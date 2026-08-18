@@ -1,0 +1,47 @@
+{
+  "id": "real-logo-run-001-ai-studio-os",
+  "brand": "AI Studio OS",
+  "status": "blocked-at-human-visual-approval-gate",
+  "goodBlock": true,
+  "desiredPerceptions": [
+    "controlled-intelligence",
+    "multi-disciplinary-orchestration",
+    "precision-without-sterility",
+    "creative-authority",
+    "human-judgment-in-control",
+    "modular-extensibility",
+    "evidence-and-repeatability"
+  ],
+  "typeAssessments": [
+    {"type":"combination-mark","score":9.4,"decision":"shortlist"},
+    {"type":"abstract-mark","score":9.1,"decision":"shortlist"},
+    {"type":"wordmark","score":8.0,"decision":"shortlist"},
+    {"type":"lettermark","score":6.4,"decision":"hold"},
+    {"type":"emblem","score":4.5,"decision":"reject"},
+    {"type":"pictorial-mark","score":3.8,"decision":"reject"},
+    {"type":"mascot","score":2.1,"decision":"reject"}
+  ],
+  "conceptFamilies": [
+    {"id":"bounded-flow","type":"combination-abstract","councilRank":1,"strategicFit":9.6,"distinctivenessPotential":8.8,"memorabilityPotential":8.9,"smallSizePotential":9.1,"identitySystemExtensibility":9.7,"motionLogic":9.5,"reproductionPotential":9.2,"genericAiRisk":2.6},
+    {"id":"stack-shift","type":"abstract","councilRank":2,"strategicFit":8.8,"distinctivenessPotential":7.8,"memorabilityPotential":8.1,"smallSizePotential":8.5,"identitySystemExtensibility":9.2,"motionLogic":8.4,"reproductionPotential":9.0,"genericAiRisk":3.8},
+    {"id":"decision-port","type":"combination-wordmark","councilRank":3,"strategicFit":8.7,"distinctivenessPotential":8.4,"memorabilityPotential":8.5,"smallSizePotential":9.0,"identitySystemExtensibility":8.1,"motionLogic":8.0,"reproductionPotential":9.3,"genericAiRisk":3.2},
+    {"id":"phase-mark","type":"abstract","councilRank":4,"strategicFit":8.5,"distinctivenessPotential":8.0,"memorabilityPotential":8.3,"smallSizePotential":8.0,"identitySystemExtensibility":9.3,"motionLogic":9.7,"reproductionPotential":8.4,"genericAiRisk":4.1}
+  ],
+  "councilVerdict": {
+    "advance": "bounded-flow",
+    "typographySupport": "decision-port",
+    "doNot": "merge concepts into a busy hybrid",
+    "killCriteria": ["flowchart", "maze", "chain", "infinity", "automation-app", "sparkle", "brain", "atom", "generic-network"]
+  },
+  "stageStatus": {
+    "inspiration": "ready",
+    "psychology": "ready",
+    "sevenTypeCoverage": "ready",
+    "conceptExploration": "ready",
+    "logoCouncil": "selected-bounded-flow-for-visual-exploration",
+    "finalLogoSystem": "blocked-no-user-approved-vector-finalist",
+    "canonicalMarkSpecification": "blocked-correctly-not-created",
+    "artifactIntegrity": "blocked-not-applicable-until-canonical-svg"
+  },
+  "nextGate": "three-distinct-bounded-flow-visual-candidates-black-white-first"
+}
