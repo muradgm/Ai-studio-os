@@ -1,0 +1,137 @@
+{
+  "id": "benchmark-001-du-bonheur",
+  "taskType": "landing-page",
+  "intent": "Create a distinctive, high-craft landing page for Du Bonheur that turns its real pâtisserie pedigree, sensory product experience, and Berlin identity into a modern digital experience",
+  "businessTruths": [
+    "Du Bonheur is a real French pâtisserie in Berlin Mitte.",
+    "The site must represent real products and the real physical business truthfully.",
+    "The digital experience should make visiting, understanding the offer, and reaching the shop easy."
+  ],
+  "creativeTraits": [
+    "tactile",
+    "editorial",
+    "precise",
+    "warm",
+    "Berlin-aware"
+  ],
+  "antiPrinciples": [
+    "Do not default to generic beige luxury.",
+    "Do not use decorative Paris clichés.",
+    "Do not fabricate signature products as documentary imagery.",
+    "Do not add motion merely to signal premium quality."
+  ],
+  "inspiration": {
+    "directIndustry": [
+      "premium pâtisserie",
+      "artisan bakery",
+      "specialty café"
+    ],
+    "bestInClass": [
+      "editorial food commerce",
+      "high-craft hospitality websites"
+    ],
+    "adjacentIndustries": [
+      "fashion editorial",
+      "perfume",
+      "wine",
+      "independent magazines"
+    ],
+    "trends": [
+      "visible craft",
+      "human imperfection",
+      "sensory storytelling",
+      "reduced chrome"
+    ],
+    "antiReferences": [
+      "blush-pink patisserie template",
+      "generic centered serif hero",
+      "three-card pastry grid",
+      "floating CGI croissant"
+    ],
+    "opportunityGaps": [
+      "make pastry texture and process tactile online",
+      "combine French craft with Berlin restraint",
+      "use real-product editorial cropping instead of category clichés"
+    ],
+    "unresolvedUnknowns": [
+      "which existing product photos are licensed/high-resolution",
+      "whether online shop conversion or in-store visits are the primary commercial goal"
+    ]
+  },
+  "designPreferences": {
+    "primaryAction": "visit-or-shop",
+    "sequence": [
+      "identity-and-sensory-hook",
+      "craft-pedigree",
+      "signature-products",
+      "café-experience",
+      "visit-or-shop"
+    ],
+    "composition": "editorial-asymmetry-with-tactile-macro-anchors",
+    "density": "restrained",
+    "imageBehavior": "large-real-product-crops-as-layout",
+    "mobilePriority": [
+      "open-status",
+      "location",
+      "signature-products",
+      "shop-or-route"
+    ]
+  },
+  "assets": [
+    {
+      "id": "storefront",
+      "real": true,
+      "usable": true,
+      "representsRealProduct": false,
+      "needs": [
+        "crop",
+        "grade"
+      ]
+    },
+    {
+      "id": "signature-croissant",
+      "real": true,
+      "usable": true,
+      "representsRealProduct": true,
+      "needs": [
+        "crop",
+        "cleanup",
+        "grade"
+      ]
+    },
+    {
+      "id": "cafe-interior",
+      "real": true,
+      "usable": true,
+      "representsRealProduct": false,
+      "needs": [
+        "extend",
+        "remove-distraction"
+      ]
+    },
+    {
+      "id": "signature-eclair-missing",
+      "real": false,
+      "usable": false,
+      "representsRealProduct": true,
+      "needs": []
+    },
+    {
+      "id": "abstract-texture",
+      "real": false,
+      "usable": false,
+      "representsRealProduct": false,
+      "needs": []
+    }
+  ],
+  "motion": {
+    "traits": [
+      "precise",
+      "tactile",
+      "restrained",
+      "sensory"
+    ],
+    "intensity": 4,
+    "signature": "laminated-layer-reveal"
+  }
+}

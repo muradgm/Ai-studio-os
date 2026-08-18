@@ -1,11 +1,19 @@
 # Inspiration contract
 
-Scan direct industry, best-in-class work, adjacent industries, business/design trends, and anti-references.
+Inspiration is a calibration stage, not a moodboard dump.
+
+Scan:
+- direct industry
+- best-in-class design
+- adjacent industries
+- business/design trends
+- anti-references
 
 Required output:
-- take
-- reject
-- opportunity gap
-- reference matrix
+- query/research lanes
+- reference matrix fields: `reference`, `take`, `reject`, `evidence`
+- anti-reference list
+- opportunity gaps
+- unresolved unknowns
 
-Inspiration must calibrate judgment, not authorize copying.
+Every reference must have a reason. Inspiration must calibrate judgment, not authorize copying.

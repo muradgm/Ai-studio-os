@@ -1,0 +1,41 @@
+{
+  "requiredStages": [
+    "inspiration",
+    "creative-direction",
+    "design",
+    "image",
+    "motion",
+    "creative-eval"
+  ],
+  "requiredInspirationLanes": [
+    "directIndustry",
+    "bestInClass",
+    "adjacentIndustries",
+    "trends",
+    "antiReferences"
+  ],
+  "requireReducedMotion": true,
+  "requireSharedCreativeDirection": true,
+  "assetExpectations": [
+    {
+      "id": "storefront",
+      "action": "retouch"
+    },
+    {
+      "id": "signature-croissant",
+      "action": "retouch"
+    },
+    {
+      "id": "cafe-interior",
+      "action": "generative-edit"
+    },
+    {
+      "id": "signature-eclair-missing",
+      "action": "capture-required"
+    },
+    {
+      "id": "abstract-texture",
+      "action": "generate-supporting"
+    }
+  ]
+}

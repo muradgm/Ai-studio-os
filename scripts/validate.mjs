@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -12,7 +13,16 @@ const required = [
   'kernel/workflows/critique.md',
   'kernel/workflows/red-team.md',
   'kernel/workflows/review.md',
-  'kernel/workflows/improve.md'
+  'kernel/workflows/improve.md',
+  'modules/inspiration/runtime.mjs',
+  'modules/creative-direction/runtime.mjs',
+  'modules/design/runtime.mjs',
+  'modules/image/runtime.mjs',
+  'modules/motion/runtime.mjs',
+  'modules/evals/runtime.mjs',
+  'lib/creative-runtime.mjs',
+  'benchmarks/001-du-bonheur/input.json',
+  'benchmarks/001-du-bonheur/expected.json'
 ];
 
 const failures = [];
@@ -32,8 +42,15 @@ for (const dir of fs.readdirSync(skillsRoot, { withFileTypes: true }).filter(d =
 
 JSON.parse(fs.readFileSync(path.join(root, 'kernel/routes.json'), 'utf8'));
 
+if (!failures.length) {
+  const input = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/input.json'), 'utf8'));
+  const expected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/expected.json'), 'utf8'));
+  const benchmark = validateBenchmark(runCreativeRuntime(input), expected);
+  if (!benchmark.pass) failures.push(...benchmark.failures.map((f) => `benchmark: ${f}`));
+}
+
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS kernel validation passed.');
+console.log('AI Studio OS Epoch 002 validation passed.');

@@ -5,11 +5,11 @@ description: Define purposeful motion language, choreography, accessibility, and
 
 # motion-direction
 
-Follow the repository-level `AGENTS.md` and the relevant kernel/module contract.
-
 ## Procedure
-1. Restate the artifact, question, or decision in scope.
-2. Load only the evidence and modules needed.
-3. Apply the corresponding protocol from `kernel/workflows/` or `modules/`.
-4. Make assumptions explicit.
-5. Return a decisive output with unresolved uncertainty preserved.
+1. Derive motion personality from creative direction, not from the animation library.
+2. Define intensity, timing/easing tokens, and one signature behavior.
+3. Choreograph hero, scroll, page/state transitions, and microinteractions as one system.
+4. Explain what each major motion behavior communicates.
+5. Define reduced-motion behavior at the same time as full motion.
+6. Define mobile and performance constraints before implementation.
+7. Send implementation to motion-review before approval.

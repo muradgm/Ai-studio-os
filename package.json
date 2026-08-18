@@ -1,12 +1,13 @@
 {
   "name": "ai-studio-os",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "A modular operating system for AI-assisted product, creative, and engineering work.",
   "scripts": {
     "studio": "node ./bin/studio.mjs",
     "validate": "node ./scripts/validate.mjs",
+    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur",
     "test": "node --test && npm run validate"
   },
   "engines": {
