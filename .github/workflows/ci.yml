@@ -26,8 +26,14 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install web dependencies
+        run: npm install --no-audit --no-fund
+
       - name: Run AI Studio OS tests
         run: npm test
+
+      - name: Build The Creative Agency prototype
+        run: npm run build:web
 
       - name: Install logo integrity renderer
         run: python -m pip install --disable-pip-version-check -r requirements-logo-integrity.txt
