@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.mjs';
 import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
+import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -13,7 +14,7 @@ function read(rel) { return fs.readFileSync(path.join(root, rel), 'utf8'); }
 function json(rel) { return JSON.parse(read(rel)); }
 
 function usage() {
-  console.log(`AI Studio OS — Epoch 003
+  console.log(`AI Studio OS — Epoch 004
 
 Usage:
   studio route <task-type>
@@ -21,6 +22,7 @@ Usage:
   studio council <preset>
   studio creative <fixture>
   studio engineering <fixture>
+  studio multimodal <fixture>
   studio benchmark <fixture>
   studio list
 `);
@@ -39,6 +41,14 @@ function engineeringPaths(name) {
   return {
     input: 'benchmarks/002-workspace-role-update/input.json',
     expected: 'benchmarks/002-workspace-role-update/expected.json'
+  };
+}
+
+function multimodalPaths(name) {
+  if (name !== 'du-bonheur-brand-film') return null;
+  return {
+    input: 'benchmarks/003-du-bonheur-brand-film/input.json',
+    expected: 'benchmarks/003-du-bonheur-brand-film/expected.json'
   };
 }
 
@@ -78,15 +88,24 @@ if (command === 'route') {
   const paths = engineeringPaths(arg);
   if (!paths) { console.error(`Unknown engineering fixture: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify(runEngineeringRuntime(json(paths.input)), null, 2));
+} else if (command === 'multimodal') {
+  const paths = multimodalPaths(arg);
+  if (!paths) { console.error(`Unknown multimodal fixture: ${arg ?? '(missing)'}`); process.exit(1); }
+  console.log(JSON.stringify(runMultimodalRuntime(json(paths.input)), null, 2));
 } else if (command === 'benchmark') {
   const creative = creativePaths(arg);
   const engineering = engineeringPaths(arg);
+  const multimodal = multimodalPaths(arg);
   if (creative) {
     const result = validateBenchmark(runCreativeRuntime(json(creative.input)), json(creative.expected));
     console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
     if (!result.pass) process.exit(1);
   } else if (engineering) {
     const result = validateEngineeringBenchmark(runEngineeringRuntime(json(engineering.input)), json(engineering.expected));
+    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
+    if (!result.pass) process.exit(1);
+  } else if (multimodal) {
+    const result = validateMultimodalBenchmark(runMultimodalRuntime(json(multimodal.input)), json(multimodal.expected));
     console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
     if (!result.pass) process.exit(1);
   } else {
@@ -102,6 +121,7 @@ if (command === 'route') {
   console.log('councils:', councils.join(', '));
   console.log('creative fixtures: du-bonheur');
   console.log('engineering fixtures: workspace-role-update');
+  console.log('multimodal fixtures: du-bonheur-brand-film');
 } else {
   usage();
   process.exit(1);
