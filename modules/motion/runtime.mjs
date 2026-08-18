@@ -4,11 +4,19 @@ const DEFAULT_TOKENS = {
   ambient: { durationMs: [1800, 6000], easing: 'linear-or-gentle' }
 };
 
-export function buildMotionPacket({ traits = [], intensity = 4, signature = 'layer-reveal' } = {}) {
+export function buildMotionPacket({ traits = [], intensity = 4, signature = 'layer-reveal', direction } = {}) {
   const safeIntensity = Math.max(0, Math.min(10, intensity));
+  const inheritedTraits = direction?.traits ?? [];
+  const personality = traits.length ? traits : inheritedTraits.length ? inheritedTraits : ['precise', 'restrained', 'purposeful'];
+
   return {
     stage: 'motion',
-    personality: traits.length ? traits : ['precise', 'restrained', 'purposeful'],
+    directionContext: direction ? {
+      statement: direction.directionStatement,
+      traits: direction.traits ?? [],
+      antiPrinciples: direction.antiPrinciples ?? []
+    } : null,
+    personality,
     intensity: safeIntensity,
     tokens: DEFAULT_TOKENS,
     choreography: {
