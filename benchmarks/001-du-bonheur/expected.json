@@ -15,6 +15,7 @@
     "antiReferences"
   ],
   "requireReducedMotion": true,
+  "requireSharedCreativeDirection": true,
   "assetExpectations": [
     {
       "id": "storefront",
