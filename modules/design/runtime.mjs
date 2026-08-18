@@ -2,6 +2,11 @@ export function buildDesignPacket({ direction, preferences = {} }) {
   if (!direction) throw new Error('design packet requires creative direction');
   return {
     stage: 'design',
+    directionContext: {
+      statement: direction.directionStatement,
+      traits: direction.traits ?? [],
+      antiPrinciples: direction.antiPrinciples ?? []
+    },
     hierarchy: {
       primary: preferences.primaryAction ?? 'business-primary-action',
       sequence: preferences.sequence ?? ['identity', 'value', 'proof', 'offer', 'visit-or-convert']
