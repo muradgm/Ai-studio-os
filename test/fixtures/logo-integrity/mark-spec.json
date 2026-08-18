@@ -1,0 +1,9 @@
+{
+  "id":"integrity-fixture-v1",
+  "canonicalFileSha256":"a106a1c4c9e350ac9f4afb1f0d59e7928dcc4481ce095b1f146e6ebd57dec1f0",
+  "shapeIds":["arm-a","arm-b"],
+  "palette":[{"id":"ink","value":"#12100F"},{"id":"accent","value":"#E54832"}],
+  "layers":[{"id":"base"},{"id":"top"}],
+  "overlaps":[{"a":"arm-a","b":"arm-b","mode":"intersect","owner":"arm-b","tolerance":0.005}],
+  "maxVisualDiffPct":0.5
+}

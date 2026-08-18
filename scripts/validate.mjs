@@ -6,6 +6,7 @@ import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engi
 import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
 import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
 import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
+import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -62,7 +63,21 @@ const required = [
   'lib/creative-production-runtime.mjs',
   'kernel/councils/creative-production.json',
   'benchmarks/005-du-bonheur-creative-production/input.json',
-  'benchmarks/005-du-bonheur-creative-production/expected.json'
+  'benchmarks/005-du-bonheur-creative-production/expected.json',
+  'modules/logo-inspiration/runtime.mjs',
+  'modules/logo-psychology/runtime.mjs',
+  'modules/logo/runtime.mjs',
+  'modules/logo-integrity/runtime.mjs',
+  'modules/logo-integrity/artifact-adapter.mjs',
+  'scripts/logo_integrity_inspect.py',
+  'requirements-logo-integrity.txt',
+  'bin/logo-integrity.mjs',
+  'test/fixtures/logo-integrity/canonical.svg',
+  'test/fixtures/logo-integrity/mark-spec.json',
+  'lib/logo-runtime.mjs',
+  'kernel/councils/logo.json',
+  'benchmarks/006-logo-identity/input.json',
+  'benchmarks/006-logo-identity/expected.json'
 ];
 
 const failures = [];
@@ -71,7 +86,7 @@ for (const rel of required) {
 }
 
 const skillsRoot = path.join(root, '.agents/skills');
-for (const dir of fs.readdirSync(skillsRoot, { withFileTypes: true }).filter(d => d.isDirectory())) {
+for (const dir of fs.readdirSync(skillsRoot, { withFileTypes: true }).filter((d) => d.isDirectory())) {
   const file = path.join(skillsRoot, dir.name, 'SKILL.md');
   if (!fs.existsSync(file)) { failures.push(`missing SKILL.md for ${dir.name}`); continue; }
   const text = fs.readFileSync(file, 'utf8');
@@ -107,10 +122,15 @@ if (!failures.length) {
   const productionExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/005-du-bonheur-creative-production/expected.json'), 'utf8'));
   const productionBenchmark = validateCreativeProductionBenchmark(runCreativeProductionRuntime(productionInput), productionExpected);
   if (!productionBenchmark.pass) failures.push(...productionBenchmark.failures.map((f) => `creative production benchmark: ${f}`));
+
+  const logoInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/006-logo-identity/input.json'), 'utf8'));
+  const logoExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/006-logo-identity/expected.json'), 'utf8'));
+  const logoBenchmark = validateLogoBenchmark(runLogoRuntime(logoInput), logoExpected);
+  if (!logoBenchmark.pass) failures.push(...logoBenchmark.failures.map((f) => `logo benchmark: ${f}`));
 }
 
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS v1.1 validation passed.');
+console.log('AI Studio OS v1.2 validation passed.');
