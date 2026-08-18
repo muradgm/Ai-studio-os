@@ -1,15 +1,27 @@
+function normalizeTraits(traits = []) {
+  return traits.filter((trait) => typeof trait === 'string' && trait.trim().length > 0);
+}
+
 export function buildCreativeDirection({ intent, businessTruths = [], inspiration, traits = [], antiPrinciples = [] }) {
   if (!intent) throw new Error('creative direction requires intent');
   if (!inspiration) throw new Error('creative direction requires inspiration');
 
+  const normalizedTraits = normalizeTraits(traits);
   const gaps = inspiration.opportunityGaps ?? [];
+  const tension = normalizedTraits.length >= 2
+    ? `${normalizedTraits[0]} × ${normalizedTraits[1]}`
+    : normalizedTraits[0] ?? 'business truth × distinctiveness';
+  const leadGap = gaps[0];
+
   return {
     stage: 'creative-direction',
     provisional: inspiration.status !== 'ready',
-    directionStatement: `${intent}. Build from business truth, then use inspiration to create a distinct authored system rather than a category template.`,
+    traits: normalizedTraits,
+    tension,
+    directionStatement: `${intent}. Creative tension: ${tension}.${leadGap ? ` Lead opportunity: ${leadGap}.` : ''}`,
     nonNegotiables: [...businessTruths],
     principles: [
-      ...traits.map((trait) => `Express ${trait} through concrete design decisions.`),
+      ...normalizedTraits.map((trait) => `Express ${trait} through concrete design decisions.`),
       ...gaps.map((gap) => `Exploit opportunity gap: ${gap}`)
     ],
     antiPrinciples: [...antiPrinciples],
