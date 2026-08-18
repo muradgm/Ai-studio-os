@@ -75,7 +75,7 @@ test('cross-project recurring evidence can be promoted', () => {
 
 test('creative runtime keeps design, image, and motion under one direction', () => {
   const output = runCreativeRuntime(input);
-  assert.equal(output.design.direction.directionStatement, output.creativeDirection.directionStatement);
+  assert.equal(output.design.directionContext.statement, output.creativeDirection.directionStatement);
   assert.equal(output.image.directionContext.statement, output.creativeDirection.directionStatement);
   assert.equal(output.motion.directionContext.statement, output.creativeDirection.directionStatement);
   assert.match(output.creativeDirection.directionStatement, /tactile × editorial/);
