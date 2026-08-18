@@ -31,5 +31,15 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - Motion is designed with reduced-motion and performance constraints from the start.
 - A high average eval score does not override critical failures in authenticity, accessibility, brand fit, or business clarity.
 
+## Engineering runtime rules
+- Classify change risk before implementation; do not infer safety from small diff size.
+- Define invariants and required tests before code review.
+- Code review and security review are separate gates.
+- Missing required tests block review.
+- Permission-sensitive changes require server-side authorization, least privilege, and auditability.
+- State mutations require validation and a transaction/recovery boundary.
+- High-risk changes require explicit rollback and observability plans before release.
+- Release readiness is boolean evidence, not an averaged confidence score.
+
 ## Quality bar
 Prefer explicit tradeoffs, evidence, and testable claims over confident generic prose.
