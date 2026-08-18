@@ -1,0 +1,14 @@
+{
+  "requiredStages": ["engineering", "code-review", "security", "qa", "release"],
+  "riskLevel": "high",
+  "requiredSecurityControls": [
+    "authentication",
+    "authorization",
+    "least-privilege",
+    "audit-log",
+    "input-validation",
+    "transaction-boundary"
+  ],
+  "requiredQaDimensions": ["functional", "regression", "permissionBoundary", "failureRecovery", "accessibility", "observability"],
+  "releaseReady": true
+}

@@ -6,17 +6,18 @@ The repository is organized into **epochs**. Each epoch adds a validated capabil
 
 ## Current epoch
 
-**Epoch 002 — Creative Runtime**
+**Epoch 003 — Engineering Runtime**
 
-Epoch 002 turns the creative contracts from Epoch 001 into executable planning and evaluation primitives:
+Epoch 003 turns engineering review and release discipline into connected executable gates:
 
-- structured inspiration packets with direct, adjacent, trend, anti-reference, and opportunity-gap lanes
-- creative-direction synthesis from product truth + reference evidence
-- design-system planning for hierarchy, typography, composition, responsive behavior, and interaction
-- image asset routing: use → retouch → generative edit → supporting generation / new capture
-- motion-system planning with choreography, reduced-motion, and performance constraints
-- creative evaluation gates with explicit thresholds and AI-generic-risk limits
-- Du Bonheur Benchmark 001 as a deterministic creative-runtime regression fixture
+- implementation planning with explicit risk classification, invariants, required tests, rollback, and observability needs
+- independent code review with blocker/major/minor/taste severity and required-test enforcement
+- security planning derived from the actual change surface
+- permission-boundary, failure-recovery, regression, accessibility, and observability QA
+- release readiness that refuses unsafe high-risk changes rather than averaging scores
+- Workspace Role Update Benchmark 002 for a permission-sensitive SaaS feature
+
+Epoch 002 remains the creative runtime for inspiration, art direction, design, image, motion, and creative evals.
 
 ## Quick start
 
@@ -24,7 +25,9 @@ Epoch 002 turns the creative contracts from Epoch 001 into executable planning a
 node ./bin/studio.mjs route landing-page
 node ./bin/studio.mjs council design
 node ./bin/studio.mjs creative du-bonheur
+node ./bin/studio.mjs engineering workspace-role-update
 node ./bin/studio.mjs benchmark du-bonheur
+node ./bin/studio.mjs benchmark workspace-role-update
 npm test
 ```
 
@@ -36,16 +39,11 @@ Do not run every module for every task. Route only the capabilities justified by
 
 - `001-kernel` — orchestration, reasoning/review, routing, learning
 - `002-creative-runtime` — executable inspiration, direction, design, image, motion, creative evals
-- `003-engineering-runtime` — implementation, code review, security, QA
+- `003-engineering-runtime` — implementation planning, code review, security, QA, release gates
 - `004-multimodal` — video/audio/voice production
 - `005-observation-loop` — analytics, release feedback, benchmark-driven learning
 
-## Benchmark 001
+## Benchmarks
 
-`benchmarks/001-du-bonheur/` contains the first creative-runtime fixture. It models a real-business landing-page redesign and verifies that the OS:
-
-1. looks outward before deciding,
-2. protects business/product truth,
-3. prefers real assets and controlled edits,
-4. defines motion as a system,
-5. evaluates distinctiveness and AI-generic risk explicitly.
+- `benchmarks/001-du-bonheur/` — real-business creative runtime fixture
+- `benchmarks/002-workspace-role-update/` — high-risk permission-sensitive engineering fixture

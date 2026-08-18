@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.mjs';
+import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -22,7 +23,15 @@ const required = [
   'modules/evals/runtime.mjs',
   'lib/creative-runtime.mjs',
   'benchmarks/001-du-bonheur/input.json',
-  'benchmarks/001-du-bonheur/expected.json'
+  'benchmarks/001-du-bonheur/expected.json',
+  'modules/engineering/runtime.mjs',
+  'modules/code-review/runtime.mjs',
+  'modules/security/runtime.mjs',
+  'modules/qa/runtime.mjs',
+  'modules/release/runtime.mjs',
+  'lib/engineering-runtime.mjs',
+  'benchmarks/002-workspace-role-update/input.json',
+  'benchmarks/002-workspace-role-update/expected.json'
 ];
 
 const failures = [];
@@ -43,14 +52,19 @@ for (const dir of fs.readdirSync(skillsRoot, { withFileTypes: true }).filter(d =
 JSON.parse(fs.readFileSync(path.join(root, 'kernel/routes.json'), 'utf8'));
 
 if (!failures.length) {
-  const input = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/input.json'), 'utf8'));
-  const expected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/expected.json'), 'utf8'));
-  const benchmark = validateBenchmark(runCreativeRuntime(input), expected);
-  if (!benchmark.pass) failures.push(...benchmark.failures.map((f) => `benchmark: ${f}`));
+  const creativeInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/input.json'), 'utf8'));
+  const creativeExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/expected.json'), 'utf8'));
+  const creativeBenchmark = validateBenchmark(runCreativeRuntime(creativeInput), creativeExpected);
+  if (!creativeBenchmark.pass) failures.push(...creativeBenchmark.failures.map((f) => `creative benchmark: ${f}`));
+
+  const engineeringInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/002-workspace-role-update/input.json'), 'utf8'));
+  const engineeringExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/002-workspace-role-update/expected.json'), 'utf8'));
+  const engineeringBenchmark = validateEngineeringBenchmark(runEngineeringRuntime(engineeringInput), engineeringExpected);
+  if (!engineeringBenchmark.pass) failures.push(...engineeringBenchmark.failures.map((f) => `engineering benchmark: ${f}`));
 }
 
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS Epoch 002 validation passed.');
+console.log('AI Studio OS Epoch 003 validation passed.');

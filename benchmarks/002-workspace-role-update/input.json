@@ -1,0 +1,77 @@
+{
+  "id": "benchmark-002-workspace-role-update",
+  "taskType": "saas-feature",
+  "intent": "Allow workspace administrators to change member roles without enabling privilege escalation or leaving partial permission state",
+  "spec": {
+    "surfaces": [
+      "api",
+      "database",
+      "ui"
+    ],
+    "authRequired": true,
+    "authorizationSensitive": true,
+    "dataWrites": true,
+    "migration": false,
+    "externalIO": false,
+    "publicApi": false,
+    "highImpact": true,
+    "requiredTests": [
+      "admin-can-change-role",
+      "member-cannot-change-role",
+      "last-owner-cannot-be-demoted",
+      "invalid-role-rejected",
+      "audit-event-recorded"
+    ]
+  },
+  "architecture": {
+    "components": [
+      "role-update-api",
+      "membership-service",
+      "workspace-settings-ui"
+    ],
+    "contracts": [
+      "workspace-role-enum",
+      "permission-boundary",
+      "audit-event"
+    ]
+  },
+  "review": {
+    "findings": [],
+    "testResults": {
+      "admin-can-change-role": true,
+      "member-cannot-change-role": true,
+      "last-owner-cannot-be-demoted": true,
+      "invalid-role-rejected": true,
+      "audit-event-recorded": true,
+      "unauthenticated-request-denied": true,
+      "authorized-request-succeeds": true,
+      "unauthorized-request-denied": true,
+      "write-failure-recovery": true
+    }
+  },
+  "security": {
+    "findings": [],
+    "controlEvidence": {
+      "authentication": "Authenticated session middleware executes before the role mutation handler.",
+      "authorization": "Server-side workspace-admin policy is checked against the target workspace.",
+      "least-privilege": "Only the role-change permission is granted; ordinary members remain denied.",
+      "audit-log": "Successful and rejected privileged role changes emit an audit event.",
+      "input-validation": "Requested role is validated against the canonical workspace-role enum.",
+      "transaction-boundary": "Role mutation and required owner-count invariant execute within one atomic service boundary."
+    }
+  },
+  "qa": {
+    "results": {
+      "functional": true,
+      "regression": true,
+      "permissionBoundary": true,
+      "failureRecovery": true,
+      "accessibility": true,
+      "observability": true
+    }
+  },
+  "release": {
+    "rollbackPlan": "Disable the role-update path and deploy the previous known-good version; no migration rollback is required.",
+    "observabilityPlan": "Monitor authorization denials, role-update failures, audit-event failures, and unexpected owner-count changes."
+  }
+}
