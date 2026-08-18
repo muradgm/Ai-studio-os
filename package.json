@@ -5,12 +5,18 @@
   "type": "module",
   "description": "A modular operating system for AI-assisted product, creative, engineering, multimodal, observation, creative-production, and logo-identity work.",
   "scripts": {
+    "dev": "vite apps/creative-agency --host 0.0.0.0",
+    "build:web": "vite build apps/creative-agency --outDir ../../dist/creative-agency",
+    "preview:web": "vite preview apps/creative-agency --host 0.0.0.0",
     "studio": "node ./bin/studio.mjs",
     "validate": "node ./scripts/validate.mjs",
     "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11 && node ./bin/studio.mjs benchmark identity-v12",
     "logo:integrity": "node ./bin/logo-integrity.mjs",
     "test:logo-integrity": "node --test integration/logo-artifact-integrity.mjs integration/logo-artifact-runtime.mjs",
     "test": "node --test && npm run validate"
+  },
+  "devDependencies": {
+    "vite": "^7.1.0"
   },
   "engines": {"node": ">=20"}
 }
