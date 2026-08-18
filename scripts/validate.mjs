@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.mjs';
 import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
 import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
+import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -42,7 +43,17 @@ const required = [
   'lib/multimodal-runtime.mjs',
   'kernel/councils/multimodal.json',
   'benchmarks/003-du-bonheur-brand-film/input.json',
-  'benchmarks/003-du-bonheur-brand-film/expected.json'
+  'benchmarks/003-du-bonheur-brand-film/expected.json',
+  'modules/outcome-evidence/runtime.mjs',
+  'modules/analytics/runtime.mjs',
+  'modules/feedback/runtime.mjs',
+  'modules/post-launch/runtime.mjs',
+  'modules/benchmark-history/runtime.mjs',
+  'modules/learning-promotion/runtime.mjs',
+  'lib/observation-runtime.mjs',
+  'kernel/councils/observation.json',
+  'benchmarks/004-du-bonheur-post-launch/input.json',
+  'benchmarks/004-du-bonheur-post-launch/expected.json'
 ];
 
 const failures = [];
@@ -77,10 +88,15 @@ if (!failures.length) {
   const multimodalExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/003-du-bonheur-brand-film/expected.json'), 'utf8'));
   const multimodalBenchmark = validateMultimodalBenchmark(runMultimodalRuntime(multimodalInput), multimodalExpected);
   if (!multimodalBenchmark.pass) failures.push(...multimodalBenchmark.failures.map((f) => `multimodal benchmark: ${f}`));
+
+  const observationInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/004-du-bonheur-post-launch/input.json'), 'utf8'));
+  const observationExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/004-du-bonheur-post-launch/expected.json'), 'utf8'));
+  const observationBenchmark = validateObservationBenchmark(runObservationRuntime(observationInput), observationExpected);
+  if (!observationBenchmark.pass) failures.push(...observationBenchmark.failures.map((f) => `observation benchmark: ${f}`));
 }
 
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS Epoch 004 validation passed.');
+console.log('AI Studio OS Epoch 005 validation passed.');

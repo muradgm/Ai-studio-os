@@ -1,0 +1,22 @@
+{
+  "id": "benchmark-004-du-bonheur-post-launch",
+  "launch": {"id":"du-bonheur-homepage-v1","hypothesis":"A clearer visit CTA, real-product editorial imagery, and stronger practical information will increase visit intent without harming performance.","shippedAt":"2026-08-01T08:00:00Z"},
+  "metrics": [
+    {"id":"visit-cta-rate","goal":"increase","primary":true,"baseline":0.081,"observed":0.116,"minMeaningfulChange":0.015,"sampleSize":2480,"minSampleSize":1000,"windowDays":14,"minWindowDays":7,"sourceEvidence":"synthetic-fixture:analytics:visit-cta-rate","sourceType":"analytics","thresholdEvidence":"synthetic-fixture:measurement-plan:visit-cta-rate"},
+    {"id":"menu-engagement-rate","goal":"increase","primary":true,"baseline":0.318,"observed":0.379,"minMeaningfulChange":0.025,"sampleSize":2480,"minSampleSize":1000,"windowDays":14,"minWindowDays":7,"sourceEvidence":"synthetic-fixture:analytics:menu-engagement-rate","sourceType":"analytics","thresholdEvidence":"synthetic-fixture:measurement-plan:menu-engagement-rate"},
+    {"id":"mobile-lcp-p75","goal":"decrease","guardrail":true,"primary":false,"baseline":2.2,"observed":2.25,"minMeaningfulChange":0.2,"sampleSize":1600,"minSampleSize":800,"windowDays":14,"minWindowDays":7,"sourceEvidence":"synthetic-fixture:web-vitals:mobile-lcp-p75","sourceType":"web-vitals","thresholdEvidence":"synthetic-fixture:measurement-plan:mobile-lcp-p75"}
+  ],
+  "feedback": [
+    {"theme":"find-visit-info-fast","sentiment":"positive","count":34,"sourceType":"intercept-survey","evidence":"synthetic-fixture:survey:visit-info"},
+    {"theme":"real-craft-feels-credible","sentiment":"positive","count":26,"sourceType":"intercept-survey","evidence":"synthetic-fixture:survey:craft-credibility"},
+    {"theme":"dark-hero-feels-heavy","sentiment":"negative","count":11,"sourceType":"intercept-survey","evidence":"synthetic-fixture:survey:dark-hero"}
+  ],
+  "benchmarkRuns": [
+    {"benchmarkId":"001-du-bonheur","commitSha":"epoch-002","timestamp":"2026-08-18T09:00:00Z","pass":true},{"benchmarkId":"001-du-bonheur","commitSha":"epoch-004","timestamp":"2026-08-18T10:00:00Z","pass":true},{"benchmarkId":"002-workspace-role-update","commitSha":"epoch-003","timestamp":"2026-08-18T09:30:00Z","pass":true},{"benchmarkId":"002-workspace-role-update","commitSha":"epoch-004","timestamp":"2026-08-18T10:00:00Z","pass":true},{"benchmarkId":"003-du-bonheur-brand-film","commitSha":"epoch-004","timestamp":"2026-08-18T10:00:00Z","pass":true}
+  ],
+  "learningCandidates": [
+    {"id":"project-visible-visit-cta","scope":"project","rule":"Keep Du Bonheur visit/location action visible within the first mobile viewport.","supportMetricIds":["visit-cta-rate"],"supportFeedbackThemes":["find-visit-info-fast"],"minIndependentSignals":2,"recurrenceEvidence":[]},
+    {"id":"global-real-product-macro","scope":"global","rule":"Premium food brands should use real macro product imagery as a primary trust device.","supportMetricIds":["menu-engagement-rate"],"supportFeedbackThemes":["real-craft-feels-credible"],"minIndependentSignals":2,"recurrenceEvidence":[{"projectId":"du-bonheur","evidence":"synthetic-fixture:current-context"}]},
+    {"id":"global-dark-editorial-hero","scope":"global","rule":"Premium hospitality sites should default to a dark editorial hero.","supportMetricIds":["visit-cta-rate"],"conflictFeedbackThemes":["dark-hero-feels-heavy"],"minIndependentSignals":1,"recurrenceEvidence":[{"projectId":"hospitality-a","evidence":"synthetic-fixture:prior-learning:a"},{"projectId":"hospitality-b","evidence":"synthetic-fixture:prior-learning:b"}]}
+  ]
+}
