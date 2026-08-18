@@ -1,0 +1,13 @@
+{
+  "name": "observation",
+  "members": [
+    "product-analyst",
+    "data-analyst",
+    "ux-researcher",
+    "experiment-reviewer",
+    "benchmark-owner",
+    "learning-curator",
+    "skeptic"
+  ],
+  "chair": "observation-chair"
+}

@@ -1,0 +1,11 @@
+{
+  "requiredStages": ["outcome-evidence","analytics","feedback","post-launch-review","benchmark-history","learning-promotion"],
+  "outcomeStatus": "success",
+  "attribution": "correlational",
+  "promotedRuleIds": ["project-visible-visit-cta"],
+  "heldRuleIds": ["global-real-product-macro"],
+  "rejectedRuleIds": ["global-dark-editorial-hero"],
+  "requireNoActiveBenchmarkRegressions": true,
+  "runtimePass": true,
+  "decisionReady": true
+}

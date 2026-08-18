@@ -13,7 +13,7 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 7. Preserve dissent when reviewers disagree.
 8. Distinguish defects from taste preferences.
 9. Evaluate before release.
-10. Promote only durable lessons into memory.
+10. Observe real outcomes before promoting durable lessons.
 
 ## Command semantics
 - `question`: identify missing information and hidden assumptions.
@@ -51,6 +51,16 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - Spoken content requires captions and transcript.
 - Aspect-ratio variants require intentional recomposition; do not blindly crop a master.
 - A multimodal plan is approved only when timing, continuity, truth, rights, accessibility, and creative coherence all pass.
+
+## Observation loop rules
+- Metric movement is not evidence quality; require a launch hypothesis and validate source type/provenance, sample, window, baseline, observed values, and threshold justification before interpretation.
+- Use metric-specific meaningful-change thresholds and keep flat movement distinct from improvement.
+- Guardrail regressions are not averaged away by primary metric gains.
+- Default post-launch attribution to correlational; causal language requires evidenced controlled experiments.
+- Unsupported anecdotes do not become reliable feedback themes.
+- Preserve benchmark regression history while distinguishing active failures from recovered ones.
+- Project rules require independent evidence sources in one context; global rules additionally require evidenced recurrence across at least two distinct contexts.
+- Reliable conflicting evidence rejects a candidate learning rather than being averaged into consensus.
 
 ## Quality bar
 Prefer explicit tradeoffs, evidence, and testable claims over confident generic prose.
