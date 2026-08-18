@@ -1,0 +1,5 @@
+{
+  "name": "image",
+  "members": ["art-director", "photographer", "composition-critic", "brand-guardian", "artifact-detector"],
+  "chair": "image-chair"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "engineering",
+  "members": ["architect", "senior-engineer", "security-reviewer", "performance-reviewer", "qa-reviewer"],
+  "chair": "engineering-chair"
+}

@@ -1,0 +1,5 @@
+{
+  "name": "product",
+  "members": ["product-strategist", "customer-advocate", "commercial-skeptic", "ux-specialist", "technical-architect"],
+  "chair": "product-chair"
+}

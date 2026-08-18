@@ -1,0 +1,7 @@
+{
+  "landing-page": ["intent", "research", "inspiration", "product", "creative-direction", "image", "design", "motion", "critique", "evals", "learn"],
+  "image-retouch": ["intent", "asset-audit", "image-direction", "retouch", "image-review", "learn"],
+  "saas-feature": ["intent", "question", "research", "product", "council", "design", "engineering", "code-review", "security", "qa", "release", "learn"],
+  "product-film": ["intent", "inspiration", "creative-direction", "writing", "image", "motion", "video", "audio", "critique", "evals", "learn"],
+  "brand-identity": ["intent", "research", "inspiration", "product", "council", "creative-direction", "design", "image", "critique", "evals", "learn"]
+}
