@@ -45,6 +45,13 @@ test('every motion packet requires a reduced-motion fallback', () => {
   assert.ok(motion.reducedMotion.fallback.length > 20);
 });
 
+test('motion inherits creative traits when no motion-specific traits are supplied', () => {
+  const direction = { directionStatement: 'Shared direction', traits: ['editorial', 'warm'], antiPrinciples: [] };
+  const motion = buildMotionPacket({ direction });
+  assert.deepEqual(motion.personality, ['editorial', 'warm']);
+  assert.equal(motion.directionContext.statement, direction.directionStatement);
+});
+
 test('critical creative eval failure blocks approval despite strong average', () => {
   const result = evaluateCreative({
     businessClarity: 9,
@@ -66,10 +73,19 @@ test('cross-project recurring evidence can be promoted', () => {
   assert.equal(result.promote, true);
 });
 
+test('creative runtime keeps design, image, and motion under one direction', () => {
+  const output = runCreativeRuntime(input);
+  assert.equal(output.design.direction.directionStatement, output.creativeDirection.directionStatement);
+  assert.equal(output.image.directionContext.statement, output.creativeDirection.directionStatement);
+  assert.equal(output.motion.directionContext.statement, output.creativeDirection.directionStatement);
+  assert.match(output.creativeDirection.directionStatement, /tactile × editorial/);
+});
+
 test('Du Bonheur benchmark passes creative runtime invariants', () => {
   const output = runCreativeRuntime(input);
   const result = validateBenchmark(output, expected);
   assert.equal(result.pass, true, result.failures.join('\n'));
   assert.ok(output.creativeDirection.nonNegotiables.length >= 2);
   assert.equal(output.motion.signatureBehavior, 'laminated-layer-reveal');
+  assert.equal(output.status, 'provisional');
 });
