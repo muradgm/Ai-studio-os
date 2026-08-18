@@ -1,0 +1,30 @@
+{
+  "requiredStages": [
+    "reference-extraction",
+    "design-read",
+    "creative-dials",
+    "explore",
+    "concept-selection",
+    "creative-direction",
+    "production-mode",
+    "production-recipe",
+    "tool-gateway",
+    "asset-registry",
+    "asset-patch"
+  ],
+  "status": "production-plan-ready",
+  "selectedConceptId": "berlin-atelier",
+  "recipeId": "editorial-brand-site",
+  "requireProviderAgnostic": true,
+  "requireSharedDirection": true,
+  "assignments": [
+    {
+      "assetId": "DB-HERO-001",
+      "action": "route"
+    },
+    {
+      "assetId": "DB-SUPPORT-002",
+      "action": "route"
+    }
+  ]
+}

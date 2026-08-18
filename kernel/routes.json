@@ -1,8 +1,9 @@
 {
-  "landing-page": ["intent", "research", "inspiration", "product", "creative-direction", "image", "design", "motion", "critique", "evals", "learn"],
-  "image-retouch": ["intent", "asset-audit", "image-direction", "retouch", "image-review", "learn"],
+  "landing-page": ["intent", "research", "inspiration", "reference-extraction", "design-read", "creative-dials", "explore", "council", "concept-selection", "creative-direction", "production-mode", "production-recipe", "asset-specs", "tool-gateway", "asset-registry", "image", "design", "motion", "critique", "asset-patch", "evals", "learn"],
+  "image-retouch": ["intent", "asset-audit", "image-direction", "retouch", "image-review", "asset-registry", "learn"],
   "saas-feature": ["intent", "question", "research", "product", "council", "design", "engineering", "code-review", "security", "qa", "release", "learn"],
-  "product-film": ["intent", "inspiration", "creative-direction", "writing", "storyboard", "continuity", "image", "motion", "voice", "audio", "video", "multimodal-review", "critique", "evals", "learn"],
-  "brand-identity": ["intent", "research", "inspiration", "product", "council", "creative-direction", "design", "image", "critique", "evals", "learn"],
-  "post-launch-review": ["intent", "outcome-evidence", "analytics", "feedback", "post-launch-review", "benchmark-history", "learning-promotion", "learn"]
+  "product-film": ["intent", "inspiration", "reference-extraction", "design-read", "creative-dials", "explore", "council", "concept-selection", "creative-direction", "production-mode", "production-recipe", "asset-specs", "tool-gateway", "asset-registry", "writing", "storyboard", "continuity", "image", "motion", "voice", "audio", "video", "multimodal-review", "critique", "asset-patch", "evals", "learn"],
+  "brand-identity": ["intent", "research", "inspiration", "reference-extraction", "design-read", "creative-dials", "explore", "council", "concept-selection", "creative-direction", "production-mode", "production-recipe", "asset-specs", "tool-gateway", "asset-registry", "design", "image", "critique", "asset-patch", "evals", "learn"],
+  "post-launch-review": ["intent", "outcome-evidence", "analytics", "feedback", "post-launch-review", "benchmark-history", "learning-promotion", "learn"],
+  "creative-production": ["intent", "research", "inspiration", "reference-extraction", "design-read", "creative-dials", "explore", "council", "concept-selection", "creative-direction", "production-mode", "production-recipe", "asset-specs", "tool-gateway", "asset-registry", "design", "image", "motion", "review", "asset-patch", "qa", "evals", "learn"]
 }

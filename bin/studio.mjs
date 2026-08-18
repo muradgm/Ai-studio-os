@@ -6,6 +6,7 @@ import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.m
 import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
 import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
 import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
+import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -15,7 +16,7 @@ function read(rel) { return fs.readFileSync(path.join(root, rel), 'utf8'); }
 function json(rel) { return JSON.parse(read(rel)); }
 
 function usage() {
-  console.log(`AI Studio OS — Epoch 005
+  console.log(`AI Studio OS v1.1
 
 Usage:
   studio route <task-type>
@@ -25,6 +26,7 @@ Usage:
   studio engineering <fixture>
   studio multimodal <fixture>
   studio observation <fixture>
+  studio production <fixture>
   studio benchmark <fixture>
   studio list
 `);
@@ -59,6 +61,14 @@ function observationPaths(name) {
   return {
     input: 'benchmarks/004-du-bonheur-post-launch/input.json',
     expected: 'benchmarks/004-du-bonheur-post-launch/expected.json'
+  };
+}
+
+function productionPaths(name) {
+  if (name !== 'du-bonheur-v11') return null;
+  return {
+    input: 'benchmarks/005-du-bonheur-creative-production/input.json',
+    expected: 'benchmarks/005-du-bonheur-creative-production/expected.json'
   };
 }
 
@@ -106,11 +116,16 @@ if (command === 'route') {
   const paths = observationPaths(arg);
   if (!paths) { console.error(`Unknown observation fixture: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify(runObservationRuntime(json(paths.input)), null, 2));
+} else if (command === 'production') {
+  const paths = productionPaths(arg);
+  if (!paths) { console.error(`Unknown production fixture: ${arg ?? '(missing)'}`); process.exit(1); }
+  console.log(JSON.stringify(runCreativeProductionRuntime(json(paths.input)), null, 2));
 } else if (command === 'benchmark') {
   const creative = creativePaths(arg);
   const engineering = engineeringPaths(arg);
   const multimodal = multimodalPaths(arg);
   const observation = observationPaths(arg);
+  const production = productionPaths(arg);
   if (creative) {
     const result = validateBenchmark(runCreativeRuntime(json(creative.input)), json(creative.expected));
     console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
@@ -125,6 +140,10 @@ if (command === 'route') {
     if (!result.pass) process.exit(1);
   } else if (observation) {
     const result = validateObservationBenchmark(runObservationRuntime(json(observation.input)), json(observation.expected));
+    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
+    if (!result.pass) process.exit(1);
+  } else if (production) {
+    const result = validateCreativeProductionBenchmark(runCreativeProductionRuntime(json(production.input)), json(production.expected));
     console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
     if (!result.pass) process.exit(1);
   } else {
@@ -142,6 +161,7 @@ if (command === 'route') {
   console.log('engineering fixtures: workspace-role-update');
   console.log('multimodal fixtures: du-bonheur-brand-film');
   console.log('observation fixtures: du-bonheur-post-launch');
+  console.log('production fixtures: du-bonheur-v11');
 } else {
   usage();
   process.exit(1);

@@ -5,6 +5,7 @@ import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.m
 import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
 import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
 import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
+import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -53,7 +54,15 @@ const required = [
   'lib/observation-runtime.mjs',
   'kernel/councils/observation.json',
   'benchmarks/004-du-bonheur-post-launch/input.json',
-  'benchmarks/004-du-bonheur-post-launch/expected.json'
+  'benchmarks/004-du-bonheur-post-launch/expected.json',
+  'modules/creative-calibration/runtime.mjs',
+  'modules/production-planning/runtime.mjs',
+  'modules/tool-gateway/runtime.mjs',
+  'modules/asset-registry/runtime.mjs',
+  'lib/creative-production-runtime.mjs',
+  'kernel/councils/creative-production.json',
+  'benchmarks/005-du-bonheur-creative-production/input.json',
+  'benchmarks/005-du-bonheur-creative-production/expected.json'
 ];
 
 const failures = [];
@@ -93,10 +102,15 @@ if (!failures.length) {
   const observationExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/004-du-bonheur-post-launch/expected.json'), 'utf8'));
   const observationBenchmark = validateObservationBenchmark(runObservationRuntime(observationInput), observationExpected);
   if (!observationBenchmark.pass) failures.push(...observationBenchmark.failures.map((f) => `observation benchmark: ${f}`));
+
+  const productionInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/005-du-bonheur-creative-production/input.json'), 'utf8'));
+  const productionExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/005-du-bonheur-creative-production/expected.json'), 'utf8'));
+  const productionBenchmark = validateCreativeProductionBenchmark(runCreativeProductionRuntime(productionInput), productionExpected);
+  if (!productionBenchmark.pass) failures.push(...productionBenchmark.failures.map((f) => `creative production benchmark: ${f}`));
 }
 
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS Epoch 005 validation passed.');
+console.log('AI Studio OS v1.1 validation passed.');
