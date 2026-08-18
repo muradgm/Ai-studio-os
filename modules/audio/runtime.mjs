@@ -1,0 +1,8 @@
+function nonEmpty(value) { return typeof value === 'string' && value.trim().length > 0; }
+export function buildAudioPlan({ direction, beatIds = [], voice, music = {}, soundDesign = [], accessibility = {} } = {}) {
+  if (!direction?.directionStatement) throw new Error('audio plan requires creative direction'); const findings = []; const knownBeats = new Set(beatIds);
+  if (music.enabled) { if (!nonEmpty(music.role)) findings.push({ severity: 'blocker', code: 'music-role-missing' }); if (!['cleared', 'original', 'royalty-cleared'].includes(music.licenseStatus)) findings.push({ severity: 'blocker', code: 'music-rights-unresolved' }); if (!nonEmpty(music.rightsEvidence)) findings.push({ severity: 'blocker', code: 'music-rights-evidence-missing' }); }
+  for (const cue of soundDesign) { if (!knownBeats.has(cue.beatId)) findings.push({ severity: 'blocker', code: 'sound-cue-unknown-beat', beatId: cue.beatId }); if (!nonEmpty(cue.cue)) findings.push({ severity: 'major', code: 'sound-cue-empty', beatId: cue.beatId }); }
+  if (voice?.enabled) { if (accessibility.captions !== true) findings.push({ severity: 'blocker', code: 'captions-required' }); if (accessibility.transcript !== true) findings.push({ severity: 'blocker', code: 'transcript-required' }); }
+  return { stage: 'audio', directionContext: { statement: direction.directionStatement, traits: [...(direction.traits ?? [])] }, voice, music, soundDesign, mix: { dialoguePriority: Boolean(voice?.enabled), principle: 'Preserve intelligibility and emotional hierarchy; music and sound design support rather than mask the narrative.' }, accessibility, findings, pass: !findings.some((f) => ['blocker','major'].includes(f.severity)) };
+}

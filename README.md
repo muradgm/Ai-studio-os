@@ -1,33 +1,32 @@
 # AI Studio OS
 
-AI Studio OS is a modular operating system for AI-assisted product, creative, and engineering work.
+AI Studio OS is a modular operating system for AI-assisted product, creative, engineering, and multimodal production work.
 
 The repository is organized into **epochs**. Each epoch adds a validated capability rather than expanding the system horizontally without proof.
 
 ## Current epoch
 
-**Epoch 003 — Engineering Runtime**
+**Epoch 004 — Multimodal Runtime**
 
-Epoch 003 turns engineering review and release discipline into connected executable gates:
+Epoch 004 connects media planning and review into one authored production system:
 
-- implementation planning with explicit risk classification, invariants, required tests, rollback, and observability needs
-- independent code review with blocker/major/minor/taste severity and required-test enforcement
-- security planning derived from the actual change surface
-- permission-boundary, failure-recovery, regression, accessibility, and observability QA
-- release readiness that refuses unsafe high-risk changes rather than averaging scores
-- Workspace Role Update Benchmark 002 for a permission-sensitive SaaS feature
+- timed storyboard beats and shots before media generation
+- continuity-bible enforcement across real and generated visual assets
+- video direction for camera, edit pacing, transitions, and aspect-ratio adaptation
+- voice direction with language, casting, delivery, pronunciation, timing, usage rights, and clone consent
+- audio direction with sound design, music-rights evidence, mix hierarchy, captions, and transcript
+- cross-modal review that blocks creative-direction drift, continuity drift, timing errors, truth/source gaps, rights gaps, and accessibility failures
+- Du Bonheur Brand Film Benchmark 003
 
-Epoch 002 remains the creative runtime for inspiration, art direction, design, image, motion, and creative evals.
+Epoch 002 remains the Creative Runtime. Epoch 003 remains the Engineering Runtime.
 
 ## Quick start
 
 ```bash
-node ./bin/studio.mjs route landing-page
-node ./bin/studio.mjs council design
-node ./bin/studio.mjs creative du-bonheur
-node ./bin/studio.mjs engineering workspace-role-update
-node ./bin/studio.mjs benchmark du-bonheur
-node ./bin/studio.mjs benchmark workspace-role-update
+node ./bin/studio.mjs route product-film
+node ./bin/studio.mjs council multimodal
+node ./bin/studio.mjs multimodal du-bonheur-brand-film
+node ./bin/studio.mjs benchmark du-bonheur-brand-film
 npm test
 ```
 
@@ -40,10 +39,11 @@ Do not run every module for every task. Route only the capabilities justified by
 - `001-kernel` — orchestration, reasoning/review, routing, learning
 - `002-creative-runtime` — executable inspiration, direction, design, image, motion, creative evals
 - `003-engineering-runtime` — implementation planning, code review, security, QA, release gates
-- `004-multimodal` — video/audio/voice production
+- `004-multimodal-runtime` — storyboard, continuity, video, voice, audio, cross-modal review
 - `005-observation-loop` — analytics, release feedback, benchmark-driven learning
 
 ## Benchmarks
 
-- `benchmarks/001-du-bonheur/` — real-business creative runtime fixture
-- `benchmarks/002-workspace-role-update/` — high-risk permission-sensitive engineering fixture
+- `benchmarks/001-du-bonheur/` — real-business Creative Runtime fixture
+- `benchmarks/002-workspace-role-update/` — high-risk permission-sensitive Engineering Runtime fixture
+- `benchmarks/003-du-bonheur-brand-film/` — 30-second Multimodal Runtime fixture

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.mjs';
 import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
+import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -31,7 +32,17 @@ const required = [
   'modules/release/runtime.mjs',
   'lib/engineering-runtime.mjs',
   'benchmarks/002-workspace-role-update/input.json',
-  'benchmarks/002-workspace-role-update/expected.json'
+  'benchmarks/002-workspace-role-update/expected.json',
+  'modules/storyboard/runtime.mjs',
+  'modules/continuity/runtime.mjs',
+  'modules/video/runtime.mjs',
+  'modules/voice/runtime.mjs',
+  'modules/audio/runtime.mjs',
+  'modules/multimodal-evals/runtime.mjs',
+  'lib/multimodal-runtime.mjs',
+  'kernel/councils/multimodal.json',
+  'benchmarks/003-du-bonheur-brand-film/input.json',
+  'benchmarks/003-du-bonheur-brand-film/expected.json'
 ];
 
 const failures = [];
@@ -61,10 +72,15 @@ if (!failures.length) {
   const engineeringExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/002-workspace-role-update/expected.json'), 'utf8'));
   const engineeringBenchmark = validateEngineeringBenchmark(runEngineeringRuntime(engineeringInput), engineeringExpected);
   if (!engineeringBenchmark.pass) failures.push(...engineeringBenchmark.failures.map((f) => `engineering benchmark: ${f}`));
+
+  const multimodalInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/003-du-bonheur-brand-film/input.json'), 'utf8'));
+  const multimodalExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/003-du-bonheur-brand-film/expected.json'), 'utf8'));
+  const multimodalBenchmark = validateMultimodalBenchmark(runMultimodalRuntime(multimodalInput), multimodalExpected);
+  if (!multimodalBenchmark.pass) failures.push(...multimodalBenchmark.failures.map((f) => `multimodal benchmark: ${f}`));
 }
 
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS Epoch 003 validation passed.');
+console.log('AI Studio OS Epoch 004 validation passed.');

@@ -1,0 +1,21 @@
+{
+  "requiredStages": [
+    "storyboard",
+    "continuity",
+    "video",
+    "voice",
+    "audio",
+    "multimodal-review"
+  ],
+  "requireSharedDirection": true,
+  "durationSec": 30,
+  "requiredFormats": [
+    "16:9",
+    "9:16"
+  ],
+  "voiceEnabled": true,
+  "requireCaptions": true,
+  "requireTranscript": true,
+  "requireClearedMusic": true,
+  "reviewPass": true
+}

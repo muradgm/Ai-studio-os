@@ -1,0 +1,36 @@
+{
+  "id": "benchmark-003-du-bonheur-brand-film",
+  "taskType": "product-film",
+  "intent": "Create a 30-second Du Bonheur brand film that expresses real French pâtisserie craft with Berlin restraint, using real product imagery and restrained voice/audio",
+  "durationSec": 30,
+  "formats": ["16:9", "9:16"],
+  "creativeDirection": {
+    "directionStatement": "French pâtisserie craft × Berlin restraint. Tactile, editorial, precise, warm, and restrained.",
+    "traits": ["tactile", "editorial", "precise", "warm", "restrained"],
+    "antiPrinciples": ["No synthetic documentary representation of real signature products.", "No sentimental Paris clichés.", "No decorative camera movement without narrative purpose.", "No music that overstates luxury."]
+  },
+  "continuityBible": {
+    "requiredFields": ["productTruth", "palette", "grade", "lighting"],
+    "locked": {"productTruth": "real-du-bonheur-products-only", "palette": "cream-charcoal-framboise-butter", "grade": "natural-warm-controlled"}
+  },
+  "beats": [
+    {"id": "open", "durationSec": 4, "purpose": "establish tactile appetite and identity"},
+    {"id": "craft", "durationSec": 7, "purpose": "show process and human craft"},
+    {"id": "texture", "durationSec": 7, "purpose": "make pastry texture physical"},
+    {"id": "cafe", "durationSec": 6, "purpose": "place the product in the Berlin café experience"},
+    {"id": "close", "durationSec": 6, "purpose": "resolve to brand and visit intent"}
+  ],
+  "shots": [
+    {"id":"s01","beatId":"open","durationSec":4,"purpose":"macro reveal","subject":"real laminated pastry layers","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s01","camera":{"lens":"85mm macro","movement":"slow controlled push"},"transition":"hard tactile cut","continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"soft directional window"}},
+    {"id":"s02","beatId":"craft","durationSec":3.5,"purpose":"human process","subject":"hands laminating dough","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s02","camera":{"lens":"50mm","movement":"locked with subtle handheld life"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"cool morning ambient plus warm task light"}},
+    {"id":"s03","beatId":"craft","durationSec":3.5,"purpose":"precision detail","subject":"glaze finishing on real pastry","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s03","camera":{"lens":"85mm","movement":"micro lateral move"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"soft side key"}},
+    {"id":"s04","beatId":"texture","durationSec":3.5,"purpose":"crispness","subject":"real croissant break revealing layers","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s04","camera":{"lens":"100mm macro","movement":"static"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"bright controlled window"}},
+    {"id":"s05","beatId":"texture","durationSec":3.5,"purpose":"cream and chocolate texture","subject":"real éclair cross-section","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s05","camera":{"lens":"85mm macro","movement":"slow focus transfer"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"soft sculpted key"}},
+    {"id":"s06","beatId":"cafe","durationSec":6,"purpose":"Berlin context","subject":"real café interior and customer moment","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s06","camera":{"lens":"35mm","movement":"gentle lateral drift"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"natural café practicals"}},
+    {"id":"s07","beatId":"close","durationSec":3,"purpose":"product resolve","subject":"real pastry and coffee on table","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s07","camera":{"lens":"50mm","movement":"settle to stillness"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"warm natural table light"}},
+    {"id":"s08","beatId":"close","durationSec":3,"purpose":"brand close","subject":"storefront identity / wordmark","truthSensitive":true,"sourcePolicy":"real-source","sourceEvidence":"approved-real-source:s08","camera":{"lens":"50mm","movement":"static"},"continuity":{"productTruth":"real-du-bonheur-products-only","palette":"cream-charcoal-framboise-butter","grade":"natural-warm-controlled","lighting":"real exterior light"}}
+  ],
+  "formatPlans": {"16:9":{"composition":"editorial master composition"},"9:16":{"safeAreaStrategy":"recompose hero subjects and typography into center-safe vertical zones; do not blind crop the 16:9 master"}},
+  "voice": {"enabled":true,"language":"de-DE","sourceType":"human-recorded","usageRightsEvidence":"Performer recording is commissioned/cleared for this production.","cast":{"ageImpression":"adult","register":"calm","character":"warm, precise, unsentimental"},"delivery":{"wordsPerSecond":2.2,"tempo":"unhurried","energy":"restrained","pauses":"allow product sound and silence to carry texture","pronunciation":["Du Bonheur"]},"lines":[{"beatId":"craft","text":"Französisches Handwerk. Gebacken in Berlin.","durationSec":4},{"beatId":"close","text":"Du Bonheur. Kleine Momente, die bleiben.","durationSec":4}]},
+  "audio": {"music":{"enabled":true,"role":"provide subtle pulse and warmth without sentimental luxury cues","licenseStatus":"original","tempoBpm":72,"rightsEvidence":"Original music is commissioned/owned or otherwise cleared for the production."},"soundDesign":[{"beatId":"open","cue":"quiet pastry crackle and room tone"},{"beatId":"craft","cue":"paper, dough, utensil and tray detail"},{"beatId":"texture","cue":"crisp break and restrained plate contact"},{"beatId":"cafe","cue":"soft café room tone and espresso texture"},{"beatId":"close","cue":"music resolves; room tone remains human"}],"accessibility":{"captions":true,"transcript":true}}
+}

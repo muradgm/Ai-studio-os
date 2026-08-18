@@ -41,5 +41,16 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - High-risk changes require explicit rollback and observability plans before release.
 - Release readiness is boolean evidence, not an averaged confidence score.
 
+## Multimodal runtime rules
+- Storyboard and timing precede media generation.
+- Storyboard, video, voice, and audio inherit one shared creative direction; cross-modal drift blocks approval.
+- Use a continuity bible for facts and visual decisions that must remain stable across shots.
+- Truth-sensitive real visuals require real-source evidence; unresolved capture remains pending.
+- Voice usage rights are required, and voice cloning requires explicit consent evidence.
+- Commercial music requires concrete rights evidence, not a label alone.
+- Spoken content requires captions and transcript.
+- Aspect-ratio variants require intentional recomposition; do not blindly crop a master.
+- A multimodal plan is approved only when timing, continuity, truth, rights, accessibility, and creative coherence all pass.
+
 ## Quality bar
 Prefer explicit tradeoffs, evidence, and testable claims over confident generic prose.

@@ -1,0 +1,14 @@
+{
+  "name": "multimodal",
+  "members": [
+    "creative-director",
+    "film-director",
+    "cinematographer",
+    "editor",
+    "sound-designer",
+    "voice-director",
+    "continuity-supervisor",
+    "skeptic"
+  ],
+  "chair": "multimodal-chair"
+}
