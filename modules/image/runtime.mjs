@@ -30,9 +30,14 @@ export function routeImageAsset(asset) {
   return { action: 'use', reason: 'The real asset already fits the intended truthful use.' };
 }
 
-export function buildImagePlan(assets = []) {
+export function buildImagePlan(assets = [], { direction } = {}) {
   return {
     stage: 'image',
+    directionContext: direction ? {
+      statement: direction.directionStatement,
+      traits: direction.traits ?? [],
+      antiPrinciples: direction.antiPrinciples ?? []
+    } : null,
     priority: ['use', 'retouch', 'generative-edit', 'generate-supporting', 'capture-required'],
     assets: assets.map((asset) => ({ ...asset, ...routeImageAsset(asset) })),
     guardrails: [
