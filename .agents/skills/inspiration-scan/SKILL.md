@@ -1,15 +1,15 @@
 ---
 name: inspiration-scan
-description: Research direct industry, adjacent industries, trends, anti-references, and opportunity gaps before creative direction.
+description: Research direct industry, best-in-class work, adjacent industries, trends, anti-references, and opportunity gaps before creative direction.
 ---
 
 # inspiration-scan
 
-Follow the repository-level `AGENTS.md` and the relevant kernel/module contract.
-
 ## Procedure
-1. Restate the artifact, question, or decision in scope.
-2. Load only the evidence and modules needed.
-3. Apply the corresponding protocol from `kernel/workflows/` or `modules/`.
-4. Make assumptions explicit.
-5. Return a decisive output with unresolved uncertainty preserved.
+1. Start from the business/category and intended outcome.
+2. Scan five lanes: direct industry, best-in-class design, adjacent industries, business/design trends, anti-references.
+3. For each serious reference record: what to take, what to reject, and evidence for the choice.
+4. Identify repeated category clichés.
+5. Identify at least one opportunity gap that competitors are not exploiting well.
+6. Preserve source links/citations in the working artifact when external research is used.
+7. Do not produce a moodboard without an annotated reference matrix.
