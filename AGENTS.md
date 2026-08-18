@@ -45,6 +45,25 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - Regenerate weak assets surgically. Patch only validated blocker/major findings, preserve continuity/direction constraints, and require integration review after replacement.
 - Cap repeated patch attempts; endless regeneration is a process failure, not iteration.
 
+## Logo identity v1.2 rules
+- Every serious logo project must assess all seven types: wordmark, lettermark/monogram, pictorial mark, abstract mark, mascot, combination mark, and emblem. Assessment is mandatory; exploration can shortlist only the types that fit.
+- Logo psychology is a set of testable hypotheses, not a dictionary of universal symbols. Require intended effect, evidence basis, test method, and falsifier.
+- Treat color associations as contextual/cultural. Do not encode one-to-one rules such as blue = trust or black = luxury.
+- Evaluate processing fluency, shape semantics, complexity, harmony, abstraction, typography, figure-ground, and distinctiveness/familiarity.
+- Use LogoLounge for curated/trend intelligence, LogoSystem for type/style/shape/motion filtering, LogoMoose for long-tail identity/packaging context, and Inspiration Logo for wildcard/negative-space exploration.
+- Inspiration references require provenance plus take/reject/transform notes. Copying exact marks, geometry, lockups, or motion is blocked.
+- Explore at least three genuinely different logo concept families before refinement.
+- Generated raster marks are concept sketches only. Final logo masters require vector reconstruction and optical refinement.
+- The canonical mark specification sits above SVG and locks viewBox, stable shape IDs, geometry fingerprints, transforms, bounding boxes, palette tokens, shape-to-layer assignments, layer order, masks/clips, and intended overlap relationships.
+- SVG export cannot reinterpret the design: palette drift, raw unapproved colors, extra/missing shapes, geometry drift, viewBox drift, embedded raster artwork, or non-normalized transforms block approval.
+- Multi-layer marks require an explicit layer manifest. Layer z-order, role, opacity, masks/clips, and shape membership are invariants.
+- Intended overlaps require explicit pair IDs, overlap mode, ownership, and intersection-area signature/tolerance. Unexpected overlaps or layer-occlusion violations block approval.
+- Require render-diff evidence against the canonical master at 16, 32, 64, and 128 px; visible export drift is blocking even if the SVG parses correctly.
+- Build a responsive identity system: primary lockup, secondary lockup, symbol, micro mark, wordmark, favicon.
+- Stress-test monochrome, inverse, 16/32/64/128px, favicon/app icon, web header, social avatar, print, signage, and stamp/embroidery-like reproduction.
+- Block approval on unresolved originality/confusion risk, weak small-size behavior, poor optical quality, or excessive AI-generic risk.
+- Derive logo motion from structural/concept logic; do not animate decoratively.
+
 ## Engineering runtime rules
 - Classify change risk before implementation; do not infer safety from small diff size.
 - Define invariants and required tests before code review.

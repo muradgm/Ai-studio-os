@@ -1,0 +1,11 @@
+{
+  "requiredStages": ["logo-inspiration", "logo-psychology", "logo-type-coverage", "logo-exploration", "logo-system", "logo-integrity"],
+  "status": "approved",
+  "requireSevenTypes": true,
+  "requiredTypes": ["wordmark", "lettermark", "pictorial-mark", "abstract-mark", "mascot", "combination-mark", "emblem"],
+  "requiredPsychologyDimensions": ["processing-fluency", "shape-semantics", "complexity", "typography", "color-context", "distinctiveness-familiarity"],
+  "requiredInspirationSources": ["logolounge", "logosystem", "logomoose", "inspirationlogo"],
+  "requireVectorMaster": true,
+  "requireOriginalityClear": true,
+  "requireIntegrityLocked": true
+}

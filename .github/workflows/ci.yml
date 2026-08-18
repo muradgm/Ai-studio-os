@@ -1,0 +1,36 @@
+name: AI Studio OS CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run AI Studio OS tests
+        run: npm test
+
+      - name: Install logo integrity renderer
+        run: python -m pip install --disable-pip-version-check -r requirements-logo-integrity.txt
+
+      - name: Run real SVG corruption suite
+        run: npm run test:logo-integrity

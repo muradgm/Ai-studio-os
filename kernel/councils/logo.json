@@ -1,0 +1,33 @@
+{
+  "name": "logo",
+  "members": [
+    "brand-strategist",
+    "logo-designer",
+    "typographer",
+    "identity-systems-designer",
+    "consumer-psychology-reviewer",
+    "vector-geometry-reviewer",
+    "motion-designer",
+    "production-specialist",
+    "distinctiveness-skeptic"
+  ],
+  "chair": "identity-chair",
+  "protocol": {
+    "independentFirst": true,
+    "crossCritique": true,
+    "requiredQuestions": [
+      "Is the concept memorable without explanation?",
+      "Does the chosen logo type fit the brand and applications?",
+      "Are psychology claims hypotheses rather than myths?",
+      "Does the mark remain distinctive in a competitor lineup?",
+      "Does the canonical geometry survive every SVG export without shape drift?",
+      "Do SVG palette tokens and colors exactly match the approved master?",
+      "Are multi-layer z-order, masks/clips, and shape membership preserved?",
+      "Are all intended overlaps declared and all unexpected overlaps/occlusions blocked?",
+      "Does it survive 16px, monochrome, print, signage, and low-detail reproduction?",
+      "Is the wordmark optically resolved?",
+      "Is the motion principle derived from the mark's structure?",
+      "Is there copying, trademark/confusion, or AI-generic risk?"
+    ]
+  }
+}
