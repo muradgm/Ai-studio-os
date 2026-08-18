@@ -31,6 +31,20 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - Motion is designed with reduced-motion and performance constraints from the start.
 - A high average eval score does not override critical failures in authenticity, accessibility, brand fit, or business clarity.
 
+## Creative production v1.1 rules
+- Decompose references into transferable principles; never treat a reference as permission to reproduce its exact composition or style package.
+- Write a Design Read before concept generation so the system states what it understood about the business, emotional target, category expectation, opportunity, memorable idea, and risks.
+- Creative Dials are calibration constraints, not taste scores. Every dial needs a 0–10 value and a rationale.
+- Diverge before converging: serious creative work should explore 3–5 genuinely different concepts, not cosmetic variants of one layout.
+- Concept selection must explain rejected alternatives and define kill criteria.
+- Prototype Mode is explicitly non-final. Production Mode requires strict truth, rights, accessibility, and performance expectations.
+- Production Recipes describe reusable production patterns; they must not hard-code a provider.
+- The Creative Tool Gateway selects adapters by capability, availability, budget, and explicit task priority—not vendor identity.
+- Truth-sensitive real products or people cannot route to synthetic documentary generation. Require real-source editing or new capture.
+- Every generated/edited asset gets a stable asset ID, version, direction reference, continuity reference, provenance/rights state, and dependency record.
+- Regenerate weak assets surgically. Patch only validated blocker/major findings, preserve continuity/direction constraints, and require integration review after replacement.
+- Cap repeated patch attempts; endless regeneration is a process failure, not iteration.
+
 ## Engineering runtime rules
 - Classify change risk before implementation; do not infer safety from small diff size.
 - Define invariants and required tests before code review.

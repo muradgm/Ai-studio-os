@@ -1,14 +1,16 @@
 {
   "name": "ai-studio-os",
-  "version": "0.5.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "A modular operating system for AI-assisted product, creative, engineering, multimodal, and observation work.",
+  "description": "A modular operating system for AI-assisted product, creative, engineering, multimodal, observation, and creative-production work.",
   "scripts": {
     "studio": "node ./bin/studio.mjs",
     "validate": "node ./scripts/validate.mjs",
-    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch",
+    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11",
     "test": "node --test && npm run validate"
   },
-  "engines": {"node": ">=20"}
+  "engines": {
+    "node": ">=20"
+  }
 }

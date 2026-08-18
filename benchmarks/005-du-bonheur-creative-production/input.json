@@ -1,0 +1,83 @@
+{
+  "id": "benchmark-005-du-bonheur-creative-production",
+  "taskType": "landing-page",
+  "intent": "Create a Du Bonheur homepage that makes French pâtisserie craft tactile while preserving Berlin restraint and practical visit intent",
+  "businessTruths": [
+    "Real Du Bonheur products must remain truthful.",
+    "Visit/location information is commercially important."
+  ],
+  "antiPrinciples": [
+    "No sentimental Paris clichés.",
+    "No synthetic documentary representation of real signature products.",
+    "No decorative scroll effects."
+  ],
+  "inspiration": {
+    "directIndustry": ["premium-patisserie"],
+    "bestInClass": ["editorial-hospitality"],
+    "adjacentIndustries": ["fashion-editorial"],
+    "trends": ["material-storytelling"],
+    "antiReferences": ["generic-beige-luxury"],
+    "opportunityGaps": ["Make craftsmanship tactile and sensory online."],
+    "referenceMatrix": [
+      {"reference":"ref-a","take":"editorial crop","reject":"layout clone","evidence":"synthetic-fixture:ref-a"},
+      {"reference":"ref-b","take":"material pacing","reject":"decorative parallax","evidence":"synthetic-fixture:ref-b"}
+    ]
+  },
+  "references": [
+    {"id":"ref-a","reference":"editorial hospitality reference","evidence":"synthetic-fixture:ref-a","take":"extreme food cropping and whitespace rhythm","reject":"exact hero layout","transform":"Use pastry layers as the compositional material.","extracted":{"typography":"large editorial contrast","layout":"asymmetric anchored composition","image":"extreme macro crop","motion":"short masked reveals","color":"neutral field plus one accent"}},
+    {"id":"ref-b","reference":"fashion material reference","evidence":"synthetic-fixture:ref-b","take":"material sequencing and restrained pacing","reject":"brand-specific graphic motifs","transform":"Translate fabric/material sequencing into pastry lamination and glaze texture.","extracted":{"layout":"sequence by material detail","image":"texture as narrative","motion":"controlled crop transitions","material":"tactile surface progression"}}
+  ],
+  "designRead": {
+    "business": "French pâtisserie in Berlin with serious craft and a physical café visit goal.",
+    "emotionalTarget": "Appetite, craft credibility, and quiet pleasure.",
+    "categoryExpectation": "Elegant French bakery with polished food photography.",
+    "opportunity": "Replace French cliché with tactile craft and Berlin editorial restraint.",
+    "memorableIdea": "Pastry texture becomes the graphic and motion system.",
+    "risks": ["Too dark loses appetite.","Too Parisian becomes cliché.","Too minimal becomes cold."]
+  },
+  "creativeDials": {
+    "novelty":{"value":7,"rationale":"Distinct without becoming concept theatre."},
+    "visualDensity":{"value":4,"rationale":"Leave appetite and imagery room to breathe."},
+    "editoriality":{"value":8,"rationale":"Editorial framing differentiates from bakery templates."},
+    "asymmetry":{"value":6,"rationale":"Controlled tension without hurting scanability."},
+    "motionIntensity":{"value":4,"rationale":"Motion should reveal texture, not dominate."},
+    "texture":{"value":8,"rationale":"Texture is the central sensory device."},
+    "luxury":{"value":5,"rationale":"Craft matters more than luxury signalling."},
+    "warmth":{"value":7,"rationale":"Food and café experience need human warmth."},
+    "playfulness":{"value":2,"rationale":"Keep tone precise and adult."},
+    "technicalSpectacle":{"value":2,"rationale":"Technology stays invisible behind the concept."}
+  },
+  "concepts": [
+    {"id":"berlin-atelier","thesis":"French craft staged with Berlin editorial restraint.","memorableIdea":"Pastry texture becomes the page grid and transition language.","businessFit":"Balances premium craft with local credibility and visit intent.","risk":"Could become too austere if imagery is under-warm.","traits":["tactile","editorial","restrained","warm"]},
+    {"id":"pastry-laboratory","thesis":"Precision and process turn the site into a material study of pâtisserie.","memorableIdea":"Measurements, layers, cross-sections, and process marks structure the experience.","businessFit":"Strongly communicates technical mastery and product detail.","risk":"Could feel clinical rather than pleasurable.","traits":["precise","material","technical","graphic"]},
+    {"id":"quiet-cafe","thesis":"The café is framed as a small pause in Berlin rather than a luxury destination.","memorableIdea":"Time, table moments, hands, and takeaway rituals carry the story.","businessFit":"Human and visit-oriented with broad accessibility.","risk":"Could underplay the exceptional pâtisserie craft.","traits":["intimate","human","quiet","atmospheric"]},
+    {"id":"modern-maison","thesis":"A contemporary French maison with disciplined product theatre and warm refinement.","memorableIdea":"Signature pastries appear as collectible seasonal objects in restrained compositions.","businessFit":"Commercially clear and premium without excessive experimentation.","risk":"Could slip toward familiar luxury-commerce language.","traits":["refined","product-led","warm","composed"]}
+  ],
+  "selection": {
+    "selectedId":"berlin-atelier",
+    "rationale":"It best joins the business truth, Berlin context, sensory product story, and anti-cliché requirement.",
+    "evidence":"synthetic-fixture:creative-council:berlin-atelier",
+    "rejected":[{"id":"pastry-laboratory","reason":"Too clinical for the desired warmth."},{"id":"quiet-cafe","reason":"Underweights the exceptional craft."},{"id":"modern-maison","reason":"Too close to familiar premium commerce."}],
+    "killCriteria":["If the direction reduces appetite or makes practical visit information harder to find, abandon it."]
+  },
+  "designPreferences":{"primaryAction":"visit-or-view-patisserie","composition":"editorial-asymmetry-with-material-anchors","density":"restrained"},
+  "assets":[
+    {"id":"db-hero-real","real":true,"usable":true,"representsRealProduct":true,"truthSensitive":true,"needs":["grade","crop"]},
+    {"id":"db-botanical-support","real":false,"representsRealProduct":false,"truthSensitive":false}
+  ],
+  "motion":{"signature":"lamination-layer-reveal"},
+  "productionMode":{"mode":"production","truth":"strict","accessibility":"required","performance":"required","rights":"required"},
+  "recipeId":"editorial-brand-site",
+  "adapters":[
+    {"id":"photo-editor","provider":"adapter-a","available":true,"operations":["edit"],"capabilities":["image-edit","crop","grade"],"costTier":"medium","priority":10,"defaultModel":"edit-model"},
+    {"id":"image-generator","provider":"adapter-b","available":true,"operations":["generate"],"capabilities":["image-generate"],"costTier":"medium","priority":8,"defaultModel":"image-model"},
+    {"id":"video-generator","provider":"adapter-c","available":true,"operations":["video"],"capabilities":["video-generate"],"costTier":"high","priority":7,"defaultModel":"video-model"}
+  ],
+  "assetSpecs":[
+    {"id":"DB-HERO-001","type":"image","purpose":"homepage hero","operation":"edit","truthSensitive":true,"hasRealSource":true,"requiredCapabilities":["image-edit","crop","grade"],"budgetTier":"medium","continuityId":"DB-VISUAL-01","sourceAssetIds":["db-hero-real"],"sourceEvidence":"synthetic-fixture:approved-real-source:hero","rightsStatus":"owned","instructionRef":"DB-ASSET-SPEC-HERO"},
+    {"id":"DB-SUPPORT-002","type":"image","purpose":"supporting botanical/material graphic","operation":"generate","truthSensitive":false,"hasRealSource":false,"requiredCapabilities":["image-generate"],"budgetTier":"medium","continuityId":"DB-VISUAL-01","rightsStatus":"cleared","instructionRef":"DB-ASSET-SPEC-SUPPORT"}
+  ],
+  "assetFindings":[
+    {"assetId":"DB-SUPPORT-002","severity":"major","validated":true,"code":"support-graphic-too-generic","requestedChange":"Regenerate with more tactile botanical linework while preserving the locked direction."}
+  ]
+}

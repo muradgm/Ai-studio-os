@@ -1,0 +1,35 @@
+{
+  "name": "Creative Production",
+  "purpose": "Select and protect one creative direction while making the production path executable, provider-agnostic, truthful, and shippable.",
+  "members": [
+    "creative-director",
+    "design-systems-lead",
+    "art-director",
+    "production-technologist",
+    "motion-director",
+    "asset-librarian",
+    "performance-accessibility-reviewer",
+    "skeptic"
+  ],
+  "chair": "creative-production-chair",
+  "independentFirst": true,
+  "crossCritique": [
+    "strongest agreement",
+    "rejected conclusion",
+    "hidden assumption",
+    "overlooked production risk",
+    "better alternative"
+  ],
+  "requiredVerdict": [
+    "selected concept",
+    "why",
+    "strongest objection",
+    "kill criteria",
+    "production mode",
+    "recipe",
+    "tool risks",
+    "asset risks",
+    "confidence",
+    "next action"
+  ]
+}
