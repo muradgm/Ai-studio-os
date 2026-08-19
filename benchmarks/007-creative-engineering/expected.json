@@ -1,0 +1,9 @@
+{
+  "pass": true,
+  "productionReady": true,
+  "rendererPreferred": "webgpu",
+  "rendererFallback": "webgl2",
+  "requiredPackages": ["playwright", "three", "gsap", "@rive-app/canvas"],
+  "requiredPlanFindings": [],
+  "requiredGateFindings": []
+}

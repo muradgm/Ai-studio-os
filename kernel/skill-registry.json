@@ -1,5 +1,5 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "categories": {
     "role": "Specialist judgment and accountability",
     "task": "Repeatable operation with defined inputs and outputs",
@@ -27,7 +27,11 @@
     {"id":"product-designer","category":"role","domains":["product","landing-page","interface","command-center"],"phases":["direction","create","refine"],"path":".agents/skills/product-designer/SKILL.md","status":"active"},
     {"id":"image-director","category":"role","domains":["image","brand","landing-page","campaign"],"phases":["direction","create","refine"],"path":".agents/skills/image-director/SKILL.md","status":"active"},
     {"id":"vector-geometry-engineer","category":"role","domains":["vector","svg","icon-system","logo","identity","interface"],"phases":["direction","create","refine"],"path":".agents/skills/vector-geometry-engineer/SKILL.md","status":"active"},
-    {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign","vector","icon-system"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
+    {"id":"creative-developer","category":"role","domains":["creative-engineering","web","landing-page","immersive-web","cinematic-product-page","interactive-world"],"phases":["create","refine"],"path":".agents/skills/creative-developer/SKILL.md","status":"active"},
+    {"id":"realtime-webgl-engineer","category":"role","domains":["creative-engineering","webgl","webgpu","3d","immersive-web","cinematic-product-page","interactive-world"],"phases":["create","refine"],"path":".agents/skills/realtime-webgl-engineer/SKILL.md","status":"active"},
+    {"id":"motion-engineer","category":"role","domains":["creative-engineering","web","motion","immersive-web","cinematic-product-page","interactive-world"],"phases":["create","refine"],"path":".agents/skills/motion-engineer/SKILL.md","status":"active"},
+    {"id":"three-d-technical-artist","category":"role","domains":["creative-engineering","3d","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/three-d-technical-artist/SKILL.md","status":"active"},
+    {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign","vector","icon-system","creative-engineering","immersive-web","cinematic-product-page","interactive-world","webgl","3d"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
 
     {"id":"logo-exploration","category":"task","domains":["logo","identity"],"phases":["explore"],"path":".agents/skills/logo-exploration/SKILL.md","status":"active"},
     {"id":"motion-choreography","category":"task","domains":["motion","landing-page","campaign"],"phases":["create"],"path":".agents/skills/motion-choreography/SKILL.md","status":"active"},
@@ -35,6 +39,9 @@
     {"id":"headline-writing","category":"task","domains":["copy","landing-page","campaign"],"phases":["create"],"path":".agents/skills/headline-writing/SKILL.md","status":"active"},
     {"id":"hero-section-design","category":"task","domains":["landing-page","web","campaign"],"phases":["explore","create"],"path":".agents/skills/hero-section-design/SKILL.md","status":"active"},
     {"id":"icon-system-construction","category":"task","domains":["icon-system","vector","svg","interface","identity"],"phases":["explore","create","refine"],"path":".agents/skills/icon-system-construction/SKILL.md","status":"active"},
+    {"id":"webgl-scene-construction","category":"task","domains":["webgl","webgpu","3d","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/webgl-scene-construction/SKILL.md","status":"active"},
+    {"id":"three-d-asset-optimization","category":"task","domains":["3d","webgl","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/three-d-asset-optimization/SKILL.md","status":"active"},
+    {"id":"responsive-immersive-adaptation","category":"task","domains":["creative-engineering","immersive-web","cinematic-product-page","interactive-world","motion","webgl"],"phases":["refine"],"path":".agents/skills/responsive-immersive-adaptation/SKILL.md","status":"active"},
 
     {"id":"creative-critic","category":"review","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign"],"phases":["review"],"path":".agents/skills/creative-critic/SKILL.md","status":"active"},
     {"id":"logo-review","category":"review","domains":["logo","identity"],"phases":["review"],"path":".agents/skills/logo-review/SKILL.md","status":"active"},
@@ -42,11 +49,19 @@
     {"id":"copy-review","category":"review","domains":["copy","landing-page","brand","campaign"],"phases":["review"],"path":".agents/skills/copy-review/SKILL.md","status":"active"},
     {"id":"brand-fit-review","category":"review","domains":["brand","identity","logo","landing-page","campaign","image","motion","copy"],"phases":["review"],"path":".agents/skills/brand-fit-review/SKILL.md","status":"active"},
     {"id":"vector-geometry-review","category":"review","domains":["vector","svg","icon-system","logo","identity","interface"],"phases":["review"],"path":".agents/skills/vector-geometry-review/SKILL.md","status":"active"},
+    {"id":"creative-development-review","category":"review","domains":["creative-engineering","web","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/creative-development-review/SKILL.md","status":"active"},
+    {"id":"webgl-review","category":"review","domains":["webgl","webgpu","3d","immersive-web","interactive-world"],"phases":["review"],"path":".agents/skills/webgl-review/SKILL.md","status":"active"},
+    {"id":"performance-budget-review","category":"review","domains":["creative-engineering","web","webgl","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/performance-budget-review/SKILL.md","status":"active"},
+    {"id":"accessibility-delivery-review","category":"review","domains":["creative-engineering","web","webgl","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/accessibility-delivery-review/SKILL.md","status":"active"},
+    {"id":"responsive-motion-review","category":"review","domains":["creative-engineering","motion","web","webgl","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/responsive-motion-review/SKILL.md","status":"active"},
 
     {"id":"brand-identity-recipe","category":"recipe","domains":["brand","identity"],"phases":["recipe"],"path":".agents/skills/brand-identity-recipe/SKILL.md","status":"active"},
     {"id":"landing-page-recipe","category":"recipe","domains":["landing-page","web"],"phases":["recipe"],"path":".agents/skills/landing-page-recipe/SKILL.md","status":"active"},
     {"id":"scroll-cinematic-recipe","category":"recipe","domains":["motion","landing-page","web"],"phases":["recipe"],"path":".agents/skills/scroll-cinematic-recipe/SKILL.md","status":"active"},
     {"id":"logo-system-recipe","category":"recipe","domains":["logo","identity"],"phases":["recipe"],"path":".agents/skills/logo-system-recipe/SKILL.md","status":"active"},
-    {"id":"icon-system-recipe","category":"recipe","domains":["icon-system","vector","svg","interface","identity"],"phases":["recipe"],"path":".agents/skills/icon-system-recipe/SKILL.md","status":"active"}
+    {"id":"icon-system-recipe","category":"recipe","domains":["icon-system","vector","svg","interface","identity"],"phases":["recipe"],"path":".agents/skills/icon-system-recipe/SKILL.md","status":"active"},
+    {"id":"immersive-brand-site-recipe","category":"recipe","domains":["immersive-web","creative-engineering","webgl","3d"],"phases":["recipe"],"path":".agents/skills/immersive-brand-site-recipe/SKILL.md","status":"active"},
+    {"id":"cinematic-product-page-recipe","category":"recipe","domains":["cinematic-product-page","creative-engineering","landing-page","motion","webgl"],"phases":["recipe"],"path":".agents/skills/cinematic-product-page-recipe/SKILL.md","status":"active"},
+    {"id":"interactive-world-recipe","category":"recipe","domains":["interactive-world","creative-engineering","webgl","3d"],"phases":["recipe"],"path":".agents/skills/interactive-world-recipe/SKILL.md","status":"active"}
   ]
 }
