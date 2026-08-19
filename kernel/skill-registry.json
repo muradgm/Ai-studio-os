@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "categories": {
     "role": "Specialist judgment and accountability",
     "task": "Repeatable operation with defined inputs and outputs",
@@ -26,23 +26,27 @@
     {"id":"copywriter","category":"role","domains":["copy","landing-page","brand","campaign"],"phases":["direction","create","refine"],"path":".agents/skills/copywriter/SKILL.md","status":"active"},
     {"id":"product-designer","category":"role","domains":["product","landing-page","interface","command-center"],"phases":["direction","create","refine"],"path":".agents/skills/product-designer/SKILL.md","status":"active"},
     {"id":"image-director","category":"role","domains":["image","brand","landing-page","campaign"],"phases":["direction","create","refine"],"path":".agents/skills/image-director/SKILL.md","status":"active"},
-    {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
+    {"id":"vector-geometry-engineer","category":"role","domains":["vector","svg","icon-system","logo","identity","interface"],"phases":["direction","create","refine"],"path":".agents/skills/vector-geometry-engineer/SKILL.md","status":"active"},
+    {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign","vector","icon-system"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
 
     {"id":"logo-exploration","category":"task","domains":["logo","identity"],"phases":["explore"],"path":".agents/skills/logo-exploration/SKILL.md","status":"active"},
     {"id":"motion-choreography","category":"task","domains":["motion","landing-page","campaign"],"phases":["create"],"path":".agents/skills/motion-choreography/SKILL.md","status":"active"},
     {"id":"landing-page-layout","category":"task","domains":["landing-page","web"],"phases":["explore","create"],"path":".agents/skills/landing-page-layout/SKILL.md","status":"active"},
     {"id":"headline-writing","category":"task","domains":["copy","landing-page","campaign"],"phases":["create"],"path":".agents/skills/headline-writing/SKILL.md","status":"active"},
     {"id":"hero-section-design","category":"task","domains":["landing-page","web","campaign"],"phases":["explore","create"],"path":".agents/skills/hero-section-design/SKILL.md","status":"active"},
+    {"id":"icon-system-construction","category":"task","domains":["icon-system","vector","svg","interface","identity"],"phases":["explore","create","refine"],"path":".agents/skills/icon-system-construction/SKILL.md","status":"active"},
 
     {"id":"creative-critic","category":"review","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign"],"phases":["review"],"path":".agents/skills/creative-critic/SKILL.md","status":"active"},
     {"id":"logo-review","category":"review","domains":["logo","identity"],"phases":["review"],"path":".agents/skills/logo-review/SKILL.md","status":"active"},
     {"id":"motion-review","category":"review","domains":["motion","landing-page","campaign"],"phases":["review"],"path":".agents/skills/motion-review/SKILL.md","status":"active"},
     {"id":"copy-review","category":"review","domains":["copy","landing-page","brand","campaign"],"phases":["review"],"path":".agents/skills/copy-review/SKILL.md","status":"active"},
     {"id":"brand-fit-review","category":"review","domains":["brand","identity","logo","landing-page","campaign","image","motion","copy"],"phases":["review"],"path":".agents/skills/brand-fit-review/SKILL.md","status":"active"},
+    {"id":"vector-geometry-review","category":"review","domains":["vector","svg","icon-system","logo","identity","interface"],"phases":["review"],"path":".agents/skills/vector-geometry-review/SKILL.md","status":"active"},
 
     {"id":"brand-identity-recipe","category":"recipe","domains":["brand","identity"],"phases":["recipe"],"path":".agents/skills/brand-identity-recipe/SKILL.md","status":"active"},
     {"id":"landing-page-recipe","category":"recipe","domains":["landing-page","web"],"phases":["recipe"],"path":".agents/skills/landing-page-recipe/SKILL.md","status":"active"},
     {"id":"scroll-cinematic-recipe","category":"recipe","domains":["motion","landing-page","web"],"phases":["recipe"],"path":".agents/skills/scroll-cinematic-recipe/SKILL.md","status":"active"},
-    {"id":"logo-system-recipe","category":"recipe","domains":["logo","identity"],"phases":["recipe"],"path":".agents/skills/logo-system-recipe/SKILL.md","status":"active"}
+    {"id":"logo-system-recipe","category":"recipe","domains":["logo","identity"],"phases":["recipe"],"path":".agents/skills/logo-system-recipe/SKILL.md","status":"active"},
+    {"id":"icon-system-recipe","category":"recipe","domains":["icon-system","vector","svg","interface","identity"],"phases":["recipe"],"path":".agents/skills/icon-system-recipe/SKILL.md","status":"active"}
   ]
 }

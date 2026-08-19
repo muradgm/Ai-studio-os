@@ -1,0 +1,56 @@
+{
+  "id": "traderframe-core-icons-v1",
+  "purpose": "Calibration example for a precise product icon family; not a locked TraderFrame production system.",
+  "canvas": {
+    "width": 24,
+    "height": 24,
+    "viewBox": [0, 0, 24, 24]
+  },
+  "safeArea": {
+    "x": 2,
+    "y": 2,
+    "width": 20,
+    "height": 20
+  },
+  "grid": {
+    "unit": 1,
+    "subdivision": 0.5
+  },
+  "opticalCenter": {
+    "x": 12,
+    "y": 12
+  },
+  "stroke": {
+    "width": 1.5,
+    "cap": "square",
+    "join": "miter"
+  },
+  "geometry": {
+    "minimumGap": 1.5,
+    "dominantAngles": [0, 45, 90],
+    "radiusFamily": [0, 2, 4],
+    "curveContinuityTarget": "C1-or-better",
+    "cornerFamily": ["sharp", "chamfer", "concave"],
+    "terminalFamily": ["square", "cut"]
+  },
+  "targetSizes": [16, 20, 24, 32, 64],
+  "layers": [
+    {"id": "base", "z": 0, "role": "primary silhouette"},
+    {"id": "structure", "z": 10, "role": "secondary information"},
+    {"id": "event", "z": 20, "role": "optional semantic accent"}
+  ],
+  "accent": {
+    "allowed": true,
+    "maximumAccentShapesPerIcon": 1,
+    "purpose": "Meaningful event/focus only, never decoration"
+  },
+  "calibrationIcons": [
+    "frame",
+    "trend",
+    "watchlist",
+    "signal",
+    "filter",
+    "risk"
+  ],
+  "note": "This fixture demonstrates the geometry contract. Final TraderFrame icon DNA requires a dedicated design run and review."
+}

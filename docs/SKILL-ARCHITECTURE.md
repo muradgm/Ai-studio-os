@@ -1,4 +1,4 @@
-# AI Studio OS — Specialist Skill Architecture v1
+# AI Studio OS — Specialist Skill Architecture v1.1
 
 ## Purpose
 
@@ -41,7 +41,7 @@ Answers: **How should this specialist reason?**
 
 Role skills own professional judgment and tradeoffs. They should not prescribe a whole project workflow and should not self-approve their own output.
 
-Examples: art direction, brand strategy, logo design, motion design, copywriting, product design.
+Examples: art direction, brand strategy, logo design, motion design, copywriting, product design, vector geometry.
 
 `creative-skeptic` remains a role skill, but the router invokes it in a separate **challenger lane**. This prevents adversarial review from consuming a required maker slot.
 
@@ -51,7 +51,7 @@ Answers: **How do we perform this exact operation?**
 
 Task skills are narrower than roles. They define inputs, steps, constraints, and output format for one repeatable activity.
 
-Examples: logo exploration, motion choreography, landing-page layout, headline writing, hero-section design.
+Examples: logo exploration, motion choreography, landing-page layout, headline writing, hero-section design, icon-system construction.
 
 ### Review
 
@@ -61,7 +61,7 @@ Review skills must be independent from the maker skill. Findings use `BLOCKER / 
 
 A review-only route does not invoke maker roles, task skills, or recipes. It receives the artifact and its approved context, then judges independently.
 
-Examples: logo review, motion review, copy review, brand-fit review, creative critique.
+Examples: logo review, motion review, copy review, brand-fit review, creative critique, vector geometry review.
 
 ### Recipe
 
@@ -69,7 +69,7 @@ Answers: **How do multiple disciplines produce one deliverable?**
 
 Recipes compose skills but do not replace them. Recipes define stage order, gates, required artifacts, and handoffs. An explicitly requested unknown/inactive recipe is a routing error and blocks rather than silently disappearing.
 
-Examples: brand identity, landing page, scroll cinematic, logo system.
+Examples: brand identity, landing page, scroll cinematic, logo system, icon system.
 
 ## Routing policy
 
@@ -80,6 +80,42 @@ Examples: brand identity, landing page, scroll cinematic, logo system.
 - Recipes may activate several stages, but each stage still obeys minimal routing.
 - Never use a reviewer as evidence that its own maker output is correct.
 - Never resolve disagreement by averaging aesthetics. Record the tradeoff and choose deliberately.
+
+## Vector Geometry subsystem
+
+The vector subsystem was added after a real recurring gap became clear: existing logo/icon skills could decide **what** a symbol should be, but no specialist owned exact mathematical construction across SVG coordinates, complex corners, Bézier handles, layers, overlaps, and multi-size icon families.
+
+It adds:
+
+- `vector-geometry-engineer` — role
+- `icon-system-construction` — task
+- `vector-geometry-review` — review
+- `icon-system-recipe` — recipe
+
+### Geometry source of truth
+
+`APPROVED VISUAL INTENT → GEOMETRY SPEC → NORMALIZED SVG → VECTOR REVIEW → SVG INTEGRITY`
+
+The geometry spec sits above SVG and should record:
+
+- frame/canvas dimensions;
+- viewBox and origin;
+- grid/subgrid;
+- safe area;
+- geometric and optical center;
+- exact anchor/control-point coordinates;
+- angle/radius/corner/terminal families;
+- cubic Bézier continuity targets;
+- stable shape IDs;
+- logical z/layer order;
+- masks/clips/overlaps;
+- minimum gaps/clearances;
+- target-size matrix and optical variants;
+- pivots/anchors/paths for motion handoff.
+
+Logical `z` means deterministic SVG layer/paint order. It does not turn SVG into real 3D geometry. Real `x/y/z` scene geometry must be projected by a 3D/motion system before vector output.
+
+The executable math/validation layer lives in `lib/vector-geometry.mjs` and includes cubic Bézier point/derivative/curvature math, C0/C1/C2 join classification, deterministic logical-z ordering, and vector-spec validation.
 
 ## Anti-sprawl rule
 
@@ -95,7 +131,7 @@ Before adding a skill, answer:
 
 If those answers are weak, improve an existing skill instead.
 
-## Core catalog v1
+## Core catalog v1.1
 
 ### Role
 - art-direction
@@ -105,6 +141,7 @@ If those answers are weak, improve an existing skill instead.
 - copywriter
 - product-designer
 - image-director
+- vector-geometry-engineer
 - creative-skeptic
 
 ### Task
@@ -113,6 +150,7 @@ If those answers are weak, improve an existing skill instead.
 - landing-page-layout
 - headline-writing
 - hero-section-design
+- icon-system-construction
 
 ### Review
 - creative-critic
@@ -120,12 +158,16 @@ If those answers are weak, improve an existing skill instead.
 - motion-review
 - copy-review
 - brand-fit-review
+- vector-geometry-review
 
 ### Recipe
 - brand-identity-recipe
 - landing-page-recipe
 - scroll-cinematic-recipe
 - logo-system-recipe
+- icon-system-recipe
+
+Total active core catalog: **26 skills**.
 
 ## Future specialist candidates
 
