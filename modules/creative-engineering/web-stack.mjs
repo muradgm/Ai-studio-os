@@ -15,7 +15,7 @@ export const DEFAULT_VIEWPORTS = Object.freeze([
 
 export const DEFAULT_DELIVERY_BUDGETS = Object.freeze({
   webVitals: { lcpMs: 2500, inpMs: 200, cls: 0.1 },
-  runtime: { minFps: 55, maxFrameMs: 22, maxLongTasks: 0 },
+  runtime: { minFps: 55, maxFrameMs: 22, maxLongTasks: 3, maxTbtMs: 100 },
   bundle: { initialJsKb: 400, initialCssKb: 120 },
   accessibility: { blockers: 0, majors: 0 },
   responsive: { requiredViewports: ['mobile', 'tablet', 'desktop'] }
