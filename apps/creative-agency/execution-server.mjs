@@ -15,6 +15,7 @@ import {
   measurementFindings,
   synthesizeReleaseDecision
 } from '../../modules/creative-engineering/index.mjs';
+import { createViteInvocation } from '../../lib/local-vite.mjs';
 import {
   REPO_ROOT,
   getExecutionProject,
@@ -74,11 +75,28 @@ async function readJson(req) {
   return JSON.parse(Buffer.concat(chunks).toString('utf8'));
 }
 
-function npmCommand() { return process.platform === 'win32' ? 'npm.cmd' : 'npm'; }
+function projectBuildInvocation(project) {
+  if (project.build?.driver !== 'vite') throw new Error(`Unsupported build driver for ${project.id}: ${project.build?.driver ?? 'missing'}`);
+  return createViteInvocation({
+    repoRoot: REPO_ROOT,
+    mode: 'build',
+    appRoot: project.build.appRoot,
+    outDir: project.build.outDir,
+    emptyOutDir: true
+  });
+}
 
 function runBuild(project, job) {
   return new Promise((resolve, reject) => {
-    const child = spawn(npmCommand(), ['run', project.buildScript], {
+    let invocation;
+    try {
+      invocation = projectBuildInvocation(project);
+    } catch (error) {
+      reject(error);
+      return;
+    }
+
+    const child = spawn(invocation.executable, invocation.args, {
       cwd: REPO_ROOT,
       shell: false,
       windowsHide: true,
