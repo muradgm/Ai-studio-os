@@ -76,6 +76,20 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - Reject skill sprawl. Add a new skill only when a real project demonstrates a recurring judgment gap that cannot be cleanly solved by improving an existing skill.
 - Promote skill changes from validated project failures, Council findings, benchmark regressions, user corrections, or recurring production constraints—not one-off taste preferences.
 
+## Vector geometry rules
+- `vector-geometry-engineer` owns deterministic vector construction after visual/semantic intent is approved; it does not replace art direction, logo design, or product design.
+- The geometry specification sits above SVG. Record canvas/frame dimensions, viewBox/origin, grid/subgrid, safe area, geometric and optical center, exact anchor/control points, corner/terminal grammar, layers, overlaps, and target-size behavior.
+- Use `x/y` for drawing coordinates. Use logical `z` only for deterministic SVG layer/paint order; real 3D `x/y/z` geometry must be projected by a 3D/motion system before SVG output.
+- Cubic Bézier construction should reason explicitly about anchors, handles, tangents, curvature, inflection points, and C0/C1/C2 continuity.
+- Prefer the fewest meaningful path nodes that preserve intended geometry; reject tracing noise, near-tangent kinks, and accidental inflections.
+- Mathematical centering and optical centering are separate. Optical corrections are allowed when documented and verified at target sizes.
+- Define permitted corner families and terminal families before scale icon production. Do not invent new geometry rules for each difficult icon.
+- Multi-layer assets require stable layer IDs and explicit logical z/paint order. Masks, clips, knockouts, and intended overlaps must remain auditable.
+- Small-size icons may use intentional optical variants/simplifications. Do not blindly scale one master to every pixel target.
+- Icon systems freeze family DNA only after 5–8 calibration icons prove the grammar across difficult geometry/semantic cases.
+- Run `vector-geometry-review` before existing Shape/SVG/Layer/Overlap/Render locks.
+- Static vector construction is primarily geometry. Physics such as spring, damping, mass, momentum, and collision belongs to motion; vector assets should expose pivots, anchors, paths, normals, and constraints for that handoff.
+
 ## Engineering runtime rules
 - Classify change risk before implementation; do not infer safety from small diff size.
 - Define invariants and required tests before code review.
