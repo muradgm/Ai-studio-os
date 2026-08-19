@@ -2,11 +2,11 @@
 
 AI Studio OS is a modular operating system for AI-assisted product, creative, engineering, multimodal production, creative engineering, and outcome-learning work.
 
-The five-epoch core remains frozen as the **v1 baseline**. **v1.1 — Creative Production Upgrade** strengthened the bridge from creative judgment to tool/asset production. **v1.2 — Logo Identity Upgrade** added geometry-locked identity production. **v1.3 — Creative Engineering Runtime** adds the execution layer required to turn approved creative direction into measured running browser artifacts.
+The five-epoch core remains frozen as the **v1 baseline**. **v1.1 — Creative Production Upgrade** strengthened the bridge from creative judgment to tool/asset production. **v1.2 — Logo Identity Upgrade** added geometry-locked identity production. **v1.3 — Creative Engineering Runtime** adds the execution and measurement layer required to turn approved creative direction into observed, release-gated browser artifacts.
 
 ## Current baseline
 
-**AI Studio OS v1.3 — Creative Engineering Runtime + Command Center execution wiring**
+**AI Studio OS v1.3 — Creative Engineering Runtime + measured Command Center release intelligence**
 
 v1.3 adds:
 
@@ -18,12 +18,18 @@ v1.3 adds:
 - a real headless-Chromium CI smoke gate
 - WebGPU-preferred / WebGL2-fallback realtime scene contracts where justified
 - deterministic Blender CLI adapter contracts and web-3D asset manifests
-- explicit LCP/INP/CLS, runtime, bundle, accessibility, and responsive delivery budgets
+- explicit LCP/interaction/CLS, runtime, bundle, accessibility, responsive and reduced-motion delivery budgets
 - capped evidence-driven patch loops rather than one-shot implementation
 - a production fixture that bundles Three.js, GSAP, and Rive together
 - a first-class `studio creative-engineering` command and Benchmark 007
-- The Creative Agency Command Center local executor: whitelisted build → real browser capture → review → patch queue → explicit iteration approval
-- fail-closed release evidence: unmeasured performance/accessibility evidence cannot silently become PASS
+- The Creative Agency Command Center local executor: whitelisted build → real browser capture → measured review → patch queue → explicit iteration approval
+- lab LCP/CLS collection plus a clearly-labelled safe interaction latency proxy for INP-style responsiveness testing
+- requestAnimationFrame FPS/frame-time sampling, Long Task observation and Chromium heap evidence
+- automated semantic/accessibility baseline checks plus real keyboard traversal and focus-indicator evidence
+- reduced-motion runtime inspection, not just media-query detection
+- approved reduced-motion screenshot baselines with browser-side pixel-diff regression thresholds
+- persisted JSON release reports and CI evidence artifacts
+- fail-closed release evidence: `measured:false` and missing evidence cannot silently become PASS
 
 v1.2 remains the logo/identity integrity layer: seven-type exploration, psychology hypotheses, canonical mark specification, vector geometry, icon systems, responsive marks, SVG/layer/overlap/render locks, and identity QA.
 
@@ -53,7 +59,9 @@ npm run test:command-center
 
 ## Design principle
 
-Do not run every module for every task. Route only the capabilities justified by intent, uncertainty, cost, and consequence. Three.js, GSAP, Rive, Blender, and other production tools are capabilities—not visual styles. A production web artifact must be observed in the browser and pass independent responsive, accessibility, performance, and implementation review. **Iteration approval never overrides a failed or unmeasured release gate.**
+Do not run every module for every task. Route only the capabilities justified by intent, uncertainty, cost, and consequence. Three.js, GSAP, Rive, Blender, and other production tools are capabilities—not visual styles. A production web artifact must be observed in the browser and pass independent responsive, accessibility, performance, motion and implementation review. **Iteration approval never overrides a failed or unmeasured release gate.**
+
+The accessibility lane is an automated release baseline, not a replacement for complete manual WCAG evaluation. Likewise, the Command Center's interaction metric is a controlled lab proxy; it must not be described as field CrUX INP.
 
 ## v1 core
 
@@ -67,7 +75,7 @@ Do not run every module for every task. Route only the capabilities justified by
 
 - `upgrades/v1.1-creative-production/` — calibration, concept exploration/selection, production modes/recipes, tool routing, asset registry, surgical patching
 - `upgrades/v1.2-logo-identity/` — logo psychology, responsive identity, canonical SVG/vector geometry integrity, icon systems, logo QA
-- `upgrades/v1.3-creative-engineering/` — realtime web implementation, browser observation, 3D asset adapters, responsive/motion engineering, delivery budgets, patch loop
+- `upgrades/v1.3-creative-engineering/` — realtime web implementation, browser observation, 3D asset adapters, responsive/motion engineering, delivery budgets, patch loop, release measurement
 
 ## Benchmarks
 
@@ -81,5 +89,5 @@ Do not run every module for every task. Route only the capabilities justified by
 
 ## Executable fixtures
 
-- `apps/creative-agency/` — The Creative Agency Workroom + local Command Center executor
+- `apps/creative-agency/` — The Creative Agency Workroom + local measured Command Center executor
 - `apps/creative-engineering-fixture/` — Three.js + GSAP + Rive production-build fixture

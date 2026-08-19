@@ -41,7 +41,17 @@ export function createCreativeEngineeringPlan(input = {}) {
 }
 
 function hasEvidence(metrics, key) {
-  return Object.prototype.hasOwnProperty.call(metrics, key) && metrics[key] && typeof metrics[key] === 'object';
+  const value = metrics[key];
+  return Object.prototype.hasOwnProperty.call(metrics, key)
+    && value
+    && typeof value === 'object'
+    && value.measured !== false;
+}
+
+function totalBlockingTime(runtime = {}) {
+  if (Number.isFinite(runtime.totalBlockingTimeMs)) return Math.max(0, runtime.totalBlockingTimeMs);
+  if (!Number.isFinite(runtime.longTasks) || !Number.isFinite(runtime.longTaskMs)) return null;
+  return Math.max(0, runtime.longTaskMs - (runtime.longTasks * 50));
 }
 
 export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredViewports, requiredEvidence = [] } = {}) {
@@ -52,6 +62,8 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
   const bundle = metrics.bundle ?? {};
   const accessibility = metrics.accessibility ?? {};
   const responsive = metrics.responsive ?? {};
+  const reducedMotion = metrics.reducedMotion ?? {};
+  const visualRegression = metrics.visualRegression ?? {};
 
   for (const key of [...new Set(requiredEvidence)]) {
     if (!hasEvidence(metrics, key)) {
@@ -63,7 +75,7 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
     findings.push(finding('blocker', 'lcp-budget-failed', `LCP ${vitals.lcpMs}ms exceeds ${resolved.webVitals.lcpMs}ms.`, { actual: vitals.lcpMs, budget: resolved.webVitals.lcpMs }));
   }
   if (Number.isFinite(vitals.inpMs) && vitals.inpMs > resolved.webVitals.inpMs) {
-    findings.push(finding('blocker', 'inp-budget-failed', `INP ${vitals.inpMs}ms exceeds ${resolved.webVitals.inpMs}ms.`, { actual: vitals.inpMs, budget: resolved.webVitals.inpMs }));
+    findings.push(finding('blocker', 'inp-budget-failed', `INP lab proxy ${vitals.inpMs}ms exceeds ${resolved.webVitals.inpMs}ms.`, { actual: vitals.inpMs, budget: resolved.webVitals.inpMs, method: vitals.method?.inp }));
   }
   if (Number.isFinite(vitals.cls) && vitals.cls > resolved.webVitals.cls) {
     findings.push(finding('blocker', 'cls-budget-failed', `CLS ${vitals.cls} exceeds ${resolved.webVitals.cls}.`, { actual: vitals.cls, budget: resolved.webVitals.cls }));
@@ -75,7 +87,16 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
     findings.push(finding('major', 'frame-time-budget-failed', `Frame time ${runtime.maxFrameMs}ms exceeds ${resolved.runtime.maxFrameMs}ms.`, { actual: runtime.maxFrameMs, budget: resolved.runtime.maxFrameMs }));
   }
   if (Number.isFinite(runtime.longTasks) && runtime.longTasks > resolved.runtime.maxLongTasks) {
-    findings.push(finding('major', 'long-task-budget-failed', `Long tasks ${runtime.longTasks} exceed ${resolved.runtime.maxLongTasks}.`, { actual: runtime.longTasks, budget: resolved.runtime.maxLongTasks }));
+    findings.push(finding('major', 'long-task-budget-failed', `Long-task count ${runtime.longTasks} exceeds ${resolved.runtime.maxLongTasks}.`, { actual: runtime.longTasks, budget: resolved.runtime.maxLongTasks }));
+  }
+  const tbtMs = totalBlockingTime(runtime);
+  if (Number.isFinite(tbtMs) && tbtMs > resolved.runtime.maxTbtMs) {
+    findings.push(finding('major', 'tbt-budget-failed', `Total Blocking Time ${Math.round(tbtMs * 10) / 10}ms exceeds ${resolved.runtime.maxTbtMs}ms.`, {
+      actual: Math.round(tbtMs * 10) / 10,
+      budget: resolved.runtime.maxTbtMs,
+      longTasks: runtime.longTasks ?? null,
+      longTaskMs: runtime.longTaskMs ?? null
+    }));
   }
   if (Number.isFinite(bundle.initialJsKb) && bundle.initialJsKb > resolved.bundle.initialJsKb) {
     findings.push(finding('major', 'initial-js-budget-failed', `Initial JS ${bundle.initialJsKb}KB exceeds ${resolved.bundle.initialJsKb}KB.`, { actual: bundle.initialJsKb, budget: resolved.bundle.initialJsKb }));
@@ -88,6 +109,17 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
   }
   if ((accessibility.majors ?? 0) > resolved.accessibility.majors) {
     findings.push(finding('major', 'accessibility-majors', 'Major accessibility findings remain.', { actual: accessibility.majors ?? 0, budget: resolved.accessibility.majors }));
+  }
+  if (hasEvidence(metrics, 'reducedMotion') && reducedMotion.pass === false) {
+    findings.push(finding('blocker', 'reduced-motion-gate-failed', `Reduced-motion mode still contains ${reducedMotion.continuousAnimations ?? 'unknown'} continuous animation(s).`, {
+      continuousAnimations: reducedMotion.continuousAnimations ?? null
+    }));
+  }
+  if (hasEvidence(metrics, 'visualRegression') && visualRegression.status === 'compared' && visualRegression.pass === false) {
+    findings.push(finding('major', 'visual-regression-gate-failed', `Visual regression ${visualRegression.maxChangedRatio ?? 'unknown'} exceeds approved-baseline threshold ${visualRegression.threshold ?? 'unknown'}.`, {
+      maxChangedRatio: visualRegression.maxChangedRatio,
+      threshold: visualRegression.threshold
+    }));
   }
 
   const required = requiredViewports ?? resolved.responsive.requiredViewports;

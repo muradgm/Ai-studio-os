@@ -11,20 +11,21 @@ const stages = [
   { id: 'explore', index: '03', label: 'Explore', kicker: 'Diverge on purpose', title: 'Make alternatives that are <em>actually different</em>.', deck: 'Three to five concept families must change the core mechanism, not just the color, typeface or hero image. Weak directions get killed early.', stat: ['4 directions', '2 killed', '1 challenger'] },
   { id: 'decide', index: '04', label: 'Decide', kicker: 'Independent review', title: 'The Council must earn the <em>decision</em>.', deck: 'Strategy, creative, technical and skeptical reviewers work independently, cross-critique, preserve dissent and expose assumptions before selection.', stat: ['6 reviewers', '2 objections', 'confidence 0.86'] },
   { id: 'make', index: '05', label: 'Make', kicker: 'Production under direction', title: 'Turn the decision into <em>work</em>.', deck: 'Design, image, motion, writing, video and implementation inherit one creative direction. Tools are adapters; the project does not become a model marketplace.', stat: ['runtime v1.3', 'browser executable', 'production gates active'] },
-  { id: 'review', index: '06', label: 'Review', kicker: 'Critique the artifact', title: 'Review the <em>running artifact</em>.', deck: 'The Command Center builds, opens the site in Chromium, captures responsive and reduced-motion evidence, records failures and creates a bounded patch queue.', stat: ['3 viewports', '2 motion modes', 'evidence required'] },
-  { id: 'deliver', index: '07', label: 'Deliver', kicker: 'Ship with evidence', title: 'Release only what has <em>earned</em> release.', deck: 'Iteration approval and production readiness are deliberately separate. Missing performance, accessibility or responsive evidence blocks release.', stat: ['no fake PASS', 'release gated', 'handoff traceable'] }
+  { id: 'review', index: '06', label: 'Review', kicker: 'Measure the artifact', title: 'Review the <em>running artifact</em>, not a screenshot.', deck: 'The Command Center builds, runs Chromium, measures lab Web Vitals, frame behavior, accessibility, responsive states and reduced motion, then turns failures into a bounded patch queue.', stat: ['7 evidence lanes', '3 viewports', 'release decision synthesized'] },
+  { id: 'deliver', index: '07', label: 'Deliver', kicker: 'Ship with evidence', title: 'Release only what has <em>earned</em> release.', deck: 'Iteration approval and production readiness remain separate. A release becomes green only when required evidence is measured and blocker/major budgets pass.', stat: ['no fake PASS', 'baseline regression', 'handoff traceable'] }
 ];
 
 const decisions = [
-  { title: 'Execution runtime', body: 'AI Studio OS v1.3 is the active creative-engineering baseline.', status: 'ready' },
-  { title: 'Browser evidence', body: 'Desktop, tablet, mobile and reduced-motion captures are required.', status: 'ready' },
+  { title: 'Execution runtime', body: 'AI Studio OS v1.3 remains the active creative-engineering baseline.', status: 'ready' },
+  { title: 'Measured release gate', body: 'Web Vitals, runtime, accessibility, responsive and reduced-motion evidence now participate in release.', status: 'ready' },
   { title: 'Patch behavior', body: 'Findings create an auditable queue; arbitrary shell/code execution is prohibited.', status: 'review' },
-  { title: 'Release status', body: 'Production release remains blocked while required evidence is unmeasured.', status: 'blocked' }
+  { title: 'Release status', body: 'Green status is computed from measured evidence; iteration approval cannot override it.', status: 'review' }
 ];
 
 const evidence = [
   { title: 'Real Chromium', body: 'Playwright browser execution is validated in CI.', status: 'ready' },
-  { title: 'Delivery gates', body: 'Responsive, bundle, performance and accessibility evidence are independent.', status: 'ready' },
+  { title: 'Release intelligence', body: 'Lab vitals, frame sampling, semantics, keyboard traversal and reduced motion are measured.', status: 'ready' },
+  { title: 'Visual baseline', body: 'Approved reduced-motion captures become the regression baseline for the next iteration.', status: 'ready' },
   { title: 'Local-only executor', body: 'Build service binds to 127.0.0.1 and uses whitelisted shell-free jobs.', status: 'ready' }
 ];
 
@@ -65,7 +66,7 @@ const flowGraphic = () => `
 </svg>`;
 
 const outputCard = (n, title, note) => `
-  <article class="output-card" tabindex="0">
+  <article class="output-card">
     <div class="output-visual"><div class="output-glyph"></div></div>
     <div class="output-body"><div><h4>${title}</h4><p>${note}</p></div><span class="output-number">0${n}</span></div>
   </article>`;
@@ -97,12 +98,12 @@ function render() {
         </header>
 
         <section class="project-head">
-          <div><div class="eyebrow">Execution Slice · Brand / Website</div><h1 class="project-title">Build. Observe.<br/>Judge the real work.</h1><div class="project-meta"><span>Owner <b>Creative Council</b></span><span>Mode <b>Production gate</b></span><span>Engine <b>AI Studio OS v1.3</b></span></div></div>
+          <div><div class="eyebrow">Measurement Slice · Brand / Website</div><h1 class="project-title">Build. Measure.<br/>Earn release.</h1><div class="project-meta"><span>Owner <b>Creative Council</b></span><span>Mode <b>Measured production gate</b></span><span>Engine <b>AI Studio OS v1.3</b></span></div></div>
           <div class="phase-chip" id="phase-chip">Current · Brief</div>
         </section>
 
         <nav class="project-spine" aria-label="Project stages">
-          ${stages.map((s,i)=>`<button class="spine-step ${i===0?'active':''}" data-stage="${s.id}"><small>${s.index}</small><strong>${s.label}</strong></button>`).join('')}
+          ${stages.map((s,i)=>`<button class="spine-step ${i===0?'active':''}" data-stage="${s.id}" ${i === 0 ? 'data-release-probe="stage-brief"' : ''}><small>${s.index}</small><strong>${s.label}</strong></button>`).join('')}
         </nav>
 
         <section class="work-grid">
@@ -115,14 +116,14 @@ function render() {
 
           <div class="stack">
             <article class="panel"><div class="panel-head"><div class="panel-label"><span>Decisions</span></div><div class="panel-count">04</div></div><div class="decision-list">${decisions.map((d,i)=>row(d,i)).join('')}</div></article>
-            <article class="panel"><div class="panel-head"><div class="panel-label"><span>Execution Council</span></div><div class="panel-count">05 gates</div></div><div class="council-strip"><div class="council-avatars">${['DEV','GL','MOT','PERF','A11Y'].map(x=>`<div class="avatar">${x}</div>`).join('')}</div><p><strong>Rule:</strong> makers build the artifact; browser evidence and independent delivery gates decide what can ship.</p></div></article>
-            <article class="panel"><div class="panel-head"><div class="panel-label"><span>Evidence</span></div><div class="panel-count">03</div></div><div class="evidence-list">${evidence.map((d,i)=>row(d,i)).join('')}</div></article>
+            <article class="panel"><div class="panel-head"><div class="panel-label"><span>Execution Council</span></div><div class="panel-count">07 gates</div></div><div class="council-strip"><div class="council-avatars">${['DEV','PERF','A11Y','MOT','RESP','VIS'].map(x=>`<div class="avatar">${x}</div>`).join('')}</div><p><strong>Rule:</strong> makers build the artifact; measured browser evidence and independent delivery gates decide what can ship.</p></div></article>
+            <article class="panel"><div class="panel-head"><div class="panel-label"><span>Evidence</span></div><div class="panel-count">04</div></div><div class="evidence-list">${evidence.map((d,i)=>row(d,i)).join('')}</div></article>
           </div>
 
           <section class="command-center panel" id="command-center">
             <div class="cc-head">
-              <div><div class="panel-label"><i></i><span>Command Center / Execution</span></div><p>Real local build and browser observation. Unknown evidence remains unmeasured.</p></div>
-              <div class="cc-actions"><button class="cc-button secondary" id="refresh-execution">Refresh</button><button class="cc-button primary" id="run-execution">Run build + review</button></div>
+              <div><div class="panel-label"><i></i><span>Command Center / Release Intelligence</span></div><p>Real local build, browser observation, lab performance, accessibility and regression evidence.</p></div>
+              <div class="cc-actions"><button class="cc-button secondary" id="refresh-execution">Refresh</button><button class="cc-button primary" id="run-execution">Run measured review</button></div>
             </div>
 
             <div class="execution-spine" id="execution-spine">
@@ -132,17 +133,20 @@ function render() {
             <div class="cc-grid">
               <div class="preview-surface">
                 <div class="surface-head"><span>LIVE BUILD</span><b id="job-id">NO EXECUTION</b></div>
-                <div class="preview-empty" id="preview-empty"><strong>Build evidence appears here.</strong><span>Start the local executor, then run Build + Review.</span></div>
+                <div class="preview-empty" id="preview-empty"><strong>Measured build evidence appears here.</strong><span>Start the local executor, then run a measured review.</span></div>
                 <iframe id="live-preview" title="Live build preview" hidden></iframe>
               </div>
 
               <aside class="evidence-rail">
                 <div class="surface-head"><span>DELIVERY EVIDENCE</span><b id="release-state">UNMEASURED</b></div>
-                <div class="evidence-metric"><span>Browser capture</span><b id="metric-browser">—</b><i id="metric-browser-note">not run</i></div>
-                <div class="evidence-metric"><span>Responsive</span><b id="metric-responsive">—</b><i id="metric-responsive-note">not run</i></div>
-                <div class="evidence-metric"><span>Bundle</span><b id="metric-bundle">—</b><i id="metric-bundle-note">not run</i></div>
-                <div class="evidence-metric unmeasured"><span>Performance</span><b id="metric-performance">UNMEASURED</b><i>release blocker</i></div>
-                <div class="evidence-metric unmeasured"><span>Accessibility</span><b id="metric-accessibility">UNMEASURED</b><i>release blocker</i></div>
+                <div class="evidence-metric" id="evidence-browser" data-state="unmeasured"><span>Browser capture</span><b id="metric-browser">UNMEASURED</b><i id="metric-browser-note">not run</i></div>
+                <div class="evidence-metric" id="evidence-responsive" data-state="unmeasured"><span>Responsive</span><b id="metric-responsive">UNMEASURED</b><i id="metric-responsive-note">not run</i></div>
+                <div class="evidence-metric" id="evidence-vitals" data-state="unmeasured"><span>Lab Web Vitals</span><b id="metric-vitals">UNMEASURED</b><i id="metric-vitals-note">LCP · interaction proxy · CLS</i></div>
+                <div class="evidence-metric" id="evidence-runtime" data-state="unmeasured"><span>Runtime</span><b id="metric-runtime">UNMEASURED</b><i id="metric-runtime-note">FPS · frame · long tasks</i></div>
+                <div class="evidence-metric" id="evidence-accessibility" data-state="unmeasured"><span>Accessibility</span><b id="metric-accessibility">UNMEASURED</b><i id="metric-accessibility-note">semantics · keyboard · focus</i></div>
+                <div class="evidence-metric" id="evidence-motion" data-state="unmeasured"><span>Reduced motion</span><b id="metric-motion">UNMEASURED</b><i id="metric-motion-note">continuous animation gate</i></div>
+                <div class="evidence-metric" id="evidence-visual" data-state="unmeasured"><span>Visual regression</span><b id="metric-visual">UNMEASURED</b><i id="metric-visual-note">approved reduced-motion baseline</i></div>
+                <div class="evidence-metric" id="evidence-bundle" data-state="unmeasured"><span>Bundle</span><b id="metric-bundle">UNMEASURED</b><i id="metric-bundle-note">built asset bytes</i></div>
               </aside>
             </div>
 
@@ -152,20 +156,20 @@ function render() {
             </div>
 
             <div class="approval-bar">
-              <div><span>ITERATION APPROVAL</span><p>Approval records creative acceptance. It does not override release blockers.</p></div>
-              <button class="cc-button approve" id="approve-execution" disabled>Approve iteration</button>
+              <div><span>ITERATION APPROVAL</span><p>Approval promotes the reduced-motion visual baseline. It does not override release blockers.</p></div>
+              <div class="approval-actions"><a class="report-link" id="release-report" href="#" hidden target="_blank" rel="noreferrer">Release report</a><button class="cc-button approve" id="approve-execution" disabled>Approve iteration</button></div>
             </div>
           </section>
 
           <div class="outputs">
-            ${outputCard(1,'Live browser build','Rendered artifact, not a design mockup')}
-            ${outputCard(2,'Capture evidence','Desktop · tablet · mobile · reduced motion')}
-            ${outputCard(3,'Patch queue','Findings ordered by release consequence')}
+            ${outputCard(1,'Measured browser build','Rendered artifact with performance and accessibility probes')}
+            ${outputCard(2,'Release evidence','Responsive · reduced motion · lab vitals · runtime')}
+            ${outputCard(3,'Visual baseline','Approved iteration becomes the next regression reference')}
           </div>
         </section>
       </main>
 
-      <form class="command-bar" id="command-form"><input class="command-input" id="command-input" autocomplete="off" placeholder="Build, review, refresh or approve this project…"/><span class="command-hint">⌘ K</span><button class="command-submit" aria-label="Run command">↗</button></form>
+      <form class="command-bar" id="command-form"><input class="command-input" id="command-input" aria-label="Command Center command" autocomplete="off" placeholder="Build, review, refresh or approve this project…"/><span class="command-hint">⌘ K</span><button class="command-submit" aria-label="Run command">↗</button></form>
       <div class="toast" id="toast"><b id="toast-title">Command Center</b><span id="toast-copy"></span></div>
     </div>`;
   setStage('brief');
@@ -206,12 +210,43 @@ function metricState(value) {
   return value === true ? 'PASS' : value === false ? 'FAIL' : '—';
 }
 
+function setEvidenceMetric(id, value, note, state = 'unmeasured') {
+  const row = document.querySelector(`#evidence-${id}`);
+  const valueEl = document.querySelector(`#metric-${id}`);
+  const noteEl = document.querySelector(`#metric-${id}-note`);
+  if (row) row.dataset.state = state;
+  if (valueEl) valueEl.textContent = value;
+  if (noteEl) noteEl.textContent = note;
+}
+
+function findingSet(job) {
+  return new Set((job.findings ?? []).map((finding) => finding.code));
+}
+
+function hasAny(codes, candidates) {
+  return candidates.some((code) => codes.has(code));
+}
+
 function renderExecution(job) {
   if (!job) return;
   activeJob = job;
   document.querySelector('#job-id').textContent = job.id.toUpperCase();
-  document.querySelector('#release-state').textContent = job.productionReady ? 'RELEASE READY' : job.status === 'complete' ? 'RELEASE BLOCKED' : job.status.toUpperCase();
-  document.querySelector('#release-state').className = job.productionReady ? 'release-ready' : 'release-blocked';
+
+  const release = job.releaseDecision ?? {};
+  const releaseState = document.querySelector('#release-state');
+  if (job.status !== 'complete') {
+    releaseState.textContent = job.status.toUpperCase();
+    releaseState.className = '';
+  } else if (release.status === 'ready') {
+    releaseState.textContent = 'RELEASE READY';
+    releaseState.className = 'release-ready';
+  } else if (release.status === 'review') {
+    releaseState.textContent = 'RELEASE REVIEW';
+    releaseState.className = 'release-review';
+  } else {
+    releaseState.textContent = 'RELEASE BLOCKED';
+    releaseState.className = 'release-blocked';
+  }
 
   for (const step of job.steps ?? []) {
     const el = document.querySelector(`[data-execution-step="${step.id}"]`);
@@ -228,19 +263,87 @@ function renderExecution(job) {
     empty.hidden = true;
   }
 
+  const codes = findingSet(job);
   const browser = job.evidence?.browser;
-  document.querySelector('#metric-browser').textContent = browser ? `${browser.passed}/${browser.captures}` : '—';
-  document.querySelector('#metric-browser-note').textContent = browser ? `${browser.reducedMotionCaptures} reduced-motion` : 'not run';
+  setEvidenceMetric(
+    'browser',
+    browser ? `${browser.passed}/${browser.captures}` : 'UNMEASURED',
+    browser ? `${browser.reducedMotionCaptures} reduced-motion` : 'not run',
+    browser ? (browser.passed === browser.captures ? 'pass' : 'fail') : 'unmeasured'
+  );
 
   const responsive = job.evidence?.responsive ?? {};
   const responsiveValues = ['mobile','tablet','desktop'].map((id) => responsive[id]?.pass);
-  const responsivePass = responsiveValues.every((value) => value === true);
-  document.querySelector('#metric-responsive').textContent = Object.keys(responsive).length ? metricState(responsivePass) : '—';
-  document.querySelector('#metric-responsive-note').textContent = Object.keys(responsive).length ? ['M','T','D'].map((label,i)=>`${label}:${metricState(responsiveValues[i])}`).join(' · ') : 'not run';
+  const responsiveMeasured = responsiveValues.some((value) => typeof value === 'boolean');
+  const responsivePass = responsiveMeasured && responsiveValues.every((value) => value === true);
+  setEvidenceMetric(
+    'responsive',
+    responsiveMeasured ? metricState(responsivePass) : 'UNMEASURED',
+    responsiveMeasured ? ['M','T','D'].map((label,i)=>`${label}:${metricState(responsiveValues[i])}`).join(' · ') : 'not run',
+    responsiveMeasured ? (responsivePass ? 'pass' : 'fail') : 'unmeasured'
+  );
+
+  const vitals = job.evidence?.webVitals;
+  const vitalFailed = hasAny(codes, ['lcp-budget-failed','inp-budget-failed','cls-budget-failed','web-vitals-evidence-missing']);
+  setEvidenceMetric(
+    'vitals',
+    vitals?.measured ? `LCP ${Math.round(vitals.lcpMs)} ms` : 'UNMEASURED',
+    vitals?.measured ? `interaction ${Math.round(vitals.inpMs)} ms · CLS ${Number(vitals.cls).toFixed(3)}` : 'LCP · interaction proxy · CLS',
+    vitals?.measured ? (vitalFailed ? 'fail' : 'pass') : 'unmeasured'
+  );
+
+  const runtime = job.evidence?.runtime;
+  const runtimeFailed = hasAny(codes, ['fps-budget-failed','frame-time-budget-failed','long-task-budget-failed','runtime-evidence-missing']);
+  setEvidenceMetric(
+    'runtime',
+    runtime?.measured ? `${runtime.fps} FPS` : 'UNMEASURED',
+    runtime?.measured ? `${runtime.maxFrameMs} ms max · ${runtime.longTasks} long tasks${runtime.usedJsHeapMb ? ` · ${runtime.usedJsHeapMb} MB heap` : ''}` : 'FPS · frame · long tasks',
+    runtime?.measured ? (runtimeFailed ? 'fail' : 'pass') : 'unmeasured'
+  );
+
+  const accessibility = job.evidence?.accessibility;
+  const accessibilityFailed = hasAny(codes, ['accessibility-blockers','accessibility-majors','accessibility-evidence-missing']);
+  setEvidenceMetric(
+    'accessibility',
+    accessibility?.measured ? `${accessibility.blockers}B / ${accessibility.majors}M` : 'UNMEASURED',
+    accessibility?.measured ? `${accessibility.keyboard?.uniqueVisited ?? 0} focus states · ${Math.round((accessibility.keyboard?.visibleRatio ?? 0) * 100)}% visible focus` : 'semantics · keyboard · focus',
+    accessibility?.measured ? (accessibilityFailed ? 'fail' : 'pass') : 'unmeasured'
+  );
+
+  const reducedMotion = job.evidence?.reducedMotion;
+  setEvidenceMetric(
+    'motion',
+    reducedMotion?.measured ? metricState(reducedMotion.pass) : 'UNMEASURED',
+    reducedMotion?.measured ? `${reducedMotion.continuousAnimations} continuous animations · media ${reducedMotion.mediaQuery ? 'active' : 'missing'}` : 'continuous animation gate',
+    reducedMotion?.measured ? (reducedMotion.pass ? 'pass' : 'fail') : 'unmeasured'
+  );
+
+  const visual = job.evidence?.visualRegression;
+  const visualValue = visual?.status === 'baseline-seed'
+    ? 'BASELINE SEED'
+    : visual?.measured
+      ? metricState(visual.pass)
+      : 'UNMEASURED';
+  const visualNote = visual?.status === 'baseline-seed'
+    ? 'approve iteration to promote baseline'
+    : visual?.status === 'compared'
+      ? `${((visual.maxChangedRatio ?? 0) * 100).toFixed(2)}% max drift · ${(visual.threshold * 100).toFixed(2)}% limit`
+      : 'approved reduced-motion baseline';
+  setEvidenceMetric(
+    'visual',
+    visualValue,
+    visualNote,
+    visual?.status === 'baseline-seed' ? 'baseline' : visual?.measured ? (visual.pass ? 'pass' : 'fail') : 'unmeasured'
+  );
 
   const bundle = job.evidence?.bundle;
-  document.querySelector('#metric-bundle').textContent = bundle ? `${bundle.initialJsKb} KB JS` : '—';
-  document.querySelector('#metric-bundle-note').textContent = bundle ? `${bundle.initialCssKb} KB CSS · measured` : 'not run';
+  const bundleFailed = hasAny(codes, ['initial-js-budget-failed','initial-css-budget-failed','bundle-evidence-missing']);
+  setEvidenceMetric(
+    'bundle',
+    bundle?.measured ? `${bundle.initialJsKb} KB JS` : 'UNMEASURED',
+    bundle?.measured ? `${bundle.initialCssKb} KB CSS · measured` : 'built asset bytes',
+    bundle?.measured ? (bundleFailed ? 'fail' : 'pass') : 'unmeasured'
+  );
 
   const captures = job.artifacts?.captures ?? [];
   document.querySelector('#capture-count').textContent = String(captures.length).padStart(2, '0');
@@ -258,6 +361,14 @@ function renderExecution(job) {
     return `<article class="finding-item ${escapeHtml(finding.severity)}"><div><span>${escapeHtml(finding.severity)}</span><b>${escapeHtml(finding.code)}</b></div><p>${escapeHtml(finding.message)}</p>${patch ? `<small>PATCH · ${escapeHtml(patch.instruction)}</small>` : ''}</article>`;
   }).join('') : '<div class="empty-line">No findings.</div>';
 
+  const report = document.querySelector('#release-report');
+  if (job.artifacts?.reportUrl) {
+    report.href = job.artifacts.reportUrl;
+    report.hidden = false;
+  } else {
+    report.hidden = true;
+  }
+
   const approve = document.querySelector('#approve-execution');
   approve.disabled = job.status !== 'complete' || job.approval === 'iteration-approved';
   approve.textContent = job.approval === 'iteration-approved' ? 'Iteration approved' : 'Approve iteration';
@@ -267,7 +378,7 @@ function renderExecution(job) {
 async function checkRuntime() {
   try {
     const status = await getExecutionStatus();
-    setRuntimeStatus(true, `Runtime ready · ${status.runtime}`);
+    setRuntimeStatus(true, `Runtime ready · ${status.measurement ?? status.runtime}`);
   } catch {
     setRuntimeStatus(false, 'Execution server offline');
   }
@@ -280,7 +391,7 @@ async function startBuild() {
     const result = await startExecution({ projectId: 'creative-agency', iteration: activeJob?.iteration ? activeJob.iteration + 1 : 0 });
     activeJob = result.job;
     renderExecution(activeJob);
-    toast('Build started', `${activeJob.id} is building the current Creative Agency artifact.`);
+    toast('Measured review started', `${activeJob.id} is building and measuring the current Creative Agency artifact.`);
     startPolling();
   } catch (error) {
     if (error.status === 409 && error.body?.job) {
@@ -304,7 +415,15 @@ function startPolling() {
         window.clearInterval(pollTimer);
         if (job.status === 'complete') {
           setStage('review');
-          toast('Browser review complete', job.productionReady ? 'All production gates passed.' : 'Iteration captured. Release blockers remain visible in the Command Center.');
+          const decision = job.releaseDecision?.status ?? 'blocked';
+          toast(
+            'Measured review complete',
+            decision === 'ready'
+              ? 'Required release evidence passed. This build is production-ready.'
+              : decision === 'review'
+                ? 'No blockers remain, but major findings still require review.'
+                : 'Release blockers remain visible in the Command Center.'
+          );
         } else toast('Execution failed', job.error ?? 'Unknown execution error.');
       }
     } catch (error) { window.clearInterval(pollTimer); toast('Polling stopped', error.message); }
@@ -324,7 +443,12 @@ async function approveIteration() {
     const { job } = await approveExecution(activeJob.id);
     renderExecution(job);
     setStage('deliver');
-    toast('Iteration approved', job.productionReady ? 'The iteration is approved and production-ready.' : 'Creative iteration approved. Release blockers are still enforced.');
+    toast(
+      'Iteration approved',
+      job.productionReady
+        ? 'Iteration approved. Its reduced-motion captures are now the regression baseline and the release is production-ready.'
+        : 'Creative iteration approved and promoted as the visual baseline. Release blockers are still enforced.'
+    );
   } catch (error) { toast('Approval blocked', error.message); }
 }
 
@@ -346,10 +470,10 @@ function bind() {
     const value = input.value.trim();
     if (!value) return;
     input.value = '';
-    if (/\b(build|capture|review|run)\b/i.test(value)) return startBuild();
+    if (/\b(build|capture|review|measure|run)\b/i.test(value)) return startBuild();
     if (/\bapprove\b/i.test(value)) return approveIteration();
     if (/\b(refresh|status)\b/i.test(value)) return refreshExecution();
-    toast('Command routed', 'This slice executes build/review/approval actions. Free-form AI source mutation remains intentionally unconnected until its write adapter is auditable.');
+    toast('Command routed', 'This slice executes measured build/review/approval actions. Free-form AI source mutation remains intentionally unconnected until its write adapter is auditable.');
   });
 
   document.addEventListener('keydown', (e) => {

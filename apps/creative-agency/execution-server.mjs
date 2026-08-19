@@ -9,7 +9,11 @@ import {
   createPatchQueue,
   createCapturePlan,
   captureWithPlaywright,
-  buildResponsiveEvidence
+  buildResponsiveEvidence,
+  measureReleaseEvidence,
+  compareVisualCaptureFiles,
+  measurementFindings,
+  synthesizeReleaseDecision
 } from '../../modules/creative-engineering/index.mjs';
 import {
   REPO_ROOT,
@@ -23,9 +27,10 @@ import {
 } from './execution-core.mjs';
 
 const jobs = new Map();
+const captureFilesByJob = new Map();
 const ARTIFACT_ROOT = path.join(REPO_ROOT, 'artifacts/command-center');
 const JSON_LIMIT = 64 * 1024;
-const REQUIRED_EVIDENCE = ['webVitals', 'runtime', 'bundle', 'accessibility', 'responsive'];
+const REQUIRED_EVIDENCE = ['webVitals', 'runtime', 'bundle', 'accessibility', 'responsive', 'reducedMotion', 'visualRegression'];
 
 function mime(file) {
   const ext = path.extname(file).toLowerCase();
@@ -100,6 +105,70 @@ function artifactUrl(serverOrigin, absolutePath) {
   return `${serverOrigin}/artifacts/${relative}`;
 }
 
+function baselineDirectory(projectId) {
+  const safe = String(projectId).replace(/[^a-z0-9_-]+/gi, '-');
+  return path.join(ARTIFACT_ROOT, 'baselines', safe);
+}
+
+async function loadApprovedBaseline(projectId) {
+  const directory = baselineDirectory(projectId);
+  try {
+    const metadata = JSON.parse(await fs.readFile(path.join(directory, 'baseline.json'), 'utf8'));
+    return {
+      ...metadata,
+      captures: (metadata.captures ?? []).map((capture) => ({
+        ...capture,
+        screenshot: path.join(directory, capture.file)
+      }))
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function persistApprovedBaseline(projectId, jobId, captures = []) {
+  const directory = baselineDirectory(projectId);
+  await fs.rm(directory, { recursive: true, force: true });
+  await fs.mkdir(directory, { recursive: true });
+
+  const stored = [];
+  for (const capture of captures.filter((item) => item.reducedMotion)) {
+    const viewport = String(capture.viewport?.id ?? 'viewport').replace(/[^a-z0-9_-]+/gi, '-');
+    const file = `${viewport}-reduced.png`;
+    await fs.copyFile(capture.screenshot, path.join(directory, file));
+    stored.push({
+      id: capture.id,
+      viewport: capture.viewport,
+      reducedMotion: true,
+      file
+    });
+  }
+
+  const metadata = {
+    projectId,
+    sourceJobId: jobId,
+    approvedAt: new Date().toISOString(),
+    captures: stored
+  };
+  await fs.writeFile(path.join(directory, 'baseline.json'), `${JSON.stringify(metadata, null, 2)}\n`, 'utf8');
+  return metadata;
+}
+
+async function writeReleaseReport(job, serverOrigin) {
+  const directory = path.join(ARTIFACT_ROOT, job.id);
+  await fs.mkdir(directory, { recursive: true });
+  const file = path.join(directory, 'release-report.json');
+  job.artifacts.reportUrl = artifactUrl(serverOrigin, file);
+  await fs.writeFile(file, `${JSON.stringify(publicJob(job), null, 2)}\n`, 'utf8');
+}
+
+function retainCaptureFiles(jobId, captures) {
+  captureFilesByJob.set(jobId, captures.map((capture) => ({ ...capture })));
+  while (captureFilesByJob.size > 20) {
+    captureFilesByJob.delete(captureFilesByJob.keys().next().value);
+  }
+}
+
 async function executeJob(job, serverOrigin) {
   const project = getExecutionProject(job.projectId);
   job.status = 'running';
@@ -122,6 +191,7 @@ async function executeJob(job, serverOrigin) {
     const capturePlan = createCapturePlan({ baseUrl: serverOrigin, routes: [project.previewBase] });
     const captureDir = path.join(ARTIFACT_ROOT, job.id, 'captures');
     const captured = await captureWithPlaywright(capturePlan, { outputDir: captureDir, settleMs: 180, fullPage: true });
+    retainCaptureFiles(job.id, captured.captures);
     job.artifacts.captures = captured.captures.map((capture) => ({
       ...capture,
       screenshot: artifactUrl(serverOrigin, capture.screenshot)
@@ -131,14 +201,20 @@ async function executeJob(job, serverOrigin) {
     setJobStep(job, 'review', 'running');
     const responsive = buildResponsiveEvidence(captured.captures);
     const bundle = await collectBundleEvidence(project.distDir);
-    const metrics = { bundle, responsive };
-    const gates = evaluateDeliveryGates({
-      metrics,
-      budgets: plan.budgets,
-      requiredEvidence: REQUIRED_EVIDENCE
+    const measured = await measureReleaseEvidence({
+      url: previewUrl,
+      viewport: plan.viewports.find((item) => item.id === 'desktop') ?? plan.viewports.at(-1),
+      interactionSelector: '[data-release-probe]'
     });
-    const findings = [...plan.findings, ...captureFindings(captured.captures), ...gates.findings];
-    job.evidence = {
+    const baseline = await loadApprovedBaseline(project.id);
+    const visualRegression = await compareVisualCaptureFiles(
+      captured.captures,
+      baseline?.captures ?? [],
+      { threshold: 0.015 }
+    );
+    visualRegression.baselineJobId = baseline?.sourceJobId ?? null;
+
+    const evidence = {
       browser: {
         measured: true,
         captures: captured.captures.length,
@@ -147,13 +223,45 @@ async function executeJob(job, serverOrigin) {
       },
       responsive,
       bundle,
-      webVitals: { measured: false },
-      runtime: { measured: false },
-      accessibility: { measured: false }
+      webVitals: measured.webVitals,
+      runtime: measured.runtime,
+      accessibility: measured.accessibility,
+      reducedMotion: measured.reducedMotion,
+      visualRegression
     };
+    job.evidence = evidence;
+
+    const metrics = {
+      bundle,
+      responsive,
+      webVitals: measured.webVitals,
+      runtime: measured.runtime,
+      accessibility: measured.accessibility,
+      reducedMotion: measured.reducedMotion,
+      visualRegression
+    };
+    const gates = evaluateDeliveryGates({
+      metrics,
+      budgets: plan.budgets,
+      requiredEvidence: REQUIRED_EVIDENCE
+    });
+    const findings = [
+      ...plan.findings,
+      ...captureFindings(captured.captures),
+      ...measurementFindings(evidence),
+      ...gates.findings
+    ];
     job.findings = findings;
-    job.productionReady = plan.pass && gates.productionReady && captured.pass;
-    setJobStep(job, 'review', findings.some((item) => item.severity === 'blocker') ? 'blocked' : 'passed');
+    job.releaseDecision = synthesizeReleaseDecision({
+      findings,
+      evidence,
+      requiredEvidence: REQUIRED_EVIDENCE
+    });
+    job.productionReady = plan.pass && captured.pass && gates.productionReady && job.releaseDecision.productionReady;
+
+    if (job.releaseDecision.status === 'blocked') setJobStep(job, 'review', 'blocked');
+    else if (job.releaseDecision.status === 'review') setJobStep(job, 'review', 'ready');
+    else setJobStep(job, 'review', 'passed');
 
     setJobStep(job, 'patch', 'running');
     const queue = createPatchQueue(findings, { iteration: job.iteration, maxIterations: 8 });
@@ -163,6 +271,7 @@ async function executeJob(job, serverOrigin) {
     job.status = 'complete';
     job.stage = 'approve';
     job.updatedAt = new Date().toISOString();
+    await writeReleaseReport(job, serverOrigin);
   } catch (error) {
     job.status = 'error';
     job.error = error instanceof Error ? error.message : String(error);
@@ -208,7 +317,13 @@ async function handler(req, res, serverOrigin) {
   const pathname = url.pathname;
 
   if (pathname === '/api/status' && req.method === 'GET') {
-    return json(res, 200, { status: 'ready', runtime: 'creative-engineering-v1.3', transport: 'local-http', host: '127.0.0.1' });
+    return json(res, 200, {
+      status: 'ready',
+      runtime: 'creative-engineering-v1.3',
+      measurement: 'release-intelligence-v1',
+      transport: 'local-http',
+      host: '127.0.0.1'
+    });
   }
 
   if (pathname === '/api/executions' && req.method === 'POST') {
@@ -235,11 +350,18 @@ async function handler(req, res, serverOrigin) {
     if (!match[2] && req.method === 'GET') return json(res, 200, { job: publicJob(job) });
     if (match[2] === 'approve' && req.method === 'POST') {
       if (job.status !== 'complete') return json(res, 409, { error: 'execution-not-complete', job: publicJob(job) });
+      const localCaptures = captureFilesByJob.get(job.id) ?? [];
+      if (localCaptures.length) {
+        const baseline = await persistApprovedBaseline(job.projectId, job.id, localCaptures);
+        job.baseline = { promoted: true, sourceJobId: baseline.sourceJobId, approvedAt: baseline.approvedAt };
+        captureFilesByJob.delete(job.id);
+      }
       job.approval = 'iteration-approved';
       job.approvedAt = new Date().toISOString();
       job.updatedAt = job.approvedAt;
       const step = job.steps.find((item) => item.id === 'approve');
       step.status = 'approved';
+      await writeReleaseReport(job, serverOrigin);
       return json(res, 200, { job: publicJob(job) });
     }
   }
