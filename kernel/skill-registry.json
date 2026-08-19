@@ -1,5 +1,5 @@
 {
-  "version": "1.2",
+  "version": "1.3",
   "categories": {
     "role": "Specialist judgment and accountability",
     "task": "Repeatable operation with defined inputs and outputs",
@@ -42,6 +42,7 @@
     {"id":"webgl-scene-construction","category":"task","domains":["webgl","webgpu","3d","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/webgl-scene-construction/SKILL.md","status":"active"},
     {"id":"three-d-asset-optimization","category":"task","domains":["3d","webgl","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/three-d-asset-optimization/SKILL.md","status":"active"},
     {"id":"responsive-immersive-adaptation","category":"task","domains":["creative-engineering","immersive-web","cinematic-product-page","interactive-world","motion","webgl"],"phases":["refine"],"path":".agents/skills/responsive-immersive-adaptation/SKILL.md","status":"active"},
+    {"id":"brand-kit-packaging","category":"task","domains":["brand-kit","brand","identity"],"phases":["create","refine"],"path":".agents/skills/brand-kit-packaging/SKILL.md","status":"active"},
 
     {"id":"creative-critic","category":"review","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign"],"phases":["review"],"path":".agents/skills/creative-critic/SKILL.md","status":"active"},
     {"id":"logo-review","category":"review","domains":["logo","identity"],"phases":["review"],"path":".agents/skills/logo-review/SKILL.md","status":"active"},
@@ -54,6 +55,7 @@
     {"id":"performance-budget-review","category":"review","domains":["creative-engineering","web","webgl","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/performance-budget-review/SKILL.md","status":"active"},
     {"id":"accessibility-delivery-review","category":"review","domains":["creative-engineering","web","webgl","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/accessibility-delivery-review/SKILL.md","status":"active"},
     {"id":"responsive-motion-review","category":"review","domains":["creative-engineering","motion","web","webgl","immersive-web","cinematic-product-page","interactive-world"],"phases":["review"],"path":".agents/skills/responsive-motion-review/SKILL.md","status":"active"},
+    {"id":"brand-kit-review","category":"review","domains":["brand-kit","brand","identity","logo","icon-system"],"phases":["review"],"path":".agents/skills/brand-kit-review/SKILL.md","status":"active"},
 
     {"id":"brand-identity-recipe","category":"recipe","domains":["brand","identity"],"phases":["recipe"],"path":".agents/skills/brand-identity-recipe/SKILL.md","status":"active"},
     {"id":"landing-page-recipe","category":"recipe","domains":["landing-page","web"],"phases":["recipe"],"path":".agents/skills/landing-page-recipe/SKILL.md","status":"active"},
@@ -62,6 +64,7 @@
     {"id":"icon-system-recipe","category":"recipe","domains":["icon-system","vector","svg","interface","identity"],"phases":["recipe"],"path":".agents/skills/icon-system-recipe/SKILL.md","status":"active"},
     {"id":"immersive-brand-site-recipe","category":"recipe","domains":["immersive-web","creative-engineering","webgl","3d"],"phases":["recipe"],"path":".agents/skills/immersive-brand-site-recipe/SKILL.md","status":"active"},
     {"id":"cinematic-product-page-recipe","category":"recipe","domains":["cinematic-product-page","creative-engineering","landing-page","motion","webgl"],"phases":["recipe"],"path":".agents/skills/cinematic-product-page-recipe/SKILL.md","status":"active"},
-    {"id":"interactive-world-recipe","category":"recipe","domains":["interactive-world","creative-engineering","webgl","3d"],"phases":["recipe"],"path":".agents/skills/interactive-world-recipe/SKILL.md","status":"active"}
+    {"id":"interactive-world-recipe","category":"recipe","domains":["interactive-world","creative-engineering","webgl","3d"],"phases":["recipe"],"path":".agents/skills/interactive-world-recipe/SKILL.md","status":"active"},
+    {"id":"brand-identity-kit-recipe","category":"recipe","domains":["brand-kit","brand","identity","logo","icon-system"],"phases":["recipe"],"path":".agents/skills/brand-identity-kit-recipe/SKILL.md","status":"active"}
   ]
 }
