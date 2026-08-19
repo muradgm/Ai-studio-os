@@ -1,0 +1,88 @@
+{
+  "project": "TraderFrame",
+  "run": "real-project-run-001",
+  "type": "specialist-system-trial",
+  "status": "prototype-ready",
+  "truthState": {
+    "confirmed": [
+      "Brand name: TraderFrame",
+      "Terminal Red palette is locked",
+      "Typography direction: Space Grotesk / Inter / IBM Plex Mono",
+      "Refined logo/icon direction remains locked",
+      "Marketing direction may use a restrained 3D market-motion idea",
+      "Product UI should remain flatter and more precise than the marketing hero"
+    ],
+    "unresolved": [
+      "Exact primary user segment",
+      "Exact market/data coverage",
+      "Broker or execution capability",
+      "Pricing",
+      "Data latency or realtime guarantees",
+      "Integrations",
+      "Performance claims",
+      "Customer proof or adoption metrics"
+    ],
+    "rule": "Prototype copy may express positioning and design intent, but must not invent unresolved product capabilities or proof."
+  },
+  "identity": {
+    "palette": {
+      "black": "#12100F",
+      "paper": "#F0EAE0",
+      "vermilion": "#E54832",
+      "steel": "#6C7772",
+      "graphite": "#272A26"
+    },
+    "type": ["Space Grotesk", "Inter", "IBM Plex Mono"]
+  },
+  "recipe": "landing-page-recipe",
+  "risk": "high",
+  "stageRoutes": [
+    {
+      "stage": "direction",
+      "kind": "landing-page",
+      "phase": "create",
+      "risk": "high",
+      "makers": ["brand-strategist", "art-direction", "product-designer"],
+      "challenger": ["creative-skeptic"],
+      "reviews": ["brand-fit-review", "creative-critic"]
+    },
+    {
+      "stage": "copy",
+      "kind": "copy",
+      "phase": "create",
+      "risk": "moderate",
+      "makers": ["copywriter", "brand-strategist"],
+      "tasks": ["headline-writing"],
+      "reviews": ["copy-review", "brand-fit-review"]
+    },
+    {
+      "stage": "motion",
+      "kind": "motion",
+      "phase": "create",
+      "risk": "moderate",
+      "makers": ["motion-designer", "art-direction"],
+      "tasks": ["motion-choreography"],
+      "reviews": ["motion-review", "creative-critic"]
+    }
+  ],
+  "creativeDials": {
+    "novelty": 7,
+    "visualDensity": 5,
+    "editoriality": 6,
+    "asymmetry": 5,
+    "motionIntensity": 6,
+    "texture": 2,
+    "luxury": 3,
+    "warmth": 1,
+    "playfulness": 1,
+    "technicalSpectacle": 4
+  },
+  "concepts": [
+    {"id":"01","name":"After Hours","decision":"reject"},
+    {"id":"02","name":"The Frame","decision":"select"},
+    {"id":"03","name":"Decision Surface","decision":"reject-as-direction-preserve-restraint"},
+    {"id":"04","name":"Pressure Field","decision":"reject"}
+  ],
+  "selectedDirection": "The Frame",
+  "prototype": "apps/traderframe"
+}

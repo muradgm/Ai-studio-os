@@ -35,6 +35,9 @@ jobs:
       - name: Build The Creative Agency prototype
         run: npm run build:web
 
+      - name: Build TraderFrame specialist prototype
+        run: npm run build:traderframe
+
       - name: Install logo integrity renderer
         run: python -m pip install --disable-pip-version-check -r requirements-logo-integrity.txt
 
