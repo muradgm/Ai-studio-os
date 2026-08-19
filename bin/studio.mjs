@@ -8,6 +8,7 @@ import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multim
 import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
 import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
+import { runCreativeEngineeringRuntime, validateCreativeEngineeringBenchmark } from '../lib/creative-engineering-runtime.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -17,7 +18,7 @@ function read(rel) { return fs.readFileSync(path.join(root, rel), 'utf8'); }
 function json(rel) { return JSON.parse(read(rel)); }
 
 function usage() {
-  console.log(`AI Studio OS v1.2
+  console.log(`AI Studio OS v1.3
 
 Usage:
   studio route <task-type>
@@ -29,6 +30,7 @@ Usage:
   studio observation <fixture>
   studio production <fixture>
   studio logo <fixture>
+  studio creative-engineering <fixture>
   studio benchmark <fixture>
   studio list
 `);
@@ -36,50 +38,31 @@ Usage:
 
 function creativePaths(name) {
   if (name !== 'du-bonheur') return null;
-  return {
-    input: 'benchmarks/001-du-bonheur/input.json',
-    expected: 'benchmarks/001-du-bonheur/expected.json'
-  };
+  return { input: 'benchmarks/001-du-bonheur/input.json', expected: 'benchmarks/001-du-bonheur/expected.json' };
 }
-
 function engineeringPaths(name) {
   if (name !== 'workspace-role-update') return null;
-  return {
-    input: 'benchmarks/002-workspace-role-update/input.json',
-    expected: 'benchmarks/002-workspace-role-update/expected.json'
-  };
+  return { input: 'benchmarks/002-workspace-role-update/input.json', expected: 'benchmarks/002-workspace-role-update/expected.json' };
 }
-
 function multimodalPaths(name) {
   if (name !== 'du-bonheur-brand-film') return null;
-  return {
-    input: 'benchmarks/003-du-bonheur-brand-film/input.json',
-    expected: 'benchmarks/003-du-bonheur-brand-film/expected.json'
-  };
+  return { input: 'benchmarks/003-du-bonheur-brand-film/input.json', expected: 'benchmarks/003-du-bonheur-brand-film/expected.json' };
 }
-
 function observationPaths(name) {
   if (name !== 'du-bonheur-post-launch') return null;
-  return {
-    input: 'benchmarks/004-du-bonheur-post-launch/input.json',
-    expected: 'benchmarks/004-du-bonheur-post-launch/expected.json'
-  };
+  return { input: 'benchmarks/004-du-bonheur-post-launch/input.json', expected: 'benchmarks/004-du-bonheur-post-launch/expected.json' };
 }
-
 function productionPaths(name) {
   if (name !== 'du-bonheur-v11') return null;
-  return {
-    input: 'benchmarks/005-du-bonheur-creative-production/input.json',
-    expected: 'benchmarks/005-du-bonheur-creative-production/expected.json'
-  };
+  return { input: 'benchmarks/005-du-bonheur-creative-production/input.json', expected: 'benchmarks/005-du-bonheur-creative-production/expected.json' };
 }
-
 function logoPaths(name) {
   if (name !== 'identity-v12') return null;
-  return {
-    input: 'benchmarks/006-logo-identity/input.json',
-    expected: 'benchmarks/006-logo-identity/expected.json'
-  };
+  return { input: 'benchmarks/006-logo-identity/input.json', expected: 'benchmarks/006-logo-identity/expected.json' };
+}
+function creativeEngineeringPaths(name) {
+  if (name !== 'creative-engineering-v13') return null;
+  return { input: 'benchmarks/007-creative-engineering/input.json', expected: 'benchmarks/007-creative-engineering/expected.json' };
 }
 
 if (!command) { usage(); process.exit(0); }
@@ -134,6 +117,10 @@ if (command === 'route') {
   const paths = logoPaths(arg);
   if (!paths) { console.error(`Unknown logo fixture: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify(runLogoRuntime(json(paths.input)), null, 2));
+} else if (command === 'creative-engineering') {
+  const paths = creativeEngineeringPaths(arg);
+  if (!paths) { console.error(`Unknown creative engineering fixture: ${arg ?? '(missing)'}`); process.exit(1); }
+  console.log(JSON.stringify(runCreativeEngineeringRuntime(json(paths.input)), null, 2));
 } else if (command === 'benchmark') {
   const creative = creativePaths(arg);
   const engineering = engineeringPaths(arg);
@@ -141,34 +128,18 @@ if (command === 'route') {
   const observation = observationPaths(arg);
   const production = productionPaths(arg);
   const logo = logoPaths(arg);
-  if (creative) {
-    const result = validateBenchmark(runCreativeRuntime(json(creative.input)), json(creative.expected));
-    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
-    if (!result.pass) process.exit(1);
-  } else if (engineering) {
-    const result = validateEngineeringBenchmark(runEngineeringRuntime(json(engineering.input)), json(engineering.expected));
-    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
-    if (!result.pass) process.exit(1);
-  } else if (multimodal) {
-    const result = validateMultimodalBenchmark(runMultimodalRuntime(json(multimodal.input)), json(multimodal.expected));
-    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
-    if (!result.pass) process.exit(1);
-  } else if (observation) {
-    const result = validateObservationBenchmark(runObservationRuntime(json(observation.input)), json(observation.expected));
-    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
-    if (!result.pass) process.exit(1);
-  } else if (production) {
-    const result = validateCreativeProductionBenchmark(runCreativeProductionRuntime(json(production.input)), json(production.expected));
-    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
-    if (!result.pass) process.exit(1);
-  } else if (logo) {
-    const result = validateLogoBenchmark(runLogoRuntime(json(logo.input)), json(logo.expected));
-    console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
-    if (!result.pass) process.exit(1);
-  } else {
-    console.error(`Unknown benchmark: ${arg ?? '(missing)'}`);
-    process.exit(1);
-  }
+  const creativeEngineering = creativeEngineeringPaths(arg);
+  let result;
+  if (creative) result = validateBenchmark(runCreativeRuntime(json(creative.input)), json(creative.expected));
+  else if (engineering) result = validateEngineeringBenchmark(runEngineeringRuntime(json(engineering.input)), json(engineering.expected));
+  else if (multimodal) result = validateMultimodalBenchmark(runMultimodalRuntime(json(multimodal.input)), json(multimodal.expected));
+  else if (observation) result = validateObservationBenchmark(runObservationRuntime(json(observation.input)), json(observation.expected));
+  else if (production) result = validateCreativeProductionBenchmark(runCreativeProductionRuntime(json(production.input)), json(production.expected));
+  else if (logo) result = validateLogoBenchmark(runLogoRuntime(json(logo.input)), json(logo.expected));
+  else if (creativeEngineering) result = validateCreativeEngineeringBenchmark(runCreativeEngineeringRuntime(json(creativeEngineering.input)), json(creativeEngineering.expected));
+  else { console.error(`Unknown benchmark: ${arg ?? '(missing)'}`); process.exit(1); }
+  console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
+  if (!result.pass) process.exit(1);
 } else if (command === 'list') {
   const routes = Object.keys(json('kernel/routes.json'));
   const workflows = fs.readdirSync(path.join(root, 'kernel/workflows')).filter(f => f.endsWith('.md')).map(f => f.slice(0,-3));
@@ -182,6 +153,7 @@ if (command === 'route') {
   console.log('observation fixtures: du-bonheur-post-launch');
   console.log('production fixtures: du-bonheur-v11');
   console.log('logo fixtures: identity-v12');
+  console.log('creative engineering fixtures: creative-engineering-v13');
 } else {
   usage();
   process.exit(1);

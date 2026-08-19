@@ -1,0 +1,21 @@
+{
+  "plan": {
+    "projectId": "creative-engineering-v13-fixture",
+    "entryPath": "apps/creative-engineering-fixture/index.html",
+    "mode": "production",
+    "needs": ["3d", "motion", "rive"],
+    "assetPlan": {"status": "ready", "truthSensitive": false},
+    "reducedMotionPlan": {"mode": "authored", "fallback": "static spatial composition"}
+  },
+  "metrics": {
+    "webVitals": {"lcpMs": 2100, "inpMs": 150, "cls": 0.05},
+    "runtime": {"fps": 60, "maxFrameMs": 17, "longTasks": 0},
+    "bundle": {"initialJsKb": 340, "initialCssKb": 45},
+    "accessibility": {"blockers": 0, "majors": 0},
+    "responsive": {
+      "mobile": {"pass": true},
+      "tablet": {"pass": true},
+      "desktop": {"pass": true}
+    }
+  }
+}
