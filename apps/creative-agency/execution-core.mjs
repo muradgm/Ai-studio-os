@@ -8,7 +8,11 @@ export const EXECUTION_PROJECTS = Object.freeze({
   'creative-agency': Object.freeze({
     id: 'creative-agency',
     name: 'The Creative Agency',
-    buildScript: 'build:web',
+    build: Object.freeze({
+      driver: 'vite',
+      appRoot: 'apps/creative-agency',
+      outDir: '../../dist/creative-agency'
+    }),
     distDir: path.join(REPO_ROOT, 'dist/creative-agency'),
     previewBase: '/preview/creative-agency/',
     mode: 'production',
