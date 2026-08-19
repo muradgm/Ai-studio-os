@@ -48,6 +48,12 @@ function hasEvidence(metrics, key) {
     && value.measured !== false;
 }
 
+function totalBlockingTime(runtime = {}) {
+  if (Number.isFinite(runtime.totalBlockingTimeMs)) return Math.max(0, runtime.totalBlockingTimeMs);
+  if (!Number.isFinite(runtime.longTasks) || !Number.isFinite(runtime.longTaskMs)) return null;
+  return Math.max(0, runtime.longTaskMs - (runtime.longTasks * 50));
+}
+
 export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredViewports, requiredEvidence = [] } = {}) {
   const resolved = mergeBudgets(budgets);
   const findings = [];
@@ -81,7 +87,16 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
     findings.push(finding('major', 'frame-time-budget-failed', `Frame time ${runtime.maxFrameMs}ms exceeds ${resolved.runtime.maxFrameMs}ms.`, { actual: runtime.maxFrameMs, budget: resolved.runtime.maxFrameMs }));
   }
   if (Number.isFinite(runtime.longTasks) && runtime.longTasks > resolved.runtime.maxLongTasks) {
-    findings.push(finding('major', 'long-task-budget-failed', `Long tasks ${runtime.longTasks} exceed ${resolved.runtime.maxLongTasks}.`, { actual: runtime.longTasks, budget: resolved.runtime.maxLongTasks }));
+    findings.push(finding('major', 'long-task-budget-failed', `Long-task count ${runtime.longTasks} exceeds ${resolved.runtime.maxLongTasks}.`, { actual: runtime.longTasks, budget: resolved.runtime.maxLongTasks }));
+  }
+  const tbtMs = totalBlockingTime(runtime);
+  if (Number.isFinite(tbtMs) && tbtMs > resolved.runtime.maxTbtMs) {
+    findings.push(finding('major', 'tbt-budget-failed', `Total Blocking Time ${Math.round(tbtMs * 10) / 10}ms exceeds ${resolved.runtime.maxTbtMs}ms.`, {
+      actual: Math.round(tbtMs * 10) / 10,
+      budget: resolved.runtime.maxTbtMs,
+      longTasks: runtime.longTasks ?? null,
+      longTaskMs: runtime.longTaskMs ?? null
+    }));
   }
   if (Number.isFinite(bundle.initialJsKb) && bundle.initialJsKb > resolved.bundle.initialJsKb) {
     findings.push(finding('major', 'initial-js-budget-failed', `Initial JS ${bundle.initialJsKb}KB exceeds ${resolved.bundle.initialJsKb}KB.`, { actual: bundle.initialJsKb, budget: resolved.bundle.initialJsKb }));
