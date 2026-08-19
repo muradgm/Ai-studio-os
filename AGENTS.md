@@ -64,6 +64,18 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - Block approval on unresolved originality/confusion risk, weak small-size behavior, poor optical quality, or excessive AI-generic risk.
 - Derive logo motion from structural/concept logic; do not animate decoratively.
 
+## Specialist skill architecture rules
+- Specialist skills are divided into four categories: `role`, `task`, `review`, and `recipe`.
+- Role skills own professional judgment; task skills own repeatable operations; review skills judge independently; recipe skills compose workflows without replacing the underlying specialists.
+- Use `kernel/skill-registry.json` as the active catalog and `lib/skill-router.mjs` for minimal deterministic routing.
+- Do not invoke every plausible specialist. Default caps are three role skills and two task skills per routing decision.
+- Low-risk narrow work should stay minimal. Moderate-risk work requires independent review. High-risk creative work additionally requires `creative-skeptic` and Council when decisions are consequential or hard to reverse.
+- A maker skill cannot self-approve its own output. Reviewer findings use `BLOCKER / MAJOR / MINOR / TASTE` and must separate strategic mismatch, execution defect, and preference.
+- Recipes define stage order, gates, required artifacts, and handoffs; they must not become giant prompts that erase specialist boundaries.
+- Every catalogued specialist `SKILL.md` must define Purpose, When to use, Inputs required, Operating principles, Workflow, Deliverables, Review criteria, Failure modes, and Handoffs.
+- Reject skill sprawl. Add a new skill only when a real project demonstrates a recurring judgment gap that cannot be cleanly solved by improving an existing skill.
+- Promote skill changes from validated project failures, Council findings, benchmark regressions, user corrections, or recurring production constraints—not one-off taste preferences.
+
 ## Engineering runtime rules
 - Classify change risk before implementation; do not infer safety from small diff size.
 - Define invariants and required tests before code review.
