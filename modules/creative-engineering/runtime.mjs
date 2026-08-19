@@ -40,7 +40,11 @@ export function createCreativeEngineeringPlan(input = {}) {
   };
 }
 
-export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredViewports } = {}) {
+function hasEvidence(metrics, key) {
+  return Object.prototype.hasOwnProperty.call(metrics, key) && metrics[key] && typeof metrics[key] === 'object';
+}
+
+export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredViewports, requiredEvidence = [] } = {}) {
   const resolved = mergeBudgets(budgets);
   const findings = [];
   const vitals = metrics.webVitals ?? {};
@@ -48,6 +52,12 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
   const bundle = metrics.bundle ?? {};
   const accessibility = metrics.accessibility ?? {};
   const responsive = metrics.responsive ?? {};
+
+  for (const key of [...new Set(requiredEvidence)]) {
+    if (!hasEvidence(metrics, key)) {
+      findings.push(finding('blocker', `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}-evidence-missing`, `${key} evidence has not been measured.`, { evidence: 'unmeasured' }));
+    }
+  }
 
   if (Number.isFinite(vitals.lcpMs) && vitals.lcpMs > resolved.webVitals.lcpMs) {
     findings.push(finding('blocker', 'lcp-budget-failed', `LCP ${vitals.lcpMs}ms exceeds ${resolved.webVitals.lcpMs}ms.`, { actual: vitals.lcpMs, budget: resolved.webVitals.lcpMs }));
@@ -91,6 +101,7 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
   return {
     stage: 'creative-engineering-delivery-gates',
     budgets: resolved,
+    requiredEvidence: [...new Set(requiredEvidence)],
     findings,
     pass: !blocker,
     productionReady: !blocker && !major

@@ -6,7 +6,7 @@ The five-epoch core remains frozen as the **v1 baseline**. **v1.1 — Creative P
 
 ## Current baseline
 
-**AI Studio OS v1.3 — Creative Engineering Runtime**
+**AI Studio OS v1.3 — Creative Engineering Runtime + Command Center execution wiring**
 
 v1.3 adds:
 
@@ -22,6 +22,8 @@ v1.3 adds:
 - capped evidence-driven patch loops rather than one-shot implementation
 - a production fixture that bundles Three.js, GSAP, and Rive together
 - a first-class `studio creative-engineering` command and Benchmark 007
+- The Creative Agency Command Center local executor: whitelisted build → real browser capture → review → patch queue → explicit iteration approval
+- fail-closed release evidence: unmeasured performance/accessibility evidence cannot silently become PASS
 
 v1.2 remains the logo/identity integrity layer: seven-type exploration, psychology hypotheses, canonical mark specification, vector geometry, icon systems, responsive marks, SVG/layer/overlap/render locks, and identity QA.
 
@@ -33,6 +35,12 @@ The original five epochs remain intact: Kernel, Creative Runtime, Engineering Ru
 
 ```bash
 npm install
+npm run dev
+```
+
+`npm run dev` starts the Workroom and its local execution service together. For validation:
+
+```bash
 npm test
 node ./bin/studio.mjs creative-engineering creative-engineering-v13
 node ./bin/studio.mjs benchmark creative-engineering-v13
@@ -40,11 +48,12 @@ npm run build:web
 npm run build:creative-engineering
 npx playwright install chromium
 npm run test:browser-runtime
+npm run test:command-center
 ```
 
 ## Design principle
 
-Do not run every module for every task. Route only the capabilities justified by intent, uncertainty, cost, and consequence. Three.js, GSAP, Rive, Blender, and other production tools are capabilities—not visual styles. A production web artifact must be observed in the browser and pass independent responsive, accessibility, performance, and implementation review.
+Do not run every module for every task. Route only the capabilities justified by intent, uncertainty, cost, and consequence. Three.js, GSAP, Rive, Blender, and other production tools are capabilities—not visual styles. A production web artifact must be observed in the browser and pass independent responsive, accessibility, performance, and implementation review. **Iteration approval never overrides a failed or unmeasured release gate.**
 
 ## v1 core
 
@@ -72,5 +81,5 @@ Do not run every module for every task. Route only the capabilities justified by
 
 ## Executable fixtures
 
-- `apps/creative-agency/` — The Creative Agency Workroom prototype
+- `apps/creative-agency/` — The Creative Agency Workroom + local Command Center executor
 - `apps/creative-engineering-fixture/` — Three.js + GSAP + Rive production-build fixture

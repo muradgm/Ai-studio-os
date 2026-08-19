@@ -1,25 +1,38 @@
+import {
+  getExecutionStatus,
+  startExecution,
+  getExecution,
+  approveExecution
+} from './execution-client.js';
+
 const stages = [
   { id: 'brief', index: '01', label: 'Brief', kicker: 'Define the real problem', title: 'Start with the <em>brief</em>, not the model.', deck: 'Capture intent, business outcome, audience, constraints, source assets and truth requirements before any creative system starts making.', stat: ['5 constraints', '2 open questions', 'source audit pending'] },
   { id: 'research', index: '02', label: 'Research', kicker: 'Evidence before opinion', title: 'Find the <em>signal</em> before choosing a style.', deck: 'Market context, category pressure, source quality and factual constraints are separated from inspiration so aesthetic preference cannot impersonate evidence.', stat: ['11 sources', '4 competitors', 'confidence 0.82'] },
   { id: 'explore', index: '03', label: 'Explore', kicker: 'Diverge on purpose', title: 'Make alternatives that are <em>actually different</em>.', deck: 'Three to five concept families must change the core mechanism, not just the color, typeface or hero image. Weak directions get killed early.', stat: ['4 directions', '2 killed', '1 challenger'] },
   { id: 'decide', index: '04', label: 'Decide', kicker: 'Independent review', title: 'The Council must earn the <em>decision</em>.', deck: 'Strategy, creative, technical and skeptical reviewers work independently, cross-critique, preserve dissent and expose assumptions before selection.', stat: ['6 reviewers', '2 objections', 'confidence 0.86'] },
-  { id: 'make', index: '05', label: 'Make', kicker: 'Production under direction', title: 'Turn the decision into <em>work</em>.', deck: 'Design, image, motion, writing, video and implementation inherit one creative direction. Tools are adapters; the project does not become a model marketplace.', stat: ['8 assets', '3 adapters', 'direction locked'] },
-  { id: 'review', index: '06', label: 'Review', kicker: 'Critique the artifact', title: 'Separate taste from <em>failure</em>.', deck: 'Critique, red-team, QA and integrity checks distinguish blockers from majors, minors and taste. Weak assets are patched surgically instead of rerunning the whole project.', stat: ['1 blocker', '3 majors', 'SVG lock active'] },
-  { id: 'deliver', index: '07', label: 'Deliver', kicker: 'Ship with evidence', title: 'Leave with the <em>work</em>, not a chat transcript.', deck: 'Approved assets, versions, rights, source evidence, implementation notes and exports are packaged for handoff. The observation loop begins after release.', stat: ['12 outputs', 'rights verified', 'handoff ready'] }
+  { id: 'make', index: '05', label: 'Make', kicker: 'Production under direction', title: 'Turn the decision into <em>work</em>.', deck: 'Design, image, motion, writing, video and implementation inherit one creative direction. Tools are adapters; the project does not become a model marketplace.', stat: ['runtime v1.3', 'browser executable', 'production gates active'] },
+  { id: 'review', index: '06', label: 'Review', kicker: 'Critique the artifact', title: 'Review the <em>running artifact</em>.', deck: 'The Command Center builds, opens the site in Chromium, captures responsive and reduced-motion evidence, records failures and creates a bounded patch queue.', stat: ['3 viewports', '2 motion modes', 'evidence required'] },
+  { id: 'deliver', index: '07', label: 'Deliver', kicker: 'Ship with evidence', title: 'Release only what has <em>earned</em> release.', deck: 'Iteration approval and production readiness are deliberately separate. Missing performance, accessibility or responsive evidence blocks release.', stat: ['no fake PASS', 'release gated', 'handoff traceable'] }
 ];
 
 const decisions = [
-  { title: 'Public name', body: 'The Creative Agency — working name locked; commercial clearance unresolved.', status: 'review' },
-  { title: 'Identity symbol', body: 'Bounded Flow v2 / Agency Handoff advances to visual exploration.', status: 'ready' },
-  { title: 'Prototype scope', body: 'One Brand / Website journey before exposing the wider OS.', status: 'ready' },
-  { title: 'Final SVG master', body: 'Blocked until a visual candidate is explicitly approved.', status: 'blocked' }
+  { title: 'Execution runtime', body: 'AI Studio OS v1.3 is the active creative-engineering baseline.', status: 'ready' },
+  { title: 'Browser evidence', body: 'Desktop, tablet, mobile and reduced-motion captures are required.', status: 'ready' },
+  { title: 'Patch behavior', body: 'Findings create an auditable queue; arbitrary shell/code execution is prohibited.', status: 'review' },
+  { title: 'Release status', body: 'Production release remains blocked while required evidence is unmeasured.', status: 'blocked' }
 ];
 
 const evidence = [
-  { title: 'Name collision territory', body: 'Exact phrase is descriptive and actively used by agencies.', status: 'review' },
-  { title: 'Seven-type logo assessment', body: 'Combination + abstract mark lead the identity system.', status: 'ready' },
-  { title: 'Council verdict', body: 'ADVANCE TO PROTOTYPE — confidence 0.86.', status: 'ready' }
+  { title: 'Real Chromium', body: 'Playwright browser execution is validated in CI.', status: 'ready' },
+  { title: 'Delivery gates', body: 'Responsive, bundle, performance and accessibility evidence are independent.', status: 'ready' },
+  { title: 'Local-only executor', body: 'Build service binds to 127.0.0.1 and uses whitelisted shell-free jobs.', status: 'ready' }
 ];
+
+let activeJob = null;
+let pollTimer = null;
+let runtimeOnline = false;
+
+const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 
 const icon = (name) => {
   const paths = {
@@ -57,6 +70,10 @@ const outputCard = (n, title, note) => `
     <div class="output-body"><div><h4>${title}</h4><p>${note}</p></div><span class="output-number">0${n}</span></div>
   </article>`;
 
+function row(item, i) {
+  return `<div class="decision-row"><span class="row-index">0${i+1}</span><div><h4>${item.title}</h4><p>${item.body}</p></div><span class="badge ${item.status}">${item.status}</span></div>`;
+}
+
 function render() {
   document.querySelector('#app').innerHTML = `
     <div class="app-shell">
@@ -70,17 +87,17 @@ function render() {
           <button class="rail-button" aria-label="Deliveries">${icon('delivery')}</button>
           <button class="rail-button" aria-label="Memory">${icon('memory')}</button>
         </nav>
-        <div class="rail-index">AI Studio OS · v1.2</div>
+        <div class="rail-index">AI Studio OS · v1.3</div>
       </aside>
 
       <main class="workspace">
         <header class="topbar">
-          <div class="brandline"><strong>The Creative Agency</strong><span>Workroom / Project 001</span></div>
-          <div class="top-actions"><div class="status-pill"><i class="status-dot"></i> Runtime connected</div><button class="icon-button" aria-label="More options">···</button></div>
+          <div class="brandline"><strong>The Creative Agency</strong><span>Command Center / Project 001</span></div>
+          <div class="top-actions"><div class="status-pill offline" id="runtime-pill"><i class="status-dot"></i><span id="runtime-label">Execution server offline</span></div><button class="icon-button" aria-label="More options">···</button></div>
         </header>
 
         <section class="project-head">
-          <div><div class="eyebrow">Prototype Slice 01 · Brand / Website</div><h1 class="project-title">Build the agency<br/>that builds the work.</h1><div class="project-meta"><span>Owner <b>Creative Council</b></span><span>Mode <b>Prototype</b></span><span>Engine <b>AI Studio OS v1.2</b></span></div></div>
+          <div><div class="eyebrow">Execution Slice · Brand / Website</div><h1 class="project-title">Build. Observe.<br/>Judge the real work.</h1><div class="project-meta"><span>Owner <b>Creative Council</b></span><span>Mode <b>Production gate</b></span><span>Engine <b>AI Studio OS v1.3</b></span></div></div>
           <div class="phase-chip" id="phase-chip">Current · Brief</div>
         </section>
 
@@ -98,26 +115,60 @@ function render() {
 
           <div class="stack">
             <article class="panel"><div class="panel-head"><div class="panel-label"><span>Decisions</span></div><div class="panel-count">04</div></div><div class="decision-list">${decisions.map((d,i)=>row(d,i)).join('')}</div></article>
-            <article class="panel"><div class="panel-head"><div class="panel-label"><span>Council</span></div><div class="panel-count">06 roles</div></div><div class="council-strip"><div class="council-avatars">${['STR','CD','UX','ENG','BR','SK'].map(x=>`<div class="avatar">${x}</div>`).join('')}</div><p><strong>Verdict:</strong> advance one complete project journey. Do not expose the engine as product theater.</p></div></article>
+            <article class="panel"><div class="panel-head"><div class="panel-label"><span>Execution Council</span></div><div class="panel-count">05 gates</div></div><div class="council-strip"><div class="council-avatars">${['DEV','GL','MOT','PERF','A11Y'].map(x=>`<div class="avatar">${x}</div>`).join('')}</div><p><strong>Rule:</strong> makers build the artifact; browser evidence and independent delivery gates decide what can ship.</p></div></article>
             <article class="panel"><div class="panel-head"><div class="panel-label"><span>Evidence</span></div><div class="panel-count">03</div></div><div class="evidence-list">${evidence.map((d,i)=>row(d,i)).join('')}</div></article>
           </div>
 
+          <section class="command-center panel" id="command-center">
+            <div class="cc-head">
+              <div><div class="panel-label"><i></i><span>Command Center / Execution</span></div><p>Real local build and browser observation. Unknown evidence remains unmeasured.</p></div>
+              <div class="cc-actions"><button class="cc-button secondary" id="refresh-execution">Refresh</button><button class="cc-button primary" id="run-execution">Run build + review</button></div>
+            </div>
+
+            <div class="execution-spine" id="execution-spine">
+              ${['Build','Capture','Review','Patch','Approve'].map((label,i)=>`<div class="execution-step" data-execution-step="${label.toLowerCase()}"><span>0${i+1}</span><b>${label}</b><i>waiting</i></div>`).join('')}
+            </div>
+
+            <div class="cc-grid">
+              <div class="preview-surface">
+                <div class="surface-head"><span>LIVE BUILD</span><b id="job-id">NO EXECUTION</b></div>
+                <div class="preview-empty" id="preview-empty"><strong>Build evidence appears here.</strong><span>Start the local executor, then run Build + Review.</span></div>
+                <iframe id="live-preview" title="Live build preview" hidden></iframe>
+              </div>
+
+              <aside class="evidence-rail">
+                <div class="surface-head"><span>DELIVERY EVIDENCE</span><b id="release-state">UNMEASURED</b></div>
+                <div class="evidence-metric"><span>Browser capture</span><b id="metric-browser">—</b><i id="metric-browser-note">not run</i></div>
+                <div class="evidence-metric"><span>Responsive</span><b id="metric-responsive">—</b><i id="metric-responsive-note">not run</i></div>
+                <div class="evidence-metric"><span>Bundle</span><b id="metric-bundle">—</b><i id="metric-bundle-note">not run</i></div>
+                <div class="evidence-metric unmeasured"><span>Performance</span><b id="metric-performance">UNMEASURED</b><i>release blocker</i></div>
+                <div class="evidence-metric unmeasured"><span>Accessibility</span><b id="metric-accessibility">UNMEASURED</b><i>release blocker</i></div>
+              </aside>
+            </div>
+
+            <div class="cc-lower">
+              <div class="capture-area"><div class="surface-head"><span>BROWSER CAPTURES</span><b id="capture-count">0</b></div><div class="capture-grid" id="capture-grid"><div class="empty-line">No captures yet.</div></div></div>
+              <div class="review-area"><div class="surface-head"><span>FINDINGS / PATCH QUEUE</span><b id="finding-count">0</b></div><div id="finding-list" class="finding-list"><div class="empty-line">No review evidence yet.</div></div></div>
+            </div>
+
+            <div class="approval-bar">
+              <div><span>ITERATION APPROVAL</span><p>Approval records creative acceptance. It does not override release blockers.</p></div>
+              <button class="cc-button approve" id="approve-execution" disabled>Approve iteration</button>
+            </div>
+          </section>
+
           <div class="outputs">
-            ${outputCard(1,'Identity direction','Bounded Flow v2 · visual exploration')}
-            ${outputCard(2,'Workroom system','Project spine + accountable gates')}
-            ${outputCard(3,'Launch slice','One end-to-end brand / website job')}
+            ${outputCard(1,'Live browser build','Rendered artifact, not a design mockup')}
+            ${outputCard(2,'Capture evidence','Desktop · tablet · mobile · reduced motion')}
+            ${outputCard(3,'Patch queue','Findings ordered by release consequence')}
           </div>
         </section>
       </main>
 
-      <form class="command-bar" id="command-form"><input class="command-input" id="command-input" autocomplete="off" placeholder="Ask the agency to critique, explore, review or improve…"/><span class="command-hint">⌘ K</span><button class="command-submit" aria-label="Run command">↗</button></form>
-      <div class="toast" id="toast"><b>Agency command routed</b><span id="toast-copy"></span></div>
+      <form class="command-bar" id="command-form"><input class="command-input" id="command-input" autocomplete="off" placeholder="Build, review, refresh or approve this project…"/><span class="command-hint">⌘ K</span><button class="command-submit" aria-label="Run command">↗</button></form>
+      <div class="toast" id="toast"><b id="toast-title">Command Center</b><span id="toast-copy"></span></div>
     </div>`;
   setStage('brief');
-}
-
-function row(item, i) {
-  return `<div class="decision-row"><span class="row-index">0${i+1}</span><div><h4>${item.title}</h4><p>${item.body}</p></div><span class="badge ${item.status}">${item.status}</span></div>`;
 }
 
 function setStage(id) {
@@ -130,12 +181,159 @@ function setStage(id) {
   document.querySelector('#motion-kicker').textContent = stage.kicker;
   document.querySelector('#motion-title').innerHTML = stage.title;
   document.querySelector('#motion-deck').textContent = stage.deck;
-  document.querySelector('#motion-stat').innerHTML = stage.stat.map(x=>`${x}<br/>`).join('');
+  document.querySelector('#motion-stat').innerHTML = stage.stat.map(x=>`${escapeHtml(x)}<br/>`).join('');
   document.querySelector('#motion-panel').dataset.state = stage.id;
+}
+
+function toast(title, copy) {
+  const el = document.querySelector('#toast');
+  document.querySelector('#toast-title').textContent = title;
+  document.querySelector('#toast-copy').textContent = copy;
+  el.classList.add('show');
+  window.setTimeout(() => el.classList.remove('show'), 4200);
+}
+
+function setRuntimeStatus(online, label) {
+  runtimeOnline = online;
+  const pill = document.querySelector('#runtime-pill');
+  pill.classList.toggle('offline', !online);
+  pill.classList.toggle('online', online);
+  document.querySelector('#runtime-label').textContent = label;
+  document.querySelector('#run-execution').disabled = !online || ['queued','running'].includes(activeJob?.status);
+}
+
+function metricState(value) {
+  return value === true ? 'PASS' : value === false ? 'FAIL' : '—';
+}
+
+function renderExecution(job) {
+  if (!job) return;
+  activeJob = job;
+  document.querySelector('#job-id').textContent = job.id.toUpperCase();
+  document.querySelector('#release-state').textContent = job.productionReady ? 'RELEASE READY' : job.status === 'complete' ? 'RELEASE BLOCKED' : job.status.toUpperCase();
+  document.querySelector('#release-state').className = job.productionReady ? 'release-ready' : 'release-blocked';
+
+  for (const step of job.steps ?? []) {
+    const el = document.querySelector(`[data-execution-step="${step.id}"]`);
+    if (!el) continue;
+    el.dataset.status = step.status;
+    el.querySelector('i').textContent = step.status;
+  }
+
+  const preview = document.querySelector('#live-preview');
+  const empty = document.querySelector('#preview-empty');
+  if (job.artifacts?.previewUrl) {
+    if (preview.src !== job.artifacts.previewUrl) preview.src = job.artifacts.previewUrl;
+    preview.hidden = false;
+    empty.hidden = true;
+  }
+
+  const browser = job.evidence?.browser;
+  document.querySelector('#metric-browser').textContent = browser ? `${browser.passed}/${browser.captures}` : '—';
+  document.querySelector('#metric-browser-note').textContent = browser ? `${browser.reducedMotionCaptures} reduced-motion` : 'not run';
+
+  const responsive = job.evidence?.responsive ?? {};
+  const responsiveValues = ['mobile','tablet','desktop'].map((id) => responsive[id]?.pass);
+  const responsivePass = responsiveValues.every((value) => value === true);
+  document.querySelector('#metric-responsive').textContent = Object.keys(responsive).length ? metricState(responsivePass) : '—';
+  document.querySelector('#metric-responsive-note').textContent = Object.keys(responsive).length ? ['M','T','D'].map((label,i)=>`${label}:${metricState(responsiveValues[i])}`).join(' · ') : 'not run';
+
+  const bundle = job.evidence?.bundle;
+  document.querySelector('#metric-bundle').textContent = bundle ? `${bundle.initialJsKb} KB JS` : '—';
+  document.querySelector('#metric-bundle-note').textContent = bundle ? `${bundle.initialCssKb} KB CSS · measured` : 'not run';
+
+  const captures = job.artifacts?.captures ?? [];
+  document.querySelector('#capture-count').textContent = String(captures.length).padStart(2, '0');
+  document.querySelector('#capture-grid').innerHTML = captures.length ? captures.map((capture) => `
+    <a class="capture-card ${capture.pass ? 'pass' : 'fail'}" href="${escapeHtml(capture.screenshot)}" target="_blank" rel="noreferrer">
+      <img src="${escapeHtml(capture.screenshot)}" alt="${escapeHtml(capture.id)} browser capture" loading="lazy" />
+      <div><b>${escapeHtml(capture.viewport?.id ?? 'viewport')}</b><span>${capture.reducedMotion ? 'reduced motion' : 'full motion'}</span><i>${capture.pass ? 'PASS' : 'FAIL'}</i></div>
+    </a>`).join('') : '<div class="empty-line">No captures yet.</div>';
+
+  const findings = job.findings ?? [];
+  const patches = new Map((job.patches ?? []).map((patch) => [patch.sourceFinding, patch]));
+  document.querySelector('#finding-count').textContent = String(findings.length).padStart(2, '0');
+  document.querySelector('#finding-list').innerHTML = findings.length ? findings.map((finding) => {
+    const patch = patches.get(finding.code);
+    return `<article class="finding-item ${escapeHtml(finding.severity)}"><div><span>${escapeHtml(finding.severity)}</span><b>${escapeHtml(finding.code)}</b></div><p>${escapeHtml(finding.message)}</p>${patch ? `<small>PATCH · ${escapeHtml(patch.instruction)}</small>` : ''}</article>`;
+  }).join('') : '<div class="empty-line">No findings.</div>';
+
+  const approve = document.querySelector('#approve-execution');
+  approve.disabled = job.status !== 'complete' || job.approval === 'iteration-approved';
+  approve.textContent = job.approval === 'iteration-approved' ? 'Iteration approved' : 'Approve iteration';
+  document.querySelector('#run-execution').disabled = !runtimeOnline || ['queued','running'].includes(job.status);
+}
+
+async function checkRuntime() {
+  try {
+    const status = await getExecutionStatus();
+    setRuntimeStatus(true, `Runtime ready · ${status.runtime}`);
+  } catch {
+    setRuntimeStatus(false, 'Execution server offline');
+  }
+}
+
+async function startBuild() {
+  if (!runtimeOnline) return toast('Execution unavailable', 'Run npm run dev so the local execution service starts with the Workroom.');
+  try {
+    setStage('make');
+    const result = await startExecution({ projectId: 'creative-agency', iteration: activeJob?.iteration ? activeJob.iteration + 1 : 0 });
+    activeJob = result.job;
+    renderExecution(activeJob);
+    toast('Build started', `${activeJob.id} is building the current Creative Agency artifact.`);
+    startPolling();
+  } catch (error) {
+    if (error.status === 409 && error.body?.job) {
+      activeJob = error.body.job;
+      renderExecution(activeJob);
+      startPolling();
+      return toast('Execution already running', activeJob.id);
+    }
+    toast('Build failed to start', error.message);
+  }
+}
+
+function startPolling() {
+  window.clearInterval(pollTimer);
+  if (!activeJob?.id) return;
+  pollTimer = window.setInterval(async () => {
+    try {
+      const { job } = await getExecution(activeJob.id);
+      renderExecution(job);
+      if (['complete','error'].includes(job.status)) {
+        window.clearInterval(pollTimer);
+        if (job.status === 'complete') {
+          setStage('review');
+          toast('Browser review complete', job.productionReady ? 'All production gates passed.' : 'Iteration captured. Release blockers remain visible in the Command Center.');
+        } else toast('Execution failed', job.error ?? 'Unknown execution error.');
+      }
+    } catch (error) { window.clearInterval(pollTimer); toast('Polling stopped', error.message); }
+  }, 1100);
+}
+
+async function refreshExecution() {
+  await checkRuntime();
+  if (!activeJob?.id) return;
+  try { renderExecution((await getExecution(activeJob.id)).job); }
+  catch (error) { toast('Refresh failed', error.message); }
+}
+
+async function approveIteration() {
+  if (!activeJob?.id) return;
+  try {
+    const { job } = await approveExecution(activeJob.id);
+    renderExecution(job);
+    setStage('deliver');
+    toast('Iteration approved', job.productionReady ? 'The iteration is approved and production-ready.' : 'Creative iteration approved. Release blockers are still enforced.');
+  } catch (error) { toast('Approval blocked', error.message); }
 }
 
 function bind() {
   document.querySelectorAll('.spine-step').forEach(el => el.addEventListener('click', () => setStage(el.dataset.stage)));
+  document.querySelector('#run-execution').addEventListener('click', startBuild);
+  document.querySelector('#refresh-execution').addEventListener('click', refreshExecution);
+  document.querySelector('#approve-execution').addEventListener('click', approveIteration);
+
   document.addEventListener('pointermove', (e) => {
     document.documentElement.style.setProperty('--mx', `${(e.clientX/window.innerWidth)*100}%`);
     document.documentElement.style.setProperty('--my', `${(e.clientY/window.innerHeight)*100}%`);
@@ -143,15 +341,15 @@ function bind() {
 
   const form = document.querySelector('#command-form');
   const input = document.querySelector('#command-input');
-  const toast = document.querySelector('#toast');
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const value = input.value.trim();
     if (!value) return;
-    document.querySelector('#toast-copy').textContent = `“${value}” → router classified this as a prototype command. Provider execution is intentionally stubbed in Slice 01.`;
-    toast.classList.add('show');
     input.value = '';
-    window.setTimeout(()=>toast.classList.remove('show'), 4300);
+    if (/\b(build|capture|review|run)\b/i.test(value)) return startBuild();
+    if (/\bapprove\b/i.test(value)) return approveIteration();
+    if (/\b(refresh|status)\b/i.test(value)) return refreshExecution();
+    toast('Command routed', 'This slice executes build/review/approval actions. Free-form AI source mutation remains intentionally unconnected until its write adapter is auditable.');
   });
 
   document.addEventListener('keydown', (e) => {
@@ -162,3 +360,5 @@ function bind() {
 
 render();
 bind();
+checkRuntime();
+window.setInterval(checkRuntime, 8000);
