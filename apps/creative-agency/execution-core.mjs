@@ -41,6 +41,15 @@ export function createExecutionJob({ id, projectId, iteration = 0 } = {}) {
     approval: 'pending',
     approvedAt: null,
     productionReady: false,
+    releaseDecision: {
+      status: 'unmeasured',
+      productionReady: false,
+      blockerCount: 0,
+      majorCount: 0,
+      requiredEvidence: [],
+      unmeasuredEvidence: []
+    },
+    baseline: { promoted: false, sourceJobId: null, approvedAt: null },
     steps: [
       { id: 'build', label: 'Build', status: 'pending' },
       { id: 'capture', label: 'Capture', status: 'pending' },
@@ -52,7 +61,7 @@ export function createExecutionJob({ id, projectId, iteration = 0 } = {}) {
     evidence: {},
     findings: [],
     patches: [],
-    artifacts: { previewUrl: null, captures: [] },
+    artifacts: { previewUrl: null, captures: [], reportUrl: null },
     error: null
   };
 }

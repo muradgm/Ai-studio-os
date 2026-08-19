@@ -47,8 +47,17 @@ jobs:
       - name: Run real browser runtime smoke test
         run: npm run test:browser-runtime
 
-      - name: Run Command Center execution smoke test
+      - name: Run measured Command Center release smoke test
         run: npm run test:command-center
+
+      - name: Upload Command Center release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: command-center-release-evidence
+          path: artifacts/command-center
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Install logo integrity renderer
         run: python -m pip install --disable-pip-version-check -r requirements-logo-integrity.txt

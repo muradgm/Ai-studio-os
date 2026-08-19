@@ -41,7 +41,11 @@ export function createCreativeEngineeringPlan(input = {}) {
 }
 
 function hasEvidence(metrics, key) {
-  return Object.prototype.hasOwnProperty.call(metrics, key) && metrics[key] && typeof metrics[key] === 'object';
+  const value = metrics[key];
+  return Object.prototype.hasOwnProperty.call(metrics, key)
+    && value
+    && typeof value === 'object'
+    && value.measured !== false;
 }
 
 export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredViewports, requiredEvidence = [] } = {}) {
@@ -52,6 +56,8 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
   const bundle = metrics.bundle ?? {};
   const accessibility = metrics.accessibility ?? {};
   const responsive = metrics.responsive ?? {};
+  const reducedMotion = metrics.reducedMotion ?? {};
+  const visualRegression = metrics.visualRegression ?? {};
 
   for (const key of [...new Set(requiredEvidence)]) {
     if (!hasEvidence(metrics, key)) {
@@ -63,7 +69,7 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
     findings.push(finding('blocker', 'lcp-budget-failed', `LCP ${vitals.lcpMs}ms exceeds ${resolved.webVitals.lcpMs}ms.`, { actual: vitals.lcpMs, budget: resolved.webVitals.lcpMs }));
   }
   if (Number.isFinite(vitals.inpMs) && vitals.inpMs > resolved.webVitals.inpMs) {
-    findings.push(finding('blocker', 'inp-budget-failed', `INP ${vitals.inpMs}ms exceeds ${resolved.webVitals.inpMs}ms.`, { actual: vitals.inpMs, budget: resolved.webVitals.inpMs }));
+    findings.push(finding('blocker', 'inp-budget-failed', `INP lab proxy ${vitals.inpMs}ms exceeds ${resolved.webVitals.inpMs}ms.`, { actual: vitals.inpMs, budget: resolved.webVitals.inpMs, method: vitals.method?.inp }));
   }
   if (Number.isFinite(vitals.cls) && vitals.cls > resolved.webVitals.cls) {
     findings.push(finding('blocker', 'cls-budget-failed', `CLS ${vitals.cls} exceeds ${resolved.webVitals.cls}.`, { actual: vitals.cls, budget: resolved.webVitals.cls }));
@@ -88,6 +94,17 @@ export function evaluateDeliveryGates({ metrics = {}, budgets = {}, requiredView
   }
   if ((accessibility.majors ?? 0) > resolved.accessibility.majors) {
     findings.push(finding('major', 'accessibility-majors', 'Major accessibility findings remain.', { actual: accessibility.majors ?? 0, budget: resolved.accessibility.majors }));
+  }
+  if (hasEvidence(metrics, 'reducedMotion') && reducedMotion.pass === false) {
+    findings.push(finding('blocker', 'reduced-motion-gate-failed', `Reduced-motion mode still contains ${reducedMotion.continuousAnimations ?? 'unknown'} continuous animation(s).`, {
+      continuousAnimations: reducedMotion.continuousAnimations ?? null
+    }));
+  }
+  if (hasEvidence(metrics, 'visualRegression') && visualRegression.status === 'compared' && visualRegression.pass === false) {
+    findings.push(finding('major', 'visual-regression-gate-failed', `Visual regression ${visualRegression.maxChangedRatio ?? 'unknown'} exceeds approved-baseline threshold ${visualRegression.threshold ?? 'unknown'}.`, {
+      maxChangedRatio: visualRegression.maxChangedRatio,
+      threshold: visualRegression.threshold
+    }));
   }
 
   const required = requiredViewports ?? resolved.responsive.requiredViewports;
