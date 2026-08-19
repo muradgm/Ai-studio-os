@@ -33,11 +33,11 @@ test('production evidence can be required explicitly and measured:false fails cl
   assert.ok(!codes.includes('responsive-evidence-missing'));
 });
 
-test('measured release evidence can satisfy the v1.3 delivery gate', () => {
+test('measured release evidence can satisfy the v1.3 delivery gate with a small bounded long task', () => {
   const gates = evaluateDeliveryGates({
     metrics: {
       webVitals: { measured: true, lcpMs: 1200, inpMs: 80, cls: 0.01 },
-      runtime: { measured: true, fps: 60, maxFrameMs: 17, longTasks: 0 },
+      runtime: { measured: true, fps: 60, maxFrameMs: 17, longTasks: 1, longTaskMs: 61 },
       bundle: { measured: true, initialJsKb: 180, initialCssKb: 20 },
       accessibility: { measured: true, blockers: 0, majors: 0 },
       responsive: { mobile: { pass: true }, tablet: { pass: true }, desktop: { pass: true } },
@@ -48,6 +48,26 @@ test('measured release evidence can satisfy the v1.3 delivery gate', () => {
   });
   assert.equal(gates.productionReady, true);
   assert.equal(gates.findings.length, 0);
+});
+
+test('runtime release gate catches excessive long-task count and Total Blocking Time', () => {
+  const countFailure = evaluateDeliveryGates({
+    metrics: {
+      runtime: { measured: true, fps: 60, maxFrameMs: 17, longTasks: 4, longTaskMs: 240 },
+      responsive: { mobile: { pass: true }, tablet: { pass: true }, desktop: { pass: true } }
+    }
+  });
+  assert.ok(countFailure.findings.some((item) => item.code === 'long-task-budget-failed'));
+
+  const tbtFailure = evaluateDeliveryGates({
+    metrics: {
+      runtime: { measured: true, fps: 60, maxFrameMs: 17, longTasks: 2, longTaskMs: 240 },
+      responsive: { mobile: { pass: true }, tablet: { pass: true }, desktop: { pass: true } }
+    }
+  });
+  const tbt = tbtFailure.findings.find((item) => item.code === 'tbt-budget-failed');
+  assert.ok(tbt);
+  assert.equal(tbt.evidence.actual, 140);
 });
 
 test('reduced motion and visual regression participate in release gates', () => {
