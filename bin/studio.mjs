@@ -9,6 +9,7 @@ import { runObservationRuntime, validateObservationBenchmark } from '../lib/obse
 import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
 import { runCreativeEngineeringRuntime, validateCreativeEngineeringBenchmark } from '../lib/creative-engineering-runtime.mjs';
+import { runBrandKitRuntime, validateBrandKitBenchmark } from '../lib/brand-kit-runtime.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -31,6 +32,7 @@ Usage:
   studio production <fixture>
   studio logo <fixture>
   studio creative-engineering <fixture>
+  studio brand-kit <fixture>
   studio benchmark <fixture>
   studio list
 `);
@@ -63,6 +65,10 @@ function logoPaths(name) {
 function creativeEngineeringPaths(name) {
   if (name !== 'creative-engineering-v13') return null;
   return { input: 'benchmarks/007-creative-engineering/input.json', expected: 'benchmarks/007-creative-engineering/expected.json' };
+}
+function brandKitPaths(name) {
+  if (name !== 'brand-identity-kit-v1') return null;
+  return { input: 'benchmarks/008-brand-identity-kit/input.json', expected: 'benchmarks/008-brand-identity-kit/expected.json' };
 }
 
 if (!command) { usage(); process.exit(0); }
@@ -121,6 +127,10 @@ if (command === 'route') {
   const paths = creativeEngineeringPaths(arg);
   if (!paths) { console.error(`Unknown creative engineering fixture: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify(runCreativeEngineeringRuntime(json(paths.input)), null, 2));
+} else if (command === 'brand-kit') {
+  const paths = brandKitPaths(arg);
+  if (!paths) { console.error(`Unknown Brand Kit fixture: ${arg ?? '(missing)'}`); process.exit(1); }
+  console.log(JSON.stringify(runBrandKitRuntime(json(paths.input)), null, 2));
 } else if (command === 'benchmark') {
   const creative = creativePaths(arg);
   const engineering = engineeringPaths(arg);
@@ -129,6 +139,7 @@ if (command === 'route') {
   const production = productionPaths(arg);
   const logo = logoPaths(arg);
   const creativeEngineering = creativeEngineeringPaths(arg);
+  const brandKit = brandKitPaths(arg);
   let result;
   if (creative) result = validateBenchmark(runCreativeRuntime(json(creative.input)), json(creative.expected));
   else if (engineering) result = validateEngineeringBenchmark(runEngineeringRuntime(json(engineering.input)), json(engineering.expected));
@@ -137,6 +148,7 @@ if (command === 'route') {
   else if (production) result = validateCreativeProductionBenchmark(runCreativeProductionRuntime(json(production.input)), json(production.expected));
   else if (logo) result = validateLogoBenchmark(runLogoRuntime(json(logo.input)), json(logo.expected));
   else if (creativeEngineering) result = validateCreativeEngineeringBenchmark(runCreativeEngineeringRuntime(json(creativeEngineering.input)), json(creativeEngineering.expected));
+  else if (brandKit) result = validateBrandKitBenchmark(runBrandKitRuntime(json(brandKit.input)), json(brandKit.expected));
   else { console.error(`Unknown benchmark: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
   if (!result.pass) process.exit(1);
@@ -154,6 +166,7 @@ if (command === 'route') {
   console.log('production fixtures: du-bonheur-v11');
   console.log('logo fixtures: identity-v12');
   console.log('creative engineering fixtures: creative-engineering-v13');
+  console.log('Brand Kit fixtures: brand-identity-kit-v1');
 } else {
   usage();
   process.exit(1);
