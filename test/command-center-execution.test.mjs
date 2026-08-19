@@ -8,6 +8,8 @@ import {
   summarizeAccessibilityIssues,
   synthesizeReleaseDecision
 } from '../modules/creative-engineering/index.mjs';
+import { createViteInvocation } from '../lib/local-vite.mjs';
+import { createDevProcessSpecs, root as devRoot } from '../scripts/dev-creative-agency.mjs';
 import {
   EXECUTION_PROJECTS,
   createExecutionJob,
@@ -128,11 +130,38 @@ test('measurement findings preserve actionable accessibility issue details', () 
   assert.deepEqual(findings.map((item) => item.code), ['form-label-missing']);
 });
 
-test('Command Center execution project is whitelisted and has no arbitrary command field', () => {
+test('Command Center execution project is whitelisted as structured Vite build data', () => {
   const project = EXECUTION_PROJECTS['creative-agency'];
-  assert.equal(project.buildScript, 'build:web');
+  assert.deepEqual(project.build, {
+    driver: 'vite',
+    appRoot: 'apps/creative-agency',
+    outDir: '../../dist/creative-agency'
+  });
+  assert.equal(Object.hasOwn(project, 'buildScript'), false);
   assert.equal(Object.hasOwn(project, 'command'), false);
   assert.equal(Object.hasOwn(project, 'args'), false);
+});
+
+test('Vite launcher uses the Node executable directly and never npm.cmd or a shell', () => {
+  const build = createViteInvocation({
+    repoRoot: devRoot,
+    mode: 'build',
+    appRoot: 'apps/creative-agency',
+    outDir: '../../dist/creative-agency'
+  });
+  assert.equal(build.executable, process.execPath);
+  assert.equal(build.shell, false);
+  assert.ok(build.args[0].endsWith(path.join('node_modules', 'vite', 'bin', 'vite.js')));
+  assert.ok(build.args.includes('build'));
+  assert.ok(build.args.includes('--emptyOutDir'));
+  assert.ok(!build.args.some((arg) => /npm(?:\.cmd)?$/i.test(arg)));
+
+  const specs = createDevProcessSpecs();
+  assert.equal(specs.length, 2);
+  assert.ok(specs.every((spec) => spec.command === process.execPath));
+  assert.ok(specs.every((spec) => !/npm(?:\.cmd)?$/i.test(spec.command)));
+  const vite = specs.find((spec) => spec.label === 'Vite');
+  assert.ok(vite.args[0].endsWith(path.join('node_modules', 'vite', 'bin', 'vite.js')));
 });
 
 test('execution job uses bounded state transitions and keeps iteration approval separate', () => {
