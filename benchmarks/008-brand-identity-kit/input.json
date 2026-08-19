@@ -1,0 +1,43 @@
+{
+  "risk": "high",
+  "brandDNA": {
+    "brandId": "benchmark-identity",
+    "version": "1.0.0",
+    "status": "approved",
+    "strategy": {
+      "positioning": "A disciplined creative-production system for teams that need coherent identity work.",
+      "audience": "Design-led product and brand teams",
+      "promise": "One accountable identity system from direction through delivery.",
+      "categoryTension": "AI speed without generic AI output",
+      "personality": ["precise", "editorial", "confident"]
+    },
+    "creativeDirection": {
+      "idea": "Bounded expression: structure creates room for creative range.",
+      "visualPrinciples": ["Structured negative space", "One semantic accent", "Editorial hierarchy"],
+      "antiReferences": ["generic AI glow", "stock icon recolors"]
+    },
+    "geometry": {"grid": 8, "dominantAngles": [0, 45, 90]},
+    "iconDNA": {"canvas": 24, "stroke": 1.5, "caps": "square", "joins": "miter"}
+  },
+  "assets": [
+    {"id":"strategy-v1","category":"strategy","artifactRef":"benchmark://strategy-v1.md","brandDnaVersion":"1.0.0","status":"approved"},
+    {"id":"direction-v1","category":"creative-direction","artifactRef":"benchmark://direction-v1.md","brandDnaVersion":"1.0.0","status":"approved"},
+    {"id":"logo-master","category":"logo","artifactRef":"benchmark://logo-master.svg","brandDnaVersion":"1.0.0","status":"frozen","review":{"logoReview":"passed"},"integrity":{"status":"passed"}},
+    {"id":"palette-v1","category":"color","artifactRef":"benchmark://palette.json","brandDnaVersion":"1.0.0","status":"approved"},
+    {"id":"type-system-v1","category":"typography","artifactRef":"benchmark://typography.json","brandDnaVersion":"1.0.0","status":"approved","metadata":{"families":[{"family":"Benchmark Sans","role":"UI"}],"redistributeFontFiles":false},"rights":{"licenseStatus":"reference-only"}},
+    {"id":"icon-family-v1","category":"icon-system","artifactRef":"benchmark://icons/core-v1","brandDnaVersion":"1.0.0","status":"frozen","metadata":{"personalized":true,"calibrationCount":6,"svgMasterCount":24,"iconDNA":{"canvas":24,"stroke":1.5,"grammar":"brand-derived"}},"review":{"vectorGeometry":"passed"}},
+    {"id":"guidelines-v1","category":"guidelines","artifactRef":"benchmark://brand-guidelines.pdf","brandDnaVersion":"1.0.0","status":"approved"}
+  ],
+  "applications": [
+    {"id":"website","name":"Website","artifactRef":"benchmark://applications/website.png","brandDnaVersion":"1.0.0","status":"approved"},
+    {"id":"social","name":"Social","artifactRef":"benchmark://applications/social.png","brandDnaVersion":"1.0.0","status":"approved"}
+  ],
+  "reviews": [
+    {"type":"brand-fit-review","reviewer":"benchmark-brand-reviewer","independent":true,"status":"passed","evidenceRef":"benchmark://reviews/brand-fit.json"},
+    {"type":"brand-kit-review","reviewer":"benchmark-kit-reviewer","independent":true,"status":"passed","evidenceRef":"benchmark://reviews/brand-kit.json"}
+  ],
+  "legal": {
+    "trademarkStatus": "unresolved",
+    "notes": ["Benchmark preserves legal uncertainty rather than simulating clearance."]
+  }
+}

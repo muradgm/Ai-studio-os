@@ -1,9 +1,9 @@
 {
   "name": "ai-studio-os",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "private": true,
   "type": "module",
-  "description": "A modular operating system for AI-assisted product, creative, engineering, multimodal, observation, creative-production, identity, and creative-engineering work.",
+  "description": "A modular operating system for AI-assisted product, creative, engineering, multimodal, observation, creative-production, identity, brand-kit, and creative-engineering work.",
   "scripts": {
     "dev": "node ./scripts/dev-creative-agency.mjs",
     "dev:web": "vite apps/creative-agency --host 0.0.0.0",
@@ -15,7 +15,7 @@
     "test:command-center": "node ./scripts/command-center-execution-smoke.mjs",
     "studio": "node ./bin/studio.mjs",
     "validate": "node ./scripts/validate.mjs",
-    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11 && node ./bin/studio.mjs benchmark identity-v12 && node ./bin/studio.mjs benchmark creative-engineering-v13",
+    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11 && node ./bin/studio.mjs benchmark identity-v12 && node ./bin/studio.mjs benchmark creative-engineering-v13 && node ./bin/studio.mjs benchmark brand-identity-kit-v1",
     "logo:integrity": "node ./bin/logo-integrity.mjs",
     "test:logo-integrity": "node --test integration/logo-artifact-integrity.mjs integration/logo-artifact-runtime.mjs",
     "test": "node --test && npm run validate"
