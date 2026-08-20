@@ -18,17 +18,17 @@ Merged historical epoch/slice/run branches should be archived or removed after c
 
 ## Phase order
 
-### P0 — Finish the current Command Center fidelity pass
+### P0 — Command Center truth + native architecture
 
-The approved visual reference is the layout/design contract. Finish PR #19 visually, then refactor the temporary DOM-decorator/CSS-override implementation into the real frontend structure. Preserve measured runtime IDs and evidence behavior.
+**Artifact-backed state merged in PR #23.** The Command Center now has a deterministic projection of Artifact Graph truth with explicit `blocked`, `stale`, `review`, `queued`, `produced`, `approved`, and `released` states.
+
+**Native architecture is implemented in PR #24 and CI is green.** It removes the DOM-decorator/CSS-override shell and makes the approved dense production workspace the real frontend structure. Keep PR #24 unmerged until the final 1440×900 / 1600×900 visual fidelity check can be performed on desktop.
 
 ### P0 — Universal Artifact + Artifact Graph
 
 **Foundation merged in PR #20.** The shared `ai-studio-os/artifact@1` and `ai-studio-os/artifact-graph@1` contracts now model versioned artifacts, dependencies, cycles and downstream stale/review impact without silently mutating descendants.
 
 **Brand Kit projection merged in PR #22.** Brand DNA, identity assets, representative applications and the Brand Kit manifest now participate in the shared graph without fabricating package files.
-
-Current bounded migration slice: project Artifact Graph truth into a deterministic Command Center state model so the final UI can render real artifact status instead of UI-local assumptions.
 
 This is the foundational production data model for:
 
@@ -47,7 +47,11 @@ Move toward a shared `StudioRuntime` primitive with capability, task, artifact, 
 
 ### P1 — Real production adapters
 
-Implement provider-neutral adapters that execute jobs and return universal Artifacts:
+**Active slice: `feature/production-adapter-runtime-v1`.** Establish a provider-neutral execution boundary that consumes routed jobs, executes an adapter, and returns universal Artifacts rather than adapter-specific payloads.
+
+The first proof adapter is a real local document writer: it creates an actual file on disk, records the file bytes/path, and returns a produced but still unreviewed/unmeasured Artifact. It exists to prove the contract and file-truth boundary before network providers are added.
+
+Next adapters should follow the same contract:
 
 - image generation/edit
 - vector/SVG
@@ -57,7 +61,7 @@ Implement provider-neutral adapters that execute jobs and return universal Artif
 - browser/web/code
 - document/guideline export
 
-Adapters must record real output refs, provenance, rights, cost and failures. Unavailable adapters fail closed.
+Adapters must record real output refs, provenance, rights, cost and failures. Unavailable adapters fail closed. Adapter success never implies creative approval or release readiness.
 
 ### P1 — Creative Agency Brand Kit dogfood
 
