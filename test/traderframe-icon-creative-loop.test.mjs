@@ -5,11 +5,11 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { runTraderFrameIconCreativeLoopProof } from '../projects/traderframe/icon-creative-loop-v1/orchestrator.mjs';
 import {
   buildTraderFrameRenderEvidenceHtml,
   exploreTraderFrameIconDirections,
   renderTraderFrameDirectionPreview,
-  runTraderFrameIconCreativeLoop,
   traderFrameCreativeLoopIcons,
   traderFrameIconDirections,
   traderFrameIconSemanticMap,
@@ -20,7 +20,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 async function runProof() {
   const outputDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'traderframe-icon-creative-loop-'));
-  const result = await runTraderFrameIconCreativeLoop({ repoRoot: root, outputDir, captureBrowserEvidence: false });
+  const result = await runTraderFrameIconCreativeLoopProof({ repoRoot: root, outputDir, captureBrowserEvidence: false });
   return { result, outputDir };
 }
 
@@ -76,6 +76,8 @@ test('creative loop produces only the selected direction as the eight-icon calib
   assert.equal(result.selectedDna.status, 'selected-candidate-not-frozen');
   assert.equal(result.manifest.frozen, false);
   assert.equal(result.manifest.renderEvidence.status, 'pending');
+  assert.equal(result.productionExecution.previewPass, true);
+  assert.equal(result.productionExecution.iconPass, true);
 
   for (const direction of traderFrameIconDirections) {
     assert.equal(fs.existsSync(path.join(outputDir, 'direction-previews', `${direction.id}.svg`)), true);
@@ -101,8 +103,10 @@ test('creative loop produces only the selected direction as the eight-icon calib
 test('creative loop preserves Artifact Graph truth and never fabricates visual approval', async () => {
   const { result, outputDir } = await runProof();
   assert.equal(result.graph.pass, true, JSON.stringify(result.graph.findings));
-  assert.equal(result.previewBatch.pass, true);
-  assert.equal(result.iconBatch.pass, true);
+  assert.equal(result.productionExecution.previewPass, true);
+  assert.equal(result.productionExecution.iconPass, true);
+  assert.equal(result.productionExecution.finalGraphPass, true);
+  assert.equal(result.manifest.orchestration.finalArtifactGraphAuthoritative, true);
   assert.equal(result.familyReview.status, 'review');
   assert.equal(result.familyReview.approval, 'independent-vector-and-user-visual-review-required');
   assert.equal(result.familyReview.renderEvidence.status, 'pending');
@@ -127,6 +131,9 @@ test('creative loop preserves Artifact Graph truth and never fabricates visual a
   for (const file of ['semantic-map.json', 'directions.json', 'selection-review.json', 'selected-icon-dna.json', 'family-review.json', 'manifest.json', path.join('render-evidence', 'index.html')]) {
     assert.equal(fs.existsSync(path.join(outputDir, file)), true, `${file} must exist`);
   }
+  const manifestFile = JSON.parse(fs.readFileSync(path.join(outputDir, 'manifest.json'), 'utf8'));
+  assert.equal(manifestFile.status, 'produced-awaiting-render-and-independent-review');
+  assert.equal(manifestFile.orchestration.finalArtifactGraphAuthoritative, true);
 });
 
 test('render evidence index carries all declared small-size targets in monochrome and accent modes', async () => {
