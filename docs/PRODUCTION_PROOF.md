@@ -47,19 +47,19 @@ Move toward a shared `StudioRuntime` primitive with capability, task, artifact, 
 
 ### P1 — Real production adapters
 
-**Active slice: `feature/production-adapter-runtime-v1`.** Establish a provider-neutral execution boundary that consumes routed jobs, executes an adapter, and returns universal Artifacts rather than adapter-specific payloads.
+**Foundation PR #25 is green and remains unmerged pending explicit merge approval.** It establishes the provider-neutral production execution boundary, routes only explicitly assigned adapters, writes real output files, normalizes output into universal Artifacts, returns Artifact Graphs, and fails closed when output/provenance constraints are not satisfied.
 
-The first proof adapter is a real local document writer: it creates an actual file on disk, records the file bytes/path, and returns a produced but still unreviewed/unmeasured Artifact. It exists to prove the contract and file-truth boundary before network providers are added.
+**Active stacked slice: `feature/vector-svg-adapter-v1`.** Add the first vector-production adapter on top of that green foundation. The local SVG adapter writes an actual SVG master file, records SHA-256/bytes/structural measurements, rejects unsafe/external/raster/font-dependent content when those constraints apply, and still leaves creative/logo approval unresolved.
 
-Next adapters should follow the same contract:
+The adapter roadmap remains:
 
+- vector/SVG — active
 - image generation/edit
-- vector/SVG
 - video
 - audio/voice
 - 3D/Blender where available
 - browser/web/code
-- document/guideline export
+- document/guideline export — foundation proof exists
 
 Adapters must record real output refs, provenance, rights, cost and failures. Unavailable adapters fail closed. Adapter success never implies creative approval or release readiness.
 
