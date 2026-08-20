@@ -13,9 +13,9 @@ import {
 import {
   applyTraderFrameIconPatch,
   buildTraderFrameIconPatchPlan,
-  reviewTraderFrameIconVisuals,
   traderFrameIconPatchAttemptCap
 } from './runtime.mjs';
+import { reviewTraderFrameIconVisualsV2 as reviewTraderFrameIconVisuals } from './review-v2.mjs';
 
 function severityRank(value) {
   return ({ blocker: 4, major: 3, minor: 2, taste: 1 })[String(value).toLowerCase()] ?? 0;
@@ -164,8 +164,6 @@ export async function runTraderFrameIconVisualReviewPatchV2({ repoRoot, outputDi
   const targetRoot = path.resolve(outputDir || path.join(root, 'artifacts/traderframe/icon-visual-review-patch-v1'));
   const beforeMarkups = selectedMarkups();
 
-  // Materialize the exact PR #32 Gate + Decision family as explicit source artifacts.
-  // This avoids nesting the whole creative-loop orchestration inside the review proof.
   const sourceAdapter = createLocalSvgAdapter({ rootDir: targetRoot });
   const sourceJobs = traderFrameCreativeLoopIcons.map(([name, title, semantic]) => ({
     id: `traderframe-${name}-visual-review-source-v1`,
@@ -182,9 +180,7 @@ export async function runTraderFrameIconVisualReviewPatchV2({ repoRoot, outputDi
   }));
   const sourceAssignments = sourceJobs.map((job) => ({ assetId: job.id, action: 'route', adapterId: 'local-svg' }));
   const sourceBatch = await executeProductionBatch({ jobs: sourceJobs, assignments: sourceAssignments, adapters: [sourceAdapter] });
-  if (!sourceBatch.pass) {
-    return { stage: 'traderframe-icon-visual-review-patch', status: 'blocked', pass: false, sourceBatch };
-  }
+  if (!sourceBatch.pass) return { stage: 'traderframe-icon-visual-review-patch', status: 'blocked', pass: false, sourceBatch };
 
   const beforeMetrics = await measureWithChromium(beforeMarkups);
   const beforeReview = reviewTraderFrameIconVisuals(beforeMarkups, beforeMetrics);
@@ -259,24 +255,10 @@ export async function runTraderFrameIconVisualReviewPatchV2({ repoRoot, outputDi
   await addDocument({ id: 'traderframe-icon-patch-plan-v1', title: 'TraderFrame Icon Patch Plan', outputPath: 'patch-plan.json', content: initialPlan, metadata: { patchOnlyMajorOrBlocker: true, maxAttempts: traderFrameIconPatchAttemptCap } });
   await addDocument({ id: 'traderframe-icon-patch-attempts-v1', title: 'TraderFrame Icon Patch Attempts', outputPath: 'patch-attempts.json', content: { attempts, cappedAt: traderFrameIconPatchAttemptCap }, metadata: { boundedPatchLoop: true } });
   await addDocument({ id: 'traderframe-icon-visual-metrics-after-v1', title: 'TraderFrame Icon Visual Metrics After Patch', outputPath: 'metrics-after.json', content: { measured: true, engine: 'playwright-chromium-canvas', sizes: traderFrameIconTargetSizes, metrics: afterMetrics } });
-  const reviewExecution = await addDocument({
-    id: 'traderframe-icon-visual-review-after-v1',
-    title: 'TraderFrame Icon Visual Review After Patch',
-    outputPath: 'review-after.json',
-    content: afterReview,
-    dependencies: finalRefs.map((artifactRef) => ({ artifactRef, relation: 'reviews', required: true, impact: 'review' })),
-    metadata: { userVisualApprovalRequired: true }
-  });
+  const reviewExecution = await addDocument({ id: 'traderframe-icon-visual-review-after-v1', title: 'TraderFrame Icon Visual Review After Patch', outputPath: 'review-after.json', content: afterReview, dependencies: finalRefs.map((artifactRef) => ({ artifactRef, relation: 'reviews', required: true, impact: 'review' })), metadata: { userVisualApprovalRequired: true } });
 
   const html = comparisonHtml(beforeMarkups, currentMarkups, beforeReview, afterReview);
-  const htmlExecution = await addDocument({
-    id: 'traderframe-icon-before-after-index-v1',
-    title: 'TraderFrame Icon Before/After Render Index',
-    outputPath: 'render-evidence/before-after.html',
-    content: html,
-    format: 'text',
-    dependencies: finalRefs.map((artifactRef) => ({ artifactRef, relation: 'renders', required: true, impact: 'review' }))
-  });
+  const htmlExecution = await addDocument({ id: 'traderframe-icon-before-after-index-v1', title: 'TraderFrame Icon Before/After Render Index', outputPath: 'render-evidence/before-after.html', content: html, format: 'text', dependencies: finalRefs.map((artifactRef) => ({ artifactRef, relation: 'renders', required: true, impact: 'review' })) });
   const renderArtifacts = await captureComparison({ targetRoot, html, iconRefs: finalRefs });
 
   const blockingAfter = majorCount(afterReview);
@@ -294,26 +276,10 @@ export async function runTraderFrameIconVisualReviewPatchV2({ repoRoot, outputDi
     improved,
     patchedIcons: initialPlan.icons,
     preservedIcons: initialPlan.preserveUnchangedIcons,
-    renderEvidence: {
-      measured: true,
-      sizes: traderFrameIconTargetSizes,
-      index: 'render-evidence/before-after.html',
-      screenshots: traderFrameIconTargetSizes.map((size) => `render-evidence/before-after-${size}px.png`)
-    },
+    renderEvidence: { measured: true, sizes: traderFrameIconTargetSizes, index: 'render-evidence/before-after.html', screenshots: traderFrameIconTargetSizes.map((size) => `render-evidence/before-after-${size}px.png`) },
     finalReview: { status: afterReview.status, approval: afterReview.approval, findings: afterReview.findings },
-    truth: {
-      userApproved: false,
-      iconDnaFrozen: false,
-      independentVectorReviewComplete: false,
-      brokerIntegration: false,
-      autonomousExecution: false,
-      performanceClaims: false
-    },
-    limitations: [
-      'Visual measurements are local Chromium raster evidence, not human taste or legal approval.',
-      'Patch geometry is deterministic benchmark logic in v1; no external art-direction model is invoked.',
-      'Minor and taste findings remain visible and are not auto-patched under the bounded patch policy.'
-    ]
+    truth: { userApproved: false, iconDnaFrozen: false, independentVectorReviewComplete: false, brokerIntegration: false, autonomousExecution: false, performanceClaims: false },
+    limitations: ['Visual measurements are local Chromium raster evidence, not human taste or legal approval.', 'Patch geometry is deterministic benchmark logic in v1; no external art-direction model is invoked.', 'Minor and taste findings remain visible and are not auto-patched under the bounded patch policy.']
   };
   const manifestExecution = await addDocument({
     id: 'traderframe-icon-visual-patch-manifest-v1',
