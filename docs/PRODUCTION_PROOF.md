@@ -26,7 +26,9 @@ The approved visual reference is the layout/design contract. Finish PR #19 visua
 
 **Foundation merged in PR #20.** The shared `ai-studio-os/artifact@1` and `ai-studio-os/artifact-graph@1` contracts now model versioned artifacts, dependencies, cycles and downstream stale/review impact without silently mutating descendants.
 
-Current bounded migration slice: project Brand Kit production into this graph while preserving the existing Brand Kit manifest as the release/delivery contract.
+**Brand Kit projection merged in PR #22.** Brand DNA, identity assets, representative applications and the Brand Kit manifest now participate in the shared graph without fabricating package files.
+
+Current bounded migration slice: project Artifact Graph truth into a deterministic Command Center state model so the final UI can render real artifact status instead of UI-local assumptions.
 
 This is the foundational production data model for:
 
