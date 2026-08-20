@@ -1,11 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runTraderFrameIconVisualReviewPatch } from '../projects/traderframe/icon-visual-review-patch-v1/runtime.mjs';
+import { runTraderFrameIconVisualReviewPatchV1 } from '../projects/traderframe/icon-visual-review-patch-v1/driver.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 try {
-  const result = await runTraderFrameIconVisualReviewPatch({ repoRoot: root, captureBrowserEvidence: true });
+  const result = await runTraderFrameIconVisualReviewPatchV1({ repoRoot: root });
   console.log(JSON.stringify({
     stage: result.stage,
     status: result.status,
