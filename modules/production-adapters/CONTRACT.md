@@ -85,3 +85,23 @@ Production rules:
 - tests use an injected fetch boundary and fake credential, so CI never requires a live OpenAI credential or paid request
 
 The Image API integration follows the current OpenAI documentation contract: `gpt-image-2`, `/images/generations`, `/images/edits`, base64 image responses, configurable size/quality/format/compression/background, and high-fidelity edit inputs. Runtime availability still depends on a separately configured API credential.
+
+## ComfyUI image adapter
+
+`comfyui-image` is the first local raster-production adapter. It drives a supplied ComfyUI API-format workflow through ComfyUI's native HTTP surface and converts the resulting image into a universal Artifact.
+
+Production rules:
+
+- the default endpoint is `http://127.0.0.1:8188`; non-loopback endpoints are unavailable unless `allowRemote` is explicitly enabled
+- this first slice supports routed `generate` jobs only; image editing/upload workflows are deferred until source-upload semantics are added deliberately
+- jobs must provide a real ComfyUI API-format workflow graph; the adapter does not invent or silently repair a missing graph
+- execution submits through `POST /prompt`, polls `GET /history/{prompt_id}`, and downloads the selected output through `GET /view`
+- both prompt-id keyed history responses and the newer `history[]` response shape are accepted
+- a completed execution without a real image output is blocked
+- downloaded bytes must be a recognized PNG/JPEG/WebP raster before the file is accepted
+- output paths remain constrained to the configured artifact root
+- SHA-256, byte count, prompt id, workflow node count, output node id, provider filename, polling attempts, and measured adapter duration remain on the Artifact
+- local compute cost is not fabricated as zero; it is recorded as unmeasured/estimated local compute
+- successful local execution remains `produced / unreviewed / unmeasured`; it does not imply creative approval or release readiness
+
+The adapter follows ComfyUI's native prompt/history/view execution pattern and keeps local execution as the default security boundary. Remote ComfyUI should require an explicit security decision rather than being enabled by configuration accident.
