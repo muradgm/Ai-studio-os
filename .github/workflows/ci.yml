@@ -45,6 +45,18 @@ jobs:
       - name: Run real SVG corruption suite
         run: npm run test:logo-integrity
 
+      - name: Run TraderFrame icon creative loop proof
+        run: npm run proof:traderframe-icon-creative-loop
+
+      - name: Upload TraderFrame icon creative-loop evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traderframe-icon-creative-loop-evidence
+          path: artifacts/traderframe/icon-creative-loop-v1
+          if-no-files-found: ignore
+          retention-days: 7
+
   browser-release:
     runs-on: ubuntu-latest
     timeout-minutes: 12
