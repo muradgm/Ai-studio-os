@@ -96,3 +96,16 @@ test('design packet carries resolved type selections and production config when 
   assert.ok(packet.typography.pairingScore > 0);
   assert.match(packet.typography.production.css2Url, /fonts\.googleapis\.com/);
 });
+
+test('avoidFamilies is a hard exclusion', () => {
+  const result = buildTypographySystem({
+    catalog,
+    business:{ type:'French patisserie' },
+    brand:{ traits:['refined'] },
+    requirements:{ languages:['de','fr','en'] },
+    avoidFamilies:['Newsreader']
+  });
+  assert.equal(result.pass, true);
+  assert.notEqual(result.selection.display.family, 'Newsreader');
+  assert.notEqual(result.selection.body.family, 'Newsreader');
+});
