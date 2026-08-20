@@ -30,16 +30,7 @@ Merged historical epoch/slice/run branches should be archived or removed after c
 
 **Brand Kit projection merged in PR #22.** Brand DNA, identity assets, representative applications and the Brand Kit manifest now participate in the shared graph without fabricating package files.
 
-This is the foundational production data model for:
-
-- Command Center production queue
-- Brand Kit dependency coherence
-- external production adapters
-- packaging/delivery
-- provenance/rights
-- memory
-- review/evidence
-- future runtime consolidation
+This is the foundational production data model for Command Center production truth, Brand Kit coherence, production adapters, delivery, provenance/rights, memory, review/evidence and future runtime consolidation.
 
 ### P1 — Runtime consolidation
 
@@ -47,22 +38,25 @@ Move toward a shared `StudioRuntime` primitive with capability, task, artifact, 
 
 ### P1 — Real production adapters
 
-**Production adapter foundation merged in PR #25.** The shared execution boundary now routes only explicitly assigned adapters, writes real output files, normalizes output into universal Artifacts, returns Artifact Graphs, and fails closed when output/provenance constraints are not satisfied.
+**Production adapter foundation merged in PR #25.** The shared execution boundary routes only explicitly assigned adapters, writes real output files, normalizes output into universal Artifacts, returns Artifact Graphs, and fails closed when output/provenance constraints are not satisfied.
 
-**Vector production merged in PR #26.** `local-svg` writes real SVG masters, records SHA-256/bytes/structural measurements, rejects unsafe/external/raster/font-dependent content when required, and never self-declares creative/logo approval.
+**Vector production merged in PR #26.** `local-svg` writes real SVG masters and records vector hygiene evidence without self-declaring creative/logo approval.
 
-**OpenAI image production merged in PR #27.** `openai-image` uses OpenAI's Image API for routed raster generation/edit jobs, writes decoded provider output to real local files, preserves provider/model/request provenance, validates output format bytes, and remains unavailable without an explicit API credential.
+**OpenAI image production merged in PR #27.** `openai-image` provides hosted raster generation/edit through a credential-gated provider boundary and writes real validated output files.
 
-**Active slice: `feature/comfyui-image-adapter-v1`.** Add the first local raster-production adapter. `comfyui-image` executes a supplied ComfyUI API-format workflow through the native prompt/history/view HTTP surface, accepts loopback execution by default, writes the returned raster to a real local Artifact, and records prompt/output provenance without pretending local compute is free or creatively approved.
+**ComfyUI local raster PR #28 is CI-green.** `comfyui-image` executes supplied API-format workflows through the local prompt/history/view HTTP boundary, writes real raster Artifacts and keeps remote execution opt-in.
 
-The adapter roadmap remains:
+**Active stacked slice: `feature/gemini-image-adapter-v1`.** Add a second hosted image provider using Google's current Gemini Interactions image API. `gemini-image` defaults to `gemini-3.1-flash-image`, supports the current Flash Lite/Flash/Pro image family, writes real PNG/JPEG output, accepts auditable local reference images for editing, enforces provider-specific size/aspect capabilities and the 20 MB inline-request boundary, and records SynthID as expected provider provenance rather than a locally verified watermark.
+
+The adapter roadmap now is:
 
 - vector/SVG — merged
-- image generation/edit — OpenAI adapter merged
-- local raster generation — active ComfyUI slice
-- Gemini image adapter — next hosted-provider candidate after local raster proof
-- gateway/orchestration adapters — evaluate OpenClaw after direct-provider/local capability is stable
-- review/planning providers — Claude/DeepSeek should enter recipes where benchmarked value justifies them rather than being mislabeled as image producers
+- OpenAI hosted raster generation/edit — merged
+- ComfyUI local raster generation — PR #28 green
+- Gemini hosted raster generation/edit — active
+- capability/evidence-aware provider comparison and routing — next after hosted/local breadth is stable
+- OpenClaw — evaluate as a gateway/orchestration adapter, not a fake image provider
+- Claude/DeepSeek — evaluate in creative-direction/review recipes where benchmarks prove value
 - video
 - audio/voice
 - 3D/Blender where available
