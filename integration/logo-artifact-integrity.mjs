@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { inspectLogoArtifacts } from '../modules/logo-integrity/artifact-adapter.mjs';
 
 const base = new URL('../test/fixtures/logo-integrity/', import.meta.url);
-const canonical = decodeURIComponent(new URL('canonical.svg', base).pathname);
-const specJson = decodeURIComponent(new URL('mark-spec.json', base).pathname);
+const canonical = fileURLToPath(new URL('canonical.svg', base));
+const specJson = fileURLToPath(new URL('mark-spec.json', base));
 const master = fs.readFileSync(canonical,'utf8');
 function candidate(name, transform) {
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'logo-integrity-'));
@@ -23,6 +24,7 @@ test('real artifact adapter locks identical SVG', () => {
   assert.match(r.canonical.fileSha256,/^[a-f0-9]{64}$/);
   assert.equal(r.renderEvidence.length,4);
   assert.deepEqual(r.canonical.shapeIds,['arm-a','arm-b']);
+  assert.equal(r.inspectorEvidence,'artifact-inspector:playwright-chromium');
 });
 
 const corruptions = [
