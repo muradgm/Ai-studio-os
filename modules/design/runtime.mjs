@@ -1,5 +1,24 @@
-export function buildDesignPacket({ direction, preferences = {} }) {
+function defaultTypographyStrategy() {
+  return {
+    display: 'character-bearing display role; never select a typeface by category cliché alone',
+    body: 'high-legibility supporting role',
+    utility: 'compact functional role for metadata/navigation'
+  };
+}
+
+export function buildDesignPacket({ direction, preferences = {}, typography = null }) {
   if (!direction) throw new Error('design packet requires creative direction');
+  const typographyStrategy = defaultTypographyStrategy();
+  const typographyPacket = typography?.pass === true
+    ? {
+        strategy: typographyStrategy,
+        selection: typography.selection,
+        production: typography.production,
+        systemScore: typography.systems?.[0]?.overall ?? null,
+        pairingScore: typography.systems?.[0]?.pairing?.score ?? null
+      }
+    : typographyStrategy;
+
   return {
     stage: 'design',
     directionContext: {
@@ -11,11 +30,7 @@ export function buildDesignPacket({ direction, preferences = {} }) {
       primary: preferences.primaryAction ?? 'business-primary-action',
       sequence: preferences.sequence ?? ['identity', 'value', 'proof', 'offer', 'visit-or-convert']
     },
-    typography: {
-      display: 'character-bearing display role; never select a typeface by category cliché alone',
-      body: 'high-legibility supporting role',
-      utility: 'compact functional role for metadata/navigation'
-    },
+    typography: typographyPacket,
     composition: {
       approach: preferences.composition ?? 'editorial-asymmetry-with-clear-anchors',
       density: preferences.density ?? 'restrained',
