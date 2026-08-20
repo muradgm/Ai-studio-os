@@ -102,7 +102,8 @@ function validateModelOptions(model, aspectRatio, imageSize) {
   const ratios = model === 'gemini-3.1-flash-image' ? FLASH_RATIOS : STANDARD_RATIOS;
   if (aspectRatio && !ratios.has(aspectRatio)) throw new Error(`gemini-image-aspect-ratio-unsupported:${aspectRatio}`);
 
-  const size = clean(imageSize || '1K').toUpperCase();
+  const size = clean(imageSize).toUpperCase();
+  if (!size) return '';
   if (model === 'gemini-3.1-flash-lite-image' && size !== '1K') throw new Error(`gemini-image-size-unsupported:${model}:${size}`);
   if (model === 'gemini-3.1-flash-image' && !new Set(['512', '1K', '2K', '4K']).has(size)) throw new Error(`gemini-image-size-unsupported:${model}:${size}`);
   if (model === 'gemini-3-pro-image' && !new Set(['1K', '2K', '4K']).has(size)) throw new Error(`gemini-image-size-unsupported:${model}:${size}`);
@@ -219,14 +220,11 @@ export function createGeminiImageAdapter({
       if (!prompt) throw new Error('gemini-image-prompt-missing');
 
       const format = normalizeFormat(job.format ?? input.outputFormat ?? input.output_format ?? 'png');
-      const aspectRatio = clean(input.aspectRatio ?? input.aspect_ratio ?? '1:1');
-      const imageSize = validateModelOptions(model, aspectRatio, input.imageSize ?? input.image_size ?? '1K');
-      const responseFormat = {
-        type: 'image',
-        mime_type: FORMATS.get(format),
-        aspect_ratio: aspectRatio,
-        image_size: imageSize
-      };
+      const aspectRatio = clean(input.aspectRatio ?? input.aspect_ratio);
+      const imageSize = validateModelOptions(model, aspectRatio, input.imageSize ?? input.image_size);
+      const responseFormat = { type: 'image', mime_type: FORMATS.get(format) };
+      if (aspectRatio) responseFormat.aspect_ratio = aspectRatio;
+      if (imageSize) responseFormat.image_size = imageSize;
 
       const providerInput = [{ type: 'text', text: prompt }];
       let sourceBytes = 0;
@@ -280,8 +278,8 @@ export function createGeminiImageAdapter({
           relativePath: relative,
           outputFormat: format,
           responseMime,
-          aspectRatio,
-          imageSize,
+          aspectRatio: aspectRatio || null,
+          imageSize: imageSize || null,
           sourceCount: operation === 'edit' ? array(job.sourceFiles).length : 0,
           sourceBytes,
           synthIdExpected: true,
