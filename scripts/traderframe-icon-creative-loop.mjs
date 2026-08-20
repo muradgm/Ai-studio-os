@@ -1,12 +1,12 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runTraderFrameIconCreativeLoop } from '../projects/traderframe/icon-creative-loop-v1/runtime.mjs';
+import { runTraderFrameIconCreativeLoopProof } from '../projects/traderframe/icon-creative-loop-v1/orchestrator.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const captureBrowserEvidence = !process.argv.includes('--no-browser-evidence');
 
 try {
-  const result = await runTraderFrameIconCreativeLoop({ repoRoot: root, captureBrowserEvidence });
+  const result = await runTraderFrameIconCreativeLoopProof({ repoRoot: root, captureBrowserEvidence });
   console.log(JSON.stringify({
     stage: result.stage,
     status: result.status,
@@ -18,7 +18,8 @@ try {
     icons: result.counts?.icons ?? 0,
     renderCaptures: result.counts?.renderCaptures ?? 0,
     files: result.counts?.files ?? 0,
-    review: result.familyReview ? { status: result.familyReview.status, approval: result.familyReview.approval, blockers: result.familyReview.findings.filter((item) => String(item.severity).toLowerCase() === 'blocker').length } : null
+    review: result.familyReview ? { status: result.familyReview.status, approval: result.familyReview.approval, blockers: result.familyReview.findings.filter((item) => String(item.severity).toLowerCase() === 'blocker').length } : null,
+    productionExecution: result.productionExecution ?? null
   }, null, 2));
   if (!result.pass) process.exitCode = 1;
 } catch (error) {
