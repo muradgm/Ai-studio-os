@@ -66,3 +66,22 @@ Its production guardrails are deliberately strict:
 - `canonicalLogoApproval` and `creativeApproval` remain false; independent logo/vector/creative review is still required
 
 This adapter proves file production and vector hygiene. It is not a substitute for logo integrity review, personalized-icon calibration review, or creative-direction judgment.
+
+## OpenAI image adapter
+
+`openai-image` is the first external network production adapter. It uses OpenAI's Image API and defaults to `gpt-image-2` for routed raster generation/edit jobs.
+
+Production rules:
+
+- the adapter is unavailable when `OPENAI_API_KEY` is not present; it never falls back to another provider
+- generation uses the Image API generations endpoint and edit jobs use the Image API edits endpoint
+- edit jobs accept auditable local filesystem source images only in this first slice; remote source URLs are rejected
+- provider responses must include base64 image output, and the decoded bytes must match the requested PNG/JPEG/WebP format before they are written
+- output paths remain constrained to the configured artifact root
+- SHA-256, byte count, request id, provider/model, endpoint, output options, and source count remain on the normalized Artifact
+- `gpt-image-2` transparent-background requests fail closed because that model does not currently support transparent output
+- no provider call implies creative approval, brand fit, rights clearance, accessibility, or release readiness
+- moderation/API failures are blockers; the adapter does not fabricate a fallback image
+- tests use an injected fetch boundary and fake credential, so CI never requires a live OpenAI credential or paid request
+
+The Image API integration follows the current OpenAI documentation contract: `gpt-image-2`, `/images/generations`, `/images/edits`, base64 image responses, configurable size/quality/format/compression/background, and high-fidelity edit inputs. Runtime availability still depends on a separately configured API credential.
