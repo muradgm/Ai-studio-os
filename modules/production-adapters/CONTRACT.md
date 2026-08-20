@@ -50,3 +50,19 @@ An adapter `execute(job, context)` returns:
 - optional `findings[]`
 
 The runtime owns Artifact normalization and final pass/fail truth.
+
+## Local SVG adapter
+
+`local-svg` is the first vector-production adapter built on this contract. It writes an actual SVG file and records deterministic structural measurements, but it does **not** approve the design or declare a logo canonical.
+
+Its production guardrails are deliberately strict:
+
+- a valid positive `viewBox` is required
+- scripts, inline event handlers, `foreignObject`, JavaScript URLs, and external network references are blocked
+- vector-only masters reject embedded raster `<image>` content
+- font-free masters reject live `<text>` nodes; typography must be converted to approved outlines upstream
+- output paths are constrained to the configured local root
+- successful output records SHA-256, bytes, structural measurements, and a real filesystem path
+- `canonicalLogoApproval` and `creativeApproval` remain false; independent logo/vector/creative review is still required
+
+This adapter proves file production and vector hygiene. It is not a substitute for logo integrity review, personalized-icon calibration review, or creative-direction judgment.
