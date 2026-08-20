@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { validateLogoIntegrity } from '../modules/logo-integrity/runtime.mjs';
 const base = new URL('../test/fixtures/logo-integrity/', import.meta.url);
-const canonical=decodeURIComponent(new URL('canonical.svg',base).pathname);
-const specJson=decodeURIComponent(new URL('mark-spec.json',base).pathname);
+const canonical=fileURLToPath(new URL('canonical.svg',base));
+const specJson=fileURLToPath(new URL('mark-spec.json',base));
 const master=fs.readFileSync(canonical,'utf8');
 function tempSvg(transform){const dir=fs.mkdtempSync(path.join(os.tmpdir(),'logo-runtime-'));const p=path.join(dir,'candidate.svg');fs.writeFileSync(p,transform(master));return p;}
 const input=(candidateSvg)=>({artifacts:{canonicalSvg:canonical,candidateSvg,specJson}});
