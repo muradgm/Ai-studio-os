@@ -47,19 +47,21 @@ Move toward a shared `StudioRuntime` primitive with capability, task, artifact, 
 
 ### P1 — Real production adapters
 
-**Foundation PR #25 is green and remains unmerged pending explicit merge approval.** It establishes the provider-neutral production execution boundary, routes only explicitly assigned adapters, writes real output files, normalizes output into universal Artifacts, returns Artifact Graphs, and fails closed when output/provenance constraints are not satisfied.
+**Production adapter foundation merged in PR #25.** The shared execution boundary now routes only explicitly assigned adapters, writes real output files, normalizes output into universal Artifacts, returns Artifact Graphs, and fails closed when output/provenance constraints are not satisfied.
 
-**Active stacked slice: `feature/vector-svg-adapter-v1`.** Add the first vector-production adapter on top of that green foundation. The local SVG adapter writes an actual SVG master file, records SHA-256/bytes/structural measurements, rejects unsafe/external/raster/font-dependent content when those constraints apply, and still leaves creative/logo approval unresolved.
+**Vector slice PR #26 is CI-green and remains open for explicit merge approval.** `local-svg` writes real SVG masters, records SHA-256/bytes/structural measurements, rejects unsafe/external/raster/font-dependent content when required, and never self-declares creative/logo approval.
+
+**Active stacked slice: `feature/openai-image-adapter-v1`.** Add the first external network production adapter. `openai-image` uses OpenAI's Image API for routed raster generation/edit jobs, writes decoded provider output to real local files, preserves provider/model/request provenance, validates output format bytes, and remains unavailable without an explicit API credential.
 
 The adapter roadmap remains:
 
-- vector/SVG — active
-- image generation/edit
+- vector/SVG — PR #26 green, unmerged
+- image generation/edit — active external adapter slice
 - video
 - audio/voice
 - 3D/Blender where available
 - browser/web/code
-- document/guideline export — foundation proof exists
+- document/guideline export — foundation proof merged
 
 Adapters must record real output refs, provenance, rights, cost and failures. Unavailable adapters fail closed. Adapter success never implies creative approval or release readiness.
 
