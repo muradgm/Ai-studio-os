@@ -201,13 +201,13 @@ function manifestArtifact(manifest = {}, review = {}, delivery = {}, context = {
     title: `${context.brandId} Brand Kit`,
     projectId: context.brandId,
     brandDnaVersion: context.brandDnaVersion,
-    status: productionReady ? 'approved' : review?.status === 'blocked' ? 'blocked' : 'review',
+    // A ready manifest is approved structured state, but it is not a fabricated package
+    // file. Keep status produced and express approval/release independently.
+    status: productionReady ? 'produced' : review?.status === 'blocked' ? 'blocked' : 'review',
     reviewStatus: productionReady ? 'approved' : 'unreviewed',
     releaseStatus: productionReady ? 'ready' : 'blocked',
     recipe: context.recipe,
     dependencies,
-    // The manifest is structured state. Delivery files live on the contained artifacts,
-    // so do not fabricate a package file before packaging actually occurs.
     metadata: {
       requiredCategories: manifest.requiredCategories ?? [],
       legal: manifest.legal ?? {},
