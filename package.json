@@ -18,6 +18,7 @@
     "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11 && node ./bin/studio.mjs benchmark identity-v12 && node ./bin/studio.mjs benchmark creative-engineering-v13 && node ./bin/studio.mjs benchmark brand-identity-kit-v1",
     "logo:integrity": "node ./bin/logo-integrity.mjs",
     "test:logo-integrity": "node --test integration/logo-artifact-integrity.mjs integration/logo-artifact-runtime.mjs",
+    "proof:traderframe-icons": "node ./scripts/traderframe-icon-production-proof.mjs",
     "test": "node --test && npm run validate"
   },
   "dependencies": {
