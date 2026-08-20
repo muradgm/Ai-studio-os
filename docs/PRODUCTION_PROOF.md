@@ -24,7 +24,9 @@ The approved visual reference is the layout/design contract. Finish PR #19 visua
 
 ### P0 — Universal Artifact + Artifact Graph
 
-Create one shared Artifact contract for logo, image, icon, motion, code, web, video, audio, 3D, document and delivery outputs. Model explicit dependencies and deterministic downstream invalidation/review requirements.
+**Foundation merged in PR #20.** The shared `ai-studio-os/artifact@1` and `ai-studio-os/artifact-graph@1` contracts now model versioned artifacts, dependencies, cycles and downstream stale/review impact without silently mutating descendants.
+
+Current bounded migration slice: project Brand Kit production into this graph while preserving the existing Brand Kit manifest as the release/delivery contract.
 
 This is the foundational production data model for:
 

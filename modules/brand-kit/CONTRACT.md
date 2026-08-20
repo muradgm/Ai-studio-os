@@ -13,6 +13,22 @@ A Brand Kit is a versioned delivery system built from one approved Brand DNA con
 - Trademark/legal state is reported as evidence or unresolved risk. The runtime never invents clearance.
 - Maker approval cannot substitute for independent kit review.
 
+## Artifact Graph projection
+
+Brand Kit production is projected into the universal `ai-studio-os/artifact@1` / `ai-studio-os/artifact-graph@1` model.
+
+The projection must preserve these rules:
+
+- Brand DNA is a first-class structured graph node and is never represented by a fabricated file.
+- Every identity artifact depends on the exact Brand DNA version it inherits.
+- Guidelines depend on the identity artifacts they document, so changes invalidate the compiled guidance.
+- Representative applications depend on Brand DNA and the identity artifacts they apply; identity changes require application review unless a stronger stale dependency applies.
+- The Brand Kit manifest depends on Brand DNA, all kit artifacts, and representative applications.
+- A ready in-memory manifest may have approved review/release state without pretending a ZIP/PDF package already exists. Package files enter the graph only after packaging actually produces them.
+- Brand DNA version drift or other blocking Brand Kit review findings must fail the projected graph closed.
+
+The Artifact Graph is additive to the existing Brand Kit manifest during migration. The manifest remains the delivery/review contract; the graph becomes the cross-runtime dependency and invalidation contract.
+
 ## Default required kit
 
 1. strategy
