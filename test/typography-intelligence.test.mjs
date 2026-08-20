@@ -5,6 +5,7 @@ import { createGoogleFontsProvider, normalizeGoogleFont } from '../modules/typog
 import { scorePairing, supportsLanguages } from '../modules/typography/scoring.mjs';
 import { buildTypographySystem } from '../modules/typography/runtime.mjs';
 import { buildGoogleFontsCss2Url } from '../modules/typography/export.mjs';
+import { buildDesignPacket } from '../modules/design/runtime.mjs';
 
 const catalog = [
   normalizeGoogleFont({ family:'Newsreader', category:'serif', variants:['regular','500','600','700'], subsets:['latin','latin-ext'], files:{regular:'https://fonts.gstatic.test/newsreader.woff2'}, axes:[{tag:'wght',start:200,end:800}] }),
@@ -75,4 +76,23 @@ test('css2 export encodes families and selected weights without exposing API key
   assert.match(url, /Newsreader:wght@400;600/);
   assert.match(url, /IBM\+Plex\+Mono:wght@400;500/);
   assert.doesNotMatch(url, /key=/i);
+});
+
+test('design packet preserves legacy typography shape when no resolved system is supplied', () => {
+  const packet = buildDesignPacket({ direction:{ directionStatement:'D', traits:[], antiPrinciples:[] } });
+  assert.equal(packet.typography.display, 'character-bearing display role; never select a typeface by category cliché alone');
+  assert.equal('selection' in packet.typography, false);
+});
+
+test('design packet carries resolved type selections and production config when available', () => {
+  const typography = buildTypographySystem({
+    catalog,
+    business:{ type:'French patisserie' },
+    brand:{ traits:['refined'] },
+    requirements:{ languages:['de','fr','en'] }
+  });
+  const packet = buildDesignPacket({ direction:{ directionStatement:'D', traits:[], antiPrinciples:[] }, typography });
+  assert.equal(packet.typography.selection.display.family, 'Newsreader');
+  assert.ok(packet.typography.pairingScore > 0);
+  assert.match(packet.typography.production.css2Url, /fonts\.googleapis\.com/);
 });
