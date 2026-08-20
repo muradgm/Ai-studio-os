@@ -27,8 +27,10 @@ function fallbackFor(font) {
 }
 
 function rankRole(catalog, role, context, limit) {
+  const avoided = new Set((context.avoidFamilies ?? []).map((family) => String(family).toLowerCase()));
   return catalog
-    .filter((font) => font?.family && supportsLanguages(font, context.requirements?.languages ?? []))
+    .filter((font) => font?.family && !avoided.has(font.family.toLowerCase()))
+    .filter((font) => supportsLanguages(font, context.requirements?.languages ?? []))
     .map((font) => ({ font, scores: scoreFontForRole(font, { ...context, role }) }))
     .sort((a, b) => b.scores.total - a.scores.total || a.font.family.localeCompare(b.font.family))
     .slice(0, limit);
