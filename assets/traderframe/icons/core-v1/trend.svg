@@ -1,0 +1,8 @@
+<svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g data-layer="structure" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" vector-effect="non-scaling-stroke">
+    <path d="M4 17L9 12L13 15L19 9"/>
+  </g>
+  <g data-layer="event" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="miter" vector-effect="non-scaling-stroke">
+    <path d="M16 7H20V11"/>
+  </g>
+</svg>

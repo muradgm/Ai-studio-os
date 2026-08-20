@@ -1,0 +1,42 @@
+{
+  "id": "traderframe-core-icons-calibration-v1",
+  "status": "review-candidate",
+  "purpose": "Six-icon calibration family for TraderFrame before expanding the production icon library.",
+  "canvas": {"width": 24, "height": 24, "viewBox": [0, 0, 24, 24]},
+  "safeArea": {"x": 2, "y": 2, "width": 20, "height": 20},
+  "grid": {"unit": 1, "subdivision": 0.5},
+  "stroke": {"width": 1.5, "cap": "square", "join": "miter"},
+  "geometry": {
+    "dominantAngles": [0, 45, 90],
+    "minimumGap": 1.5,
+    "cornerFamily": ["sharp", "chamfer"],
+    "terminalFamily": ["square", "cut"],
+    "curvePolicy": "Use curves only when the semantic form requires them; do not soften the family decoratively."
+  },
+  "layers": [
+    {"id": "base", "z": 0, "role": "primary silhouette"},
+    {"id": "structure", "z": 10, "role": "secondary information"},
+    {"id": "event", "z": 20, "role": "semantic focus/change accent"}
+  ],
+  "color": {
+    "canonicalMaster": "currentColor",
+    "accentToken": "#E54832",
+    "accentRule": "At most one event layer per icon. Accent indicates focus, change, boundary, or selected state; never decoration."
+  },
+  "targetSizes": [16, 20, 24, 32],
+  "icons": {
+    "frame": {"role": "focus boundary", "event": "top-right acquired corner", "bboxApprox": [4, 3, 20, 21]},
+    "trend": {"role": "direction plus breakout", "event": "terminal frame corner rather than generic arrowhead", "bboxApprox": [3, 6, 21, 18]},
+    "watchlist": {"role": "tracked market rows", "event": "selected top row", "bboxApprox": [4, 3, 20, 21]},
+    "signal": {"role": "aligned event", "event": "center event point", "bboxApprox": [3, 3, 21, 21]},
+    "filter": {"role": "reduce the field", "event": "retained band", "bboxApprox": [3.5, 4, 20.5, 21.5]},
+    "risk": {"role": "protect the boundary", "event": "central risk boundary", "bboxApprox": [3.5, 2.5, 20.5, 21.5]}
+  },
+  "freezeGate": [
+    "User approves the family visually",
+    "All six remain legible at 16/20/24/32px",
+    "No icon breaks the one-event-accent rule",
+    "No family member reads as an unrelated stock icon",
+    "Monochrome masters remain clear without Terminal Red"
+  ]
+}
