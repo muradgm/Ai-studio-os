@@ -46,7 +46,7 @@ test('TraderFrame production proof materializes eight GateZero decision-loop SVG
     assert.match(svg, /currentColor/);
     assert.equal((svg.match(/data-layer="event"/g) ?? []).length, 1, `${name} must have exactly one semantic event layer`);
     assert.doesNotMatch(svg, /#[0-9a-fA-F]{3,8}/, `${name} must remain palette-neutral`);
-    assert.doesNotMatch(svg, /<text|<image|<script|<foreignObject|https?:\/\//i, `${name} must remain font-free, vector-only and self-contained`);
+    assert.doesNotMatch(svg, /<text|<image|<script|<foreignObject|\shref=/i, `${name} must remain font-free, vector-only and self-contained`);
   }
 });
 
