@@ -6,7 +6,7 @@ import { runCreativeRuntime, validateBenchmark } from '../lib/creative-runtime.m
 import { runEngineeringRuntime, validateEngineeringBenchmark } from '../lib/engineering-runtime.mjs';
 import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multimodal-runtime.mjs';
 import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
-import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
+import { runCreativeProductionRuntime, runCreativeProductionProjectRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
 import { runCreativeEngineeringRuntime, validateCreativeEngineeringBenchmark } from '../lib/creative-engineering-runtime.mjs';
 import { runBrandKitRuntime, validateBrandKitBenchmark } from '../lib/brand-kit-runtime.mjs';
@@ -124,7 +124,7 @@ if (command === 'route') {
 } else if (command === 'production') {
   const paths = productionPaths(arg);
   if (!paths) { console.error(`Unknown production fixture: ${arg ?? '(missing)'}`); process.exit(1); }
-  console.log(JSON.stringify(runCreativeProductionRuntime(json(paths.input)), null, 2));
+  console.log(JSON.stringify(await runCreativeProductionProjectRuntime(json(paths.input)), null, 2));
 } else if (command === 'logo') {
   const paths = logoPaths(arg);
   if (!paths) { console.error(`Unknown logo fixture: ${arg ?? '(missing)'}`); process.exit(1); }
