@@ -1,5 +1,5 @@
 const NUMERIC_DESCRIPTOR_KEYS = new Set([
-  'xHeight', 'width', 'strokeContrast', 'aperture', 'humanism', 'roundness', 'complexity', 'proportion'
+  'xHeight', 'capHeight', 'ascender', 'descender', 'lineGap', 'width', 'strokeContrast', 'aperture', 'humanism', 'roundness', 'complexity', 'proportion'
 ]);
 const TEXT_DESCRIPTOR_KEYS = new Set(['geometry', 'rhythm', 'terminals', 'serifStyle']);
 const DESCRIPTOR_KEYS = new Set([...NUMERIC_DESCRIPTOR_KEYS, ...TEXT_DESCRIPTOR_KEYS]);
