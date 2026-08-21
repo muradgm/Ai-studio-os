@@ -19,13 +19,18 @@ function numericDistance(a, b) {
   return Math.abs(a - b);
 }
 
-function evaluateRoleSeparation(display, body) {
+function evaluateRoleSeparation(display, body, pairingStrategy='contrast-with-coherence') {
   let score = 72;
   const reasons = [];
   if (!display || !body) return { score:0, reasons:['display and body roles are both required'] };
   if (display.family === body.family) {
-    score -= 25;
-    reasons.push('display and body use the same family');
+    if (pairingStrategy === 'single-family') {
+      score += 12;
+      reasons.push('single-family strategy intentionally separates roles through hierarchy rather than family contrast');
+    } else {
+      score -= 25;
+      reasons.push('display and body use the same family without a single-family strategy');
+    }
   }
   if (display.category !== body.category) {
     score += 7;
@@ -39,7 +44,7 @@ function evaluateRoleSeparation(display, body) {
     numericDistance(a.strokeContrast, b.strokeContrast),
     numericDistance(a.roundness, b.roundness)
   ].filter(Number.isFinite);
-  if (distances.length >= 2) {
+  if (distances.length >= 2 && display.family !== body.family) {
     const average = distances.reduce((sum, value)=>sum+value,0) / distances.length;
     if (average < 7) { score -= 14; reasons.push('measured structure is too similar for strong hierarchy'); }
     else if (average >= 12 && average <= 42) { score += 10; reasons.push('measured structure creates controlled display/body tension'); }
@@ -68,6 +73,9 @@ function evaluateClicheRisk(display, body, { marketCommonPairs=[] }={}) {
     const [a,b] = String(pair).split('|');
     return pairKey(a,b);
   })]);
+  if (display?.family && body?.family && display.family === body.family) {
+    return { score:82, risk:'low', reasons:['single-family system avoids a common two-family pairing cliché'] };
+  }
   if (common.has(key)) return { score:35, risk:'high', reasons:['pair matches an overused/default pairing pattern'] };
   return { score:85, risk:'low', reasons:['pair avoids the default overused-pair list'] };
 }
@@ -90,14 +98,14 @@ function evaluateBusinessAlignment(system, strategy={}) {
   return { score:clamp(score), reasons };
 }
 
-export function critiqueTypographySystem(system, { strategy={}, marketCommonPairs=[] }={}) {
+export function critiqueTypographySystem(system, { strategy={}, marketCommonPairs=[], pairingStrategy='contrast-with-coherence' }={}) {
   if (!system?.display?.font || !system?.body?.font) {
     return { pass:false, score:0, findings:[{severity:'blocker',code:'typography-system-incomplete'}] };
   }
   const display = system.display.font;
   const body = system.body.font;
   const utility = system.utility?.font ?? null;
-  const roleSeparation = evaluateRoleSeparation(display, body);
+  const roleSeparation = evaluateRoleSeparation(display, body, pairingStrategy);
   const utilityRole = evaluateUtilityRole(utility, body, strategy);
   const cliche = evaluateClicheRisk(display, body, { marketCommonPairs });
   const businessAlignment = evaluateBusinessAlignment(system, strategy);
