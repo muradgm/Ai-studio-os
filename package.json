@@ -26,6 +26,9 @@
     "proof:traderframe-icon-semantic-v2": "node ./scripts/traderframe-icon-semantic-construction-v2.mjs",
     "proof:traderframe-icon-semantic-v2:no-browser": "node ./scripts/traderframe-icon-semantic-construction-v2.mjs --no-browser-evidence",
     "test:traderframe-icon-semantic-v2": "node --test test/traderframe-icon-semantic-construction-v2.test.mjs",
+    "proof:traderframe-icon-form-refinement": "node ./scripts/traderframe-icon-form-refinement-v1.mjs",
+    "proof:traderframe-icon-form-refinement:no-browser": "node ./scripts/traderframe-icon-form-refinement-v1.mjs --no-browser-evidence",
+    "test:traderframe-icon-form-refinement": "node --test test/traderframe-icon-form-refinement-v1.test.mjs",
     "test": "node --test && npm run validate"
   },
   "dependencies": {
