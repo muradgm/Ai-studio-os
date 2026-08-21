@@ -25,6 +25,8 @@ const artifact = {
   analyzedAt: new Date().toISOString(),
   attempted: analysis.attempted,
   analyzed: analysis.analyzed,
+  glyphAnalyzed: analysis.glyphAnalyzed,
+  strokeAnalyzed: analysis.strokeAnalyzed,
   unsupported: analysis.unsupported,
   unavailable: analysis.unavailable,
   evidence: analysis.evidence,
