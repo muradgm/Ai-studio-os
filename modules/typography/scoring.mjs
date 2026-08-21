@@ -9,14 +9,6 @@ const LANGUAGE_SUBSET = {
   'zh-cn': 'chinese-simplified', 'zh-tw': 'chinese-traditional'
 };
 
-const BUSINESS_CATEGORY_HINTS = [
-  { match: /law|legal|finance|bank|wealth|consult|architecture|editorial|publishing/i, display: ['serif', 'sans-serif'], body: ['sans-serif', 'serif'] },
-  { match: /fashion|luxury|beauty|jewel|gallery|culture|art|patisserie|bakery|restaurant|hospitality|hotel/i, display: ['serif', 'display'], body: ['sans-serif', 'serif'] },
-  { match: /tech|software|saas|ai|developer|engineering|logistics|industrial|automotive/i, display: ['sans-serif', 'display'], body: ['sans-serif'] },
-  { match: /health|medical|clinic|education|government|public|nonprofit/i, display: ['sans-serif', 'serif'], body: ['sans-serif', 'serif'] },
-  { match: /streetwear|music|gaming|entertainment|sports|youth/i, display: ['display', 'sans-serif'], body: ['sans-serif'] }
-];
-
 function clamp(value, min = 0, max = 100) {
   return Math.max(min, Math.min(max, Math.round(value)));
 }
@@ -41,34 +33,66 @@ export function supportsLanguages(font, languages = []) {
   return required.every((subset) => available.has(subset) || (subset === 'latin' && available.has('latin-ext')));
 }
 
-function preferredCategories(business = {}, role) {
-  const explicit = business.preferredCategories?.[role];
-  if (Array.isArray(explicit) && explicit.length) return explicit.map((value) => String(value).toLowerCase());
-  const haystack = [business.type, business.industry, business.model, business.positioning].filter(Boolean).join(' ');
-  return BUSINESS_CATEGORY_HINTS.find((hint) => hint.match.test(haystack))?.[role] ?? (role === 'display' ? ['serif', 'sans-serif', 'display'] : ['sans-serif', 'serif']);
+function scoreCategoryForStrategy(font, role, pressures = {}) {
+  const category = String(font.category ?? '').toLowerCase();
+  let score = 0;
+  const reasons = [];
+  const high = (key) => Number(pressures[key] ?? 50) >= 70;
+
+  if (role === 'body') {
+    if (category === 'sans-serif' || category === 'serif') { score += 12; reasons.push('category is viable for sustained body reading'); }
+    else if (category === 'display') score -= 20;
+    else if (category === 'monospace') score -= 10;
+    if (high('readingDensity') && (category === 'serif' || category === 'sans-serif')) score += 8;
+    if (high('accessibility') && category === 'sans-serif') score += 5;
+  } else if (role === 'display') {
+    if (category === 'serif' || category === 'sans-serif' || category === 'display') score += 7;
+    if (high('expression') && category === 'display') { score += 13; reasons.push('display category supports a high-expression strategy'); }
+    if (high('formality') && category === 'serif') { score += 10; reasons.push('serif category can support the formal pressure'); }
+    if (high('technicality') && category === 'sans-serif') { score += 9; reasons.push('sans-serif category supports technical clarity'); }
+    if (high('warmth') && category === 'serif') score += 5;
+  } else if (role === 'utility') {
+    if (category === 'monospace') { score += high('technicality') ? 18 : 10; reasons.push('monospace category is useful for functional utility text'); }
+    else if (category === 'sans-serif') score += 10;
+    else score -= 4;
+  }
+
+  return { score, reasons };
 }
 
-export function scoreBusinessFit(font, { business = {}, brand = {}, requirements = {}, role = 'body' } = {}) {
+function scoreExplicitCategoryPreference(font, business = {}, role) {
+  const preferred = business.preferredCategories?.[role];
+  if (!Array.isArray(preferred) || preferred.length === 0) return { score: 0, reasons: [] };
+  const categories = preferred.map((value) => String(value).toLowerCase());
+  const index = categories.indexOf(String(font.category ?? '').toLowerCase());
+  if (index === 0) return { score: 12, reasons: ['client/project explicitly prefers this category for the role'] };
+  if (index > 0) return { score: 6, reasons: ['category is within the explicit project preference set'] };
+  return { score: -12, reasons: ['category falls outside an explicit project preference'] };
+}
+
+export function scoreBusinessFit(font, { business = {}, requirements = {}, role = 'body', strategy = {} } = {}) {
   let score = 50;
   const reasons = [];
-  const preferred = preferredCategories(business, role);
-  const categoryIndex = preferred.indexOf(String(font.category).toLowerCase());
-  if (categoryIndex === 0) { score += 20; reasons.push('category strongly fits business role'); }
-  else if (categoryIndex > 0) { score += 10; reasons.push('category is compatible with business role'); }
-  else { score -= 12; reasons.push('category is outside the default business-role preference'); }
+  const pressures = strategy.pressures ?? strategy;
+
+  const strategicCategory = scoreCategoryForStrategy(font, role, pressures);
+  score += strategicCategory.score;
+  reasons.push(...strategicCategory.reasons);
+
+  const explicitCategory = scoreExplicitCategoryPreference(font, business, role);
+  score += explicitCategory.score;
+  reasons.push(...explicitCategory.reasons);
 
   if (supportsLanguages(font, requirements.languages ?? [])) { score += 15; reasons.push('required language coverage is present'); }
   else { score -= 45; reasons.push('required language coverage is incomplete'); }
 
   const weightCount = normalWeights(font).length;
-  if (role === 'body' && weightCount >= 4) score += 10;
-  else if (role === 'display' && weightCount >= 2) score += 6;
+  if (role === 'body' && weightCount >= 4) { score += 8; reasons.push('weight range supports body hierarchy'); }
+  else if (role === 'display' && weightCount >= 2) score += 5;
   if ((font.axes ?? []).length > 0) { score += 5; reasons.push('variable axes improve production flexibility'); }
 
-  const traits = new Set((brand.traits ?? []).map((value) => String(value).toLowerCase()));
-  if (traits.has('technical') && font.category === 'monospace') score += role === 'utility' ? 18 : 2;
-  if ((traits.has('editorial') || traits.has('refined')) && font.category === 'serif' && role === 'display') score += 8;
-  if (traits.has('contemporary') && font.category === 'sans-serif') score += 5;
+  if ((pressures.trust ?? 50) >= 75 && role === 'body' && (font.category === 'sans-serif' || font.category === 'serif')) score += 4;
+  if ((pressures.accessibility ?? 50) >= 75 && role === 'body' && font.category === 'display') score -= 10;
 
   return { score: clamp(score), reasons };
 }
@@ -88,50 +112,85 @@ export function scoreProductionFitness(font, { requirements = {}, role = 'body' 
   return { score: clamp(score), reasons };
 }
 
-export function scoreDistinctiveness(font, { marketCommonFamilies = [], avoidFamilies = [] } = {}) {
+export function scoreDistinctiveness(font, { marketCommonFamilies = [], avoidFamilies = [], strategy = {} } = {}) {
   const family = font.family.toLowerCase();
   const common = new Set([...DEFAULT_COMMON_FAMILIES, ...marketCommonFamilies.map((value) => String(value).toLowerCase())]);
   const avoided = new Set(avoidFamilies.map((value) => String(value).toLowerCase()));
+  const distinctivenessPressure = Number(strategy.pressures?.distinctiveness ?? strategy.distinctiveness ?? 50);
   if (avoided.has(family)) return { score: 0, reasons: ['family is explicitly excluded'] };
-  if (common.has(family)) return { score: 45, reasons: ['family carries an overuse/commonality penalty'] };
-  return { score: 82, reasons: ['family avoids the default commonality penalty'] };
+  if (common.has(family)) {
+    return {
+      score: distinctivenessPressure >= 70 ? 32 : 48,
+      reasons: ['family carries an overuse/commonality penalty', ...(distinctivenessPressure >= 70 ? ['project has a high differentiation requirement'] : [])]
+    };
+  }
+  return { score: distinctivenessPressure >= 70 ? 88 : 82, reasons: ['family avoids the default commonality penalty'] };
+}
+
+function opticalEvidence(primary, secondary) {
+  const a = primary.descriptors ?? {};
+  const b = secondary.descriptors ?? {};
+  const numericKeys = ['xHeight', 'width', 'strokeContrast', 'roundness'];
+  const differences = [];
+  for (const key of numericKeys) {
+    if (Number.isFinite(a[key]) && Number.isFinite(b[key])) differences.push(Math.abs(a[key] - b[key]));
+  }
+  if (differences.length < 2) return { available: false, score: 0, reasons: ['optical descriptor evidence is unavailable; category contrast remains only a weak pairing signal'] };
+
+  const distance = differences.reduce((sum, value) => sum + value, 0) / differences.length;
+  if (distance >= 15 && distance <= 45) return { available: true, score: 12, reasons: ['explicit optical descriptors provide useful contrast without severe mismatch'] };
+  if (distance < 8) return { available: true, score: -4, reasons: ['explicit optical descriptors indicate limited hierarchy contrast'] };
+  if (distance > 60) return { available: true, score: -7, reasons: ['explicit optical descriptors indicate excessive structural distance'] };
+  return { available: true, score: 5, reasons: ['explicit optical descriptors indicate moderate structural contrast'] };
 }
 
 export function scorePairing(primary, secondary, { strategy = 'contrast-with-coherence', requirements = {} } = {}) {
-  if (!primary || !secondary) return { score: 0, reasons: ['pair requires two fonts'] };
+  if (!primary || !secondary) return { score: 0, reasons: ['pair requires two fonts'], evidenceLevel: 'none' };
   if (primary.family === secondary.family) {
-    const score = strategy === 'single-family' ? 94 : 52;
-    return { score, reasons: [strategy === 'single-family' ? 'single-family strategy intentionally preserves one family' : 'same-family pairing reduces hierarchy contrast'] };
+    const score = strategy === 'single-family' ? 94 : 54;
+    return {
+      score,
+      evidenceLevel: 'family',
+      reasons: [strategy === 'single-family' ? 'single-family strategy intentionally preserves one family' : 'same-family pairing reduces role contrast unless a single-family system is intentional']
+    };
   }
 
-  let score = 58;
+  let score = strategy === 'single-family' ? 42 : 60;
   const reasons = [];
   const a = primary.category;
   const b = secondary.category;
   const strongContrast = new Set(['serif|sans-serif', 'sans-serif|serif', 'display|sans-serif', 'sans-serif|display']);
-  if (strongContrast.has(`${a}|${b}`)) { score += 18; reasons.push('category contrast supports hierarchy'); }
-  else if (a === b) { score -= 8; reasons.push('same-category pairing needs stronger optical evidence'); }
-  else { score += 8; reasons.push('category relationship provides moderate contrast'); }
+  if (strongContrast.has(`${a}|${b}`)) { score += 9; reasons.push('category contrast provides a preliminary hierarchy signal'); }
+  else if (a === b) { score -= 3; reasons.push('same-category pairing requires optical evidence or deliberate restraint'); }
+  else { score += 4; reasons.push('category relationship provides modest contrast'); }
+
+  if (strategy === 'expressive-display' && (a === 'display' || a === 'serif') && b === 'sans-serif') score += 7;
+  if (strategy === 'restrained-system' && a === b) score += 6;
+  if (strategy === 'single-family') reasons.push('different families conflict with the requested single-family strategy');
+
+  const optical = opticalEvidence(primary, secondary);
+  score += optical.score;
+  reasons.push(...optical.reasons);
 
   const sharedSubsets = (primary.subsets ?? []).filter((subset) => (secondary.subsets ?? []).includes(subset));
-  if (sharedSubsets.length) score += 7;
+  if (sharedSubsets.length) score += 5;
   if (supportsLanguages(primary, requirements.languages ?? []) && supportsLanguages(secondary, requirements.languages ?? [])) {
-    score += 9; reasons.push('both families cover required languages');
+    score += 10; reasons.push('both families cover required languages');
   } else {
     score -= 35; reasons.push('pair does not fully cover required languages');
   }
 
   const primaryWeights = normalWeights(primary).length;
   const secondaryWeights = normalWeights(secondary).length;
-  if (primaryWeights >= 2 && secondaryWeights >= 3) score += 8;
+  if (primaryWeights >= 2 && secondaryWeights >= 3) { score += 7; reasons.push('both families have enough weights for role separation'); }
 
-  return { score: clamp(score), reasons };
+  return { score: clamp(score), reasons, evidenceLevel: optical.available ? 'optical-descriptors' : 'catalog-metadata' };
 }
 
 export function scoreFontForRole(font, context = {}) {
   const business = scoreBusinessFit(font, context);
   const production = scoreProductionFitness(font, context);
   const distinctiveness = scoreDistinctiveness(font, context);
-  const total = clamp(business.score * 0.45 + production.score * 0.35 + distinctiveness.score * 0.20);
+  const total = clamp(business.score * 0.48 + production.score * 0.32 + distinctiveness.score * 0.20);
   return { total, business, production, distinctiveness };
 }
