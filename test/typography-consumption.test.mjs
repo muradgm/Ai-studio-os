@@ -29,12 +29,14 @@ function readyTypography() {
       cssVariables:{
         '--font-family-display':"'Newsreader', serif",
         '--font-family-body':"'Manrope', sans-serif",
+        '--font-family-utility':"'IBM Plex Mono', monospace",
         '--type-h1-size':'clamp(2.75rem, 6vw, 5.5rem)',
         '--type-body-size':'1.0625rem'
       },
       families:[
         {role:'display',family:'Newsreader',weights:[400,600],source:'google-fonts'},
-        {role:'body',family:'Manrope',weights:[400,500,600],source:'google-fonts'}
+        {role:'body',family:'Manrope',weights:[400,500,600],source:'google-fonts'},
+        {role:'utility',family:'IBM Plex Mono',weights:[400,500],source:'google-fonts'}
       ]
     },
     systemCritique:{ score:91 },
@@ -75,6 +77,14 @@ test('consumer blocks malformed or not-ready contracts instead of silently recom
   assert.equal(consumed.enabled, true);
   assert.equal(consumed.pass, false);
   assert.ok(consumed.findings.some((item)=>item.code === 'typography-contract-not-ready'));
+});
+
+test('consumer blocks role/token drift', () => {
+  const contract = buildTypographyConsumptionContract(readyTypography());
+  contract.production.cssVariables['--font-family-body'] = "'Inter', sans-serif";
+  const consumed = consumeTypographyContract(contract);
+  assert.equal(consumed.pass, false);
+  assert.ok(consumed.findings.some((item)=>item.code === 'typography-contract-role-token-drift' && item.role === 'body'));
 });
 
 test('consumer is a no-op for legacy surfaces without a typography contract', () => {
