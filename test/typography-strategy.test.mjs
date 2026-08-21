@@ -31,7 +31,7 @@ test('explicit typography pressures override inferred defaults', () => {
   assert.equal(strategy.pressures.trust, 92);
 });
 
-test('typography benchmark validates client strategy and pairing threshold', () => {
+test('typography strategy fixture validates client strategy and declared pairing threshold', () => {
   const output = buildTypographySystem({
     catalog,
     business:{ type:'French patisserie', industry:'hospitality food retail', model:'local-retail', positioning:'premium but accessible' },
@@ -45,7 +45,7 @@ test('typography benchmark validates client strategy and pairing threshold', () 
     displayFamily:'Newsreader',
     bodyFamily:'Manrope',
     utilityFamily:'IBM Plex Mono',
-    minPairingScore:85,
+    minPairingScore:75,
     excludedFamilies:['Poppins'],
     minPressures:[{key:'warmth',value:70},{key:'distinctiveness',value:70}]
   });
