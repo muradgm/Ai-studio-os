@@ -19,7 +19,7 @@ test('google provider normalizes catalog and caches identical list requests', as
   let calls = 0;
   const fetchImpl = async (url) => {
     calls += 1;
-    assert.match(String(url), /webfonts/);
+    assert.match(String(url), /^https:\/\/www\.googleapis\.com\/webfonts\/v1\/webfonts\?/);
     return { ok:true, json:async () => ({ items:[{ family:'Manrope', category:'sans-serif', variants:['regular'], subsets:['latin'], files:{regular:'x'} }] }) };
   };
   const provider = createGoogleFontsProvider({ apiKey:'test-key', fetchImpl, now:() => 1000 });
@@ -35,6 +35,12 @@ test('google provider never operates without a server-side API key', async () =>
   await assert.rejects(() => provider.list(), /GOOGLE_FONTS_API_KEY/);
 });
 
+test('google provider refuses to attach credentials to non-Google or insecure endpoints', () => {
+  assert.throws(() => createGoogleFontsProvider({apiKey:'secret',endpoint:'https://evil.example/webfonts/v1/webfonts',fetchImpl:async()=>({})}), /host is not allowed/);
+  assert.throws(() => createGoogleFontsProvider({apiKey:'secret',endpoint:'http://www.googleapis.com/webfonts/v1/webfonts',fetchImpl:async()=>({})}), /must use HTTPS/);
+  assert.throws(() => createGoogleFontsProvider({apiKey:'secret',endpoint:'https://www.googleapis.com/other',fetchImpl:async()=>({})}), /path is not allowed/);
+});
+
 test('language coverage rejects fonts missing required scripts', () => {
   assert.equal(supportsLanguages(catalog[0], ['de','fr','en']), true);
   assert.equal(supportsLanguages(catalog[0], ['ar']), false);
@@ -46,7 +52,7 @@ test('pairing rewards hierarchy contrast and complete language coverage', () => 
   assert.ok(good.score > weaker.score);
 });
 
-test('typography system is business-aware, pairing-aware, and production-ready', () => {
+test('typography system defaults utility to body instead of imposing monospace', () => {
   const result = buildTypographySystem({
     catalog,
     business:{ type:'French patisserie', model:'local-retail', positioning:'accessible-luxury' },
@@ -57,9 +63,22 @@ test('typography system is business-aware, pairing-aware, and production-ready',
   assert.equal(result.pass, true);
   assert.equal(result.selection.display.family, 'Newsreader');
   assert.notEqual(result.selection.body.family, result.selection.display.family);
-  assert.equal(result.selection.utility.family, 'IBM Plex Mono');
+  assert.equal(result.selection.utility.family, result.selection.body.family);
+  assert.equal(result.context.utilityMode, 'reuse-body');
   assert.match(result.production.css2Url, /fonts\.googleapis\.com\/css2/);
   assert.ok(result.systems[0].pairing.score >= 80);
+});
+
+test('explicit utility intent may request a distinct monospace family', () => {
+  const result = buildTypographySystem({
+    catalog,
+    business:{type:'French patisserie'},
+    requirements:{languages:['de','fr','en']},
+    typographyIntent:{preferredCategories:{display:['serif'],body:['sans-serif'],utility:['monospace']}}
+  });
+  assert.equal(result.pass, true);
+  assert.equal(result.selection.utility.family, 'IBM Plex Mono');
+  assert.equal(result.context.utilityMode, 'distinct');
 });
 
 test('typography system blocks cleanly when catalog is unavailable', () => {
@@ -69,10 +88,7 @@ test('typography system blocks cleanly when catalog is unavailable', () => {
 });
 
 test('css2 export encodes families and selected weights without exposing API keys', () => {
-  const url = buildGoogleFontsCss2Url([
-    {family:'Newsreader',weights:[400,600],source:'google-fonts'},
-    {family:'IBM Plex Mono',weights:[400,500],source:'google-fonts'}
-  ]);
+  const url = buildGoogleFontsCss2Url([{family:'Newsreader',weights:[400,600],source:'google-fonts'},{family:'IBM Plex Mono',weights:[400,500],source:'google-fonts'}]);
   assert.match(url, /Newsreader:wght@400;600/);
   assert.match(url, /IBM\+Plex\+Mono:wght@400;500/);
   assert.doesNotMatch(url, /key=/i);
@@ -85,12 +101,7 @@ test('design packet preserves legacy typography shape when no resolved system is
 });
 
 test('design packet carries resolved type selections and production config when available', () => {
-  const typography = buildTypographySystem({
-    catalog,
-    business:{ type:'French patisserie' },
-    brand:{ traits:['refined'] },
-    requirements:{ languages:['de','fr','en'] }
-  });
+  const typography = buildTypographySystem({catalog,business:{ type:'French patisserie' },brand:{ traits:['refined'] },requirements:{ languages:['de','fr','en'] }});
   const packet = buildDesignPacket({ direction:{ directionStatement:'D', traits:[], antiPrinciples:[] }, typography });
   assert.equal(packet.typography.selection.display.family, 'Newsreader');
   assert.ok(packet.typography.pairingScore > 0);
@@ -98,13 +109,7 @@ test('design packet carries resolved type selections and production config when 
 });
 
 test('avoidFamilies is a hard exclusion', () => {
-  const result = buildTypographySystem({
-    catalog,
-    business:{ type:'French patisserie' },
-    brand:{ traits:['refined'] },
-    requirements:{ languages:['de','fr','en'] },
-    avoidFamilies:['Newsreader']
-  });
+  const result = buildTypographySystem({catalog,business:{ type:'French patisserie' },brand:{ traits:['refined'] },requirements:{ languages:['de','fr','en'] },avoidFamilies:['Newsreader']});
   assert.equal(result.pass, true);
   assert.notEqual(result.selection.display.family, 'Newsreader');
   assert.notEqual(result.selection.body.family, 'Newsreader');
