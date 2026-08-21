@@ -2,21 +2,18 @@
 
 > Supersedes the merge-readiness portion of `HANDOFF-TYPOGRAPHY-INTELLIGENCE-V01.md`.
 >
-> This document records the focused fixes made after the independent orchestrator review on 2026-08-21. Preserve the v0.1 architecture, but use this file for current integration status and next actions.
+> This file is the current handoff for Typography Intelligence after the independent architecture review, v0.2 hardening, local execution, live Google Fonts validation, and browser proof.
 
 **Repository:** `muradgm/Ai-studio-os`  
 **Branch:** `feat/typography-intelligence-v01`  
 **Base:** `main` at `0fcfb990a6b5a06dd577952b718d8c5d8e7b2d94`  
-**Status:** v0.2 integration/hardening implemented; execution proof still required  
-**Merge readiness:** **DO NOT MERGE YET**
+**Draft PR:** #37  
+**Status:** typography implementation and standalone integration gates validated  
+**PR state:** **KEEP DRAFT** until the future Creative World integration proof is available
 
 ---
 
-## 1. Why v0.2 exists
-
-Independent review found that the v0.1 typography architecture was strong but still had gaps between its evidence engine and the new Creative Thesis / Creative World architecture.
-
-The required pipeline is now treated as:
+## 1. Current architecture
 
 ```text
 BUSINESS / PRODUCT TRUTH
@@ -33,457 +30,305 @@ FONT / PAIRING EXPLORATION
         ↓
 TYPOGRAPHY ART DIRECTION
         ↓
-APPLICATION
+OPTICAL APPLICATION
         ↓
-PRODUCTION / CANONICAL CONTRACT
+CANONICAL PRODUCTION CONTRACT
 ```
 
-Business heuristics remain constraints and evidence. When Creative Thesis / Creative World intent exists, category heuristics are deliberately attenuated rather than becoming the primary creative authority.
+Business/client heuristics remain constraints and evidence. Reviewed Creative Thesis and an explicitly selected Creative World are the creative authorities.
+
+A Creative World only receives typography authority when it has:
+
+```text
+id
+reviewReady === true
+selected === true
+```
+
+If a schema is supplied, `ai-studio-os/creative-world@1` is required.
+
+Candidate worlds and reviewed-but-unselected worlds cannot override typography direction.
 
 ---
 
-## 2. Independent-review blockers fixed
+## 2. Important v0.2 fixes now locked
 
-### 2.1 Google Fonts sync now requests variable-font capability
+The independent review findings were addressed before execution:
 
-The real sync path now defaults to:
-
-```text
-capability=VF
-```
-
-Implementation:
-
-```text
-modules/typography/google-fonts-sync.mjs
-scripts/sync-google-fonts.mjs
-```
-
-Regression proof:
-
-```text
-test/google-fonts-sync-vf.test.mjs
-```
-
-The sync default is injectable/testable instead of being hidden only in CLI script code.
-
-### 2.2 Language/script coverage now fails closed
-
-`supportsLanguages()` no longer treats unresolved requested languages as supported.
-
-New behavior includes explicit handling for examples that previously bypassed the gate:
-
-```text
-fa → arabic
-th → thai
-cs → latin-ext
-zh → unresolved unless script/region is explicit
-unsupported scripts → unresolved / false
-```
-
-BCP-47 tags are normalized through `Intl.Locale` where possible. Plain `zh` remains intentionally ambiguous and blocks until simplified/traditional intent is known.
-
-Runtime-level unresolved language requirements return:
-
-```text
-typography-language-requirement-unresolved
-```
-
-### 2.3 Canonical family/token integrity is exact
-
-The consumption contract no longer validates family identity with substring matching.
-
-Example now correctly blocked:
-
-```text
-role family: Inter
-CSS token:  Inter Tight
-```
-
-The first CSS family is parsed and normalized, then compared exactly.
-
-### 2.4 Benchmark 009 now exercises structural evidence
-
-`benchmarks/009-typography-intelligence/input.json` now supplies provenance-backed `fontEvidence` separately from catalog metadata.
-
-Expected output now requires:
-
-```text
-evidenceLevel = evidence-backed-structural
-minimum body size
-maximum line measure
-```
-
-This prevents the flagship benchmark from passing while bypassing the binary/glyph/stroke intelligence layer.
-
-### 2.5 CI and repository validation now enforce Benchmark 009
-
-Typography is now enforced by:
-
-```text
-.github/workflows/ci.yml
-scripts/validate.mjs
-npm run benchmark
-```
-
-The fast-validation CI job explicitly runs:
-
-```bash
-node ./bin/studio.mjs benchmark typography-intelligence-v01
-```
-
-The general validator also registers the typography modules and Benchmark 009.
+- Google Fonts sync defaults to `capability=VF`.
+- language/script coverage fails closed for unresolved requirements.
+- plain ambiguous `zh` blocks until script/region is explicit.
+- canonical family/token validation uses exact parsed family identity, not substring matching.
+- Benchmark 009 carries separate provenance-backed `fontEvidence`.
+- Benchmark 009 is enforced by the benchmark chain, validator, and CI.
+- Creative Thesis is a real input to `typography-intent@1`.
+- selected Creative World intent can provide role/category preferences, descriptor targets, and pressure overrides.
+- business/category heuristics are attenuated when reviewed creative authority exists.
+- selected-font x-height, width, cap height, ascender, descender, line gap, and stroke evidence influence application decisions.
+- production CSS2 requests only axes actually used by the resolved typography application.
+- provider network access is fail-closed and policy-bound.
+- Google analysis is constrained to HTTPS `fonts.gstatic.com`.
+- custom providers require an explicit trusted network policy.
+- cache/filesystem I/O stays outside the deterministic typography core.
+- stale cached evidence is reported but discarded before ranking.
+- fresh project-specific evidence can still be used when cache evidence is stale.
+- the canonical consumption contract is the downstream source of truth.
 
 ---
 
-## 3. Creative Thesis / Creative World integration
+## 3. Runtime boundaries
 
-New module:
+### Deterministic core
 
-```text
-modules/typography/typography-intent.mjs
-```
+`buildTypographySystem()` remains deterministic and receives explicit catalog/evidence inputs.
 
-Contract:
+It does not silently read local caches or perform network I/O.
 
-```text
-ai-studio-os/typography-intent@1
-```
+### Project orchestration
 
-It accepts the `ai-studio-os/creative-thesis@1` shape introduced in draft PR #36 without importing that branch directly.
-
-A supplied Creative Thesis must be structurally review-ready. A provisional thesis blocks typography with:
-
-```text
-typography-intent-creative-thesis-not-review-ready
-```
-
-The intent layer carries:
-
-- governing idea
-- creative tension
-- thesis typography expression test
-- category / anti-reference rejections
-- selected-world role directives
-- explicit preferred / avoided categories
-- explicit descriptor targets
-- explicit typography pressure overrides
-- provenance back to thesis/world
-
-### Creative authority rule
-
-When reviewed Creative Thesis or selected Creative World intent exists:
-
-- category/business heuristics are attenuated,
-- explicit world/category preferences have higher weight,
-- measured descriptor targets can score candidates directly,
-- business constraints still apply for language, production, accessibility, trust, etc.
-
-No prose-to-style hallucination is introduced. Numeric pressure overrides and descriptor targets must be explicit structured inputs.
-
-### Creative Production binding
-
-`lib/creative-production-runtime.mjs` automatically forwards top-level:
-
-```text
-creativeThesis
-selectedCreativeWorld / creativeWorld
-```
-
-into Typography Intelligence when the typography stage runs.
-
-Callers do not need to duplicate the thesis inside `input.typography`.
-
----
-
-## 4. Application intelligence now uses selected-font measurements
-
-The evidence schema now carries additional normalized OpenType metrics:
-
-```text
-xHeight
-capHeight
-ascender
-descender
-lineGap
-width
-```
-
-These remain provenance-backed font-binary evidence.
-
-Application decisions now use measured font data when available:
-
-- low x-height can increase body base size,
-- glyph width adjusts readable measure,
-- ascender/descender/line-gap metrics influence line-height,
-- display cap height influences hierarchy ratio modestly,
-- stroke contrast and width influence display tracking modestly.
-
-The application packet exposes the actual optical evidence used so downstream review can audit the adjustment.
-
-Fallback formulas remain deterministic when metrics are unavailable.
-
----
-
-## 5. CSS2 payload hardening
-
-Production export no longer requests every declared variable axis automatically.
-
-`buildTypographyProductionConfig()` derives which axes are actually used by resolved desktop/mobile styles and requests only those declared axes.
-
-Example:
-
-```text
-font exposes: opsz, wdth, wght, GRAD
-application uses: opsz, wght
-CSS2 request: opsz,wght only
-```
-
-The standalone URL builder remains backward-compatible when no application context is supplied.
-
----
-
-## 6. Provider network policy / SSRF boundary
-
-Font analysis is now fail-closed per provider.
-
-Default trusted policy:
-
-```text
-google-fonts
-  protocol: https
-  host: fonts.gstatic.com
-```
-
-Google HTTP URLs are normalized to HTTPS.
-
-Unknown/custom providers have **no network access by default** and return:
-
-```text
-provider-network-policy-required
-```
-
-A future provider must be registered with an explicit trusted network policy before remote analysis is allowed.
-
-Do not expose provider network-policy configuration directly to untrusted project/user input.
-
----
-
-## 7. Project orchestration boundary
-
-New module:
-
-```text
-modules/typography/project-orchestrator.mjs
-```
-
-This deliberately keeps filesystem/cache I/O outside the deterministic typography core.
-
-It explicitly loads:
+`modules/typography/project-orchestrator.mjs` explicitly loads:
 
 ```text
 .tmp/google-fonts/catalog.json
 .tmp/google-fonts/intelligence.json
 ```
 
-and validates:
+It checks catalog availability, provider identity, cache structure, provider drift, and evidence/catalog freshness before invoking the core.
 
-- catalog exists,
-- provider identity,
-- intelligence artifact structure,
-- provider drift,
-- catalog/evidence timestamp drift.
-
-Project-specific/manual font evidence is merged with cached evidence rather than replaced.
-
-### Runtime behavior
-
-`runCreativeProductionRuntime()` remains deterministic and cache-independent.
-
-New async entrypoint:
-
-```text
-runCreativeProductionProjectRuntime()
-```
-
-loads project typography resources explicitly and then calls the deterministic runtime.
-
-The official CLI production path:
-
-```bash
-npm run studio -- production du-bonheur-v11
-```
-
-now uses the project orchestration entrypoint.
-
-Benchmarks intentionally continue to use the deterministic runtime and fixtures so local cache state cannot change benchmark results.
-
-### Auto-enable contract
-
-Typography can be auto-enabled when a project provides:
-
-```text
-autoTypography: true
-typographyContext: {...}
-```
-
-Explicit `typography: false` or `autoTypography: false` remains an opt-out.
+The official project production entrypoint uses this orchestration layer, while fixture-driven benchmarks remain cache-independent.
 
 ---
 
-## 8. Real browser proof added
+## 4. Verified execution evidence — 2026-08-21
 
-New script:
+The branch has now been executed in a real Windows/Git Bash checkout.
+
+### Full test suite
 
 ```text
-scripts/typography-browser-proof.mjs
+tests:     303
+pass:      303
+fail:      0
+skipped:   0
+cancelled: 0
 ```
 
 Command:
 
 ```bash
-npm run test:typography-browser
+npm test
 ```
 
-The proof uses Playwright Chromium and the real public Google Fonts CSS2/font resource path. It verifies:
+Result: **PASS**
 
-- CSS2 resource request is emitted,
-- `fonts.gstatic.com` font resource is requested,
-- `document.fonts.check()` confirms selected families,
-- computed family values match the contract,
-- variable settings are visible in computed styles,
-- unused `GRAD` axis is not requested/applied,
-- no `GOOGLE_FONTS_API_KEY`, `AIza...`, or `?key=` appears in browser requests.
+### Repository validation
 
-The browser-release CI job now runs this proof after Chromium installation.
-
-This is intentionally a real network/browser gate rather than a mocked unit test.
-
----
-
-## 9. New focused regression suite
-
-Added:
-
-```text
-test/typography-v02-integration.test.mjs
-test/google-fonts-sync-vf.test.mjs
-```
-
-Coverage includes:
-
-- VF sync default,
-- Persian / Thai / Czech mapping,
-- ambiguous Chinese fail-closed behavior,
-- unsupported script fail-closed behavior,
-- Creative Thesis review gate,
-- selected Creative World authority,
-- optical application metrics,
-- exact Inter vs Inter Tight contract drift,
-- custom-provider network-policy blocking,
-- cache/evidence resource orchestration,
-- used-axis-only CSS2 output.
-
----
-
-## 10. Execution status
-
-### Important
-
-The code has **not yet been proven green in a full checkout** after these v0.2 changes.
-
-An attempt was made from the current agent runtime to clone the branch for execution, but the runtime cannot resolve `github.com` via DNS. This is an environment limitation, not a passing test result.
-
-Do not describe the branch as validated because of the static review alone.
-
-At handoff time the branch has no combined CI status for its latest commits because it is not currently receiving a PR-triggered workflow run.
-
----
-
-## 11. Required validation sequence
-
-On a real checkout:
+Command:
 
 ```bash
-git fetch origin
-git switch feat/typography-intelligence-v01
-git pull --ff-only
-
-npm install
-
-node --test test/typography-*.test.mjs test/google-fonts-sync-vf.test.mjs
 npm run validate
+```
+
+Result:
+
+```text
+AI Studio OS v1.3 validation passed.
+```
+
+### Full benchmark chain
+
+Command:
+
+```bash
 npm run benchmark
-npm test
+```
 
+All registered benchmarks passed:
+
+```text
+du-bonheur                     PASS
+workspace-role-update          PASS
+du-bonheur-brand-film          PASS
+du-bonheur-post-launch         PASS
+du-bonheur-v11                 PASS
+identity-v12                   PASS
+creative-engineering-v13       PASS
+brand-identity-kit-v1          PASS
+typography-intelligence-v01    PASS
+```
+
+Benchmark 009 now explicitly encodes typography role intent and validates:
+
+- Newsreader display
+- Manrope body
+- IBM Plex Mono utility
+- evidence-backed structural pairing
+- client/business pressures
+- body-size and line-measure constraints
+- explicit typography-intent authority
+
+### Real Google Fonts sync
+
+Command:
+
+```bash
 npm run fonts:sync
-npm run fonts:analyze
+```
 
+Verified result:
+
+```text
+Google Fonts catalog synced: 1951 families (VF capability enabled)
+```
+
+This proves the real sync path is using the variable-font capability rather than only static instances.
+
+### Real font analysis
+
+Command:
+
+```bash
+npm run fonts:analyze
+```
+
+Verified result:
+
+```text
+attempted:       1951
+analyzed:        1914
+glyphAnalyzed:   1872
+strokeAnalyzed:  1867
+unsupported:       37
+unavailable:        0
+```
+
+The 37 unsupported entries are explicit degraded-analysis cases; they are not treated as measured evidence.
+
+### Real browser typography proof
+
+Commands:
+
+```bash
 npx playwright install chromium
 npm run test:typography-browser
 ```
 
-Then run at least one real project through the cache-backed production entrypoint with:
+Result: **PASS**
+
+Verified browser evidence included:
 
 ```text
-autoTypography: true
-typographyContext
-review-ready Creative Thesis
-selected Creative World typography intent
+displayLoaded: true
+bodyLoaded: true
+displayFamily: "Roboto Flex", sans-serif
+bodyFamily: Manrope, sans-serif
+displayVariation: "opsz" 64, "wdth" 125, "wght" 600
+bodyVariation: "wght" 400
+requestCount: 3
 ```
 
-Verify the resulting design consumption contract and browser implementation.
+The proof also checks that the Google Developer API key is not exposed through browser requests or generated CSS2 URLs.
+
+### GitHub CI
+
+PR-triggered `AI Studio OS CI` workflow runs have completed successfully on the validated branch heads.
+
+Therefore the branch now has both local execution evidence and remote CI evidence.
 
 ---
 
-## 12. Merge criteria
+## 5. Security status
 
-Do not merge until all are true:
+The Google Developer API key must remain server-side only.
 
-1. focused v0.2 tests pass,
-2. `npm run validate` passes,
-3. `npm run benchmark` passes including Benchmark 009,
-4. full `npm test` passes,
-5. real `fonts:sync` returns VF axis metadata,
-6. `fonts:analyze` produces evidence without unexpected provider/network failures,
-7. real browser typography proof passes,
-8. no API key appears in repository, browser URLs, generated output, logs, or artifacts,
-9. one end-to-end project proves Creative Thesis → Creative World → Typography Intent → Typography Intelligence → application → contract,
-10. integration with PR #36 is reviewed after both branches are brought into the same target stack.
+Never commit it to:
+
+```text
+.env tracked by git
+source files
+fixtures
+benchmarks
+browser bundles
+logs
+artifacts
+generated websites
+```
+
+Generated sites use the public Google Fonts CSS2/resource delivery path and do not receive the Developer API credential.
+
+Custom font providers remain network-disabled unless an explicit trusted provider policy is registered.
 
 ---
 
-## 13. Branch strategy
+## 6. What remains intentionally unproven
 
-Keep both branches independent until validation:
+Typography Intelligence itself has cleared its standalone engineering gates.
+
+The remaining proof belongs to the future Creative World architecture, not to another typography feature slice:
+
+```text
+Creative Thesis
+        ↓
+Creative World Exploration
+        ↓
+World Review
+        ↓
+Selected Creative World
+        ↓
+Typography Intent
+        ↓
+Typography Intelligence
+        ↓
+Optical Application
+        ↓
+Canonical Consumption Contract
+        ↓
+Design / Motion / Build
+```
+
+Creative World Slice 2 does not yet exist as the canonical integrated world-selection runtime, so this end-to-end cross-branch proof cannot yet be completed honestly.
+
+Do not add more typography capability merely to compensate for that future dependency.
+
+---
+
+## 7. Branch / PR strategy
+
+Keep both feature branches independent while Creative World is built:
 
 ```text
 main
 ├── feature/creative-thesis-v1       # draft PR #36
-└── feat/typography-intelligence-v01 # this branch
+└── feat/typography-intelligence-v01 # draft PR #37
 ```
 
-Do not merge PR #36 merely to make typography compile against it. Typography consumes the thesis contract structurally without cross-branch imports.
+PR #37 should remain **draft** for now.
 
-After both branches are green, integrate them deliberately in the Creative World target branch/stack and resolve any runtime ordering changes there.
+Do not merge PR #36 merely to make Typography Intelligence depend directly on it. Typography consumes the thesis contract structurally and does not require cross-branch imports.
+
+Once Creative World Exploration v1 produces the canonical selected-world contract, run one combined integration proof and then make the merge decision for the target Creative World stack.
 
 ---
 
-## 14. Current judgment
+## 8. Current judgment
 
-The independent review's central criticism has been addressed architecturally:
+Typography Intelligence has moved from "architecture implemented but unproven" to **validated infrastructure awaiting final Creative World composition**.
 
-> Typography Intelligence is no longer intended to be a sophisticated parallel font recommender.
-
-It now has explicit seams for:
+Verified today:
 
 ```text
-Creative Thesis
-→ selected Creative World
-→ typography intent
-→ evidence-backed font decisions
-→ optical application
-→ canonical production contract
+303/303 tests
+repository validation
+all benchmarks
+1951-family VF Google sync
+1914 real font analyses
+1872 glyph analyses
+1867 stroke analyses
+live browser font delivery
+variable-axis application
+PR-triggered CI success
 ```
 
-The remaining uncertainty is execution evidence, not an identified missing architectural slice.
+No further typography feature development is recommended before Creative World integration.
+
+The next architectural work should return to Creative World Exploration v1.
