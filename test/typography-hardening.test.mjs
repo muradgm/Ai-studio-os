@@ -6,6 +6,18 @@ import { critiqueTypographySystem } from '../modules/typography/system-intellige
 import { buildTypographySystem } from '../modules/typography/runtime.mjs';
 import { buildTypographyConsumptionContract, consumeTypographyContract } from '../modules/design/typography-consumption.mjs';
 
+function unifiedFont() {
+  return {
+    family:'Unified Sans',
+    provider:'google-fonts',
+    category:'sans-serif',
+    variants:['regular','500','600','700'],
+    subsets:['latin'],
+    files:{ regular:'https://fonts.example/unified.ttf' },
+    axes:[{ tag:'wght', start:300, end:800 }]
+  };
+}
+
 test('Google Fonts CSS2 export preserves declared variable-axis ranges and ordering', () => {
   const url = buildGoogleFontsCss2Url([
     {
@@ -45,17 +57,8 @@ test('built-in cliché pairs use the same canonical key as runtime lookup', () =
 });
 
 test('single-family runtime keeps utility on the selected family instead of introducing a third family', () => {
-  const font = {
-    family:'Unified Sans',
-    provider:'google-fonts',
-    category:'sans-serif',
-    variants:['regular','500','600','700'],
-    subsets:['latin'],
-    files:{ regular:'https://fonts.example/unified.ttf' },
-    axes:[{ tag:'wght', start:300, end:800 }]
-  };
   const result = buildTypographySystem({
-    catalog:[font],
+    catalog:[unifiedFont()],
     business:{ type:'software', model:'b2b', positioning:'professional' },
     brand:{ traits:['technical','minimal'] },
     requirements:{ languages:['en'] },
@@ -65,6 +68,35 @@ test('single-family runtime keeps utility on the selected family instead of intr
   assert.equal(result.selection.display.family, 'Unified Sans');
   assert.equal(result.selection.body.family, 'Unified Sans');
   assert.equal(result.selection.utility.family, 'Unified Sans');
+});
+
+test('runtime normalizes invalid limits and score thresholds instead of leaking Array.slice edge behavior', () => {
+  const result = buildTypographySystem({
+    catalog:[unifiedFont()],
+    requirements:{ languages:['en'] },
+    pairing:{ strategy:'single-family', minScore:-40, minSystemScore:140 },
+    candidateLimit:-5,
+    systemLimit:0
+  });
+  assert.equal(result.context?.limits?.candidateLimit ?? 8, 8);
+  assert.equal(result.context?.limits?.systemLimit ?? 3, 3);
+  if (result.context?.pairing) {
+    assert.equal(result.context.pairing.minScore, 0);
+    assert.equal(result.context.pairing.minSystemScore, 100);
+  } else {
+    assert.equal(result.findings[0].minSystemScore, 100);
+  }
+});
+
+test('runtime rejects non-array market and exclusion inputs early', () => {
+  assert.throws(
+    () => buildTypographySystem({ catalog:[unifiedFont()], marketCommonPairs:'bad-input' }),
+    /marketCommonPairs must be an array/
+  );
+  assert.throws(
+    () => buildTypographySystem({ catalog:[unifiedFont()], avoidFamilies:{} }),
+    /avoidFamilies must be an array/
+  );
 });
 
 test('Google-backed consumption contract blocks when its loader is missing', () => {
