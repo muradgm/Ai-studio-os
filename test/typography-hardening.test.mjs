@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { buildGoogleFontsCss2Url } from '../modules/typography/export.mjs';
 import { critiqueTypographySystem } from '../modules/typography/system-intelligence.mjs';
 import { buildTypographySystem } from '../modules/typography/runtime.mjs';
+import { buildTypographyConsumptionContract, consumeTypographyContract } from '../modules/design/typography-consumption.mjs';
 
 test('Google Fonts CSS2 export preserves declared variable-axis ranges and ordering', () => {
   const url = buildGoogleFontsCss2Url([
@@ -64,4 +65,25 @@ test('single-family runtime keeps utility on the selected family instead of intr
   assert.equal(result.selection.display.family, 'Unified Sans');
   assert.equal(result.selection.body.family, 'Unified Sans');
   assert.equal(result.selection.utility.family, 'Unified Sans');
+});
+
+test('Google-backed consumption contract blocks when its loader is missing', () => {
+  const contract = buildTypographyConsumptionContract({
+    pass:true,
+    selection:{
+      display:{ family:'Display Sans', source:'google-fonts', weights:[600] },
+      body:{ family:'Body Sans', source:'google-fonts', weights:[400] }
+    },
+    application:{ styles:{ h1:{family:'Display Sans'}, body:{family:'Body Sans'} } },
+    production:{
+      css2Url:null,
+      cssVariables:{ '--font-family-display':"'Display Sans', sans-serif", '--font-family-body':"'Body Sans', sans-serif" },
+      families:[]
+    }
+  });
+  assert.equal(contract.status, 'blocked');
+  assert.equal(contract.pass, false);
+  assert.ok(contract.findings.some((finding)=>finding.code === 'typography-consumption-google-font-loader-missing'));
+  const consumed = consumeTypographyContract(contract);
+  assert.equal(consumed.pass, false);
 });
