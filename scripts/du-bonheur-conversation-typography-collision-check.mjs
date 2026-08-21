@@ -27,14 +27,30 @@ try {
         document.fonts.load(`400 16px "${proof.body}"`)
       ]);
       await document.fonts.ready;
-      const display = document.querySelector('#display-test')?.getBoundingClientRect();
-      const utility = document.querySelector('aside')?.getBoundingClientRect();
+      const displayEl = document.querySelector('#display-test');
+      const section = displayEl?.parentElement ?? null;
+      const utilityEl = section ? [...section.children].find((node) => node !== displayEl && String(node.getAttribute?.('style') ?? '').includes('position:absolute') && String(node.getAttribute?.('style') ?? '').includes('right:0')) : null;
       const toObject = (rect) => rect ? ({ left:rect.left, right:rect.right, top:rect.top, bottom:rect.bottom, width:rect.width, height:rect.height }) : null;
-      return { entry:location.pathname.split('/').pop(), finalist:proof.finalist, scene:proof.scene, display:toObject(display), utility:toObject(utility) };
+      const glyphRects = [];
+      if (displayEl) {
+        const range = document.createRange();
+        range.selectNodeContents(displayEl);
+        for (const rect of range.getClientRects()) {
+          if (rect.width > 1 && rect.height > 1) glyphRects.push(toObject(rect));
+        }
+      }
+      return {
+        entry:location.pathname.split('/').pop(),
+        finalist:proof.finalist,
+        scene:proof.scene,
+        glyphRects,
+        utility:toObject(utilityEl?.getBoundingClientRect?.() ?? null)
+      };
     });
     await page.close();
-    if (!result.display || !result.utility) throw new Error(`Missing collision targets: ${JSON.stringify(result)}`);
-    result.intersects = intersects(result.display, result.utility);
+    if (!result.glyphRects.length || !result.utility) throw new Error(`Missing collision targets: ${JSON.stringify(result)}`);
+    result.intersectingGlyphRects = result.glyphRects.filter((rect) => intersects(rect, result.utility));
+    result.intersects = result.intersectingGlyphRects.length > 0;
     evidence.push(result);
   }
 } finally {
@@ -44,4 +60,4 @@ try {
 const collisions = evidence.filter((item) => item.intersects);
 await fs.writeFile(path.join(path.dirname(sourceRoot), 'collision-evidence.json'), JSON.stringify({ pass:collisions.length === 0, evidence, collisions }, null, 2));
 if (collisions.length) throw new Error(`Typography finalist collision gate failed: ${JSON.stringify(collisions)}`);
-console.log(`Typography finalist collision gate passed: ${evidence.length} multilingual frames, 0 prompt/utility collisions.`);
+console.log(`Typography finalist collision gate passed: ${evidence.length} multilingual frames, 0 rendered-glyph/utility collisions.`);
