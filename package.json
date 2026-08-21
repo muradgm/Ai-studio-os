@@ -16,7 +16,7 @@
     "proof:du-bonheur-style-frames": "node ./scripts/du-bonheur-style-frame-proof.mjs",
     "proof:counter-ritual-art-direction": "node ./scripts/du-bonheur-counter-ritual-art-direction-v2.mjs",
     "proof:conversation-typography": "node ./scripts/du-bonheur-conversation-typography-proof.mjs",
-    "proof:conversation-typography-refinement": "node ./scripts/du-bonheur-conversation-typography-refinement-proof.mjs",
+    "proof:conversation-typography-refinement": "node ./scripts/du-bonheur-conversation-typography-refinement-proof.mjs && node ./scripts/du-bonheur-conversation-typography-collision-check.mjs",
     "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
     "fonts:analyze": "node ./scripts/analyze-google-fonts.mjs",
     "test:typography-browser": "node ./scripts/typography-browser-proof.mjs",
