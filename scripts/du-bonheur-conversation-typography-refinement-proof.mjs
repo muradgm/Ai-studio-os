@@ -31,7 +31,6 @@ const SCENES = [
 function esc(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
 }
-function slug(value) { return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 function familyParam(family) { return family.trim().replace(/\s+/g, '+') + ':wght@400;600;700'; }
 function css2(display, body) {
   return `https://fonts.googleapis.com/css2?${[...new Set([display, body])].map((family) => `family=${familyParam(family)}`).join('&')}&display=swap`;
@@ -46,7 +45,7 @@ function commonCss(finalist, scene) {
       --display-size:${tuning.displaySizePx}px;--display-weight:${tuning.displayWeight};--display-line:${tuning.displayLineHeight};--display-track:${tuning.displayTrackingEm}em;
       --body-size:${tuning.bodySizePx}px;--body-line:${tuning.bodyLineHeight};
     }
-    *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink)}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--paper);color:var(--ink)}
     body{font-family:var(--body);font-size:var(--body-size);line-height:var(--body-line);-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
     .frame{position:relative;width:100vw;height:100vh;overflow:hidden;background:var(--paper)}
     .display{font-family:var(--display);font-weight:var(--display-weight);line-height:var(--display-line);letter-spacing:var(--display-track)}
@@ -54,7 +53,7 @@ function commonCss(finalist, scene) {
     .top .center{text-align:center;color:var(--muted)}.top .right{text-align:right}.brand{font-weight:700;letter-spacing:-.025em}
     .rule{position:absolute;left:30px;right:30px;top:88px;height:1px;background:var(--line)}
     .eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
-    .prompt{font-size:var(--display-size);max-width:1180px;margin:28px 0 0}
+    .prompt{font-size:var(--display-size);margin:0;max-width:none}
     .bodycopy{font-size:var(--body-size);line-height:var(--body-line);max-width:560px;margin:28px 0 0}
     .signal{background:var(--acid)}
     .choice{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding:16px 0;font-size:18px}
@@ -62,7 +61,6 @@ function commonCss(finalist, scene) {
     .meta{position:absolute;left:28px;bottom:17px;font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
     .type-meta{position:absolute;right:24px;bottom:16px;background:var(--ink);color:var(--paper);padding:8px 11px;font-size:9px;letter-spacing:.07em}
     .specimen-note{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-    .dark{background:var(--ink);color:var(--paper)}
   `;
 }
 
@@ -78,7 +76,22 @@ function sceneHtml(finalist, scene) {
 
   if (scene.kind === 'language') {
     const copy = scene.language;
-    content = `${topBar()}<section style="position:absolute;left:30px;right:54px;top:126px"><div class="eyebrow">Language stress · ${esc(copy.lang.toUpperCase())}</div><div id="display-test" class="display prompt" lang="${esc(copy.lang)}">${esc(copy.prompt)}</div><div class="signal" style="width:72px;height:12px;margin-top:34px"></div><p id="body-test" class="bodycopy" lang="${esc(copy.lang)}">${esc(copy.response)} The service voice must remain direct while practical reading stays calm, clear and easy to scan.</p><div style="position:absolute;right:0;top:34px;width:28%;border-left:1px solid var(--line);padding-left:26px"><div class="eyebrow">Utility phrase</div><div class="display" style="font-size:42px;margin-top:24px;line-height:.96;letter-spacing:-.035em">${esc(copy.utility)}</div><div class="choice" style="margin-top:44px"><strong style="font-size:21px">Route</strong><span>→</span></div><div class="choice"><strong style="font-size:21px">Selection</strong><span>→</span></div></div></section>`;
+    content = `${topBar()}<section style="position:absolute;left:30px;right:30px;top:126px">
+      <div class="eyebrow">Language stress · ${esc(copy.lang.toUpperCase())}</div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:60px;align-items:start;margin-top:28px">
+        <div style="min-width:0">
+          <div id="display-test" class="display prompt" lang="${esc(copy.lang)}">${esc(copy.prompt)}</div>
+          <div class="signal" style="width:72px;height:12px;margin-top:34px"></div>
+          <p id="body-test" class="bodycopy" lang="${esc(copy.lang)}">${esc(copy.response)} The service voice must remain direct while practical reading stays calm, clear and easy to scan.</p>
+        </div>
+        <div id="utility-test" style="border-left:1px solid var(--line);padding-left:26px;min-width:0">
+          <div class="eyebrow">Utility phrase</div>
+          <div class="display" style="font-size:42px;margin-top:24px;line-height:.96;letter-spacing:-.035em">${esc(copy.utility)}</div>
+          <div class="choice" style="margin-top:44px"><strong style="font-size:21px">Route</strong><span>→</span></div>
+          <div class="choice"><strong style="font-size:21px">Selection</strong><span>→</span></div>
+        </div>
+      </div>
+    </section>`;
   }
 
   if (scene.kind === 'nomenclature') {
@@ -107,7 +120,7 @@ async function asDataUri(file) {
 }
 
 function comparisonHtml(scene, items) {
-  return `<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{margin:0;background:#11110f;color:#f4f1e8;font-family:Arial,sans-serif}.wrap{padding:26px}.head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.title{font-size:27px;font-weight:700}.note{font-size:11px;color:#aaa99f;max-width:760px;text-align:right}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:#201f1b;padding:9px}.label{height:38px;display:flex;align-items:center;justify-content:space-between;font-size:11px}.card img{display:block;width:100%;height:auto;background:#f4f1e8}</style></head><body><div class="wrap"><div class="head"><div class="title">${esc(scene.label)}</div><div class="note">Same Conversation grammar. Only the finalist type system and authored optical tuning differ. Human art-direction review remains required.</div></div><div class="grid">${items.map((item) => `<div class="card"><div class="label"><b>${esc(item.label)}</b><span>${esc(item.meta)}</span></div><img src="${item.src}"></div>`).join('')}</div></div></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}body{margin:0;background:#11110f;color:#f4f1e8;font-family:Arial,sans-serif}.wrap{padding:26px}.head{display:flex;justify-content:space-between;align-items:end;margin-bottom:18px}.title{font-size:27px;font-weight:700}.note{font-size:11px;color:#aaa99f;max-width:760px;text-align:right}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.card{background:#201f1b;padding:9px}.label{height:38px;font-size:11px;display:flex;align-items:center;justify-content:space-between}.card img{display:block;width:100%;height:auto;background:#f4f1e8}</style></head><body><div class="wrap"><div class="head"><div class="title">${esc(scene.label)}</div><div class="note">Same Conversation grammar. Only the finalist type system and authored optical tuning differ. Human art-direction review remains required.</div></div><div class="grid">${items.map((item) => `<div class="card"><div class="label"><b>${esc(item.label)}</b><span>${esc(item.meta)}</span></div><img src="${item.src}"></div>`).join('')}</div></div></body></html>`;
 }
 
 const browser = await chromium.launch({ headless:true });
@@ -147,10 +160,7 @@ try {
           viewport:{ width:window.innerWidth, height:window.innerHeight },
           overflowX:Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth,
           overflowY:Math.max(document.documentElement.scrollHeight, document.body.scrollHeight) - window.innerHeight,
-          displayRect:rect(displayEl),
-          bodyRect:rect(bodyEl),
-          displayLines:lineCount(displayEl),
-          bodyLines:lineCount(bodyEl)
+          displayRect:rect(displayEl), bodyRect:rect(bodyEl), displayLines:lineCount(displayEl), bodyLines:lineCount(bodyEl)
         };
       });
       if (!evidence.displayLoaded || !evidence.bodyLoaded) throw new Error(`Google Font failed to load for ${base}: ${JSON.stringify(evidence)}`);
@@ -205,5 +215,4 @@ const manifest = {
 await fs.writeFile(path.join(outputRoot, 'refinement.json'), JSON.stringify(refinement, null, 2));
 await fs.writeFile(path.join(outputRoot, 'metrics.json'), JSON.stringify(metrics, null, 2));
 await fs.writeFile(path.join(outputRoot, 'manifest.json'), JSON.stringify(manifest, null, 2));
-
 console.log(`Conversation typography finalist proof: ${refinement.finalists.length} finalists × ${SCENES.length} scenes = ${frameIndex.length} browser frames -> ${path.relative(repoRoot, outputRoot)}`);
