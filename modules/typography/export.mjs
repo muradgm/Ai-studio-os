@@ -17,10 +17,12 @@ function compareAxisTags(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
 }
 
-function normalizeVariableAxes(selection) {
+function normalizeVariableAxes(selection, usedTags = null) {
   if (selection?.variable !== true || !Array.isArray(selection.axes)) return [];
+  const filter = usedTags instanceof Set ? usedTags : null;
   return selection.axes
     .filter((axis) => axis && typeof axis.tag === 'string' && axis.tag.length === 4)
+    .filter((axis) => !filter || filter.has(axis.tag))
     .map((axis) => ({
       tag: axis.tag,
       start: Number(axis.start),
@@ -38,9 +40,24 @@ function axisRequestValue(axis) {
   return start === end ? start : `${start}..${end}`;
 }
 
-function cssFamilyQuery(selection) {
+function usedAxisTagsForFamily(application, family) {
+  if (!application || !family) return null;
+  const tags = new Set();
+  for (const styleSet of [application.styles, application.mobileStyles]) {
+    for (const style of Object.values(styleSet ?? {})) {
+      if (style?.family !== family) continue;
+      for (const [tag, value] of Object.entries(style.axes ?? {})) {
+        if (typeof tag === 'string' && tag.length === 4 && Number.isFinite(value)) tags.add(tag);
+      }
+    }
+  }
+  return tags;
+}
+
+function cssFamilyQuery(selection, { application = null } = {}) {
   const family = encodeURIComponent(selection.family).replace(/%20/g, '+');
-  const axes = normalizeVariableAxes(selection);
+  const usedTags = application ? usedAxisTagsForFamily(application, selection.family) : null;
+  const axes = normalizeVariableAxes(selection, usedTags);
 
   if (axes.length) {
     const tags = axes.map((axis) => axis.tag);
@@ -52,12 +69,11 @@ function cssFamilyQuery(selection) {
   return `family=${family}:wght@${weights.join(';')}`;
 }
 
-export function buildGoogleFontsCss2Url(selections = []) {
+export function buildGoogleFontsCss2Url(selections = [], { application = null } = {}) {
   const googleSelections = selections.filter((selection) => selection?.source === 'google-fonts' && selection.family);
   if (!googleSelections.length) return null;
 
-  // De-duplicate identical family requests while preserving role-level selections elsewhere.
-  const queries = [...new Set(googleSelections.map(cssFamilyQuery))];
+  const queries = [...new Set(googleSelections.map((selection)=>cssFamilyQuery(selection, { application })))];
   return `https://fonts.googleapis.com/css2?${queries.join('&')}&display=swap`;
 }
 
@@ -113,7 +129,7 @@ export function buildTypographyProductionConfig(system) {
     ...buildTypographyApplicationTokens(system?.application)
   };
   return {
-    css2Url: buildGoogleFontsCss2Url(selections),
+    css2Url: buildGoogleFontsCss2Url(selections, { application:system?.application }),
     cssVariables: Object.fromEntries(Object.entries(tokens).map(([key, value]) => [`--${key}`, value])),
     families: selections.map(({ role, family, weights, source, variable, axes }) => ({
       role,
