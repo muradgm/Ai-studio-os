@@ -68,7 +68,7 @@ export function supportsLanguages(font, languages=[]) {
   return required.every((subset)=>available.has(subset) || (subset === 'latin' && available.has('latin-ext')));
 }
 
-function scoreCategoryForStrategy(font, role, pressures={}) {
+function scoreCategoryForStrategy(font, role, pressures={}, creativeAuthority=false) {
   const category = String(font.category ?? '').toLowerCase();
   let score = 0;
   const reasons = [];
@@ -90,27 +90,59 @@ function scoreCategoryForStrategy(font, role, pressures={}) {
     else if (category === 'sans-serif') score += 10;
     else score -= 4;
   }
+  if (creativeAuthority) {
+    score = Math.round(score * 0.35);
+    reasons.push('business/category heuristic attenuated because Creative Thesis or Creative World is authoritative');
+  }
   return { score, reasons };
 }
 
-function scoreExplicitCategoryPreference(font, business={}, role) {
-  const preferred = business.preferredCategories?.[role];
+function scoreExplicitCategoryPreference(font, business={}, role, intent=null) {
+  const creativePreferred = intent?.preferredCategories?.[role];
+  const preferred = Array.isArray(creativePreferred) && creativePreferred.length
+    ? creativePreferred
+    : business.preferredCategories?.[role];
   if (!Array.isArray(preferred) || !preferred.length) return { score:0, reasons:[] };
   const categories = preferred.map((value)=>String(value).toLowerCase());
   const index = categories.indexOf(String(font.category ?? '').toLowerCase());
-  if (index === 0) return { score:12, reasons:['client/project explicitly prefers this category for the role'] };
-  if (index > 0) return { score:6, reasons:['category is within the explicit project preference set'] };
-  return { score:-12, reasons:['category falls outside an explicit project preference'] };
+  if (index === 0) return { score:creativePreferred ? 18 : 12, reasons:[creativePreferred ? 'selected creative world explicitly prefers this category for the role' : 'client/project explicitly prefers this category for the role'] };
+  if (index > 0) return { score:creativePreferred ? 10 : 6, reasons:['category is within the explicit role preference set'] };
+  return { score:creativePreferred ? -18 : -12, reasons:['category falls outside an explicit role preference'] };
+}
+
+function scoreCreativeDescriptorFit(font, role, intent=null) {
+  const targets = intent?.descriptorTargets?.[role];
+  if (!targets || typeof targets !== 'object') return { score:0, reasons:[], available:false };
+  const descriptors = font.intelligence?.descriptors ?? {};
+  let compared = 0;
+  let total = 0;
+  const reasons = [];
+  for (const [key, spec] of Object.entries(targets)) {
+    const actual = Number(descriptors[key]);
+    const target = Number(spec?.target);
+    const tolerance = Number(spec?.tolerance ?? 20);
+    if (!Number.isFinite(actual) || !Number.isFinite(target) || !Number.isFinite(tolerance)) continue;
+    const distance = Math.abs(actual - target);
+    const contribution = Math.max(-20, 20 - (distance / Math.max(1, tolerance)) * 20);
+    total += contribution;
+    compared += 1;
+    reasons.push(`${key} ${distance <= tolerance ? 'fits' : 'misses'} selected-world target`);
+  }
+  if (!compared) return { score:0, reasons:['creative descriptor targets exist but this font lacks matching measured evidence'], available:false };
+  return { score:Math.round(total / compared), reasons, available:true };
 }
 
 export function scoreBusinessFit(font, { business={}, requirements={}, role='body', strategy={} }={}) {
   let score = 50;
   const reasons = [];
   const pressures = strategy.pressures ?? strategy;
-  const strategicCategory = scoreCategoryForStrategy(font, role, pressures);
+  const intent = strategy.intent ?? null;
+  const strategicCategory = scoreCategoryForStrategy(font, role, pressures, strategy.creativeAuthority === true);
   score += strategicCategory.score; reasons.push(...strategicCategory.reasons);
-  const explicitCategory = scoreExplicitCategoryPreference(font, business, role);
+  const explicitCategory = scoreExplicitCategoryPreference(font, business, role, intent);
   score += explicitCategory.score; reasons.push(...explicitCategory.reasons);
+  const creativeDescriptors = scoreCreativeDescriptorFit(font, role, intent);
+  score += creativeDescriptors.score; reasons.push(...creativeDescriptors.reasons);
   if (supportsLanguages(font, requirements.languages ?? [])) { score += 15; reasons.push('required language coverage is present'); }
   else { score -= 45; reasons.push('required language coverage is incomplete or unresolved'); }
   const weightCount = normalWeights(font).length;
@@ -118,7 +150,7 @@ export function scoreBusinessFit(font, { business={}, requirements={}, role='bod
   else if (role === 'display' && weightCount >= 2) score += 5;
   if ((font.axes ?? []).length > 0) score += 5;
   if ((pressures.accessibility ?? 50) >= 75 && role === 'body' && font.category === 'display') score -= 10;
-  return { score:clamp(score), reasons };
+  return { score:clamp(score), reasons, creativeDescriptors };
 }
 
 export function scoreProductionFitness(font, { requirements={}, role='body' }={}) {
