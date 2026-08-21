@@ -12,11 +12,7 @@ const catalog = [
 ];
 
 test('business strategy turns client context into typography pressures', () => {
-  const strategy = buildBusinessTypographyStrategy({
-    business:{ type:'French patisserie', industry:'hospitality food retail', model:'local-retail', positioning:'premium but accessible' },
-    brand:{ traits:['warm','refined','artisanal','contemporary'] },
-    requirements:{ languages:['de','fr','en'] }
-  });
+  const strategy = buildBusinessTypographyStrategy({business:{ type:'French patisserie', industry:'hospitality food retail', model:'local-retail', positioning:'premium but accessible' },brand:{ traits:['warm','refined','artisanal','contemporary'] },requirements:{ languages:['de','fr','en'] }});
   assert.ok(strategy.pressures.warmth >= 70);
   assert.ok(strategy.pressures.expression >= 70);
   assert.ok(strategy.pressures.distinctiveness >= 70);
@@ -24,41 +20,19 @@ test('business strategy turns client context into typography pressures', () => {
 });
 
 test('explicit typography pressures override inferred defaults', () => {
-  const strategy = buildBusinessTypographyStrategy({
-    business:{ type:'luxury gallery', typographyPressures:{ expression:25, trust:92 } }
-  });
+  const strategy = buildBusinessTypographyStrategy({business:{ type:'luxury gallery', typographyPressures:{ expression:25, trust:92 } }});
   assert.equal(strategy.pressures.expression, 25);
   assert.equal(strategy.pressures.trust, 92);
 });
 
 test('typography strategy fixture validates client strategy and declared pairing threshold', () => {
-  const output = buildTypographySystem({
-    catalog,
-    business:{ type:'French patisserie', industry:'hospitality food retail', model:'local-retail', positioning:'premium but accessible' },
-    brand:{ traits:['warm','refined','artisanal','contemporary'] },
-    requirements:{ languages:['de','fr','en'] },
-    pairing:{ strategy:'contrast-with-coherence', minScore:75 },
-    marketCommonFamilies:['Poppins']
-  });
-  const result = validateTypographyBenchmark(output, {
-    pass:true,
-    displayFamily:'Newsreader',
-    bodyFamily:'Manrope',
-    utilityFamily:'IBM Plex Mono',
-    minPairingScore:75,
-    excludedFamilies:['Poppins'],
-    minPressures:[{key:'warmth',value:70},{key:'distinctiveness',value:70}]
-  });
+  const output = buildTypographySystem({catalog,business:{ type:'French patisserie', industry:'hospitality food retail', model:'local-retail', positioning:'premium but accessible' },brand:{ traits:['warm','refined','artisanal','contemporary'] },requirements:{ languages:['de','fr','en'] },pairing:{ strategy:'contrast-with-coherence', minScore:75 },marketCommonFamilies:['Poppins']});
+  const result = validateTypographyBenchmark(output, {pass:true,displayFamily:'Newsreader',bodyFamily:'Manrope',utilityFamily:'Manrope',minPairingScore:75,excludedFamilies:['Poppins'],minPressures:[{key:'warmth',value:70},{key:'distinctiveness',value:70}]});
   assert.equal(result.pass, true, result.failures.join('\n'));
 });
 
 test('pairing threshold can block weak systems instead of silently selecting one', () => {
-  const output = buildTypographySystem({
-    catalog: catalog.map(({descriptors, ...font}) => font),
-    business:{ type:'French patisserie' },
-    requirements:{ languages:['de','fr','en'] },
-    pairing:{ minScore:99 }
-  });
+  const output = buildTypographySystem({catalog: catalog.map(({descriptors, ...font}) => font),business:{ type:'French patisserie' },requirements:{ languages:['de','fr','en'] },pairing:{ minScore:99 }});
   assert.equal(output.pass, false);
   assert.equal(output.findings[0].code, 'typography-no-valid-pairing');
 });
