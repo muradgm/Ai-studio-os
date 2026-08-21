@@ -77,12 +77,24 @@ jobs:
       - name: Produce Du Bonheur style-frame visual proof
         run: npm run proof:du-bonheur-style-frames
 
+      - name: Produce Counter Ritual art-direction proof
+        run: npm run proof:counter-ritual-art-direction
+
       - name: Upload Du Bonheur style-frame proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: du-bonheur-style-frame-proof-v1
           path: artifacts/du-bonheur/style-frame-proof-v1
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Counter Ritual art-direction proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: counter-ritual-art-direction-v2
+          path: artifacts/du-bonheur/counter-ritual-art-direction-v2
           if-no-files-found: error
           retention-days: 7
 
