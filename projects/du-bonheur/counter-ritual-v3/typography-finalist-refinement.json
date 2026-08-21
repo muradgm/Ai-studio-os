@@ -12,7 +12,7 @@
       "workingPosition": "finalist-a",
       "authoredHypothesis": "The display voice should feel like a person asking a useful question; the reading voice should calm the system down without becoming anonymous.",
       "tuning": {
-        "desktop": {"displayWeight": 600, "displaySizePx": 132, "displayLineHeight": 0.87, "displayTrackingEm": -0.052, "bodySizePx": 17, "bodyLineHeight": 1.5},
+        "desktop": {"displayWeight": 600, "displaySizePx": 108, "displayLineHeight": 0.89, "displayTrackingEm": -0.046, "bodySizePx": 17, "bodyLineHeight": 1.5},
         "mobile": {"displayWeight": 600, "displaySizePx": 57, "displayLineHeight": 0.91, "displayTrackingEm": -0.043, "bodySizePx": 16, "bodyLineHeight": 1.48}
       },
       "killCriteria": [
@@ -30,7 +30,7 @@
       "workingPosition": "finalist-b",
       "authoredHypothesis": "The display voice should feel contemporary, exact and culturally current while the reading voice preserves warmth and easy utility scanning.",
       "tuning": {
-        "desktop": {"displayWeight": 600, "displaySizePx": 130, "displayLineHeight": 0.89, "displayTrackingEm": -0.046, "bodySizePx": 17, "bodyLineHeight": 1.5},
+        "desktop": {"displayWeight": 600, "displaySizePx": 106, "displayLineHeight": 0.91, "displayTrackingEm": -0.041, "bodySizePx": 17, "bodyLineHeight": 1.5},
         "mobile": {"displayWeight": 600, "displaySizePx": 56, "displayLineHeight": 0.92, "displayTrackingEm": -0.038, "bodySizePx": 16, "bodyLineHeight": 1.48}
       },
       "killCriteria": [
