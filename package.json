@@ -13,6 +13,7 @@
     "build:creative-engineering": "vite build apps/creative-engineering-fixture --outDir ../../dist/creative-engineering-fixture --emptyOutDir",
     "test:browser-runtime": "node ./scripts/creative-engineering-browser-smoke.mjs",
     "test:command-center": "node ./scripts/command-center-execution-smoke.mjs",
+    "test:typography-browser": "node ./scripts/typography-browser-proof.mjs",
     "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
     "fonts:analyze": "node ./scripts/analyze-google-fonts.mjs",
     "studio": "node ./bin/studio.mjs",
