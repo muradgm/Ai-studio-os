@@ -40,16 +40,17 @@ export function resolveTypographyArtDirection({ systems = [], intent = null, rev
   const findings = [];
   if (review.schema && review.schema !== 'ai-studio-os/typography-art-direction-review@1') findings.push({severity:'blocker',code:'typography-art-direction-review-schema-unsupported'});
   if (review.reviewReady !== true || review.approved !== true) findings.push({severity:'blocker',code:'typography-art-direction-review-not-approved'});
-  const selectedSystemId = clean(review.selectedSystemId);
-  const selected = identified.find((system)=>system.systemId === selectedSystemId) ?? null;
-  if (!selected) findings.push({severity:'blocker',code:'typography-art-direction-selected-system-invalid',selectedSystemId:selectedSystemId || null});
+  const requestedSystemId = clean(review.selectedSystemId);
+  const selected = identified.find((system)=>system.systemId === requestedSystemId) ?? null;
+  if (!selected) findings.push({severity:'blocker',code:'typography-art-direction-selected-system-invalid',selectedSystemId:requestedSystemId || null});
   const rationale = clean(review.rationale);
   if (!rationale) findings.push({severity:'blocker',code:'typography-art-direction-rationale-required'});
 
   return {
     stage:'typography-art-direction', schema:'ai-studio-os/typography-art-direction-review@1', required:true,
     pass:!findings.some((item)=>item.severity === 'blocker'), approved:findings.length === 0,
-    mode:'reviewed-selection', systems:identified, selectedSystemId:selected?.systemId ?? selectedSystemId || null,
+    mode:'reviewed-selection', systems:identified,
+    selectedSystemId:selected?.systemId ?? (requestedSystemId || null),
     selected, rationale:rationale || null,
     reviewer:clean(review.reviewer) || null,
     findings
