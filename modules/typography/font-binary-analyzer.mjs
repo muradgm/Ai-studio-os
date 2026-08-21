@@ -143,7 +143,14 @@ function parsePost(view, table) {
 function buildEvidenceDescriptors(metrics) {
   const descriptors = {};
   if (Number.isFinite(metrics.os2?.normalized?.xHeight)) descriptors.xHeight = metrics.os2.normalized.xHeight;
+  if (Number.isFinite(metrics.os2?.normalized?.capHeight)) descriptors.capHeight = metrics.os2.normalized.capHeight;
   if (Number.isFinite(metrics.os2?.normalized?.averageWidth)) descriptors.width = metrics.os2.normalized.averageWidth;
+  const ascender = metrics.os2?.normalized?.typoAscender ?? metrics.hhea?.normalized?.ascender;
+  const descender = metrics.os2?.normalized?.typoDescender ?? metrics.hhea?.normalized?.descender;
+  const lineGap = metrics.os2?.normalized?.typoLineGap ?? metrics.hhea?.normalized?.lineGap;
+  if (Number.isFinite(ascender)) descriptors.ascender = ascender;
+  if (Number.isFinite(descender)) descriptors.descender = descender;
+  if (Number.isFinite(lineGap)) descriptors.lineGap = lineGap;
   return descriptors;
 }
 
