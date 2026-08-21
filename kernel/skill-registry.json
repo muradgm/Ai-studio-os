@@ -35,6 +35,7 @@
 
     {"id":"creative-thesis","category":"task","domains":["brand","identity","landing-page","campaign","product","creative-engineering","immersive-web","cinematic-product-page"],"phases":["direction"],"path":".agents/skills/creative-thesis/SKILL.md","status":"active"},
     {"id":"creative-world-exploration","category":"task","domains":["brand","identity","landing-page","campaign","product","creative-engineering","immersive-web","cinematic-product-page"],"phases":["direction","explore"],"path":".agents/skills/creative-world-exploration/SKILL.md","status":"active"},
+    {"id":"style-frame-proof","category":"task","domains":["brand","identity","landing-page","campaign","product","creative-engineering","immersive-web","cinematic-product-page"],"phases":["explore","create"],"path":".agents/skills/style-frame-proof/SKILL.md","status":"active"},
     {"id":"logo-exploration","category":"task","domains":["logo","identity"],"phases":["explore"],"path":".agents/skills/logo-exploration/SKILL.md","status":"active"},
     {"id":"motion-choreography","category":"task","domains":["motion","landing-page","campaign"],"phases":["create"],"path":".agents/skills/motion-choreography/SKILL.md","status":"active"},
     {"id":"landing-page-layout","category":"task","domains":["landing-page","web"],"phases":["explore","create"],"path":".agents/skills/landing-page-layout/SKILL.md","status":"active"},
