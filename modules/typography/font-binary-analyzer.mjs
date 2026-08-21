@@ -187,9 +187,13 @@ export function analyzeFontBinary(input, { family = null, reference = null } = {
 export async function analyzeFontUrl(url, {
   family = null,
   fetchImpl = globalThis.fetch,
-  maxBytes = 8 * 1024 * 1024
+  maxBytes = 8 * 1024 * 1024,
+  additionalAnalyzers = []
 } = {}) {
   if (typeof fetchImpl !== 'function') throw new TypeError('font URL analysis requires a fetch implementation');
+  if (!Array.isArray(additionalAnalyzers) || additionalAnalyzers.some((analyzer) => typeof analyzer !== 'function')) {
+    throw new TypeError('additionalAnalyzers must be an array of functions');
+  }
   const parsed = new URL(url);
   if (!['https:', 'http:'].includes(parsed.protocol)) throw new Error('font URL must use http or https');
 
@@ -200,7 +204,18 @@ export async function analyzeFontUrl(url, {
 
   const buffer = await response.arrayBuffer();
   if (buffer.byteLength > maxBytes) throw new Error(`font binary exceeds ${maxBytes} byte analysis limit`);
-  return analyzeFontBinary(buffer, { family, reference: parsed.toString() });
+  const base = analyzeFontBinary(buffer, { family, reference: parsed.toString() });
+  if (!additionalAnalyzers.length) return base;
+
+  const extensions = [];
+  for (const analyzer of additionalAnalyzers) {
+    try {
+      extensions.push(await analyzer(buffer, { family, reference: parsed.toString() }));
+    } catch (error) {
+      extensions.push({ available: false, reason: error.message });
+    }
+  }
+  return { ...base, extensions };
 }
 
 export async function analyzeCatalogFont(font, options = {}) {
