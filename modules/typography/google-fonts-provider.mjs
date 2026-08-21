@@ -1,8 +1,23 @@
 const DEFAULT_ENDPOINT = 'https://www.googleapis.com/webfonts/v1/webfonts';
 const ALLOWED_SORTS = new Set(['alpha', 'date', 'popularity', 'style', 'trending']);
+const ALLOWED_GOOGLE_API_HOSTS = new Set(['www.googleapis.com', 'fonts.googleapis.com']);
 
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function validateCredentialEndpoint(endpoint) {
+  let url;
+  try { url = new URL(endpoint); }
+  catch { throw new TypeError('Google Fonts endpoint must be a valid URL'); }
+  if (url.protocol !== 'https:') throw new Error('Google Fonts credential endpoint must use HTTPS');
+  if (!ALLOWED_GOOGLE_API_HOSTS.has(url.hostname.toLowerCase())) {
+    throw new Error(`Google Fonts credential endpoint host is not allowed: ${url.hostname}`);
+  }
+  if (!/^\/webfonts\/v1\/webfonts\/?$/.test(url.pathname)) {
+    throw new Error(`Google Fonts credential endpoint path is not allowed: ${url.pathname}`);
+  }
+  return url;
 }
 
 function normalizeAxis(axis) {
@@ -43,6 +58,7 @@ export function createGoogleFontsProvider({
   now = () => Date.now()
 } = {}) {
   if (typeof fetchImpl !== 'function') throw new TypeError('google fonts provider requires a fetch implementation');
+  const credentialEndpoint = validateCredentialEndpoint(endpoint);
 
   let cache = null;
 
@@ -53,7 +69,8 @@ export function createGoogleFontsProvider({
     const cacheKey = `${sort}:${capability ?? ''}`;
     if (!forceRefresh && cache?.key === cacheKey && now() - cache.savedAt < cacheTtlMs) return cache.value;
 
-    const url = new URL(endpoint);
+    // Clone the validated endpoint before attaching the credential. Never append a key to an unvalidated URL.
+    const url = new URL(credentialEndpoint.toString());
     url.searchParams.set('key', apiKey);
     url.searchParams.set('sort', sort);
     if (capability) url.searchParams.set('capability', capability);
@@ -105,3 +122,5 @@ export function createGoogleFontsProvider({
 
   return Object.freeze({ id: 'google-fonts', list, search, clearCache });
 }
+
+export { DEFAULT_ENDPOINT, ALLOWED_GOOGLE_API_HOSTS };
