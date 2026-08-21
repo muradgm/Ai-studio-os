@@ -1,0 +1,28 @@
+{
+  "schema": "ai-studio-os/experience-thesis-lock@1",
+  "projectId": "benchmark-001-du-bonheur",
+  "worldId": "counter-ritual",
+  "worldLabel": "Counter Ritual",
+  "status": "experience-thesis-locked-for-art-direction-exploration",
+  "sourceLock": "../counter-ritual-v2/EXPERIENCE_THESIS_LOCK.json",
+  "lockedExperienceIdea": "The site behaves like an intimate service ritual at the pâtisserie counter: arrival, attention, choice, preparation, handoff and return create the experience rhythm.",
+  "lockedSequence": ["arrival", "attention", "choice", "preparation", "handoff", "return"],
+  "lockedPrinciples": [
+    "Human service sequence is the governing experience behavior.",
+    "Users should receive immediate contextual response rather than theatrical delay.",
+    "Practical product, visit, route and shop information remains part of the ritual rather than breaking out into generic utility UI.",
+    "Mobile is treated as direct personal service, not a stacked-down desktop experience.",
+    "Motion and interaction should communicate attention, response, preparation or handoff rather than generic premium animation."
+  ],
+  "artDirectorFreedoms": ["composition", "typographic behavior", "color system", "shape language", "image treatment", "material language", "spatial metaphor", "motion expression", "interaction expression", "sound policy"],
+  "explicitlyNotLocked": ["current Counter Ritual circles or tray motif", "current peach palette", "current serif/sans proxy treatment", "current grid", "current image placeholders", "current button/pill styling", "production technology"],
+  "selectionRationale": "Counter Ritual is selected for deeper exploration because its service behavior can govern navigation, interaction, motion, mobile UX and conversion while remaining more project-specific than a purely editorial or documentary visual grammar.",
+  "truth": {
+    "humanExperienceThesisSelectionConfirmed": true,
+    "currentArtDirectionApproved": false,
+    "styleFramesApproved": false,
+    "typographyApproved": false,
+    "productionTechnologyApproved": false,
+    "productionReady": false
+  }
+}
