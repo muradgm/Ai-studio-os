@@ -73,12 +73,15 @@ test('cross-project recurring evidence can be promoted', () => {
   assert.equal(result.promote, true);
 });
 
-test('creative runtime keeps design, image, and motion under one direction', () => {
+test('creative runtime keeps design, image, and motion under one authored thesis direction while world selection remains unresolved', () => {
   const output = runCreativeRuntime(input);
   assert.equal(output.design.directionContext.statement, output.creativeDirection.directionStatement);
   assert.equal(output.image.directionContext.statement, output.creativeDirection.directionStatement);
   assert.equal(output.motion.directionContext.statement, output.creativeDirection.directionStatement);
-  assert.match(output.creativeDirection.directionStatement, /tactile × editorial/);
+  assert.match(output.creativeDirection.directionStatement, /sensory transformation × urban restraint/);
+  assert.equal(output.creativeDirection.thesisContext?.governingIdea, input.creativeThesisCandidate.governingIdea);
+  assert.equal(output.selectedCreativeWorld, null);
+  assert.equal(output.creativeDirection.worldContext, null);
 });
 
 test('Du Bonheur benchmark passes creative runtime invariants', () => {
