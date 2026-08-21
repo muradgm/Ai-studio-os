@@ -2,6 +2,7 @@
   "requiredStages": [
     "inspiration",
     "creative-thesis",
+    "creative-world",
     "creative-direction",
     "design",
     "image",
@@ -16,6 +17,7 @@
     "antiReferences"
   ],
   "requireCreativeThesis": true,
+  "requireCreativeWorldExploration": true,
   "requireReducedMotion": true,
   "requireSharedCreativeDirection": true,
   "assetExpectations": [
