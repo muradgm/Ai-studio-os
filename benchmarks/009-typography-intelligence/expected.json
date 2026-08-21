@@ -4,6 +4,9 @@
   "bodyFamily": "Manrope",
   "utilityFamily": "IBM Plex Mono",
   "minPairingScore": 85,
+  "evidenceLevel": "evidence-backed-structural",
+  "minBodySize": 16,
+  "maxMeasure": 72,
   "excludedFamilies": ["Roboto", "Poppins"],
   "minPressures": [
     {"key": "warmth", "value": 70},
