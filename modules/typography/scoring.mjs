@@ -2,10 +2,17 @@ import { compareFontStructures } from './font-intelligence.mjs';
 
 const DEFAULT_COMMON_FAMILIES = new Set(['roboto','open sans','lato','montserrat','poppins','inter','raleway']);
 const LANGUAGE_SUBSET = {
-  ar:'arabic', bg:'cyrillic', de:'latin', el:'greek', en:'latin', es:'latin', fr:'latin', he:'hebrew', hi:'devanagari', it:'latin',
-  ja:'japanese', ko:'korean', pl:'latin-ext', pt:'latin', ru:'cyrillic', tr:'latin-ext', uk:'cyrillic', vi:'vietnamese',
-  'zh-cn':'chinese-simplified', 'zh-tw':'chinese-traditional'
+  ar:'arabic', bg:'cyrillic', cs:'latin-ext', de:'latin', el:'greek', en:'latin', es:'latin', fa:'arabic', fr:'latin',
+  he:'hebrew', hi:'devanagari', hu:'latin-ext', id:'latin', it:'latin', ja:'japanese', ko:'korean', nl:'latin', no:'latin',
+  pl:'latin-ext', pt:'latin', ro:'latin-ext', ru:'cyrillic', sk:'latin-ext', sv:'latin', th:'thai', tr:'latin-ext',
+  uk:'cyrillic', vi:'vietnamese', 'zh-cn':'chinese-simplified', 'zh-sg':'chinese-simplified',
+  'zh-tw':'chinese-traditional', 'zh-hk':'chinese-traditional', 'zh-hans':'chinese-simplified', 'zh-hant':'chinese-traditional'
 };
+const SCRIPT_SUBSET = {
+  Arab:'arabic', Cyrl:'cyrillic', Deva:'devanagari', Grek:'greek', Hebr:'hebrew', Jpan:'japanese', Kore:'korean',
+  Latn:'latin', Thai:'thai', Hans:'chinese-simplified', Hant:'chinese-traditional'
+};
+const LATIN_EXT_LANGUAGES = new Set(['cs','hu','pl','ro','sk','tr']);
 
 function clamp(value, min=0, max=100) { return Math.max(min, Math.min(max, Math.round(value))); }
 function normalWeights(font) {
@@ -17,12 +24,46 @@ function normalWeights(font) {
   return [...weights].sort((a,b)=>a-b);
 }
 
+function normalizeLanguageTag(language) {
+  const raw = String(language ?? '').trim().replace(/_/g, '-');
+  if (!raw) return null;
+  try { return new Intl.Locale(raw).toString().toLowerCase(); }
+  catch { return null; }
+}
+
+function resolveLanguageRequirement(language) {
+  const tag = normalizeLanguageTag(language);
+  if (!tag) return { input:String(language ?? ''), subset:null, resolved:false, reason:'invalid-language-tag' };
+  if (LANGUAGE_SUBSET[tag]) return { input:tag, subset:LANGUAGE_SUBSET[tag], resolved:true };
+  const base = tag.split('-')[0];
+  if (base === 'zh') return { input:tag, subset:null, resolved:false, reason:'chinese-script-or-region-required' };
+  if (LANGUAGE_SUBSET[base]) return { input:tag, subset:LANGUAGE_SUBSET[base], resolved:true };
+  try {
+    const locale = new Intl.Locale(tag).maximize();
+    const script = locale.script;
+    const subset = SCRIPT_SUBSET[script] ?? null;
+    if (!subset) return { input:tag, subset:null, resolved:false, reason:`unsupported-script:${script ?? 'unknown'}` };
+    if (subset === 'latin' && LATIN_EXT_LANGUAGES.has(base)) return { input:tag, subset:'latin-ext', resolved:true };
+    return { input:tag, subset, resolved:true };
+  } catch {
+    return { input:tag, subset:null, resolved:false, reason:'language-resolution-failed' };
+  }
+}
+
+export function resolveLanguageRequirements(languages=[]) {
+  return languages.map(resolveLanguageRequirement);
+}
+
 export function requiredSubsets(languages=[]) {
-  return [...new Set(languages.map((language)=>LANGUAGE_SUBSET[String(language).toLowerCase()] ?? null).filter(Boolean))];
+  const resolved = resolveLanguageRequirements(languages);
+  if (resolved.some((item)=>!item.resolved)) return [];
+  return [...new Set(resolved.map((item)=>item.subset).filter(Boolean))];
 }
 export function supportsLanguages(font, languages=[]) {
-  const required = requiredSubsets(languages);
-  if (!required.length) return true;
+  if (!languages.length) return true;
+  const resolved = resolveLanguageRequirements(languages);
+  if (resolved.some((item)=>!item.resolved)) return false;
+  const required = [...new Set(resolved.map((item)=>item.subset).filter(Boolean))];
   const available = new Set((font.subsets ?? []).map((subset)=>String(subset).toLowerCase()));
   return required.every((subset)=>available.has(subset) || (subset === 'latin' && available.has('latin-ext')));
 }
@@ -71,7 +112,7 @@ export function scoreBusinessFit(font, { business={}, requirements={}, role='bod
   const explicitCategory = scoreExplicitCategoryPreference(font, business, role);
   score += explicitCategory.score; reasons.push(...explicitCategory.reasons);
   if (supportsLanguages(font, requirements.languages ?? [])) { score += 15; reasons.push('required language coverage is present'); }
-  else { score -= 45; reasons.push('required language coverage is incomplete'); }
+  else { score -= 45; reasons.push('required language coverage is incomplete or unresolved'); }
   const weightCount = normalWeights(font).length;
   if (role === 'body' && weightCount >= 4) score += 8;
   else if (role === 'display' && weightCount >= 2) score += 5;
