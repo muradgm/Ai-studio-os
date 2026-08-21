@@ -80,6 +80,20 @@ function evaluateCreativeWorld(world, findings) {
   };
 }
 
+function authoredOverrideFields(authored, worldIntent) {
+  if (!authored || !Object.keys(authored).length || !worldIntent || !Object.keys(worldIntent).length) return [];
+  const fields = [];
+  const mappings = [
+    ['statement','statement'], ['roles','roles'], ['preferredCategories','preferredCategories'],
+    ['avoidCategories','avoidCategories'], ['descriptorTargets','descriptorTargets'], ['pressures','pressures']
+  ];
+  for (const [authoredKey, worldKey] of mappings) {
+    if (authored[authoredKey] !== undefined && worldIntent[worldKey] !== undefined) fields.push(authoredKey);
+  }
+  if ((authored.antiPatterns ?? authored.avoid) && (worldIntent.antiPatterns ?? worldIntent.avoid)) fields.push('antiPatterns');
+  return fields;
+}
+
 export function buildTypographyIntent({ creativeThesis = null, creativeWorld = null, explicit = null } = {}) {
   const thesis = creativeThesis && typeof creativeThesis === 'object' && !Array.isArray(creativeThesis) ? creativeThesis : null;
   const world = creativeWorld && typeof creativeWorld === 'object' && !Array.isArray(creativeWorld) ? creativeWorld : null;
@@ -96,11 +110,8 @@ export function buildTypographyIntent({ creativeThesis = null, creativeWorld = n
 
   const worldState = evaluateCreativeWorld(world, findings);
   const worldIntent = worldState.intent;
-  const statement = clean(
-    authored.statement
-    ?? worldIntent.statement
-    ?? thesis?.expressionTests?.typography
-  );
+  const overrideFields = authoredOverrideFields(authored, worldIntent);
+  const statement = clean(authored.statement ?? worldIntent.statement ?? thesis?.expressionTests?.typography);
   const governingIdea = clean(thesis?.governingIdea?.statement);
   const creativeTension = clean(thesis?.creativeTension?.label);
   const antiPatterns = cleanList([
@@ -109,35 +120,34 @@ export function buildTypographyIntent({ creativeThesis = null, creativeWorld = n
     ...(worldIntent.antiPatterns ?? worldIntent.avoid ?? []),
     ...(authored.antiPatterns ?? authored.avoid ?? [])
   ]);
-  const roleDirectives = {
-    ...objectOrEmpty(worldIntent.roles),
-    ...objectOrEmpty(authored.roles)
-  };
-  const preferredCategories = normalizeCategoryMap({
-    ...objectOrEmpty(worldIntent.preferredCategories),
-    ...objectOrEmpty(authored.preferredCategories)
-  });
-  const avoidCategories = cleanList([
-    ...(worldIntent.avoidCategories ?? []),
-    ...(authored.avoidCategories ?? [])
-  ]).map((value)=>value.toLowerCase());
-  const descriptorTargets = normalizeDescriptorTargets({
-    ...objectOrEmpty(worldIntent.descriptorTargets),
-    ...objectOrEmpty(authored.descriptorTargets)
-  });
-  const pressureOverrides = normalizePressureOverrides({
-    ...objectOrEmpty(worldIntent.pressures),
-    ...objectOrEmpty(authored.pressures)
-  });
+  const roleDirectives = { ...objectOrEmpty(worldIntent.roles), ...objectOrEmpty(authored.roles) };
+  const preferredCategories = normalizeCategoryMap({ ...objectOrEmpty(worldIntent.preferredCategories), ...objectOrEmpty(authored.preferredCategories) });
+  const avoidCategories = cleanList([...(worldIntent.avoidCategories ?? []), ...(authored.avoidCategories ?? [])]).map((value)=>value.toLowerCase());
+  const descriptorTargets = normalizeDescriptorTargets({ ...objectOrEmpty(worldIntent.descriptorTargets), ...objectOrEmpty(authored.descriptorTargets) });
+  const pressureOverrides = normalizePressureOverrides({ ...objectOrEmpty(worldIntent.pressures), ...objectOrEmpty(authored.pressures) });
 
   const enabled = Boolean(thesis || worldState.authoritative || statement || Object.keys(roleDirectives).length || Object.keys(descriptorTargets).length);
-  const authority = worldState.authoritative && Object.keys(worldIntent).length
-    ? 'selected-creative-world'
-    : thesis
-      ? 'creative-thesis'
-      : Object.keys(authored).length
-        ? 'explicit-typography-intent'
-        : 'business-constraints-only';
+  const authoredPresent = Object.keys(authored).length > 0;
+  const authority = worldState.authoritative && authoredPresent
+    ? 'typography-art-direction'
+    : worldState.authoritative && Object.keys(worldIntent).length
+      ? 'selected-creative-world'
+      : thesis && authoredPresent
+        ? 'typography-art-direction'
+        : thesis
+          ? 'creative-thesis'
+          : authoredPresent
+            ? 'explicit-typography-intent'
+            : 'business-constraints-only';
+
+  const fieldAuthority = {
+    statement: authored.statement !== undefined ? 'typography-art-direction' : worldIntent.statement !== undefined ? 'selected-creative-world' : thesis?.expressionTests?.typography ? 'creative-thesis' : null,
+    roles: authored.roles !== undefined ? 'typography-art-direction' : worldIntent.roles !== undefined ? 'selected-creative-world' : null,
+    preferredCategories: authored.preferredCategories !== undefined ? 'typography-art-direction' : worldIntent.preferredCategories !== undefined ? 'selected-creative-world' : null,
+    avoidCategories: authored.avoidCategories !== undefined ? 'typography-art-direction' : worldIntent.avoidCategories !== undefined ? 'selected-creative-world' : null,
+    descriptorTargets: authored.descriptorTargets !== undefined ? 'typography-art-direction' : worldIntent.descriptorTargets !== undefined ? 'selected-creative-world' : null,
+    pressures: authored.pressures !== undefined ? 'typography-art-direction' : worldIntent.pressures !== undefined ? 'selected-creative-world' : null
+  };
 
   return {
     stage:'typography-intent',
@@ -161,7 +171,14 @@ export function buildTypographyIntent({ creativeThesis = null, creativeWorld = n
       creativeWorldSchema:worldState.schema,
       creativeWorldReviewReady:worldState.reviewReady ?? null,
       creativeWorldSelected:worldState.selected ?? null,
-      creativeWorldAuthoritative:worldState.authoritative
+      creativeWorldAuthoritative:worldState.authoritative,
+      fieldAuthority,
+      overrideFields,
+      layers:[
+        ...(thesis ? ['creative-thesis'] : []),
+        ...(worldState.authoritative ? ['selected-creative-world'] : []),
+        ...(authoredPresent ? ['typography-art-direction'] : [])
+      ]
     },
     findings,
     pass:!findings.some((item)=>item.severity === 'blocker')
