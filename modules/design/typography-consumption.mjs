@@ -20,7 +20,7 @@ function compactRoles(selection = {}) {
 }
 
 function normalizeCssVariables(production = {}) {
-  const input = production.cssVariables && typeof production.cssVariables === 'object'
+  const input = production.cssVariables && typeof production.cssVariables === 'object' && !Array.isArray(production.cssVariables)
     ? production.cssVariables
     : {};
   const entries = Object.entries(input)
@@ -42,9 +42,13 @@ function roleUsage(application = {}) {
     },
     utility: {
       targets: ['nav', 'button', 'label', 'metadata', 'code-like-utility'],
-      styleRefs: ['nav', 'button', 'metadata'].filter((key) => styles[key])
+      styleRefs: ['nav', 'button', 'meta', 'metadata'].filter((key) => styles[key])
     }
   };
+}
+
+function googleFontLoadingRequired(roles = {}) {
+  return Object.values(roles).some((role) => role?.source === 'google-fonts');
 }
 
 export function buildTypographyConsumptionContract(typography = null) {
@@ -54,15 +58,19 @@ export function buildTypographyConsumptionContract(typography = null) {
   const application = cloneObject(typography.application);
   const findings = [];
 
-  if (!roles.display) findings.push({ severity:'major', code:'typography-consumption-display-role-missing' });
+  if (!roles.display) findings.push({ severity:'blocker', code:'typography-consumption-display-role-missing' });
   if (!roles.body) findings.push({ severity:'blocker', code:'typography-consumption-body-role-missing' });
-  if (!Object.keys(cssVariables).length) findings.push({ severity:'major', code:'typography-consumption-css-variables-missing' });
-  if (!application.styles?.body || !application.styles?.h1) findings.push({ severity:'major', code:'typography-consumption-application-styles-incomplete' });
+  if (!Object.keys(cssVariables).length) findings.push({ severity:'blocker', code:'typography-consumption-css-variables-missing' });
+  if (!application.styles?.body || !application.styles?.h1) findings.push({ severity:'blocker', code:'typography-consumption-application-styles-incomplete' });
+  if (googleFontLoadingRequired(roles) && !typography.production.css2Url) {
+    findings.push({ severity:'blocker', code:'typography-consumption-google-font-loader-missing' });
+  }
 
+  const status = findings.length ? 'blocked' : 'ready';
   return {
     schema: 'ai-studio-os/typography-consumption@1',
     providerAgnostic: true,
-    status: findings.some((item) => item.severity === 'blocker') ? 'blocked' : findings.length ? 'review' : 'ready',
+    status,
     roles,
     usage: roleUsage(application),
     application,
@@ -83,7 +91,7 @@ export function buildTypographyConsumptionContract(typography = null) {
       evidenceLevel: typography.intelligence?.winnerEvidenceLevel ?? null
     },
     findings,
-    pass: !findings.some((item) => item.severity === 'blocker')
+    pass: status === 'ready'
   };
 }
 
@@ -91,9 +99,11 @@ export function consumeTypographyContract(contract = null, { surface = 'generic'
   if (!contract) return { enabled:false, surface, pass:true, findings:[], cssVariables:{}, roles:{} };
   const findings = [];
   if (contract.schema !== 'ai-studio-os/typography-consumption@1') findings.push({ severity:'blocker', code:'typography-contract-schema-unsupported' });
-  if (contract.pass !== true) findings.push({ severity:'blocker', code:'typography-contract-not-ready' });
+  if (contract.status !== 'ready' || contract.pass !== true) findings.push({ severity:'blocker', code:'typography-contract-not-ready' });
+  if (!contract.roles?.display?.family) findings.push({ severity:'blocker', code:'typography-contract-display-role-missing' });
   if (!contract.roles?.body?.family) findings.push({ severity:'blocker', code:'typography-contract-body-role-missing' });
-  if (!contract.production?.cssVariables || !Object.keys(contract.production.cssVariables).length) findings.push({ severity:'major', code:'typography-contract-token-set-missing' });
+  if (!contract.production?.cssVariables || !Object.keys(contract.production.cssVariables).length) findings.push({ severity:'blocker', code:'typography-contract-token-set-missing' });
+  if (googleFontLoadingRequired(contract.roles) && !contract.production?.css2Url) findings.push({ severity:'blocker', code:'typography-contract-google-font-loader-missing' });
   return {
     enabled:true,
     surface,
