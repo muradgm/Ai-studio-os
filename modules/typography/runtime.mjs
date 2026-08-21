@@ -75,25 +75,26 @@ export function buildTypographySystem({
     }
   }
 
-  const ranked = rankTypographySystems(systems, { strategy, marketCommonPairs });
+  const ranked = rankTypographySystems(systems, { strategy, marketCommonPairs, pairingStrategy });
   const acceptable = ranked.filter((entry)=>entry.critique.score >= minSystemScore && entry.critique.pass);
-  const preferredRanked = acceptable.length ? acceptable : ranked;
-  const winnerEntry = preferredRanked[0] ?? null;
-  const topSystems = preferredRanked.slice(0, systemLimit).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
-  const alternatives = buildTypographyAlternatives(preferredRanked, { limit:systemLimit });
+  const topReviewed = ranked.slice(0, systemLimit).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
+  const alternatives = buildTypographyAlternatives(ranked, { limit:systemLimit });
 
-  if (!winnerEntry) {
+  if (!ranked.length) {
     return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-no-valid-pairing',minPairingScore}], candidates:{display,body,utility}, systems:[], alternatives:[], selection:null, production:null };
   }
-  if (!acceptable.length && winnerEntry.critique.score < minSystemScore) {
+  if (!acceptable.length) {
     return {
       stage:'typography', pass:false, strategy,
-      findings:[{severity:'blocker',code:'typography-no-acceptable-system',minSystemScore,bestScore:winnerEntry.critique.score}],
-      candidates:{display,body,utility}, systems:topSystems, alternatives, selection:null, production:null
+      findings:[{severity:'blocker',code:'typography-no-acceptable-system',minSystemScore,bestScore:ranked[0].critique.score,bestFindings:ranked[0].critique.findings}],
+      candidates:{display,body,utility}, systems:topReviewed, alternatives, selection:null, production:null
     };
   }
 
+  const winnerEntry = acceptable[0];
   const winner = winnerEntry.system;
+  const topSystems = acceptable.slice(0, systemLimit).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
+  const acceptedAlternatives = buildTypographyAlternatives(acceptable, { limit:systemLimit });
   const resolved = {
     display:selection(winner.display.font,'display'),
     body:selection(winner.body.font,'body'),
@@ -104,7 +105,8 @@ export function buildTypographySystem({
     stage:'typography', pass:true, findings:[], strategy,
     intelligence:{ evidenceFamilies:fontEvidence.length, winnerEvidenceLevel:winner.pairing.evidenceLevel, winnerStructuralConfidence:winner.pairing.structural?.confidence ?? 0 },
     context:{ business, brand, requirements, pairing:{...pairing,strategy:pairingStrategy,minScore:minPairingScore,minSystemScore}, marketCommonPairs },
-    candidates:{display,body,utility}, systems:topSystems, alternatives,
+    candidates:{display,body,utility}, systems:topSystems, alternatives:acceptedAlternatives,
+    rejectedAlternatives: alternatives.filter((item)=>item.findings.length > 0),
     systemCritique:winnerEntry.critique,
     selection:resolved
   };
