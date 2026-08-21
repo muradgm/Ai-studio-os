@@ -6,10 +6,42 @@ function positiveInteger(value, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
 
+function normalizeGoogleFontFiles(font) {
+  if (font?.provider !== 'google-fonts') return font;
+  const files = {};
+  for (const [variant, rawUrl] of Object.entries(font.files ?? {})) {
+    try {
+      const url = new URL(rawUrl);
+      if (url.hostname !== 'fonts.gstatic.com') continue;
+      if (!['http:', 'https:'].includes(url.protocol)) continue;
+      url.protocol = 'https:';
+      files[variant] = url.toString();
+    } catch {
+      // Invalid provider URLs are omitted and become an explicit unavailable result.
+    }
+  }
+  return { ...font, files };
+}
+
+function createBoundedFetch(fetchImpl, requestTimeoutMs) {
+  if (typeof fetchImpl !== 'function') throw new TypeError('font catalog analysis requires a fetch implementation');
+  const timeoutMs = positiveInteger(requestTimeoutMs, 15000);
+  return async (url, init = {}) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(new Error(`font request exceeded ${timeoutMs}ms timeout`)), timeoutMs);
+    try {
+      return await fetchImpl(url, { ...init, signal: controller.signal });
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+}
+
 export async function analyzeFontCatalog(catalog = [], {
   concurrency = 4,
   limit = catalog.length,
   fetchImpl = globalThis.fetch,
+  requestTimeoutMs = 15000,
   maxBytes,
   includeGlyphOutlines = true,
   includeStrokeAnalysis = true
@@ -17,8 +49,9 @@ export async function analyzeFontCatalog(catalog = [], {
   if (!Array.isArray(catalog)) throw new TypeError('font catalog must be an array');
   const workerCount = Math.min(positiveInteger(concurrency, 4), 12);
   const maxItems = Math.min(positiveInteger(limit, catalog.length || 1), catalog.length);
-  const queue = catalog.slice(0, maxItems);
+  const queue = catalog.slice(0, maxItems).map(normalizeGoogleFontFiles);
   const results = new Array(queue.length);
+  const boundedFetch = createBoundedFetch(fetchImpl, requestTimeoutMs);
   let cursor = 0;
 
   const additionalAnalyzers = [];
@@ -31,7 +64,7 @@ export async function analyzeFontCatalog(catalog = [], {
       cursor += 1;
       if (index >= queue.length) return;
       results[index] = await analyzeCatalogFont(queue[index], {
-        fetchImpl,
+        fetchImpl: boundedFetch,
         additionalAnalyzers,
         ...(maxBytes ? { maxBytes } : {})
       });
