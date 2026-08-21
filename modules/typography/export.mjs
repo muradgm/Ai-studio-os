@@ -28,11 +28,47 @@ export function buildTypographyTokens(system) {
   return tokens;
 }
 
+function axisString(axes={}) {
+  const entries = Object.entries(axes).filter(([,value])=>Number.isFinite(value));
+  return entries.length ? entries.map(([tag,value])=>`"${tag}" ${value}`).join(', ') : null;
+}
+
+export function buildTypographyApplicationTokens(application) {
+  if (!application?.pass) return {};
+  const tokens = {
+    'type-scale-ratio': application.ratio,
+    'type-scale-mobile-ratio': application.mobileRatio,
+    'type-body-measure': `${application.measure.ideal}${application.measure.unit}`,
+    'type-body-measure-max': `${application.measure.max}${application.measure.unit}`
+  };
+  for (const [name, style] of Object.entries(application.styles ?? {})) {
+    tokens[`type-${name}-size`] = `${style.sizePx}px`;
+    tokens[`type-${name}-line-height`] = style.lineHeight;
+    tokens[`type-${name}-tracking`] = `${style.trackingEm}em`;
+    tokens[`type-${name}-weight`] = style.weight;
+    const axes = axisString(style.axes);
+    if (axes) tokens[`type-${name}-variation-settings`] = axes;
+  }
+  for (const [name, style] of Object.entries(application.mobileStyles ?? {})) {
+    tokens[`type-mobile-${name}-size`] = `${style.sizePx}px`;
+    tokens[`type-mobile-${name}-line-height`] = style.lineHeight;
+    tokens[`type-mobile-${name}-tracking`] = `${style.trackingEm}em`;
+    const axes = axisString(style.axes);
+    if (axes) tokens[`type-mobile-${name}-variation-settings`] = axes;
+  }
+  return tokens;
+}
+
 export function buildTypographyProductionConfig(system) {
   const selections = Object.values(system?.selection ?? {}).filter(Boolean);
+  const tokens = {
+    ...buildTypographyTokens(system),
+    ...buildTypographyApplicationTokens(system?.application)
+  };
   return {
     css2Url: buildGoogleFontsCss2Url(selections),
-    cssVariables: Object.fromEntries(Object.entries(buildTypographyTokens(system)).map(([key, value]) => [`--${key}`, value])),
-    families: selections.map(({ role, family, weights, source }) => ({ role, family, weights, source }))
+    cssVariables: Object.fromEntries(Object.entries(tokens).map(([key, value]) => [`--${key}`, value])),
+    families: selections.map(({ role, family, weights, source }) => ({ role, family, weights, source })),
+    application: system?.application?.pass ? system.application : null
   };
 }
