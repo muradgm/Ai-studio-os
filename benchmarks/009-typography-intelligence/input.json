@@ -1,0 +1,78 @@
+{
+  "catalog": [
+    {
+      "id": "google-fonts:newsreader",
+      "provider": "google-fonts",
+      "family": "Newsreader",
+      "category": "serif",
+      "variants": ["regular", "500", "600", "700"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/newsreader.woff2"},
+      "axes": [{"tag": "wght", "start": 200, "end": 800}],
+      "descriptors": {"xHeight": 55, "width": 52, "strokeContrast": 68, "roundness": 45}
+    },
+    {
+      "id": "google-fonts:manrope",
+      "provider": "google-fonts",
+      "family": "Manrope",
+      "category": "sans-serif",
+      "variants": ["regular", "500", "600", "700", "800"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/manrope.woff2"},
+      "axes": [{"tag": "wght", "start": 200, "end": 800}],
+      "descriptors": {"xHeight": 66, "width": 55, "strokeContrast": 18, "roundness": 62}
+    },
+    {
+      "id": "google-fonts:ibm-plex-mono",
+      "provider": "google-fonts",
+      "family": "IBM Plex Mono",
+      "category": "monospace",
+      "variants": ["regular", "500", "600"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/plex.woff2"},
+      "axes": [],
+      "descriptors": {"xHeight": 64, "width": 60, "strokeContrast": 10, "roundness": 42}
+    },
+    {
+      "id": "google-fonts:poppins",
+      "provider": "google-fonts",
+      "family": "Poppins",
+      "category": "sans-serif",
+      "variants": ["regular", "500", "600", "700"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/poppins.woff2"},
+      "axes": [],
+      "descriptors": {"xHeight": 67, "width": 58, "strokeContrast": 12, "roundness": 76}
+    },
+    {
+      "id": "google-fonts:bodoni-moda",
+      "provider": "google-fonts",
+      "family": "Bodoni Moda",
+      "category": "serif",
+      "variants": ["regular", "700"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/bodoni.woff2"},
+      "axes": [],
+      "descriptors": {"xHeight": 45, "width": 48, "strokeContrast": 95, "roundness": 34}
+    }
+  ],
+  "business": {
+    "type": "French patisserie",
+    "industry": "hospitality food retail",
+    "model": "local-retail",
+    "positioning": "premium but accessible",
+    "audience": "local consumers seeking high-quality everyday treats"
+  },
+  "brand": {
+    "traits": ["warm", "refined", "artisanal", "contemporary"]
+  },
+  "requirements": {
+    "languages": ["de", "fr", "en"]
+  },
+  "pairing": {
+    "strategy": "contrast-with-coherence",
+    "minScore": 75
+  },
+  "marketCommonFamilies": ["Poppins"],
+  "avoidFamilies": ["Roboto"]
+}
