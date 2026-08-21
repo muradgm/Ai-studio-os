@@ -11,6 +11,8 @@ Typography Intelligence resolves business and brand intent into production-ready
 5. Candidate ranking: business fit, production fitness, distinctiveness.
 6. Pairing: hierarchy contrast, language compatibility, usable weight ranges, explicit strategy, and evidence-backed structural comparison when available.
 7. Production: selected roles, weights, fallbacks, CSS2 URL, and design tokens.
+8. Application: responsive scale, line-height, tracking, measure, UI roles, and variable-axis settings.
+9. Consumption: one canonical contract consumed by design, engineering, brand-kit, and other downstream surfaces.
 
 ## Rules
 
@@ -23,6 +25,7 @@ Typography Intelligence resolves business and brand intent into production-ready
 - `avoidFamilies` is a hard exclusion. `marketCommonFamilies` applies a distinctiveness penalty without automatically rejecting a family.
 - Google Developer API credentials remain server-side. Generated projects use CSS2/font resources and never receive `GOOGLE_FONTS_API_KEY`.
 - A missing catalog blocks a requested typography stage; projects that do not request typography preserve the legacy design path.
+- Once typography is approved, downstream consumers use the canonical CSS variables/application contract. They must not silently re-pick families or rebuild the type scale.
 
 ## Sync and analyze the Google Fonts catalog
 
@@ -35,7 +38,7 @@ npm run fonts:analyze
 
 The catalog is cached at `.tmp/google-fonts/catalog.json`. Evidence-backed analysis is cached separately at `.tmp/google-fonts/intelligence.json`. Both paths are under `.tmp/` and are ignored by the repository.
 
-The batch analyzer uses bounded concurrency. A font file is downloaded once and the same bytes can feed both OpenType table metrics and glyph-outline analysis.
+The batch analyzer uses bounded concurrency. A font file is downloaded once and the same bytes can feed OpenType table metrics, glyph-outline analysis, and stroke analysis.
 
 ## Automatic binary metrics
 
@@ -53,50 +56,15 @@ Compressed WOFF/WOFF2 files are rejected until decompressed rather than being mi
 
 ## Glyph-outline intelligence
 
-For TrueType `glyf`/`loca` outlines, representative glyphs (`H O o n a e s` by default) are resolved through `cmap` and measured directly. The current outline layer records:
+For TrueType `glyf`/`loca` outlines, representative glyphs (`H O o n a e s` by default) are resolved through `cmap` and measured directly. The outline layer records contour/point structure, off-curve ratio, proportions, and measurement-derived roundness/complexity proxies.
 
-- contour count
-- point count
-- on-curve/off-curve point counts
-- off-curve ratio
-- glyph bounding-box proportions
-- normalized width/height
-- aggregate roundness proxy
-- aggregate outline-complexity proxy
-- aggregate proportion proxy
-
-These are measurement-derived proxies, not stylistic labels. The system does **not** infer `humanist`, `geometric`, terminal style, stroke contrast, aperture, serif style, or rhythm from these proxies alone.
+The stroke layer samples actual contours with horizontal and vertical scanlines to estimate stem distributions and numeric stroke contrast. These remain measured proxies rather than stylistic labels.
 
 Composite glyphs and unsupported outline formats degrade cleanly and do not block the rest of typography intelligence.
 
 ## Optional external font intelligence evidence
 
-Some useful structural attributes still require manual/specimen analysis or a later dedicated classifier. They can be supplied separately:
-
-```js
-const fontEvidence = [
-  {
-    family: 'Newsreader',
-    descriptors: {
-      strokeContrast: 76,
-      geometry: 'humanist',
-      rhythm: 'textual',
-      terminals: 'calligraphic',
-      aperture: 62,
-      humanism: 84
-    },
-    sources: [
-      {
-        type: 'manual-analysis',
-        reference: 'specimen-review:newsreader-v1',
-        confidence: 92
-      }
-    ]
-  }
-];
-```
-
-Numeric descriptors use a normalized 0–100 scale. They are not accepted as evidence-backed unless at least one provenance source is attached. Multiple evidence records for the same family are merged instead of overwriting one another; numeric descriptors are confidence-weighted and provenance is retained.
+Useful structural attributes that still require manual/specimen analysis or a dedicated classifier can be supplied separately with explicit provenance. Numeric descriptors use a normalized 0–100 scale. Evidence records for the same family are merged rather than overwriting one another; numeric descriptors are confidence-weighted and provenance is retained.
 
 ## Runtime contract
 
@@ -119,11 +87,16 @@ const typography = buildTypographySystem({
   },
   pairing: {
     strategy: 'contrast-with-coherence',
-    minScore: 65
+    minScore: 65,
+    minSystemScore: 68
   },
   marketCommonFamilies: ['Poppins'],
   avoidFamilies: []
 });
 ```
 
-The creative-production runtime accepts the same object as `input.typography` plus the normalized catalog as `input.fontCatalog`. When typography is not supplied, existing behavior is unchanged.
+## Downstream consumption
+
+A passing typography system is transformed into `ai-studio-os/typography-consumption@1`. The contract contains approved role/family assignments, application styles, CSS variables, provider loading information, integration rules, and provenance.
+
+Consumers may make explicit container/locale/accessibility adjustments, but they must not silently substitute families, replace the approved scale, or drop required script coverage. Creative engineering and Brand Kit runtimes accept the contract directly, and legacy projects without typography remain valid.
