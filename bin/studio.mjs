@@ -10,6 +10,7 @@ import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } fro
 import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
 import { runCreativeEngineeringRuntime, validateCreativeEngineeringBenchmark } from '../lib/creative-engineering-runtime.mjs';
 import { runBrandKitRuntime, validateBrandKitBenchmark } from '../lib/brand-kit-runtime.mjs';
+import { buildTypographySystem, validateTypographyBenchmark } from '../modules/typography/runtime.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -33,6 +34,7 @@ Usage:
   studio logo <fixture>
   studio creative-engineering <fixture>
   studio brand-kit <fixture>
+  studio typography <fixture>
   studio benchmark <fixture>
   studio list
 `);
@@ -69,6 +71,10 @@ function creativeEngineeringPaths(name) {
 function brandKitPaths(name) {
   if (name !== 'brand-identity-kit-v1') return null;
   return { input: 'benchmarks/008-brand-identity-kit/input.json', expected: 'benchmarks/008-brand-identity-kit/expected.json' };
+}
+function typographyPaths(name) {
+  if (name !== 'typography-intelligence-v01') return null;
+  return { input: 'benchmarks/009-typography-intelligence/input.json', expected: 'benchmarks/009-typography-intelligence/expected.json' };
 }
 
 if (!command) { usage(); process.exit(0); }
@@ -131,6 +137,10 @@ if (command === 'route') {
   const paths = brandKitPaths(arg);
   if (!paths) { console.error(`Unknown Brand Kit fixture: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify(runBrandKitRuntime(json(paths.input)), null, 2));
+} else if (command === 'typography') {
+  const paths = typographyPaths(arg);
+  if (!paths) { console.error(`Unknown typography fixture: ${arg ?? '(missing)'}`); process.exit(1); }
+  console.log(JSON.stringify(buildTypographySystem(json(paths.input)), null, 2));
 } else if (command === 'benchmark') {
   const creative = creativePaths(arg);
   const engineering = engineeringPaths(arg);
@@ -140,6 +150,7 @@ if (command === 'route') {
   const logo = logoPaths(arg);
   const creativeEngineering = creativeEngineeringPaths(arg);
   const brandKit = brandKitPaths(arg);
+  const typography = typographyPaths(arg);
   let result;
   if (creative) result = validateBenchmark(runCreativeRuntime(json(creative.input)), json(creative.expected));
   else if (engineering) result = validateEngineeringBenchmark(runEngineeringRuntime(json(engineering.input)), json(engineering.expected));
@@ -149,6 +160,7 @@ if (command === 'route') {
   else if (logo) result = validateLogoBenchmark(runLogoRuntime(json(logo.input)), json(logo.expected));
   else if (creativeEngineering) result = validateCreativeEngineeringBenchmark(runCreativeEngineeringRuntime(json(creativeEngineering.input)), json(creativeEngineering.expected));
   else if (brandKit) result = validateBrandKitBenchmark(runBrandKitRuntime(json(brandKit.input)), json(brandKit.expected));
+  else if (typography) result = validateTypographyBenchmark(buildTypographySystem(json(typography.input)), json(typography.expected));
   else { console.error(`Unknown benchmark: ${arg ?? '(missing)'}`); process.exit(1); }
   console.log(JSON.stringify({ benchmark: arg, ...result }, null, 2));
   if (!result.pass) process.exit(1);
@@ -167,6 +179,7 @@ if (command === 'route') {
   console.log('logo fixtures: identity-v12');
   console.log('creative engineering fixtures: creative-engineering-v13');
   console.log('Brand Kit fixtures: brand-identity-kit-v1');
+  console.log('typography fixtures: typography-intelligence-v01');
 } else {
   usage();
   process.exit(1);
