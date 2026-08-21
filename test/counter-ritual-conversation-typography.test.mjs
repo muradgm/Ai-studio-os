@@ -48,6 +48,15 @@ test('Typography Intelligence proposes multiple systems but refuses canonical se
   assert.equal(output.truth.canonicalTypographyConsumptionProduced, false);
 });
 
+test('Typography art-direction shortlist preserves materially different display voices', () => {
+  const output = buildConversationTypographyExploration();
+  const displays = output.systems.map((system) => system.display.font.family);
+  assert.ok(displays.length >= 3);
+  assert.equal(new Set(displays).size, displays.length, `display shortlist collapsed to repeated families: ${displays.join(', ')}`);
+  assert.equal(output.shortlistPolicy.mode, 'ranked-quality-plus-display-voice-diversity');
+  assert.equal(output.shortlistPolicy.automaticWinner, false);
+});
+
 test('Conversation utility role reuses body family instead of introducing automatic monospace styling', () => {
   const output = buildConversationTypographyExploration();
   for (const system of output.systems) {
