@@ -2,5 +2,9 @@ import { createGoogleFontsProvider } from '../modules/typography/google-fonts-pr
 import { syncTypographyCatalog } from '../modules/typography/catalog.mjs';
 
 const provider = createGoogleFontsProvider();
-const catalog = await syncTypographyCatalog({ provider, sort: 'popularity' });
-console.log(`Google Fonts catalog synced: ${catalog.count} families -> .tmp/google-fonts/catalog.json`);
+const catalog = await syncTypographyCatalog({
+  provider,
+  sort: 'popularity',
+  capability: 'VF'
+});
+console.log(`Google Fonts catalog synced: ${catalog.count} families (VF capability enabled) -> .tmp/google-fonts/catalog.json`);
