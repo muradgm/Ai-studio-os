@@ -1,0 +1,14 @@
+{
+  "pass": true,
+  "displayFamily": "Newsreader",
+  "bodyFamily": "Manrope",
+  "utilityFamily": "IBM Plex Mono",
+  "minPairingScore": 85,
+  "excludedFamilies": ["Roboto", "Poppins"],
+  "minPressures": [
+    {"key": "warmth", "value": 70},
+    {"key": "expression", "value": 70},
+    {"key": "distinctiveness", "value": 70},
+    {"key": "accessibility", "value": 70}
+  ]
+}
