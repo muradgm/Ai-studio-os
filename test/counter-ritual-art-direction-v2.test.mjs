@@ -1,10 +1,33 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { buildInspirationPacket } from '../modules/inspiration/runtime.mjs';
+import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
+import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
 import { buildArtDirectionExploration } from '../modules/art-direction-exploration/runtime.mjs';
 
 const lock = JSON.parse(fs.readFileSync(new URL('../projects/du-bonheur/counter-ritual-v2/EXPERIENCE_THESIS_LOCK.json', import.meta.url)));
 const authored = JSON.parse(fs.readFileSync(new URL('../projects/du-bonheur/counter-ritual-v2/art-directions.json', import.meta.url))).directions;
+const benchmark = JSON.parse(fs.readFileSync(new URL('../benchmarks/001-du-bonheur/input.json', import.meta.url)));
+
+function canonicalSelection() {
+  const inspiration = buildInspirationPacket(benchmark.inspiration);
+  const thesis = buildCreativeThesis({
+    projectId: benchmark.id,
+    intent: benchmark.intent,
+    businessTruths: benchmark.businessTruths,
+    inspiration,
+    traits: benchmark.creativeTraits,
+    antiPrinciples: benchmark.antiPrinciples,
+    authoredCandidate: benchmark.creativeThesisCandidate
+  });
+  const exploration = buildCreativeWorldExploration({ creativeThesis: thesis, authoredWorlds: benchmark.creativeWorldCandidates });
+  return selectCreativeWorld(exploration, {
+    worldId: 'counter-ritual',
+    humanConfirmed: true,
+    rationale: lock.selectionRationale
+  });
+}
 
 test('Counter Ritual experience thesis is human-selected while current art direction remains unapproved', () => {
   assert.equal(lock.worldId, 'counter-ritual');
@@ -12,6 +35,15 @@ test('Counter Ritual experience thesis is human-selected while current art direc
   assert.equal(lock.truth.currentArtDirectionApproved, false);
   assert.equal(lock.truth.productionReady, false);
   assert.deepEqual(lock.lockedSequence, ['arrival','attention','choice','preparation','handoff','return']);
+});
+
+test('experience thesis lock is traceable to the canonical Counter Ritual Creative World', () => {
+  const selected = canonicalSelection();
+  assert.equal(selected.truth.humanWorldSelectionConfirmed, true);
+  assert.equal(selected.selectedWorld.id, lock.worldId);
+  assert.equal(selected.selectedWorld.worldIdea, lock.lockedExperienceIdea);
+  assert.equal(selected.selectedWorld.truth.humanCreativeSelectionConfirmed, true);
+  assert.equal(selected.selectedWorld.truth.styleFrameReviewComplete, false);
 });
 
 test('three authored Counter Ritual directions are structurally review-ready', () => {
