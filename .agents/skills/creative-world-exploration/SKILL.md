@@ -48,7 +48,7 @@ Do not invoke when a reviewed/selected Creative World already exists unless upst
 9. **Run mobile deletion.** Remove hover, cursor, wide-screen staging, and high-motion assumptions. The governing behavior must survive.
 10. **Prepare selection review.** Present the worlds with strengths, risks, thesis fit, and explicit reasons not to choose each one.
 
-## Candidate deliverable
+## Deliverables
 Each world should contain:
 - `id` and `label`;
 - `worldIdea`;
@@ -65,6 +65,8 @@ Each world should contain:
 - `soundPolicy`;
 - at least two `antiPatterns`;
 - unresolved risks.
+
+The exploration set must also return pairwise divergence evidence and preserve `selectedAutomatically: false` until explicit human selection occurs.
 
 ## Typography intent guidance
 Good typography intent sounds like:
