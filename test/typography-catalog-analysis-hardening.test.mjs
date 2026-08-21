@@ -51,7 +51,7 @@ test('Google catalog analysis upgrades approved gstatic URLs to HTTPS', async ()
   assert.equal(result.results[0].status, 'unsupported');
 });
 
-test('custom providers retain their own remote host policy', async () => {
+test('custom providers use their explicit remote host policy', async () => {
   let requested = null;
   const fetchImpl = async (url) => {
     requested = String(url);
@@ -68,6 +68,16 @@ test('custom providers retain their own remote host policy', async () => {
       provider:'custom-provider',
       files:{ regular:'https://font-cdn.example/custom.ttf' }
     }
-  ], { fetchImpl, includeGlyphOutlines:false, includeStrokeAnalysis:false });
+  ], {
+    fetchImpl,
+    includeGlyphOutlines:false,
+    includeStrokeAnalysis:false,
+    providerPolicies:{
+      'custom-provider':{
+        protocols:['https:'],
+        hosts:['font-cdn.example']
+      }
+    }
+  });
   assert.equal(requested, 'https://font-cdn.example/custom.ttf');
 });
