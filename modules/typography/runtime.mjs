@@ -1,4 +1,5 @@
 import { scoreFontForRole, scorePairing, supportsLanguages } from './scoring.mjs';
+import { buildBusinessTypographyStrategy } from './strategy.mjs';
 import { buildTypographyProductionConfig } from './export.mjs';
 
 function roleWeights(font, role) {
@@ -62,16 +63,20 @@ export function buildTypographySystem({
   systemLimit = 3
 } = {}) {
   if (!Array.isArray(catalog)) throw new TypeError('typography catalog must be an array');
+  const strategy = buildBusinessTypographyStrategy({ business, brand, requirements });
   if (!catalog.length) {
     return {
       stage: 'typography',
       pass: false,
+      strategy,
       findings: [{ severity: 'blocker', code: 'typography-catalog-empty' }],
       candidates: {}, systems: [], selection: null, production: null
     };
   }
 
-  const context = { business, brand, requirements, marketCommonFamilies, avoidFamilies };
+  const pairingStrategy = pairing.strategy ?? 'contrast-with-coherence';
+  const minPairingScore = Number.isFinite(pairing.minScore) ? pairing.minScore : 65;
+  const context = { business, brand, requirements, marketCommonFamilies, avoidFamilies, strategy };
   const display = rankRole(catalog, 'display', context, candidateLimit);
   const body = rankRole(catalog, 'body', context, candidateLimit);
   const utilityPool = catalog.filter((font) => font.category === 'monospace');
@@ -80,8 +85,9 @@ export function buildTypographySystem({
   const systems = [];
   for (const displayCandidate of display) {
     for (const bodyCandidate of body) {
-      if (displayCandidate.font.family === bodyCandidate.font.family && pairing.strategy !== 'single-family') continue;
-      const pair = scorePairing(displayCandidate.font, bodyCandidate.font, { strategy: pairing.strategy, requirements });
+      if (displayCandidate.font.family === bodyCandidate.font.family && pairingStrategy !== 'single-family') continue;
+      const pair = scorePairing(displayCandidate.font, bodyCandidate.font, { strategy: pairingStrategy, requirements });
+      if (pair.score < minPairingScore) continue;
       const utilityCandidate = utility.find((candidate) => candidate.font.family !== displayCandidate.font.family && candidate.font.family !== bodyCandidate.font.family) ?? utility[0] ?? null;
       const overall = Math.round(
         displayCandidate.scores.total * 0.26 +
@@ -104,8 +110,8 @@ export function buildTypographySystem({
   const winner = topSystems[0] ?? null;
   if (!winner) {
     return {
-      stage: 'typography', pass: false,
-      findings: [{ severity: 'blocker', code: 'typography-no-valid-pairing' }],
+      stage: 'typography', pass: false, strategy,
+      findings: [{ severity: 'blocker', code: 'typography-no-valid-pairing', minPairingScore }],
       candidates: { display, body, utility }, systems: [], selection: null, production: null
     };
   }
@@ -120,11 +126,29 @@ export function buildTypographySystem({
     stage: 'typography',
     pass: true,
     findings: [],
-    context: { business, brand, requirements, pairing },
+    strategy,
+    context: { business, brand, requirements, pairing: { ...pairing, strategy: pairingStrategy, minScore: minPairingScore } },
     candidates: { display, body, utility },
     systems: topSystems,
     selection: resolved
   };
   output.production = buildTypographyProductionConfig(output);
   return output;
+}
+
+export function validateTypographyBenchmark(output, expected = {}) {
+  const failures = [];
+  if (expected.pass !== undefined && output.pass !== expected.pass) failures.push(`expected pass=${expected.pass}, got ${output.pass}`);
+  if (expected.displayFamily && output.selection?.display?.family !== expected.displayFamily) failures.push(`expected display ${expected.displayFamily}, got ${output.selection?.display?.family ?? 'none'}`);
+  if (expected.bodyFamily && output.selection?.body?.family !== expected.bodyFamily) failures.push(`expected body ${expected.bodyFamily}, got ${output.selection?.body?.family ?? 'none'}`);
+  if (expected.utilityFamily && output.selection?.utility?.family !== expected.utilityFamily) failures.push(`expected utility ${expected.utilityFamily}, got ${output.selection?.utility?.family ?? 'none'}`);
+  if (expected.minPairingScore !== undefined && (output.systems?.[0]?.pairing?.score ?? 0) < expected.minPairingScore) failures.push(`pairing score below ${expected.minPairingScore}`);
+  for (const family of expected.excludedFamilies ?? []) {
+    const selected = [output.selection?.display?.family, output.selection?.body?.family, output.selection?.utility?.family].filter(Boolean);
+    if (selected.includes(family)) failures.push(`excluded family selected: ${family}`);
+  }
+  for (const pressure of expected.minPressures ?? []) {
+    if ((output.strategy?.pressures?.[pressure.key] ?? 0) < pressure.value) failures.push(`${pressure.key} pressure below ${pressure.value}`);
+  }
+  return { pass: failures.length === 0, failures };
 }
