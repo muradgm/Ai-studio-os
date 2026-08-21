@@ -32,7 +32,7 @@ function includesAny(values = [], candidates = []) {
   return candidates.some((candidate) => set.has(candidate));
 }
 
-export function buildBusinessTypographyStrategy({ business = {}, brand = {}, requirements = {} } = {}) {
+export function buildBusinessTypographyStrategy({ business = {}, brand = {}, requirements = {}, typographyIntent = null } = {}) {
   const strategy = {
     trust: 50,
     expression: 50,
@@ -68,6 +68,12 @@ export function buildBusinessTypographyStrategy({ business = {}, brand = {}, req
   const explicit = business.typographyPressures ?? {};
   for (const key of Object.keys(strategy)) strategy[key] = explicitNumber(explicit[key], strategy[key]);
 
+  // Creative Thesis / selected-world pressure values are explicit authored art-direction inputs.
+  // They override category/business heuristics rather than being inferred from prose.
+  for (const [key, value] of Object.entries(typographyIntent?.pressureOverrides ?? {})) {
+    if (key in strategy && Number.isFinite(value)) strategy[key] = clamp(value);
+  }
+
   const rationale = [];
   if (strategy.trust >= 70) rationale.push('high trust requirement');
   if (strategy.readingDensity >= 70) rationale.push('sustained reading or information density matters');
@@ -77,11 +83,14 @@ export function buildBusinessTypographyStrategy({ business = {}, brand = {}, req
   if (strategy.formality >= 70) rationale.push('formal tone is strategically important');
   if (strategy.accessibility >= 70) rationale.push('accessibility and clarity are high-priority constraints');
   if (strategy.distinctiveness >= 70) rationale.push('competitive differentiation should influence selection');
+  if (typographyIntent?.enabled) rationale.push(`creative authority: ${typographyIntent.authority}`);
 
   return {
     stage: 'typography-strategy',
     pressures: strategy,
     rationale,
+    creativeAuthority: typographyIntent?.enabled === true,
+    intent: typographyIntent ?? null,
     source: {
       businessType: business.type ?? null,
       industry: business.industry ?? null,
@@ -89,7 +98,8 @@ export function buildBusinessTypographyStrategy({ business = {}, brand = {}, req
       positioning: business.positioning ?? null,
       audience: business.audience ?? null,
       brandTraits: brand.traits ?? [],
-      languages: requirements.languages ?? []
+      languages: requirements.languages ?? [],
+      creativeAuthority: typographyIntent?.authority ?? null
     }
   };
 }
