@@ -43,6 +43,22 @@ function selection(font, role) {
   };
 }
 
+function resolveUtilityCandidate({ utility, displayCandidate, bodyCandidate, pairingStrategy }) {
+  if (pairingStrategy === 'single-family') {
+    const family = bodyCandidate.font.family;
+    return utility.find((candidate)=>candidate.font.family === family)
+      ?? {
+        font: bodyCandidate.font,
+        scores: scoreFontForRole(bodyCandidate.font, {
+          business: {}, brand: {}, requirements: {}, role:'utility', strategy:{}
+        })
+      };
+  }
+  return utility.find((candidate)=>candidate.font.family !== displayCandidate.font.family && candidate.font.family !== bodyCandidate.font.family)
+    ?? utility[0]
+    ?? null;
+}
+
 export function buildTypographySystem({
   catalog=[], fontEvidence=[], business={}, brand={}, requirements={}, pairing={}, application={},
   marketCommonFamilies=[], marketCommonPairs=[], avoidFamilies=[], candidateLimit=8, systemLimit=3
@@ -61,7 +77,9 @@ export function buildTypographySystem({
   const context = { business, brand, requirements, marketCommonFamilies, avoidFamilies, strategy };
   const display = rankRole(workingCatalog, 'display', context, candidateLimit);
   const body = rankRole(workingCatalog, 'body', context, candidateLimit);
-  const utilityPool = workingCatalog.filter((font)=>font.category === 'monospace');
+  const utilityPool = pairingStrategy === 'single-family'
+    ? workingCatalog
+    : workingCatalog.filter((font)=>font.category === 'monospace');
   const utility = rankRole(utilityPool.length ? utilityPool : workingCatalog, 'utility', context, Math.min(candidateLimit,5));
 
   const systems = [];
@@ -70,7 +88,7 @@ export function buildTypographySystem({
       if (displayCandidate.font.family === bodyCandidate.font.family && pairingStrategy !== 'single-family') continue;
       const pair = scorePairing(displayCandidate.font, bodyCandidate.font, { strategy:pairingStrategy, requirements });
       if (pair.score < minPairingScore) continue;
-      const utilityCandidate = utility.find((candidate)=>candidate.font.family !== displayCandidate.font.family && candidate.font.family !== bodyCandidate.font.family) ?? utility[0] ?? null;
+      const utilityCandidate = resolveUtilityCandidate({ utility, displayCandidate, bodyCandidate, pairingStrategy });
       const overall = Math.round(displayCandidate.scores.total*0.26 + bodyCandidate.scores.total*0.34 + pair.score*0.30 + (utilityCandidate?.scores.total ?? 75)*0.10);
       systems.push({ overall, display:displayCandidate, body:bodyCandidate, utility:utilityCandidate, pairing:pair });
     }
