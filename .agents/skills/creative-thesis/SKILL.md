@@ -30,7 +30,17 @@ Do not invoke when an approved/frozen thesis already exists unless new truth inv
 - useful creative traits/tensions;
 - unresolved unknowns that must remain unresolved.
 
-## Authoring workflow
+## Operating principles
+- **Truth before style.** The idea must originate in project/business truth, not in fashionable visual treatment.
+- **One thesis, not a trend bundle.** Prefer one governing idea with real consequences over several compatible adjectives.
+- **Technology serves the idea.** WebGL, GSAP, Rive, 3D, shaders, video, generative media, and other tools are downstream choices.
+- **References calibrate judgment; they never authorize copying.** Extract principles, tensions, and production lessons rather than compositions or signatures.
+- **Do not average contradictions.** When references or goals pull in different directions, make the tradeoff explicit and choose deliberately.
+- **Competitor transfer is a mandatory stress test.** If a competitor could reuse the thesis unchanged with equal credibility, the idea is too generic.
+- **Preserve uncertainty.** Missing audience, objective, rights, product, or research evidence stays visible rather than being invented for completeness.
+- **Structural readiness is not creative approval.** Runtime validation may make a thesis review-ready, but human/independent creative approval remains separate.
+
+## Workflow
 1. **Restate the project truth.** What must remain true even if every visual reference disappears?
 2. **Name the category default.** What would a competent but generic competitor probably make?
 3. **Name the opportunity.** What documented gap could become an experience rule rather than decoration?
@@ -42,7 +52,7 @@ Do not invoke when an approved/frozen thesis already exists unless new truth inv
 9. **Select one governing idea.** State the creative tension, why it belongs to this project, and what would invalidate it.
 10. **Hand off without styling it to death.** Creative World / Art Direction owns the visual-world divergence next.
 
-## Candidate requirements
+### Candidate requirements
 Each candidate must contain:
 - governing idea in one or two sentences;
 - source truth(s) it depends on;
@@ -53,7 +63,7 @@ Each candidate must contain:
 - one sentence on how it could influence behavior, not just appearance;
 - kill risk.
 
-## Final deliverable
+## Deliverables
 Return one selected candidate with:
 - `governingIdea`;
 - `creativeTension`;
@@ -69,8 +79,18 @@ Return one selected candidate with:
 
 The runtime will attach canonical truth/opportunity references. Do not fabricate those references inside the authored candidate.
 
-## Quality bar
-A strong thesis should make downstream specialists think, “I know what this world believes and how to make choices inside it,” while still leaving room for several genuinely different visual worlds.
+## Review criteria
+A strong thesis should let downstream specialists say, “I know what this world believes and how to make choices inside it,” while still leaving room for several genuinely different visual worlds.
+
+Review it against these questions:
+- Is the governing idea inseparable from recorded project truth and a real opportunity rather than merely category language?
+- Are at least two plausible alternatives explicitly rejected for meaningful reasons?
+- Does the competitor-transfer test materially weaken the thesis when its project truth is removed?
+- Does technology deletion leave the idea intact?
+- Can type, image, motion, interaction, sound when justified, and responsive behavior interpret the thesis without all repeating one motif?
+- Are the anti-principles strong enough to prevent a competent but generic execution?
+- Are unresolved unknowns still visible?
+- Has structural readiness remained separate from human creative approval?
 
 Examples of weak theses:
 - “A premium editorial experience with elegant motion.”
