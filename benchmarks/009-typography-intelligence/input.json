@@ -81,6 +81,28 @@
   "requirements": {
     "languages": ["de", "fr", "en"]
   },
+  "typographyIntent": {
+    "statement": "Use an editorial display voice for craft and a restrained contemporary sans for functional reading, with a technical mono utility layer.",
+    "preferredCategories": {
+      "display": ["serif"],
+      "body": ["sans-serif"],
+      "utility": ["monospace"]
+    },
+    "descriptorTargets": {
+      "display": {
+        "strokeContrast": {"target": 68, "tolerance": 18},
+        "xHeight": {"target": 55, "tolerance": 16}
+      },
+      "body": {
+        "xHeight": {"target": 66, "tolerance": 12},
+        "strokeContrast": {"target": 18, "tolerance": 16}
+      },
+      "utility": {
+        "width": {"target": 60, "tolerance": 12},
+        "strokeContrast": {"target": 10, "tolerance": 15}
+      }
+    }
+  },
   "pairing": {
     "strategy": "contrast-with-coherence",
     "minScore": 75
