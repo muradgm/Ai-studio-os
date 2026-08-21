@@ -12,6 +12,9 @@ const typographyIntent = JSON.parse(fs.readFileSync(new URL('./the-conversation-
 const candidateCatalog = JSON.parse(fs.readFileSync(new URL('./typography-candidate-catalog.json', import.meta.url)));
 const artDirectionSpec = JSON.parse(fs.readFileSync(new URL('./conversation-art-direction-spec.json', import.meta.url)));
 
+const BASE_AVOID_FAMILIES = ['Poppins', 'Montserrat', 'Roboto', 'Open Sans'];
+const TARGET_VISUAL_SYSTEMS = 5;
+
 function canonicalCounterRitualSelection() {
   const inspiration = buildInspirationPacket(benchmark.inspiration);
   const creativeThesis = buildCreativeThesis({
@@ -55,17 +58,8 @@ function summarizeSystem(system, index) {
   };
 }
 
-export function buildConversationTypographyExploration() {
-  const canonical = canonicalCounterRitualSelection();
-  const leadDirection = findLeadDirection();
-  const findings = [];
-
-  if (!canonical.selectedWorld) findings.push({ severity:'blocker', code:'conversation-counter-ritual-selection-missing' });
-  if (canonical.selectedWorld?.id !== experienceLock.worldId) findings.push({ severity:'blocker', code:'conversation-counter-ritual-selection-drift' });
-  if (!leadDirection) findings.push({ severity:'blocker', code:'conversation-lead-art-direction-missing' });
-  if (artDirectionSpec.truth?.humanArtDirectionSelectionConfirmed === true) findings.push({ severity:'blocker', code:'conversation-art-direction-selection-fabricated' });
-
-  const typography = buildTypographySystem({
+function buildTypographyRun(canonical, extraAvoidFamilies = []) {
+  return buildTypographySystem({
     catalog: candidateCatalog.fonts,
     fontEvidence: [],
     business: {
@@ -96,14 +90,55 @@ export function buildConversationTypographyExploration() {
     },
     marketCommonFamilies: ['Inter', 'Poppins', 'Montserrat', 'Roboto', 'Open Sans'],
     marketCommonPairs: [],
-    avoidFamilies: ['Poppins', 'Montserrat', 'Roboto', 'Open Sans'],
-    candidateLimit: 10,
+    avoidFamilies: [...new Set([...BASE_AVOID_FAMILIES, ...extraAvoidFamilies])],
+    candidateLimit: 12,
     systemLimit: 5
   });
+}
 
-  const expectedPendingReview = typography.pass === false
-    && typography.findings?.some((item) => item.code === 'typography-art-direction-review-required');
-  if (!expectedPendingReview) {
+function isPendingHumanTypographyReview(run) {
+  return run?.pass === false
+    && run?.findings?.some((item) => item.code === 'typography-art-direction-review-required');
+}
+
+function buildDiverseVisualShortlist(canonical) {
+  const systems = [];
+  const runs = [];
+  const usedDisplayFamilies = [];
+
+  for (let attempt = 0; attempt < TARGET_VISUAL_SYSTEMS; attempt += 1) {
+    const run = buildTypographyRun(canonical, usedDisplayFamilies);
+    runs.push(run);
+    if (!isPendingHumanTypographyReview(run)) break;
+
+    const candidates = run.artDirection?.systems ?? run.systems ?? [];
+    const candidate = candidates.find((system) => {
+      const family = system.display?.font?.family;
+      return family && !usedDisplayFamilies.includes(family);
+    });
+    if (!candidate) break;
+
+    systems.push(candidate);
+    usedDisplayFamilies.push(candidate.display.font.family);
+  }
+
+  return { systems, runs, usedDisplayFamilies };
+}
+
+export function buildConversationTypographyExploration() {
+  const canonical = canonicalCounterRitualSelection();
+  const leadDirection = findLeadDirection();
+  const findings = [];
+
+  if (!canonical.selectedWorld) findings.push({ severity:'blocker', code:'conversation-counter-ritual-selection-missing' });
+  if (canonical.selectedWorld?.id !== experienceLock.worldId) findings.push({ severity:'blocker', code:'conversation-counter-ritual-selection-drift' });
+  if (!leadDirection) findings.push({ severity:'blocker', code:'conversation-lead-art-direction-missing' });
+  if (artDirectionSpec.truth?.humanArtDirectionSelectionConfirmed === true) findings.push({ severity:'blocker', code:'conversation-art-direction-selection-fabricated' });
+
+  const diverse = buildDiverseVisualShortlist(canonical);
+  const typography = diverse.runs[0] ?? buildTypographyRun(canonical);
+
+  if (!isPendingHumanTypographyReview(typography)) {
     findings.push({
       severity:'blocker',
       code:'conversation-typography-did-not-stop-at-art-direction-gate',
@@ -122,8 +157,17 @@ export function buildConversationTypographyExploration() {
     findings.push({ severity:'blocker', code:'conversation-typography-authority-layers-incomplete', layers:typography.intent?.provenance?.layers ?? [] });
   }
 
-  const systems = typography.artDirection?.systems ?? typography.systems ?? [];
+  const systems = diverse.systems;
   if (systems.length < 3) findings.push({ severity:'blocker', code:'conversation-typography-candidate-count-too-low', count:systems.length });
+  if (new Set(systems.map((system) => system.display?.font?.family)).size !== systems.length) {
+    findings.push({ severity:'blocker', code:'conversation-typography-display-shortlist-not-diverse' });
+  }
+  for (const run of diverse.runs) {
+    if (!isPendingHumanTypographyReview(run)) {
+      findings.push({ severity:'blocker', code:'conversation-diversity-run-bypassed-art-direction-gate' });
+      break;
+    }
+  }
   for (const system of systems) {
     if (system.utility?.font?.family !== system.body?.font?.family) {
       findings.push({ severity:'major', code:'conversation-utility-family-sprawl', systemId:system.systemId ?? null });
@@ -143,6 +187,19 @@ export function buildConversationTypographyExploration() {
     artDirectionSpec:structuredClone(artDirectionSpec),
     typographyIntent:typography.intent,
     typographyRuntime:typography,
+    typographyRuns:diverse.runs.map((run, index) => ({
+      attempt:index + 1,
+      excludedDisplayFamilies:diverse.usedDisplayFamilies.slice(0, index),
+      status:run.pass ? 'unexpected-canonical-pass' : run.findings?.[0]?.code ?? 'unknown',
+      topDisplay:run.artDirection?.systems?.[0]?.display?.font?.family ?? null,
+      topBody:run.artDirection?.systems?.[0]?.body?.font?.family ?? null
+    })),
+    shortlistPolicy:{
+      mode:'ranked-quality-plus-display-voice-diversity',
+      rationale:'A typography art-direction review needs materially different display voices. Five score-adjacent body pairings under one display family are not meaningful visual exploration.',
+      targetCount:TARGET_VISUAL_SYSTEMS,
+      automaticWinner:false
+    },
     systems,
     systemSummaries:systems.map(summarizeSystem),
     sourceEvidence:{
@@ -157,6 +214,7 @@ export function buildConversationTypographyExploration() {
       theConversationLeadHypothesis:true,
       humanArtDirectionSelectionConfirmed:false,
       typographyCandidateGenerationComplete:systems.length >= 3,
+      displayVoiceDiversityRequired:true,
       typographyArtDirectionReviewRequired:true,
       typographySystemSelected:false,
       typographyApproved:false,
