@@ -51,6 +51,27 @@ function googleFontLoadingRequired(roles = {}) {
   return Object.values(roles).some((role) => role?.source === 'google-fonts');
 }
 
+function normalizeFamilyName(value) {
+  return String(value ?? '').trim().replace(/^['"]|['"]$/g, '').replace(/\s+/g, ' ').toLowerCase();
+}
+
+function firstCssFamily(value) {
+  const text = String(value ?? '').trim();
+  if (!text) return '';
+  let quote = null;
+  let current = '';
+  for (const char of text) {
+    if ((char === '"' || char === "'") && (!quote || quote === char)) {
+      quote = quote === char ? null : char;
+      current += char;
+      continue;
+    }
+    if (char === ',' && !quote) break;
+    current += char;
+  }
+  return normalizeFamilyName(current);
+}
+
 function roleTokenFindings(roles = {}, cssVariables = {}) {
   const findings = [];
   for (const [role, config] of Object.entries(roles)) {
@@ -61,8 +82,10 @@ function roleTokenFindings(roles = {}, cssVariables = {}) {
       findings.push({ severity:'blocker', code:'typography-contract-role-token-missing', role, token });
       continue;
     }
-    if (!String(value).toLowerCase().includes(String(config.family).toLowerCase())) {
-      findings.push({ severity:'blocker', code:'typography-contract-role-token-drift', role, token, family:config.family });
+    const actualFamily = firstCssFamily(value);
+    const expectedFamily = normalizeFamilyName(config.family);
+    if (actualFamily !== expectedFamily) {
+      findings.push({ severity:'blocker', code:'typography-contract-role-token-drift', role, token, family:config.family, actualFamily });
     }
   }
   return findings;
