@@ -1,18 +1,18 @@
 function clamp(value, min=0, max=100) { return Math.max(min, Math.min(max, Math.round(value))); }
 
-const COMMON_PAIR_KEYS = new Set([
-  'playfair display|montserrat',
-  'playfair display|poppins',
-  'dm serif display|montserrat',
-  'roboto|roboto mono',
-  'poppins|inter',
-  'montserrat|open sans',
-  'lora|open sans'
-]);
-
 function pairKey(a, b) {
-  return [String(a ?? '').toLowerCase(), String(b ?? '').toLowerCase()].sort().join('|');
+  return [String(a ?? '').trim().toLowerCase(), String(b ?? '').trim().toLowerCase()].sort().join('|');
 }
+
+const COMMON_PAIR_KEYS = new Set([
+  ['Playfair Display', 'Montserrat'],
+  ['Playfair Display', 'Poppins'],
+  ['DM Serif Display', 'Montserrat'],
+  ['Roboto', 'Roboto Mono'],
+  ['Poppins', 'Inter'],
+  ['Montserrat', 'Open Sans'],
+  ['Lora', 'Open Sans']
+].map(([a, b]) => pairKey(a, b)));
 
 function numericDistance(a, b) {
   if (!Number.isFinite(a) || !Number.isFinite(b)) return null;
@@ -53,12 +53,19 @@ function evaluateRoleSeparation(display, body, pairingStrategy='contrast-with-co
   return { score:clamp(score), reasons };
 }
 
-function evaluateUtilityRole(utility, body, strategy={}) {
+function evaluateUtilityRole(utility, body, strategy={}, pairingStrategy='contrast-with-coherence') {
   if (!utility) return { score:70, reasons:['utility role omitted; acceptable when project does not need a third family'] };
   let score = 72;
   const reasons = [];
-  if (utility.family === body?.family) { score += 5; reasons.push('utility reuses body family and limits font sprawl'); }
-  else if (utility.category === 'monospace') {
+  if (utility.family === body?.family) {
+    score += pairingStrategy === 'single-family' ? 12 : 5;
+    reasons.push(pairingStrategy === 'single-family'
+      ? 'utility correctly reuses the approved single-family system'
+      : 'utility reuses body family and limits font sprawl');
+  } else if (pairingStrategy === 'single-family') {
+    score -= 22;
+    reasons.push('utility introduces a second family into a requested single-family system');
+  } else if (utility.category === 'monospace') {
     const technicality = Number(strategy.pressures?.technicality ?? 50);
     score += technicality >= 65 ? 12 : 3;
     reasons.push(technicality >= 65 ? 'monospace utility supports technical product character' : 'monospace adds explicit functional separation');
@@ -66,13 +73,18 @@ function evaluateUtilityRole(utility, body, strategy={}) {
   return { score:clamp(score), reasons };
 }
 
+function normalizeMarketPair(pair) {
+  if (Array.isArray(pair)) return pair.length >= 2 ? pairKey(pair[0], pair[1]) : null;
+  const parts = String(pair ?? '').split('|').map((value) => value.trim()).filter(Boolean);
+  return parts.length >= 2 ? pairKey(parts[0], parts[1]) : null;
+}
+
 function evaluateClicheRisk(display, body, { marketCommonPairs=[] }={}) {
   const key = pairKey(display?.family, body?.family);
-  const common = new Set([...COMMON_PAIR_KEYS, ...marketCommonPairs.map((pair)=>{
-    if (Array.isArray(pair)) return pairKey(pair[0], pair[1]);
-    const [a,b] = String(pair).split('|');
-    return pairKey(a,b);
-  })]);
+  const common = new Set([
+    ...COMMON_PAIR_KEYS,
+    ...marketCommonPairs.map(normalizeMarketPair).filter(Boolean)
+  ]);
   if (display?.family && body?.family && display.family === body.family) {
     return { score:82, risk:'low', reasons:['single-family system avoids a common two-family pairing cliché'] };
   }
@@ -106,7 +118,7 @@ export function critiqueTypographySystem(system, { strategy={}, marketCommonPair
   const body = system.body.font;
   const utility = system.utility?.font ?? null;
   const roleSeparation = evaluateRoleSeparation(display, body, pairingStrategy);
-  const utilityRole = evaluateUtilityRole(utility, body, strategy);
+  const utilityRole = evaluateUtilityRole(utility, body, strategy, pairingStrategy);
   const cliche = evaluateClicheRisk(display, body, { marketCommonPairs });
   const businessAlignment = evaluateBusinessAlignment(system, strategy);
   const pairingQuality = system.pairing?.score ?? 0;
@@ -116,6 +128,7 @@ export function critiqueTypographySystem(system, { strategy={}, marketCommonPair
   );
   const findings = [];
   if (roleSeparation.score < 55) findings.push({severity:'major',code:'typography-role-separation-weak'});
+  if (utilityRole.score < 55) findings.push({severity:'major',code:'typography-utility-role-conflict'});
   if (cliche.risk === 'high') findings.push({severity:'major',code:'typography-pair-cliche-risk'});
   if (businessAlignment.score < 60) findings.push({severity:'major',code:'typography-business-fit-weak'});
   if (pairingQuality < 65) findings.push({severity:'major',code:'typography-pairing-quality-low'});
