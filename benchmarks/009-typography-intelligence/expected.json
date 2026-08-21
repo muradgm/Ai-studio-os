@@ -5,6 +5,7 @@
   "utilityFamily": "IBM Plex Mono",
   "minPairingScore": 85,
   "evidenceLevel": "evidence-backed-structural",
+  "intentAuthority": "explicit-typography-intent",
   "minBodySize": 16,
   "maxMeasure": 72,
   "excludedFamilies": ["Roboto", "Poppins"],
