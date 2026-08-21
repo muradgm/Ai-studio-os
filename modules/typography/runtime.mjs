@@ -2,6 +2,7 @@ import { scoreFontForRole, scorePairing, supportsLanguages } from './scoring.mjs
 import { buildBusinessTypographyStrategy } from './strategy.mjs';
 import { enrichFontCatalog } from './font-intelligence.mjs';
 import { rankTypographySystems, buildTypographyAlternatives } from './system-intelligence.mjs';
+import { buildTypographyApplication } from './application-intelligence.mjs';
 import { buildTypographyProductionConfig } from './export.mjs';
 
 function roleWeights(font, role) {
@@ -43,14 +44,14 @@ function selection(font, role) {
 }
 
 export function buildTypographySystem({
-  catalog=[], fontEvidence=[], business={}, brand={}, requirements={}, pairing={},
+  catalog=[], fontEvidence=[], business={}, brand={}, requirements={}, pairing={}, application={},
   marketCommonFamilies=[], marketCommonPairs=[], avoidFamilies=[], candidateLimit=8, systemLimit=3
 }={}) {
   if (!Array.isArray(catalog)) throw new TypeError('typography catalog must be an array');
   if (!Array.isArray(fontEvidence)) throw new TypeError('font evidence must be an array');
   const strategy = buildBusinessTypographyStrategy({ business, brand, requirements });
   if (!catalog.length) {
-    return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-catalog-empty'}], candidates:{}, systems:[], alternatives:[], selection:null, production:null };
+    return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-catalog-empty'}], candidates:{}, systems:[], alternatives:[], selection:null, application:null, production:null };
   }
 
   const workingCatalog = fontEvidence.length ? enrichFontCatalog(catalog, fontEvidence) : catalog;
@@ -81,13 +82,13 @@ export function buildTypographySystem({
   const alternatives = buildTypographyAlternatives(ranked, { limit:systemLimit });
 
   if (!ranked.length) {
-    return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-no-valid-pairing',minPairingScore}], candidates:{display,body,utility}, systems:[], alternatives:[], selection:null, production:null };
+    return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-no-valid-pairing',minPairingScore}], candidates:{display,body,utility}, systems:[], alternatives:[], selection:null, application:null, production:null };
   }
   if (!acceptable.length) {
     return {
       stage:'typography', pass:false, strategy,
       findings:[{severity:'blocker',code:'typography-no-acceptable-system',minSystemScore,bestScore:ranked[0].critique.score,bestFindings:ranked[0].critique.findings}],
-      candidates:{display,body,utility}, systems:topReviewed, alternatives, selection:null, production:null
+      candidates:{display,body,utility}, systems:topReviewed, alternatives, selection:null, application:null, production:null
     };
   }
 
@@ -100,15 +101,25 @@ export function buildTypographySystem({
     body:selection(winner.body.font,'body'),
     utility:winner.utility ? selection(winner.utility.font,'utility') : null
   };
+  const applicationPlan = buildTypographyApplication({ selection:resolved, strategy, requirements, viewport:application.viewport ?? {} });
+  if (!applicationPlan.pass) {
+    return {
+      stage:'typography', pass:false, strategy,
+      findings:[{severity:'blocker',code:'typography-application-not-ready',details:applicationPlan.findings}],
+      candidates:{display,body,utility}, systems:topSystems, alternatives:acceptedAlternatives,
+      selection:resolved, application:applicationPlan, production:null
+    };
+  }
 
   const output = {
     stage:'typography', pass:true, findings:[], strategy,
     intelligence:{ evidenceFamilies:fontEvidence.length, winnerEvidenceLevel:winner.pairing.evidenceLevel, winnerStructuralConfidence:winner.pairing.structural?.confidence ?? 0 },
-    context:{ business, brand, requirements, pairing:{...pairing,strategy:pairingStrategy,minScore:minPairingScore,minSystemScore}, marketCommonPairs },
+    context:{ business, brand, requirements, pairing:{...pairing,strategy:pairingStrategy,minScore:minPairingScore,minSystemScore}, marketCommonPairs, application },
     candidates:{display,body,utility}, systems:topSystems, alternatives:acceptedAlternatives,
     rejectedAlternatives: alternatives.filter((item)=>item.findings.length > 0),
     systemCritique:winnerEntry.critique,
-    selection:resolved
+    selection:resolved,
+    application:applicationPlan
   };
   output.production = buildTypographyProductionConfig(output);
   return output;
@@ -122,6 +133,8 @@ export function validateTypographyBenchmark(output, expected={}) {
   if (expected.utilityFamily && output.selection?.utility?.family !== expected.utilityFamily) failures.push(`expected utility ${expected.utilityFamily}, got ${output.selection?.utility?.family ?? 'none'}`);
   if (expected.minPairingScore !== undefined && (output.systems?.[0]?.pairing?.score ?? 0) < expected.minPairingScore) failures.push(`pairing score below ${expected.minPairingScore}`);
   if (expected.minSystemScore !== undefined && (output.systemCritique?.score ?? 0) < expected.minSystemScore) failures.push(`system score below ${expected.minSystemScore}`);
+  if (expected.minBodySize !== undefined && (output.application?.styles?.body?.sizePx ?? 0) < expected.minBodySize) failures.push(`body size below ${expected.minBodySize}`);
+  if (expected.maxMeasure !== undefined && (output.application?.measure?.max ?? Infinity) > expected.maxMeasure) failures.push(`body measure exceeds ${expected.maxMeasure}ch`);
   if (expected.evidenceLevel && output.systems?.[0]?.pairing?.evidenceLevel !== expected.evidenceLevel) failures.push(`expected evidence level ${expected.evidenceLevel}, got ${output.systems?.[0]?.pairing?.evidenceLevel ?? 'none'}`);
   for (const family of expected.excludedFamilies ?? []) {
     const selected = [output.selection?.display?.family, output.selection?.body?.family, output.selection?.utility?.family].filter(Boolean);
