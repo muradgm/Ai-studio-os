@@ -68,12 +68,13 @@ export async function prepareProjectTypographyInput(input = {}, options = {}) {
   if (!resources.pass) return { enabled:true, input:structuredClone(input), resources, pass:false, findings:resources.findings };
 
   const request = explicitTypography ?? context;
+  const explicitEvidence = Array.isArray(request.fontEvidence) ? request.fontEvidence : [];
   const prepared = {
     ...structuredClone(input),
     typography:{
       ...request,
       catalog:undefined,
-      fontEvidence:resources.fontEvidence
+      fontEvidence:[...resources.fontEvidence, ...explicitEvidence]
     },
     fontCatalog:resources.catalog
   };
