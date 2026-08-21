@@ -1,10 +1,4 @@
-import { createGoogleFontsProvider } from '../modules/typography/google-fonts-provider.mjs';
-import { syncTypographyCatalog } from '../modules/typography/catalog.mjs';
+import { syncGoogleFontsCatalog } from '../modules/typography/google-fonts-sync.mjs';
 
-const provider = createGoogleFontsProvider();
-const catalog = await syncTypographyCatalog({
-  provider,
-  sort: 'popularity',
-  capability: 'VF'
-});
+const catalog = await syncGoogleFontsCatalog();
 console.log(`Google Fonts catalog synced: ${catalog.count} families (VF capability enabled) -> .tmp/google-fonts/catalog.json`);
