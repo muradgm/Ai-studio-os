@@ -28,8 +28,7 @@ try {
       ]);
       await document.fonts.ready;
       const displayEl = document.querySelector('#display-test');
-      const section = displayEl?.parentElement ?? null;
-      const utilityEl = section ? [...section.children].find((node) => node !== displayEl && String(node.getAttribute?.('style') ?? '').includes('position:absolute') && String(node.getAttribute?.('style') ?? '').includes('right:0')) : null;
+      const utilityEl = document.querySelector('#utility-test');
       const toObject = (rect) => rect ? ({ left:rect.left, right:rect.right, top:rect.top, bottom:rect.bottom, width:rect.width, height:rect.height }) : null;
       const glyphRects = [];
       if (displayEl) {
