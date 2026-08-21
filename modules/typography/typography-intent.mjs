@@ -47,11 +47,43 @@ function normalizePressureOverrides(value = {}) {
   return output;
 }
 
+function evaluateCreativeWorld(world, findings) {
+  if (!world) return { supplied:false, authoritative:false, id:null, intent:{} };
+  const id = clean(world.id ?? world.worldId);
+  const schema = clean(world.schema);
+  const schemaSupported = !schema || schema === 'ai-studio-os/creative-world@1';
+  const reviewReady = world.reviewReady === true;
+  const selected = world.selected === true;
+  const authoritative = Boolean(id && schemaSupported && reviewReady && selected);
+
+  if (schema && !schemaSupported) {
+    findings.push({ severity:'blocker', code:'typography-intent-creative-world-schema-unsupported', schema });
+  } else if (!authoritative) {
+    findings.push({
+      severity:'minor',
+      code:'typography-intent-creative-world-not-authoritative',
+      id:id || null,
+      reviewReady,
+      selected,
+      reason:!id ? 'world-id-missing' : !reviewReady ? 'world-not-review-ready' : !selected ? 'world-not-selected' : 'world-not-authoritative'
+    });
+  }
+
+  return {
+    supplied:true,
+    authoritative,
+    id:id || null,
+    schema:schema || null,
+    reviewReady,
+    selected,
+    intent:authoritative ? objectOrEmpty(world.typographyIntent ?? world.typography) : {}
+  };
+}
+
 export function buildTypographyIntent({ creativeThesis = null, creativeWorld = null, explicit = null } = {}) {
   const thesis = creativeThesis && typeof creativeThesis === 'object' && !Array.isArray(creativeThesis) ? creativeThesis : null;
   const world = creativeWorld && typeof creativeWorld === 'object' && !Array.isArray(creativeWorld) ? creativeWorld : null;
   const authored = explicit && typeof explicit === 'object' && !Array.isArray(explicit) ? explicit : {};
-  const worldIntent = objectOrEmpty(world?.typographyIntent ?? world?.typography);
 
   const thesisSupplied = Boolean(thesis);
   const findings = [];
@@ -62,6 +94,8 @@ export function buildTypographyIntent({ creativeThesis = null, creativeWorld = n
     findings.push({ severity:'blocker', code:'typography-intent-creative-thesis-not-review-ready', status:thesis.status ?? null });
   }
 
+  const worldState = evaluateCreativeWorld(world, findings);
+  const worldIntent = worldState.intent;
   const statement = clean(
     authored.statement
     ?? worldIntent.statement
@@ -96,8 +130,8 @@ export function buildTypographyIntent({ creativeThesis = null, creativeWorld = n
     ...objectOrEmpty(authored.pressures)
   });
 
-  const enabled = Boolean(thesis || world || statement || Object.keys(roleDirectives).length || Object.keys(descriptorTargets).length);
-  const authority = world && Object.keys(worldIntent).length
+  const enabled = Boolean(thesis || worldState.authoritative || statement || Object.keys(roleDirectives).length || Object.keys(descriptorTargets).length);
+  const authority = worldState.authoritative && Object.keys(worldIntent).length
     ? 'selected-creative-world'
     : thesis
       ? 'creative-thesis'
@@ -123,7 +157,11 @@ export function buildTypographyIntent({ creativeThesis = null, creativeWorld = n
       creativeThesisSchema:thesis?.schema ?? null,
       creativeThesisStatus:thesis?.status ?? null,
       creativeThesisReviewReady:thesis?.reviewReady ?? null,
-      creativeWorldId:world?.id ?? world?.worldId ?? null
+      creativeWorldId:worldState.id,
+      creativeWorldSchema:worldState.schema,
+      creativeWorldReviewReady:worldState.reviewReady ?? null,
+      creativeWorldSelected:worldState.selected ?? null,
+      creativeWorldAuthoritative:worldState.authoritative
     },
     findings,
     pass:!findings.some((item)=>item.severity === 'blocker')
