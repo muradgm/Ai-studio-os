@@ -19,6 +19,8 @@ CREATIVE THESIS
         ↓
 CREATIVE WORLD DIVERGENCE
         ↓
+HUMAN WORLD SELECTION
+        ↓
 STYLE FRAMES
         ↓
 TYPOGRAPHY / IMAGE / MATERIAL LANGUAGE
@@ -69,10 +71,64 @@ A thesis can become structurally `ready-for-creative-direction-review` only when
 
 This prevents deterministic template prose from being mistaken for high-quality creative judgment.
 
-## Planned slices
+## Slice 2 — Creative World Exploration v1
 
-### Slice 2 — Creative World exploration
-Generate 3–5 genuinely different visual-world hypotheses from one reviewed thesis. Difference must occur at the world/concept level, not palette/type/layout reskins.
+Status: implemented on `feature/creative-world-exploration-v1`.
+
+Purpose: take one reviewed Creative Thesis and require 3–5 authored experience worlds that differ at the **structural world level**, not by palette/type/layout reskin.
+
+The slice adds:
+
+- `modules/creative-world/CONTRACT.md`
+- `modules/creative-world/runtime.mjs`
+- `.agents/skills/creative-world-exploration/SKILL.md`
+- a canonical `ai-studio-os/creative-world@1` candidate/selected-world contract
+- pairwise structural divergence review across narrative, composition, image, motion, interaction, responsive behavior, and world class
+- a technology-neutrality gate
+- typography-intent handoff without premature family freezing
+- explicit human-selection requirement; automated scoring cannot pick the winner
+- Creative Runtime integration between Creative Thesis and Creative Direction
+- Du Bonheur benchmark candidates that prove three materially different worlds while deliberately leaving selection unresolved
+- focused tests for thesis readiness, cosmetic variants, technology-as-concept failure, and human selection truth
+
+### Selection boundary
+
+Creative World structural review can reject incomplete or cosmetic candidates, but it cannot choose the winning world.
+
+A world becomes selected only when an explicit selection input provides:
+
+```text
+worldId
+humanConfirmed === true
+```
+
+Even then:
+
+```text
+styleFrameReviewComplete: false
+typographyApproved: false
+productionTechnologyApproved: false
+```
+
+Selection means **advance this world to visual proof**, not “the website is creatively approved.”
+
+### Typography composition boundary
+
+Creative World owns typography intent. Typography Intelligence later owns evidence-backed candidate search and measured application. A final typography system still requires Typography Art Direction / visual specimen review before canonicalization.
+
+This is also where the open Typography Intelligence branch will eventually compose:
+
+```text
+Creative Thesis
+→ Selected Creative World
+→ Typography Intent
+→ Typography Intelligence
+→ Typography System Exploration
+→ Visual / Optical Review
+→ Canonical Consumption Contract
+```
+
+## Planned slices
 
 ### Slice 3 — Style-frame production
 Produce high-fidelity opening, narrative, product, transition, information, and closing states before implementation.
