@@ -20,7 +20,11 @@ test('every TraderFrame semantic begins with recognition anchors before geometry
     assert.ok(brief.recognitionAnchors.length >= 3);
     assert.ok(brief.prohibitedDefaults.length >= 3);
     assert.ok(brief.transformationRule.length > 40);
-    assert.match(brief.transformationRule, /avoid|rather|without|not|instead/i);
+    assert.notEqual(brief.transformationRule, brief.literalMeaning);
+    assert.equal(
+      brief.recognitionAnchors.some((anchor) => brief.prohibitedDefaults.includes(anchor)),
+      false
+    );
   }
 });
 
