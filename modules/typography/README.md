@@ -24,27 +24,60 @@ Typography Intelligence resolves business and brand intent into production-ready
 - Google Developer API credentials remain server-side. Generated projects use CSS2/font resources and never receive `GOOGLE_FONTS_API_KEY`.
 - A missing catalog blocks a requested typography stage; projects that do not request typography preserve the legacy design path.
 
-## Sync the Google Fonts catalog
+## Sync and analyze the Google Fonts catalog
 
 Set `GOOGLE_FONTS_API_KEY` in the environment and run:
 
 ```bash
 npm run fonts:sync
+npm run fonts:analyze
 ```
 
-The catalog is cached at `.tmp/google-fonts/catalog.json` (already ignored by the repository).
+The catalog is cached at `.tmp/google-fonts/catalog.json`. Evidence-backed analysis is cached separately at `.tmp/google-fonts/intelligence.json`. Both paths are under `.tmp/` and are ignored by the repository.
 
-## Optional font intelligence evidence
+The batch analyzer uses bounded concurrency. A font file is downloaded once and the same bytes can feed both OpenType table metrics and glyph-outline analysis.
 
-Google Fonts metadata does not provide enough information to justify claims about x-height, stroke contrast, rhythm, terminals, or geometry. Those can be supplied separately:
+## Automatic binary metrics
+
+For decompressed SFNT/TrueType/OpenType binaries, the analyzer can measure:
+
+- units per em
+- average character width
+- x-height and cap height when present in `OS/2`
+- weight/width classes
+- typographic ascender, descender, and line gap
+- horizontal ascender/descender/line gap
+- italic angle and underline metrics
+
+Compressed WOFF/WOFF2 files are rejected until decompressed rather than being misparsed.
+
+## Glyph-outline intelligence
+
+For TrueType `glyf`/`loca` outlines, representative glyphs (`H O o n a e s` by default) are resolved through `cmap` and measured directly. The current outline layer records:
+
+- contour count
+- point count
+- on-curve/off-curve point counts
+- off-curve ratio
+- glyph bounding-box proportions
+- normalized width/height
+- aggregate roundness proxy
+- aggregate outline-complexity proxy
+- aggregate proportion proxy
+
+These are measurement-derived proxies, not stylistic labels. The system does **not** infer `humanist`, `geometric`, terminal style, stroke contrast, aperture, serif style, or rhythm from these proxies alone.
+
+Composite glyphs and unsupported outline formats degrade cleanly and do not block the rest of typography intelligence.
+
+## Optional external font intelligence evidence
+
+Some useful structural attributes still require manual/specimen analysis or a later dedicated classifier. They can be supplied separately:
 
 ```js
 const fontEvidence = [
   {
     family: 'Newsreader',
     descriptors: {
-      xHeight: 58,
-      width: 54,
       strokeContrast: 76,
       geometry: 'humanist',
       rhythm: 'textual',
@@ -63,7 +96,7 @@ const fontEvidence = [
 ];
 ```
 
-Numeric descriptors use a normalized 0–100 scale. They are not accepted as evidence-backed unless at least one provenance source is attached.
+Numeric descriptors use a normalized 0–100 scale. They are not accepted as evidence-backed unless at least one provenance source is attached. Multiple evidence records for the same family are merged instead of overwriting one another; numeric descriptors are confidence-weighted and provenance is retained.
 
 ## Runtime contract
 
