@@ -31,19 +31,38 @@ export async function loadTypographyRuntimeResources({
   if (intelligence?.provider && catalog?.provider && intelligence.provider !== catalog.provider) {
     findings.push({ severity:'blocker', code:'typography-orchestrator-provider-drift', catalogProvider:catalog.provider, intelligenceProvider:intelligence.provider });
   }
-  if (intelligence?.catalogFetchedAt && catalog?.fetchedAt && intelligence.catalogFetchedAt !== catalog.fetchedAt) {
-    findings.push({ severity:'major', code:'typography-orchestrator-evidence-stale-for-catalog', catalogFetchedAt:catalog.fetchedAt, evidenceCatalogFetchedAt:intelligence.catalogFetchedAt });
+
+  const staleEvidence = Boolean(
+    intelligence?.catalogFetchedAt
+    && catalog?.fetchedAt
+    && intelligence.catalogFetchedAt !== catalog.fetchedAt
+  );
+  if (staleEvidence) {
+    findings.push({
+      severity:'major',
+      code:'typography-orchestrator-evidence-stale-for-catalog',
+      catalogFetchedAt:catalog.fetchedAt,
+      evidenceCatalogFetchedAt:intelligence.catalogFetchedAt,
+      action:'discard-cached-structural-evidence'
+    });
   }
+
+  const cachedEvidence = !staleEvidence && Array.isArray(intelligence?.evidence)
+    ? intelligence.evidence
+    : [];
 
   return {
     stage:'typography-runtime-resources',
     catalog:catalog?.fonts ?? [],
-    fontEvidence:intelligence?.evidence ?? [],
+    fontEvidence:cachedEvidence,
     metadata:{
       catalogFetchedAt:catalog?.fetchedAt ?? null,
       evidenceAnalyzedAt:intelligence?.analyzedAt ?? null,
       catalogCount:catalog?.fonts?.length ?? 0,
-      evidenceCount:intelligence?.evidence?.length ?? 0
+      evidenceCount:cachedEvidence.length,
+      cachedEvidenceCount:Array.isArray(intelligence?.evidence) ? intelligence.evidence.length : 0,
+      evidenceStale:staleEvidence,
+      evidenceDiscarded:staleEvidence
     },
     findings,
     pass:!findings.some((item)=>item.severity === 'blocker')
