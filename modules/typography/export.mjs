@@ -10,6 +10,13 @@ function formatAxisNumber(value) {
   return Number.isInteger(numeric) ? String(numeric) : String(Math.round(numeric * 1000) / 1000);
 }
 
+function compareAxisTags(a, b) {
+  const aCustom = /^[A-Z0-9]{4}$/.test(a);
+  const bCustom = /^[A-Z0-9]{4}$/.test(b);
+  if (aCustom !== bCustom) return aCustom ? 1 : -1;
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function normalizeVariableAxes(selection) {
   if (selection?.variable !== true || !Array.isArray(selection.axes)) return [];
   return selection.axes
@@ -21,7 +28,7 @@ function normalizeVariableAxes(selection) {
     }))
     .filter((axis) => Number.isFinite(axis.start) && Number.isFinite(axis.end))
     .map((axis) => axis.start <= axis.end ? axis : { ...axis, start: axis.end, end: axis.start })
-    .sort((a, b) => a.tag.localeCompare(b.tag));
+    .sort((a, b) => compareAxisTags(a.tag, b.tag));
 }
 
 function axisRequestValue(axis) {
@@ -68,7 +75,7 @@ export function buildTypographyTokens(system) {
 function axisString(axes = {}) {
   const entries = Object.entries(axes)
     .filter(([tag, value]) => typeof tag === 'string' && tag.length === 4 && Number.isFinite(value))
-    .sort(([a], [b]) => a.localeCompare(b));
+    .sort(([a], [b]) => compareAxisTags(a, b));
   return entries.length ? entries.map(([tag, value]) => `"${tag}" ${value}`).join(', ') : null;
 }
 
