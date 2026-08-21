@@ -22,10 +22,11 @@ export function buildCreativeDirection({ intent, businessTruths = [], inspiratio
   const thesisAntiPrinciples = thesis?.antiPrinciples ?? [];
   const selectedWorld = world?.selected === true && world?.truth?.humanCreativeSelectionConfirmed === true ? world : null;
   const worldStatement = selectedWorld?.worldIdea;
+  const worldSelectionRequired = Boolean(thesis);
 
   return {
     stage: 'creative-direction',
-    provisional: inspiration.status !== 'ready' || thesis?.reviewReady === false || !selectedWorld,
+    provisional: inspiration.status !== 'ready' || thesis?.reviewReady === false || (worldSelectionRequired && !selectedWorld),
     traits: normalizedTraits,
     tension,
     directionStatement: worldStatement
@@ -86,7 +87,7 @@ export function buildCreativeDirection({ intent, businessTruths = [], inspiratio
       writing: 'Use business-specific claims and remove interchangeable category copy.'
     },
     technologyPolicy: thesis?.technologyPolicy ?? null,
-    reviewCriteria: ['business-truth', 'creative-thesis-fit', 'selected-world-fit', 'brand-fit', 'distinctiveness', 'coherence', 'usability'],
+    reviewCriteria: ['business-truth', 'creative-thesis-fit', ...(worldSelectionRequired ? ['selected-world-fit'] : []), 'brand-fit', 'distinctiveness', 'coherence', 'usability'],
     unresolvedRisks: unique([...(inspiration.unresolvedUnknowns ?? []), ...(thesis?.unresolvedRisks ?? []), ...(selectedWorld?.unresolvedRisks ?? [])])
   };
 }
