@@ -52,7 +52,7 @@ jobs:
 
   browser-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,6 +83,9 @@ jobs:
       - name: Produce The Conversation typography proof
         run: npm run proof:conversation-typography
 
+      - name: Produce The Conversation typography finalist proof
+        run: npm run proof:conversation-typography-refinement
+
       - name: Upload Du Bonheur style-frame proof
         if: always()
         uses: actions/upload-artifact@v4
@@ -107,6 +110,15 @@ jobs:
         with:
           name: counter-ritual-conversation-typography-v1
           path: artifacts/du-bonheur/counter-ritual-conversation-typography-v1
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload The Conversation typography finalist proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: counter-ritual-conversation-typography-refinement-v2
+          path: artifacts/du-bonheur/counter-ritual-conversation-typography-refinement-v2
           if-no-files-found: error
           retention-days: 7
 
