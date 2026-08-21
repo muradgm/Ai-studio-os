@@ -31,6 +31,7 @@ export const FORM_DIRECTIONS = [
   {
     id: 'linear-architectural',
     label: 'Linear / Architectural',
+    formClass: 'skeletal-open',
     strokeWidth: 1.5,
     intent: 'Airy, precise, system-like geometry with explicit construction and generous negative space.',
     risks: ['can remain too diagrammatic', 'may feel visually timid at small sizes']
@@ -38,15 +39,17 @@ export const FORM_DIRECTIONS = [
   {
     id: 'compact-symbolic',
     label: 'Compact / Symbolic',
+    formClass: 'enclosed-compact',
     strokeWidth: 1.75,
-    intent: 'Compress each locked semantic into a tighter symbol while preserving the TraderFrame trace/node vocabulary.',
-    risks: ['can become dense', 'may reduce the distinction between structural and event layers']
+    intent: 'Compress the locked meaning into a bounded emblem-like construction with tighter internal relationships and less loose linework.',
+    risks: ['can become dense', 'enclosure can make the family feel too UI-container-like']
   },
   {
     id: 'bold-reduced',
     label: 'Bold / Reduced',
+    formClass: 'reduced-gesture',
     strokeWidth: 2,
-    intent: 'Use fewer strokes and stronger silhouette hierarchy to increase confidence without changing the locked semantic idea.',
+    intent: 'Reduce each semantic to a stronger directional gesture with fewer structural elements and a more dominant event hierarchy.',
     risks: ['can overpower the wider UI', 'may drift from the current 1.5-stroke candidate DNA if promoted without review']
   }
 ];
@@ -68,31 +71,31 @@ const FORM_BODIES = {
   },
   'compact-symbolic': {
     'strategy-idea': `
-      <g data-layer="base" data-primitive="mast"><path d="M8 18V6"/></g>
-      <g data-layer="structure" data-primitive="plan"><path d="M8 7h8l-2 2.5 2 2.5H8"/></g>
-      <g data-layer="event" data-primitive="node"><path d="M15 8l1.75 1.75L15 11.5l-1.75-1.75L15 8Z"/></g>`,
+      <g data-layer="base" data-primitive="bounded-field"><path d="M6 18V6h12v12"/></g>
+      <g data-layer="structure" data-primitive="embedded-plan"><path d="M9 16V8h6l-2 2 2 2H9"/></g>
+      <g data-layer="event" data-primitive="node"><path d="M15 8.25l1.75 1.75L15 11.75 13.25 10 15 8.25Z"/></g>`,
     'operator-decision': `
-      <g data-layer="base" data-primitive="trace"><path d="M5 12h8"/></g>
-      <g data-layer="structure" data-primitive="branch"><path d="M13 12l5-4M13 12l5 4"/></g>
-      <g data-layer="event" data-primitive="node"><path d="M17 6.25L18.75 8 17 9.75 15.25 8 17 6.25Z"/></g>`,
+      <g data-layer="base" data-primitive="decision-field"><path d="M6 7v10h12"/></g>
+      <g data-layer="structure" data-primitive="junction"><path d="M8 12h5M13 12l4-3M13 12l4 3"/></g>
+      <g data-layer="event" data-primitive="node"><path d="M17 7.25L18.75 9 17 10.75 15.25 9 17 7.25Z"/></g>`,
     'learning-event': `
-      <g data-layer="base" data-primitive="return"><path d="M17 7v9H9M9 16l2.5-2.5M9 16l2.5 2.5"/></g>
-      <g data-layer="structure" data-primitive="trace"><path d="M9 9h6"/></g>
-      <g data-layer="event" data-primitive="node"><path d="M12 7.25L13.75 9 12 10.75 10.25 9 12 7.25Z"/></g>`
+      <g data-layer="base" data-primitive="feedback-field"><path d="M17 7v10H7V9"/></g>
+      <g data-layer="structure" data-primitive="return-corner"><path d="M7 9l3-3M7 9l3 3"/></g>
+      <g data-layer="event" data-primitive="node"><path d="M14 15.25L15.75 17 14 18.75 12.25 17 14 15.25Z"/></g>`
   },
   'bold-reduced': {
     'strategy-idea': `
-      <g data-layer="base" data-primitive="mast"><path d="M7 19V5"/></g>
-      <g data-layer="structure" data-primitive="plan"><path d="M7 7h9l-3 3 3 3H7"/></g>
+      <g data-layer="base" data-primitive="plan-gesture"><path d="M7 19V5M7 7h9l-4 3 4 3H7"/></g>
+      <g data-layer="structure" data-primitive="cut"><path d="M12 10h4"/></g>
       <g data-layer="event" data-primitive="node"><path d="M16 7.5l2.5 2.5-2.5 2.5-2.5-2.5 2.5-2.5Z"/></g>`,
     'operator-decision': `
-      <g data-layer="base" data-primitive="trace"><path d="M4 12h9"/></g>
-      <g data-layer="structure" data-primitive="branch"><path d="M13 12l7-6M13 12l7 6"/></g>
-      <g data-layer="event" data-primitive="node"><path d="M18 4l2.5 2.5L18 9l-2.5-2.5L18 4Z"/></g>`,
+      <g data-layer="base" data-primitive="choice-gesture"><path d="M4 12h7l8-7M11 12l7 7"/></g>
+      <g data-layer="structure" data-primitive="selected-route"><path d="M14 9l5-4"/></g>
+      <g data-layer="event" data-primitive="node"><path d="M18 3.5l2.5 2.5L18 8.5 15.5 6 18 3.5Z"/></g>`,
     'learning-event': `
-      <g data-layer="base" data-primitive="return"><path d="M18 5v13H8M8 18l4-4M8 18l4 4"/></g>
-      <g data-layer="structure" data-primitive="trace"><path d="M8 8h7"/></g>
-      <g data-layer="event" data-primitive="node"><path d="M12 5.5l2.5 2.5-2.5 2.5L9.5 8 12 5.5Z"/></g>`
+      <g data-layer="base" data-primitive="return-gesture"><path d="M18 5v13H7M7 18l4-4M7 18l4 4"/></g>
+      <g data-layer="structure" data-primitive="feed"><path d="M10 8h8"/></g>
+      <g data-layer="event" data-primitive="node"><path d="M17 4.5l2.5 2.5L17 9.5 14.5 7 17 4.5Z"/></g>`
   }
 };
 
@@ -118,12 +121,13 @@ export function renderFormCandidate(directionId, iconId) {
   const anchor = anchorById(iconId);
   const body = FORM_BODIES[directionId]?.[iconId];
   if (!direction || !anchor || !body) throw new Error(`Unknown TraderFrame form candidate ${directionId}/${iconId}`);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${direction.strokeWidth}" stroke-linecap="square" stroke-linejoin="miter" vector-effect="non-scaling-stroke" data-system="traderframe-form-refinement-v1" data-direction="${directionId}" data-semantic="${iconId}" data-source-concept="${anchor.lockedSemanticConcept}">${body}\n</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${direction.strokeWidth}" stroke-linecap="square" stroke-linejoin="miter" data-system="traderframe-form-refinement-v1" data-direction="${directionId}" data-form-class="${direction.formClass}" data-semantic="${iconId}" data-source-concept="${anchor.lockedSemanticConcept}">${body}\n</svg>`;
 }
 
 export function reviewFormRefinement() {
   const findings = [];
   for (const anchor of CALIBRATION_ANCHORS) {
+    const observedClasses = new Set();
     for (const direction of FORM_DIRECTIONS) {
       let svg = '';
       try {
@@ -136,7 +140,10 @@ export function reviewFormRefinement() {
       if (!inspection.pass) findings.push({ severity: 'blocker', code: 'form-candidate-svg-invalid', iconId: anchor.iconId, directionId: direction.id, message: 'Candidate fails SVG/vector integrity.', evidence: inspection.findings });
       if ((svg.match(/data-layer="event"/g) ?? []).length !== 1) findings.push({ severity: 'major', code: 'form-event-layer-count', iconId: anchor.iconId, directionId: direction.id, message: 'Form candidate must contain exactly one semantic event layer.' });
       if (!svg.includes(`data-source-concept="${anchor.lockedSemanticConcept}"`)) findings.push({ severity: 'blocker', code: 'semantic-lock-drift', iconId: anchor.iconId, directionId: direction.id, message: 'Formal refinement changed or lost the locked v2 semantic source concept.' });
+      if (!svg.includes(`data-form-class="${direction.formClass}"`)) findings.push({ severity: 'major', code: 'form-class-missing', iconId: anchor.iconId, directionId: direction.id, message: 'Candidate lost its declared formal construction class.' });
+      observedClasses.add(direction.formClass);
     }
+    if (observedClasses.size !== FORM_DIRECTIONS.length) findings.push({ severity: 'major', code: 'cosmetic-form-exploration', iconId: anchor.iconId, message: 'Formal exploration collapsed into cosmetic variants instead of three construction classes.' });
   }
   const blocking = findings.filter((item) => ['blocker', 'major'].includes(item.severity));
   return {
@@ -145,6 +152,7 @@ export function reviewFormRefinement() {
     pass: blocking.length === 0,
     findings,
     semanticLock: 'v2 semantic concepts are fixed; this stage may change form only',
+    formClasses: FORM_DIRECTIONS.map(({ id, formClass }) => ({ id, formClass })),
     approval: 'human-form-direction-selection-required'
   };
 }
@@ -157,7 +165,7 @@ export function buildFormSelectionGate() {
     completed: false,
     winner: null,
     anchors: CALIBRATION_ANCHORS.map(({ iconId, label, lockedSemanticConcept }) => ({ iconId, label, lockedSemanticConcept })),
-    directions: FORM_DIRECTIONS.map(({ id, label, intent, risks }) => ({ id, label, intent, risks })),
+    directions: FORM_DIRECTIONS.map(({ id, label, formClass, intent, risks }) => ({ id, label, formClass, intent, risks })),
     criteria: FORM_REVIEW_CRITERIA,
     responseTemplate: FORM_DIRECTIONS.map(({ id, label }) => ({ directionId: id, label, silhouette: null, semanticClarity: null, opticalConfidence: null, brandCharacter: null, smallSize: null, notes: '' })),
     truth: 'No automated metric may mark a formal direction approved. Human visual selection is required before the full eight-icon family is reconstructed.'
