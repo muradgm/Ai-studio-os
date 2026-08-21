@@ -5,6 +5,11 @@ import { rankTypographySystems, buildTypographyAlternatives } from './system-int
 import { buildTypographyApplication } from './application-intelligence.mjs';
 import { buildTypographyProductionConfig } from './export.mjs';
 
+function clamp(value, min=0, max=100) { return Math.max(min, Math.min(max, value)); }
+function positiveLimit(value, fallback, max=100) {
+  return Number.isInteger(value) && value > 0 ? Math.min(value, max) : fallback;
+}
+
 function roleWeights(font, role) {
   const weights = new Set();
   for (const variant of font.variants ?? []) {
@@ -63,22 +68,29 @@ export function buildTypographySystem({
 }={}) {
   if (!Array.isArray(catalog)) throw new TypeError('typography catalog must be an array');
   if (!Array.isArray(fontEvidence)) throw new TypeError('font evidence must be an array');
+  if (!Array.isArray(marketCommonFamilies)) throw new TypeError('marketCommonFamilies must be an array');
+  if (!Array.isArray(marketCommonPairs)) throw new TypeError('marketCommonPairs must be an array');
+  if (!Array.isArray(avoidFamilies)) throw new TypeError('avoidFamilies must be an array');
+
+  const candidateCount = positiveLimit(candidateLimit, 8, 50);
+  const systemCount = positiveLimit(systemLimit, 3, 20);
+  const pairingStrategy = pairing.strategy ?? 'contrast-with-coherence';
+  const minPairingScore = clamp(Number.isFinite(pairing.minScore) ? pairing.minScore : 65);
+  const minSystemScore = clamp(Number.isFinite(pairing.minSystemScore) ? pairing.minSystemScore : 68);
   const strategy = buildBusinessTypographyStrategy({ business, brand, requirements });
+
   if (!catalog.length) {
     return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-catalog-empty'}], candidates:{}, systems:[], alternatives:[], selection:null, application:null, production:null };
   }
 
   const workingCatalog = fontEvidence.length ? enrichFontCatalog(catalog, fontEvidence) : catalog;
-  const pairingStrategy = pairing.strategy ?? 'contrast-with-coherence';
-  const minPairingScore = Number.isFinite(pairing.minScore) ? pairing.minScore : 65;
-  const minSystemScore = Number.isFinite(pairing.minSystemScore) ? pairing.minSystemScore : 68;
   const context = { business, brand, requirements, marketCommonFamilies, avoidFamilies, strategy };
-  const display = rankRole(workingCatalog, 'display', context, candidateLimit);
-  const body = rankRole(workingCatalog, 'body', context, candidateLimit);
+  const display = rankRole(workingCatalog, 'display', context, candidateCount);
+  const body = rankRole(workingCatalog, 'body', context, candidateCount);
   const utilityPool = pairingStrategy === 'single-family'
     ? workingCatalog
     : workingCatalog.filter((font)=>font.category === 'monospace');
-  const utility = rankRole(utilityPool.length ? utilityPool : workingCatalog, 'utility', context, Math.min(candidateLimit,5));
+  const utility = rankRole(utilityPool.length ? utilityPool : workingCatalog, 'utility', context, Math.min(candidateCount,5));
 
   const systems = [];
   for (const displayCandidate of display) {
@@ -94,8 +106,8 @@ export function buildTypographySystem({
 
   const ranked = rankTypographySystems(systems, { strategy, marketCommonPairs, pairingStrategy });
   const acceptable = ranked.filter((entry)=>entry.critique.score >= minSystemScore && entry.critique.pass);
-  const topReviewed = ranked.slice(0, systemLimit).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
-  const alternatives = buildTypographyAlternatives(ranked, { limit:systemLimit });
+  const topReviewed = ranked.slice(0, systemCount).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
+  const alternatives = buildTypographyAlternatives(ranked, { limit:systemCount });
 
   if (!ranked.length) {
     return { stage:'typography', pass:false, strategy, findings:[{severity:'blocker',code:'typography-no-valid-pairing',minPairingScore}], candidates:{display,body,utility}, systems:[], alternatives:[], selection:null, application:null, production:null };
@@ -110,8 +122,8 @@ export function buildTypographySystem({
 
   const winnerEntry = acceptable[0];
   const winner = winnerEntry.system;
-  const topSystems = acceptable.slice(0, systemLimit).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
-  const acceptedAlternatives = buildTypographyAlternatives(acceptable, { limit:systemLimit });
+  const topSystems = acceptable.slice(0, systemCount).map((entry)=>({ ...entry.system, systemCritique:entry.critique }));
+  const acceptedAlternatives = buildTypographyAlternatives(acceptable, { limit:systemCount });
   const resolved = {
     display:selection(winner.display.font,'display'),
     body:selection(winner.body.font,'body'),
@@ -130,7 +142,13 @@ export function buildTypographySystem({
   const output = {
     stage:'typography', pass:true, findings:[], strategy,
     intelligence:{ evidenceFamilies:fontEvidence.length, winnerEvidenceLevel:winner.pairing.evidenceLevel, winnerStructuralConfidence:winner.pairing.structural?.confidence ?? 0 },
-    context:{ business, brand, requirements, pairing:{...pairing,strategy:pairingStrategy,minScore:minPairingScore,minSystemScore}, marketCommonPairs, application },
+    context:{
+      business, brand, requirements,
+      pairing:{...pairing,strategy:pairingStrategy,minScore:minPairingScore,minSystemScore},
+      limits:{candidateLimit:candidateCount,systemLimit:systemCount},
+      marketCommonPairs,
+      application
+    },
     candidates:{display,body,utility}, systems:topSystems, alternatives:acceptedAlternatives,
     rejectedAlternatives: alternatives.filter((item)=>item.findings.length > 0),
     systemCritique:winnerEntry.critique,
