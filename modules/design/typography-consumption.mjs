@@ -51,6 +51,23 @@ function googleFontLoadingRequired(roles = {}) {
   return Object.values(roles).some((role) => role?.source === 'google-fonts');
 }
 
+function roleTokenFindings(roles = {}, cssVariables = {}) {
+  const findings = [];
+  for (const [role, config] of Object.entries(roles)) {
+    if (!config?.family) continue;
+    const token = `--font-family-${role}`;
+    const value = cssVariables[token];
+    if (value === undefined) {
+      findings.push({ severity:'blocker', code:'typography-contract-role-token-missing', role, token });
+      continue;
+    }
+    if (!String(value).toLowerCase().includes(String(config.family).toLowerCase())) {
+      findings.push({ severity:'blocker', code:'typography-contract-role-token-drift', role, token, family:config.family });
+    }
+  }
+  return findings;
+}
+
 export function buildTypographyConsumptionContract(typography = null) {
   if (!typography || typography.pass !== true || !typography.selection || !typography.production) return null;
   const roles = compactRoles(typography.selection);
@@ -65,6 +82,7 @@ export function buildTypographyConsumptionContract(typography = null) {
   if (googleFontLoadingRequired(roles) && !typography.production.css2Url) {
     findings.push({ severity:'blocker', code:'typography-consumption-google-font-loader-missing' });
   }
+  findings.push(...roleTokenFindings(roles, cssVariables));
 
   const status = findings.length ? 'blocked' : 'ready';
   return {
@@ -104,6 +122,7 @@ export function consumeTypographyContract(contract = null, { surface = 'generic'
   if (!contract.roles?.body?.family) findings.push({ severity:'blocker', code:'typography-contract-body-role-missing' });
   if (!contract.production?.cssVariables || !Object.keys(contract.production.cssVariables).length) findings.push({ severity:'blocker', code:'typography-contract-token-set-missing' });
   if (googleFontLoadingRequired(contract.roles) && !contract.production?.css2Url) findings.push({ severity:'blocker', code:'typography-contract-google-font-loader-missing' });
+  findings.push(...roleTokenFindings(contract.roles ?? {}, contract.production?.cssVariables ?? {}));
   return {
     enabled:true,
     surface,
