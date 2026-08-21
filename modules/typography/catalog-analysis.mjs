@@ -2,25 +2,48 @@ import { analyzeCatalogFont } from './font-binary-analyzer.mjs';
 import { analyzeGlyphOutlines } from './glyph-outline-analyzer.mjs';
 import { analyzeOutlineStrokes } from './stroke-outline-analyzer.mjs';
 
+const DEFAULT_PROVIDER_POLICIES = Object.freeze({
+  'google-fonts': {
+    protocols: ['https:'],
+    hosts: ['fonts.gstatic.com'],
+    upgradeHttpToHttps: true
+  }
+});
+
 function positiveInteger(value, fallback) {
   return Number.isInteger(value) && value > 0 ? value : fallback;
 }
 
-function normalizeGoogleFontFiles(font) {
-  if (font?.provider !== 'google-fonts') return font;
+function normalizeProviderPolicy(policy = {}) {
+  const protocols = new Set((Array.isArray(policy.protocols) ? policy.protocols : ['https:']).map(String));
+  const hosts = new Set((Array.isArray(policy.hosts) ? policy.hosts : []).map((host)=>String(host).toLowerCase()));
+  return { protocols, hosts, upgradeHttpToHttps:policy.upgradeHttpToHttps === true };
+}
+
+function normalizeFontFilesByPolicy(font, providerPolicies) {
+  const provider = String(font?.provider ?? 'unknown');
+  const rawPolicy = providerPolicies?.[provider];
+  if (!rawPolicy) {
+    return { ...font, files:{}, networkPolicy:{ provider, allowed:false, reason:'provider-network-policy-required' } };
+  }
+  const policy = normalizeProviderPolicy(rawPolicy);
   const files = {};
   for (const [variant, rawUrl] of Object.entries(font.files ?? {})) {
     try {
       const url = new URL(rawUrl);
-      if (url.hostname !== 'fonts.gstatic.com') continue;
-      if (!['http:', 'https:'].includes(url.protocol)) continue;
-      url.protocol = 'https:';
+      if (policy.upgradeHttpToHttps && url.protocol === 'http:') url.protocol = 'https:';
+      if (!policy.protocols.has(url.protocol)) continue;
+      if (policy.hosts.size && !policy.hosts.has(url.hostname.toLowerCase())) continue;
       files[variant] = url.toString();
     } catch {
       // Invalid provider URLs are omitted and become an explicit unavailable result.
     }
   }
-  return { ...font, files };
+  return {
+    ...font,
+    files,
+    networkPolicy:{ provider, allowed:true, protocols:[...policy.protocols], hosts:[...policy.hosts] }
+  };
 }
 
 function createBoundedFetch(fetchImpl, requestTimeoutMs) {
@@ -44,12 +67,14 @@ export async function analyzeFontCatalog(catalog = [], {
   requestTimeoutMs = 15000,
   maxBytes,
   includeGlyphOutlines = true,
-  includeStrokeAnalysis = true
+  includeStrokeAnalysis = true,
+  providerPolicies = DEFAULT_PROVIDER_POLICIES
 } = {}) {
   if (!Array.isArray(catalog)) throw new TypeError('font catalog must be an array');
+  if (!providerPolicies || typeof providerPolicies !== 'object' || Array.isArray(providerPolicies)) throw new TypeError('providerPolicies must be an object');
   const workerCount = Math.min(positiveInteger(concurrency, 4), 12);
   const maxItems = Math.min(positiveInteger(limit, catalog.length || 1), catalog.length);
-  const queue = catalog.slice(0, maxItems).map(normalizeGoogleFontFiles);
+  const queue = catalog.slice(0, maxItems).map((font)=>normalizeFontFilesByPolicy(font, providerPolicies));
   const results = new Array(queue.length);
   const boundedFetch = createBoundedFetch(fetchImpl, requestTimeoutMs);
   let cursor = 0;
@@ -63,7 +88,12 @@ export async function analyzeFontCatalog(catalog = [], {
       const index = cursor;
       cursor += 1;
       if (index >= queue.length) return;
-      results[index] = await analyzeCatalogFont(queue[index], {
+      const font = queue[index];
+      if (font.networkPolicy?.allowed !== true) {
+        results[index] = { family:font.family, status:'unavailable', reason:font.networkPolicy?.reason ?? 'provider-network-policy-required' };
+        continue;
+      }
+      results[index] = await analyzeCatalogFont(font, {
         fetchImpl: boundedFetch,
         additionalAnalyzers,
         ...(maxBytes ? { maxBytes } : {})
@@ -106,3 +136,5 @@ export async function analyzeFontCatalog(catalog = [], {
     results
   };
 }
+
+export { DEFAULT_PROVIDER_POLICIES };
