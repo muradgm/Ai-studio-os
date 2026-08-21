@@ -33,6 +33,19 @@ function normalizeAudience(audience) {
   return label || null;
 }
 
+function authoredText(candidate, key, fallback = '') {
+  const value = candidate?.[key];
+  if (typeof value === 'string') return clean(value) || fallback;
+  if (value && typeof value === 'object') return clean(value.statement ?? value.label ?? value.value) || fallback;
+  return fallback;
+}
+
+function authoredExpressionTests(candidate, defaults) {
+  const authored = candidate?.expressionTests;
+  if (!authored || typeof authored !== 'object' || Array.isArray(authored)) return defaults;
+  return { ...defaults, ...Object.fromEntries(Object.entries(authored).filter(([, value]) => clean(value))) };
+}
+
 export function reviewCreativeThesis(thesis = {}) {
   const findings = [];
   const truths = Array.isArray(thesis.sourceTruths) ? thesis.sourceTruths : [];
@@ -67,6 +80,10 @@ export function reviewCreativeThesis(thesis = {}) {
     findings.push(finding('blocker', 'creative-thesis-technology-became-concept', 'The governing idea is expressed as an implementation technology rather than a creative idea.'));
   }
 
+  if (thesis.authorship?.mode === 'deterministic-scaffold') {
+    findings.push(finding('major', 'creative-thesis-authored-judgment-required', 'The deterministic thesis scaffold is structurally useful but cannot substitute for authored creative judgment. An art-direction agent or human must author/select the governing idea before it becomes review-ready.'));
+  }
+
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
   const status = blockers.length
@@ -97,7 +114,8 @@ export function buildCreativeThesis({
   traits = [],
   antiPrinciples = [],
   audience,
-  commercialObjective
+  commercialObjective,
+  authoredCandidate = null
 } = {}) {
   const normalizedIntent = clean(intent);
   const truths = sourceEntries('truth', businessTruths);
@@ -105,26 +123,52 @@ export function buildCreativeThesis({
   const gaps = opportunityGaps(inspiration);
   const antiReferences = inspirationAntiReferences(inspiration);
   const explicitAntiPrinciples = cleanList(antiPrinciples);
-  const categoryRejections = [...new Set([...explicitAntiPrinciples, ...antiReferences])];
+  const authoredAntiPrinciples = cleanList(authoredCandidate?.antiPrinciples ?? authoredCandidate?.categoryRejections ?? []);
+  const categoryRejections = [...new Set([...explicitAntiPrinciples, ...antiReferences, ...authoredAntiPrinciples])];
   const unresolved = unresolvedUnknowns(inspiration);
-  const primaryAudience = normalizeAudience(audience);
-  const objective = clean(commercialObjective) || null;
+  const primaryAudience = normalizeAudience(authoredCandidate?.audience ?? audience);
+  const objective = clean(authoredCandidate?.commercialObjective ?? commercialObjective) || null;
   const sourceOpportunity = gaps.length ? { id: 'opportunity-1', value: gaps[0] } : null;
   const tensionTraits = normalizedTraits.slice(0, 2);
-  const tensionLabel = tensionTraits.length >= 2
+  const fallbackTension = tensionTraits.length >= 2
     ? `${tensionTraits[0]} × ${tensionTraits[1]}`
     : tensionTraits[0] || '';
   const truthAnchor = truths[0]?.value ?? '';
 
-  const governingIdeaStatement = sourceOpportunity
+  const scaffoldIdea = sourceOpportunity
     ? `Make “${sourceOpportunity.value}” the organizing experience idea, not a decorative layer.`
     : normalizedIntent
-      ? `Make the project-specific truth in the brief the organizing experience idea rather than defaulting to category aesthetics.`
+      ? 'Make the project-specific truth in the brief the organizing experience idea rather than defaulting to category aesthetics.'
       : '';
+  const governingIdeaStatement = authoredText(authoredCandidate, 'governingIdea', scaffoldIdea);
+  const tensionLabel = authoredText(authoredCandidate, 'creativeTension', fallbackTension);
+  const authoredStatement = clean(authoredCandidate?.statement);
 
   const statementParts = [governingIdeaStatement];
-  if (tensionLabel) statementParts.push(`Resolve it through the tension ${tensionLabel}.`);
-  if (truthAnchor) statementParts.push(`It must remain anchored to: ${truthAnchor}`);
+  if (tensionLabel) statementParts.push(`Creative tension: ${tensionLabel}.`);
+  if (truthAnchor) statementParts.push(`Truth anchor: ${truthAnchor}`);
+  const statement = authoredStatement || statementParts.filter(Boolean).join(' ');
+
+  const defaultExpressionTests = {
+    typography: sourceOpportunity ? `Typography should make “${sourceOpportunity.value}” feel structurally present through hierarchy, pacing, and composition—not through a pasted decorative font style.` : 'Typography must express the governing idea through hierarchy, pacing, and composition rather than trend mimicry.',
+    image: 'Imagery must either provide truthful project evidence or extend the governing idea without fabricating documentary truth.',
+    motion: 'Motion must show a meaningful state, relationship, sequence, or material behavior implied by the governing idea; decorative motion alone does not pass.',
+    interaction: 'Interaction must reinforce how the governing idea behaves when a person explores, chooses, compares, reveals, or navigates.',
+    sound: 'Sound is optional. If used, it must reinforce rhythm, material, environment, or narrative state; silence is preferable to ornamental audio.',
+    responsive: 'Mobile and reduced-motion variants must preserve the governing idea even when spatial, pointer, or cinematic behaviors are removed.'
+  };
+
+  const authoredPrinciples = cleanList(authoredCandidate?.principles ?? []);
+  const fallbackPrinciples = [
+    sourceOpportunity ? `Turn the opportunity “${sourceOpportunity.value}” into an experience rule that can affect more than layout.` : '',
+    tensionLabel ? `Use ${tensionLabel} as a decision tension; do not average the two sides into a neutral middle.` : '',
+    truths.length ? 'Every expressive decision must remain compatible with the recorded business/product truths.' : '',
+    'Prefer one memorable governing idea over a pile of fashionable treatments.',
+    'Let each medium express the same thesis differently rather than repeating one visual motif everywhere.'
+  ].filter(Boolean);
+
+  const technologyPolicy = clean(authoredCandidate?.technologyPolicy)
+    || 'Implementation tools serve the governing idea. WebGL, Three.js, GSAP, Rive, 3D, video, AI generation, and other capabilities are selected only when they materially improve that idea.';
 
   const thesis = {
     schema: 'ai-studio-os/creative-thesis@1',
@@ -133,47 +177,46 @@ export function buildCreativeThesis({
     intent: normalizedIntent,
     audience: primaryAudience,
     commercialObjective: objective,
+    authorship: {
+      mode: authoredCandidate ? 'authored-candidate' : 'deterministic-scaffold',
+      supplied: Boolean(authoredCandidate),
+      humanCreativeApproval: false
+    },
     governingIdea: {
       statement: governingIdeaStatement,
       singular: true,
       sourceOpportunityId: sourceOpportunity?.id ?? null
     },
-    statement: statementParts.filter(Boolean).join(' '),
+    statement,
     creativeTension: {
       label: tensionLabel,
       traits: tensionTraits
     },
-    whyThisProject: truths.length
+    whyThisProject: clean(authoredCandidate?.whyThisProject) || (truths.length
       ? `The idea is constrained by ${truths.length} recorded project truth${truths.length === 1 ? '' : 's'} and the documented opportunity gap; it is not licensed by category convention alone.`
-      : '',
+      : ''),
     sourceTruths: truths,
     sourceOpportunity,
     categoryRejections,
-    principles: [
-      sourceOpportunity ? `Turn the opportunity “${sourceOpportunity.value}” into an experience rule that can affect more than layout.` : '',
-      tensionLabel ? `Use ${tensionLabel} as a decision tension; do not average the two sides into a neutral middle.` : '',
-      truths.length ? 'Every expressive decision must remain compatible with the recorded business/product truths.' : '',
-      'Prefer one memorable governing idea over a pile of fashionable treatments.',
-      'Let each medium express the same thesis differently rather than repeating one visual motif everywhere.'
-    ].filter(Boolean),
+    principles: authoredPrinciples.length ? authoredPrinciples : fallbackPrinciples,
     antiPrinciples: categoryRejections,
-    expressionTests: {
-      typography: sourceOpportunity ? `Typography should make “${sourceOpportunity.value}” feel structurally present through hierarchy, pacing, and composition—not through a pasted decorative font style.` : 'Typography must express the governing idea through hierarchy, pacing, and composition rather than trend mimicry.',
-      image: 'Imagery must either provide truthful project evidence or extend the governing idea without fabricating documentary truth.',
-      motion: 'Motion must show a meaningful state, relationship, sequence, or material behavior implied by the governing idea; decorative motion alone does not pass.',
-      interaction: 'Interaction must reinforce how the governing idea behaves when a person explores, chooses, compares, reveals, or navigates.',
-      sound: 'Sound is optional. If used, it must reinforce rhythm, material, environment, or narrative state; silence is preferable to ornamental audio.',
-      responsive: 'Mobile and reduced-motion variants must preserve the governing idea even when spatial, pointer, or cinematic behaviors are removed.'
-    },
-    technologyPolicy: 'Implementation tools serve the governing idea. WebGL, Three.js, GSAP, Rive, 3D, video, AI generation, and other capabilities are selected only when they materially improve that idea.',
+    expressionTests: authoredExpressionTests(authoredCandidate, defaultExpressionTests),
+    technologyPolicy,
     competitorTransferTest: {
-      question: 'Could a direct competitor reuse this thesis unchanged without losing the project truth that makes it meaningful?',
-      passCondition: 'A strong thesis should fail unchanged transfer: removing its source truths or opportunity gap should materially weaken or alter the idea.',
+      question: clean(authoredCandidate?.competitorTransferTest?.question) || 'Could a direct competitor reuse this thesis unchanged without losing the project truth that makes it meaningful?',
+      passCondition: clean(authoredCandidate?.competitorTransferTest?.passCondition) || 'A strong thesis should fail unchanged transfer: removing its source truths or opportunity gap should materially weaken or alter the idea.',
       evidenceRefs: [
         ...truths.slice(0, 3).map((item) => item.id),
         ...(sourceOpportunity ? [sourceOpportunity.id] : [])
       ]
     },
+    alternativesConsidered: Array.isArray(authoredCandidate?.alternativesConsidered)
+      ? authoredCandidate.alternativesConsidered.map((item) => ({
+        idea: clean(item?.idea ?? item?.statement),
+        rejectedBecause: clean(item?.rejectedBecause ?? item?.reason)
+      })).filter((item) => item.idea)
+      : [],
+    selectionRationale: clean(authoredCandidate?.selectionRationale) || null,
     unresolvedRisks: [
       ...unresolved,
       ...(!primaryAudience ? ['primary audience not explicitly supplied to Creative Thesis'] : []),
@@ -183,7 +226,8 @@ export function buildCreativeThesis({
     truth: {
       humanCreativeApproval: false,
       creativeThesisFrozen: false,
-      generatedFromSuppliedTruthAndInspiration: true
+      generatedFromSuppliedTruthAndInspiration: true,
+      authoredCandidateSupplied: Boolean(authoredCandidate)
     }
   };
 
