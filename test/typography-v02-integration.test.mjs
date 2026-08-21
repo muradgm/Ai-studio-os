@@ -8,7 +8,7 @@ import { buildTypographyApplication } from '../modules/typography/application-in
 import { buildTypographyProductionConfig } from '../modules/typography/export.mjs';
 import { buildTypographyConsumptionContract } from '../modules/design/typography-consumption.mjs';
 import { analyzeFontCatalog } from '../modules/typography/catalog-analysis.mjs';
-import { loadTypographyRuntimeResources } from '../modules/typography/project-orchestrator.mjs';
+import { loadTypographyRuntimeResources, prepareProjectTypographyInput } from '../modules/typography/project-orchestrator.mjs';
 
 test('language coverage resolves common missing languages and fails closed on ambiguous or unsupported requirements', () => {
   assert.equal(supportsLanguages({subsets:['arabic']}, ['fa']), true);
@@ -33,7 +33,10 @@ test('Creative Thesis becomes typography creative authority only when review-rea
   const intent = buildTypographyIntent({
     creativeThesis:thesis,
     creativeWorld:{
+      schema:'ai-studio-os/creative-world@1',
       id:'world-02',
+      reviewReady:true,
+      selected:true,
       typographyIntent:{
         preferredCategories:{display:['serif','sans-serif'],body:['sans-serif']},
         descriptorTargets:{display:{strokeContrast:{target:55,tolerance:25}},body:{xHeight:{target:64,tolerance:12}}}
@@ -44,10 +47,48 @@ test('Creative Thesis becomes typography creative authority only when review-rea
   assert.equal(intent.authority, 'selected-creative-world');
   assert.match(intent.statement, /Editorial enough/i);
   assert.equal(intent.descriptorTargets.body.xHeight.target, 64);
+  assert.equal(intent.provenance.creativeWorldAuthoritative, true);
 
   const blocked = buildTypographyIntent({creativeThesis:{...thesis,reviewReady:false,status:'provisional'}});
   assert.equal(blocked.pass, false);
   assert.ok(blocked.findings.some((item)=>item.code === 'typography-intent-creative-thesis-not-review-ready'));
+});
+
+test('Creative World candidates and unselected reviewed worlds do not gain typography authority', () => {
+  const thesis = {
+    schema:'ai-studio-os/creative-thesis@1',
+    status:'ready-for-creative-direction-review',
+    reviewReady:true,
+    governingIdea:{statement:'Project-specific governing idea'},
+    creativeTension:{label:'precision × warmth'},
+    expressionTests:{typography:'Use restrained hierarchy with controlled expression.'}
+  };
+  const candidate = buildTypographyIntent({
+    creativeThesis:thesis,
+    creativeWorld:{
+      id:'world-candidate',
+      reviewReady:false,
+      selected:false,
+      typographyIntent:{preferredCategories:{display:['display']}}
+    }
+  });
+  assert.equal(candidate.authority, 'creative-thesis');
+  assert.deepEqual(candidate.preferredCategories, {});
+  assert.equal(candidate.provenance.creativeWorldAuthoritative, false);
+  assert.ok(candidate.findings.some((item)=>item.code === 'typography-intent-creative-world-not-authoritative'));
+
+  const reviewedButUnselected = buildTypographyIntent({
+    creativeThesis:thesis,
+    creativeWorld:{
+      schema:'ai-studio-os/creative-world@1',
+      id:'world-reviewed',
+      reviewReady:true,
+      selected:false,
+      typographyIntent:{preferredCategories:{display:['serif']}}
+    }
+  });
+  assert.equal(reviewedButUnselected.authority, 'creative-thesis');
+  assert.deepEqual(reviewedButUnselected.preferredCategories, {});
 });
 
 test('typography runtime blocks unresolved language before candidate ranking', () => {
@@ -119,6 +160,35 @@ test('project orchestration loads catalog and evidence caches explicitly', async
   assert.equal(resources.pass, true);
   assert.equal(resources.catalog.length, 1);
   assert.equal(resources.fontEvidence.length, 1);
+});
+
+test('stale cached evidence is reported but discarded before typography ranking', async () => {
+  const catalogPath = '/virtual/catalog-stale.json';
+  const intelligencePath = '/virtual/intelligence-stale.json';
+  const readFile = async (path) => {
+    if (path === catalogPath) return JSON.stringify({provider:'google-fonts',fetchedAt:'2026-08-21T12:00:00.000Z',fonts:[{family:'Manrope'}]});
+    if (path === intelligencePath) return JSON.stringify({
+      provider:'google-fonts',
+      catalogFetchedAt:'2026-08-20T12:00:00.000Z',
+      analyzedAt:'2026-08-20T12:05:00.000Z',
+      evidence:[{family:'Manrope',descriptors:{xHeight:65},sources:[{type:'test',reference:'old',confidence:90}]}]
+    });
+    const error = new Error('missing'); error.code = 'ENOENT'; throw error;
+  };
+  const resources = await loadTypographyRuntimeResources({catalogCachePath:catalogPath,intelligenceCachePath:intelligencePath,readFile});
+  assert.equal(resources.pass, true);
+  assert.deepEqual(resources.fontEvidence, []);
+  assert.equal(resources.metadata.evidenceStale, true);
+  assert.equal(resources.metadata.evidenceDiscarded, true);
+  assert.equal(resources.metadata.cachedEvidenceCount, 1);
+  assert.ok(resources.findings.some((item)=>item.code === 'typography-orchestrator-evidence-stale-for-catalog'));
+
+  const prepared = await prepareProjectTypographyInput({
+    typography:{fontEvidence:[{family:'Manrope',descriptors:{xHeight:66},sources:[{type:'project',reference:'fresh-project-evidence',confidence:95}]}]}
+  }, {catalogCachePath:catalogPath,intelligenceCachePath:intelligencePath,readFile});
+  assert.equal(prepared.pass, true);
+  assert.equal(prepared.input.typography.fontEvidence.length, 1);
+  assert.equal(prepared.input.typography.fontEvidence[0].sources[0].reference, 'fresh-project-evidence');
 });
 
 test('production CSS2 requests only axes actually used by application styles', () => {
