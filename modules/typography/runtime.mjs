@@ -43,15 +43,13 @@ function selection(font, role) {
   };
 }
 
-function resolveUtilityCandidate({ utility, displayCandidate, bodyCandidate, pairingStrategy }) {
+function resolveUtilityCandidate({ utility, displayCandidate, bodyCandidate, pairingStrategy, context }) {
   if (pairingStrategy === 'single-family') {
     const family = bodyCandidate.font.family;
     return utility.find((candidate)=>candidate.font.family === family)
       ?? {
         font: bodyCandidate.font,
-        scores: scoreFontForRole(bodyCandidate.font, {
-          business: {}, brand: {}, requirements: {}, role:'utility', strategy:{}
-        })
+        scores: scoreFontForRole(bodyCandidate.font, { ...context, role:'utility' })
       };
   }
   return utility.find((candidate)=>candidate.font.family !== displayCandidate.font.family && candidate.font.family !== bodyCandidate.font.family)
@@ -88,7 +86,7 @@ export function buildTypographySystem({
       if (displayCandidate.font.family === bodyCandidate.font.family && pairingStrategy !== 'single-family') continue;
       const pair = scorePairing(displayCandidate.font, bodyCandidate.font, { strategy:pairingStrategy, requirements });
       if (pair.score < minPairingScore) continue;
-      const utilityCandidate = resolveUtilityCandidate({ utility, displayCandidate, bodyCandidate, pairingStrategy });
+      const utilityCandidate = resolveUtilityCandidate({ utility, displayCandidate, bodyCandidate, pairingStrategy, context });
       const overall = Math.round(displayCandidate.scores.total*0.26 + bodyCandidate.scores.total*0.34 + pair.score*0.30 + (utilityCandidate?.scores.total ?? 75)*0.10);
       systems.push({ overall, display:displayCandidate, body:bodyCandidate, utility:utilityCandidate, pairing:pair });
     }
