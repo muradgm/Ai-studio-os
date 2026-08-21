@@ -19,9 +19,11 @@ CREATIVE THESIS
         ↓
 CREATIVE WORLD DIVERGENCE
         ↓
+VISUAL WORLD PROOF
+        ↓
 HUMAN WORLD SELECTION
         ↓
-STYLE FRAMES
+HIGH-FIDELITY STYLE FRAMES
         ↓
 TYPOGRAPHY / IMAGE / MATERIAL LANGUAGE
         ↓
@@ -110,7 +112,7 @@ typographyApproved: false
 productionTechnologyApproved: false
 ```
 
-Selection means **advance this world to visual proof**, not “the website is creatively approved.”
+Selection means **advance this world to deeper visual proof**, not “the website is creatively approved.”
 
 ### Typography composition boundary
 
@@ -128,25 +130,71 @@ Creative Thesis
 → Canonical Consumption Contract
 ```
 
+## Slice 3 — Visual World Proof / Style Frame Proof v1
+
+Status: implemented on `feature/du-bonheur-style-frame-proof-v1`.
+
+Purpose: make the candidate worlds visible **before selection** so a structurally valid world cannot win merely because its prose sounds good.
+
+The slice adds:
+
+- `modules/style-frame/CONTRACT.md`
+- `modules/style-frame/runtime.mjs`
+- `.agents/skills/style-frame-proof/SKILL.md`
+- a canonical five-frame proof plan for every candidate world
+- exact Chromium rasterization from HTML/CSS/SVG rather than image-model redraws
+- source HTML beside every PNG
+- same-moment cross-world comparison boards
+- per-world overview boards
+- CI artifact production for visual review
+- explicit proxy typography and documentary-image truth boundaries
+- regression coverage for frame coverage, mobile proof, selection truth and premature typography approval
+
+### Canonical proof moments
+
+Every Creative World receives:
+
+1. Opening / Hero
+2. Product / Sensory
+3. Information / Utility
+4. Narrative Transition
+5. Mobile Interpretation
+
+For the current Du Bonheur benchmark, three worlds therefore produce 15 individual frames plus five same-moment comparison boards and three world overview boards.
+
+### Visual truth boundary
+
+The proof uses browser-native layout, CSS and SVG with local/system typography proxies. It may use abstract non-documentary material studies, but it cannot fabricate a Du Bonheur product photograph when a real source is required.
+
+The evidence manifest must remain:
+
+```text
+humanVisualApproval: false
+humanWorldSelectionConfirmed: false
+selectedWorldId: null
+typographyApproved: false
+productionTechnologyApproved: false
+productionReady: false
+```
+
+A green browser proof means the proposed world is visible and comparable. It does **not** mean the world is creatively good.
+
 ## Planned slices
 
-### Slice 3 — Style-frame production
-Produce high-fidelity opening, narrative, product, transition, information, and closing states before implementation.
+### Slice 4 — Creative-direction / visual-world review
+Use independent lenses for thesis fit, originality, visual ownership, typography/composition, asset language, category-transfer risk and mobile preservation. The review may reject all worlds; selection is never mandatory.
 
-### Slice 4 — Creative-direction review
-Independent lenses for thesis fit, originality, visual ownership, typography/composition, asset language, and category-transfer risk.
+### Slice 5 — High-fidelity selected-world style frames + Typography Art Direction
+After human world selection, deepen the chosen world and compose it with Typography Intelligence through rendered specimens before any canonical font contract is accepted.
 
-### Slice 5 — Motion language
+### Slice 6 — Motion language
 Define authored rhythm, easing, state change, continuity, entrance/exit behavior, signature motion, and reduced-motion equivalents before GSAP/Rive/realtime implementation.
 
-### Slice 6 — Interaction choreography
+### Slice 7 — Interaction choreography
 Storyboard scroll, pointer, click/tap, scene change, continuity, and mobile substitutions as experience behavior rather than generic animation requests.
 
-### Slice 7 — Responsive art direction
-Preserve the creative idea across mobile/tablet/desktop rather than merely stacking the desktop layout.
-
-### Slice 8 — Asset-production language
-Decide what must be captured, retouched, illustrated, filmed, modeled, simulated, generated, or left absent; maintain provenance and rights truth.
+### Slice 8 — Responsive art direction + asset-production language
+Preserve the creative idea across mobile/tablet/desktop and decide what must be captured, retouched, illustrated, filmed, modeled, simulated, generated, or left absent while maintaining provenance and rights truth.
 
 ### Slice 9 — Full-site production benchmark
 Dogfood the entire Creative World → Creative Engineering path on a complete Du Bonheur experience and judge the final experience, not only pipeline completion.
