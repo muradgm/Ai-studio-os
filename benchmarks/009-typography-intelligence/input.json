@@ -8,8 +8,7 @@
       "variants": ["regular", "500", "600", "700"],
       "subsets": ["latin", "latin-ext"],
       "files": {"regular": "https://fonts.gstatic.test/newsreader.woff2"},
-      "axes": [{"tag": "wght", "start": 200, "end": 800}],
-      "descriptors": {"xHeight": 55, "width": 52, "strokeContrast": 68, "roundness": 45}
+      "axes": [{"tag": "wght", "start": 200, "end": 800}]
     },
     {
       "id": "google-fonts:manrope",
@@ -19,8 +18,7 @@
       "variants": ["regular", "500", "600", "700", "800"],
       "subsets": ["latin", "latin-ext"],
       "files": {"regular": "https://fonts.gstatic.test/manrope.woff2"},
-      "axes": [{"tag": "wght", "start": 200, "end": 800}],
-      "descriptors": {"xHeight": 66, "width": 55, "strokeContrast": 18, "roundness": 62}
+      "axes": [{"tag": "wght", "start": 200, "end": 800}]
     },
     {
       "id": "google-fonts:ibm-plex-mono",
@@ -30,8 +28,7 @@
       "variants": ["regular", "500", "600"],
       "subsets": ["latin", "latin-ext"],
       "files": {"regular": "https://fonts.gstatic.test/plex.woff2"},
-      "axes": [],
-      "descriptors": {"xHeight": 64, "width": 60, "strokeContrast": 10, "roundness": 42}
+      "axes": []
     },
     {
       "id": "google-fonts:poppins",
@@ -41,8 +38,7 @@
       "variants": ["regular", "500", "600", "700"],
       "subsets": ["latin", "latin-ext"],
       "files": {"regular": "https://fonts.gstatic.test/poppins.woff2"},
-      "axes": [],
-      "descriptors": {"xHeight": 67, "width": 58, "strokeContrast": 12, "roundness": 76}
+      "axes": []
     },
     {
       "id": "google-fonts:bodoni-moda",
@@ -52,8 +48,24 @@
       "variants": ["regular", "700"],
       "subsets": ["latin", "latin-ext"],
       "files": {"regular": "https://fonts.gstatic.test/bodoni.woff2"},
-      "axes": [],
-      "descriptors": {"xHeight": 45, "width": 48, "strokeContrast": 95, "roundness": 34}
+      "axes": []
+    }
+  ],
+  "fontEvidence": [
+    {
+      "family": "Newsreader",
+      "descriptors": {"xHeight": 55, "width": 52, "strokeContrast": 68, "roundness": 45},
+      "sources": [{"type": "benchmark-measured-evidence", "reference": "fixture:newsreader", "confidence": 96}]
+    },
+    {
+      "family": "Manrope",
+      "descriptors": {"xHeight": 66, "width": 55, "strokeContrast": 18, "roundness": 62},
+      "sources": [{"type": "benchmark-measured-evidence", "reference": "fixture:manrope", "confidence": 96}]
+    },
+    {
+      "family": "IBM Plex Mono",
+      "descriptors": {"xHeight": 64, "width": 60, "strokeContrast": 10, "roundness": 42},
+      "sources": [{"type": "benchmark-measured-evidence", "reference": "fixture:ibm-plex-mono", "confidence": 94}]
     }
   ],
   "business": {
