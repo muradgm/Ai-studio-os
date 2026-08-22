@@ -81,6 +81,18 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+      - name: Run TraderFrame vector form refinement proof
+        run: npm run proof:traderframe-icon-form-refinement
+
+      - name: Upload TraderFrame vector form refinement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traderframe-icon-form-refinement-evidence
+          path: artifacts/traderframe/icon-form-refinement-v1
+          if-no-files-found: ignore
+          retention-days: 7
+
   browser-release:
     runs-on: ubuntu-latest
     timeout-minutes: 12
