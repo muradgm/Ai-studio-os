@@ -260,7 +260,12 @@ async function approveIteration() {
     const { job } = await approveExecution(activeJob.id);
     renderExecution(job);
     setStage('deliver');
-    toast('Iteration approved', job.productionReady ? 'Iteration approved. Its reduced-motion captures are now the regression baseline and the release is production-ready.' : 'Creative iteration approved and promoted as the visual baseline. Release blockers are still enforced.');
+    toast(
+      'Iteration approved',
+      job.productionReady
+        ? 'Iteration approved. Its reduced-motion captures are now the regression baseline and the release is production-ready.'
+        : 'Creative iteration approved. Release blockers remain enforced, so the visual baseline was not promoted.'
+    );
   } catch (error) {
     toast('Approval blocked', error.message);
   }

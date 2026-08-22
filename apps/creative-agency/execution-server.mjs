@@ -24,6 +24,7 @@ import {
   pushJobLog,
   collectBundleEvidence,
   safeResolve,
+  canPromoteApprovedBaseline,
   publicJob
 } from './execution-core.mjs';
 
@@ -369,11 +370,11 @@ async function handler(req, res, serverOrigin) {
     if (match[2] === 'approve' && req.method === 'POST') {
       if (job.status !== 'complete') return json(res, 409, { error: 'execution-not-complete', job: publicJob(job) });
       const localCaptures = captureFilesByJob.get(job.id) ?? [];
-      if (localCaptures.length) {
+      if (canPromoteApprovedBaseline(job, localCaptures)) {
         const baseline = await persistApprovedBaseline(job.projectId, job.id, localCaptures);
         job.baseline = { promoted: true, sourceJobId: baseline.sourceJobId, approvedAt: baseline.approvedAt };
-        captureFilesByJob.delete(job.id);
       }
+      captureFilesByJob.delete(job.id);
       job.approval = 'iteration-approved';
       job.approvedAt = new Date().toISOString();
       job.updatedAt = job.approvedAt;

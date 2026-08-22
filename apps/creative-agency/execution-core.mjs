@@ -79,6 +79,17 @@ export function setJobStep(job, stepId, status) {
   return job;
 }
 
+export function canPromoteApprovedBaseline(job, captures = []) {
+  const hasReducedMotionCapture = captures.some((capture) => capture?.reducedMotion === true && capture?.screenshot);
+  return Boolean(
+    job?.status === 'complete' &&
+    job?.productionReady === true &&
+    job?.releaseDecision?.status === 'ready' &&
+    job?.releaseDecision?.productionReady === true &&
+    hasReducedMotionCapture
+  );
+}
+
 export function pushJobLog(job, line, maxChars = 28000) {
   const clean = String(line ?? '').replace(/\u001b\[[0-9;]*m/g, '').trim();
   if (!clean) return;

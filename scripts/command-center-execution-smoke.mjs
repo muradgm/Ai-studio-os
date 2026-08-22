@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { startExecutionServer } from '../apps/creative-agency/execution-server.mjs';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const smokeBaseline = path.join(root, 'artifacts/command-center/baselines/creative-agency');
 
 async function json(url, options = {}) {
   const response = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) } });
@@ -65,6 +70,8 @@ function assertMeasuredRelease(job) {
 
   return codes;
 }
+
+await fs.rm(smokeBaseline, { recursive: true, force: true });
 
 const runtime = await startExecutionServer({ port: 0 });
 try {

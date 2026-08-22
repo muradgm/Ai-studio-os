@@ -4,10 +4,10 @@
 >
 > This is the canonical continuation document for any new agent working in this repository. It is intended to be sufficient for a competent agent to understand the product, architecture, locked decisions, current implementation state, unresolved work, validation rules, and next priorities **without access to the original chat history**.
 >
-> **Grounded against `main`:** 2026-08-20  
+> **Grounded against `main`:** 2026-08-22
 > **Repository:** `muradgm/Ai-studio-os`  
 > **Current baseline:** AI Studio OS v1.3.x + The Creative Agency Command Center  
-> **`main` at this refresh:** `3df9d4031a1647d127a0127238502a6dd30f9f67`
+> **`main` at this refresh:** `b8ef917e7b1c45dfdf482f272f97168887edf755`
 
 ---
 
@@ -314,6 +314,7 @@ ITERATION APPROVED ≠ PRODUCTION READY
 ```
 
 A user can approve the creative iteration while release evidence still blocks production readiness.
+That approval records the human creative decision only; it must not promote the visual-regression baseline unless the release decision is `ready` and `productionReady:true`.
 
 Missing evidence must fail closed:
 
@@ -717,17 +718,32 @@ Do not invent:
 
 ---
 
-# 13. Open TraderFrame PRs — handle deliberately
+# 13. Open PRs and TraderFrame branches — handle deliberately
 
-## PR #9 — TraderFrame specialist run
+## Current open PR
 
-Status at this handoff refresh:
+As of this refresh, GitHub reports one open PR:
 
 ```text
-OPEN / DRAFT
+PR #42 — Consolidate Command Center into native Artifact-backed view
+Status: OPEN / DRAFT
+Head: cleanup/native-command-center-consolidation-v1
+Base: main
 ```
 
 Purpose:
+
+- native Artifact-backed Command Center consolidation,
+- removal of superseded decorator behavior,
+- preservation of measured execution/release behavior.
+
+Before merge, verify that iteration approval still stays separate from production readiness and that visual-regression baseline promotion only occurs for production-ready releases.
+
+## Historical TraderFrame specialist/icon branches
+
+Earlier handoffs referenced TraderFrame PR #9 and PR #11 as open draft work. They are no longer open in GitHub at this refresh. Their branch content should still be handled deliberately if resurrected:
+
+### TraderFrame specialist run
 
 - real-project specialist run,
 - selected concept: **The Frame**,
@@ -736,16 +752,9 @@ Purpose:
 
 It was created against an older `main` baseline.
 
-**Do not merge blindly.** Rebase/review it against current architecture first.
+**Do not merge blindly.** Rebase/review any resurrected work against current architecture first.
 
-## PR #11 — TraderFrame six-icon calibration family
-
-Status:
-
-```text
-OPEN / DRAFT
-review-candidate
-```
+### TraderFrame six-icon calibration family
 
 Contains six deterministic SVG calibration icons:
 
@@ -770,7 +779,7 @@ max one semantic event layer
 Terminal Red applied at product/application level
 ```
 
-The PR explicitly says **DO NOT FREEZE / DO NOT MERGE YET** until visual approval is explicit.
+The historical review state was **DO NOT FREEZE** until visual approval is explicit.
 
 If the user later approves the deterministic SVG set as final calibration v1:
 
@@ -850,9 +859,9 @@ Use the product to create its own:
 
 This is the strongest way to expose missing production adapters and coherence problems.
 
-## P1 — Resolve TraderFrame PR #11
+## P1 — Resolve TraderFrame icon freeze decision
 
-Either explicitly approve/freeze it or revise it. Do not leave it indefinitely half-frozen.
+Either explicitly approve/freeze the six-icon calibration family or revise it. Do not leave it indefinitely half-frozen.
 
 ## P1 — Rebase/redo TraderFrame as a serious creative-engineering benchmark
 
@@ -1011,9 +1020,10 @@ Release Intelligence          MERGED
 Windows Shell-Free Fix        MERGED
 Brand Identity Kit infra      PRESENT IN MAIN
 
-Command Center redesign       APPROVED / LOCKED / NOT IMPLEMENTED
-TraderFrame PR #9             OPEN DRAFT
-TraderFrame PR #11            OPEN DRAFT / REVIEW-CANDIDATE
+Command Center redesign       APPROVED / LOCKED / PR #42 OPEN DRAFT
+Command Center baseline guard IMPLEMENTED ON codex/command-center-baseline-guard
+TraderFrame specialist run    HISTORICAL / NOT OPEN
+TraderFrame icon calibration  HISTORICAL / REVIEW-CANDIDATE / FREEZE DECISION UNRESOLVED
 ```
 
 The strongest next move is **real-project validation and product execution**, not another large architecture layer.
