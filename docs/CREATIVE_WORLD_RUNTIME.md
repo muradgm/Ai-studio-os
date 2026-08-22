@@ -1,15 +1,9 @@
 # Creative World Runtime
 
 ## Why this exists
-
-AI Studio OS already has strong execution infrastructure after a direction is approved: production routing, browser builds, motion/realtime capabilities, responsive evidence, performance/accessibility gates, and bounded patch loops.
-
-The current quality bottleneck is earlier: turning project truth and research into an exceptional, ownable creative idea and visual world before implementation begins.
-
-The Creative World Runtime closes that gap.
+AI Studio OS is stronger after a direction is chosen than it is at creating the direction. The Creative World Runtime closes that gap by forcing project truth → one governing thesis → materially different worlds → visual proof → human selection before production art direction and engineering.
 
 ## Target flow
-
 ```text
 BUSINESS / PRODUCT TRUTH
         ↓
@@ -19,15 +13,15 @@ CREATIVE THESIS
         ↓
 CREATIVE WORLD DIVERGENCE
         ↓
-STYLE FRAMES
+COMPARABLE VISUAL / STYLE-FRAME PROOF
         ↓
-TYPOGRAPHY / IMAGE / MATERIAL LANGUAGE
+HUMAN WORLD SELECTION
+        ↓
+TYPOGRAPHY / IMAGE / MATERIAL ART DIRECTION
         ↓
 MOTION LANGUAGE
         ↓
 INTERACTION CHOREOGRAPHY
-        ↓
-SOUND LANGUAGE WHEN JUSTIFIED
         ↓
 RESPONSIVE ART DIRECTION
         ↓
@@ -38,65 +32,61 @@ APPROVED EXPERIENCE DIRECTION
 EXISTING CREATIVE ENGINEERING RUNTIME
 ```
 
-Technology is downstream. WebGL, Three.js, GSAP, Rive, Blender, video, generative imagery, and other tools are capabilities selected only after the creative idea earns them.
+Technology is downstream. WebGL, Three.js, GSAP, Rive, Blender, video and generation capabilities are selected only after the creative idea earns them.
 
 ## Slice 1 — Creative Thesis v1
+Status: merged to `main` through PR #36.
 
-Status: implemented on `feature/creative-thesis-v1`.
+Creative Thesis inserts one project-specific governing idea before downstream art direction. Deterministic scaffolds remain provisional; authored judgment is required for review-ready state.
 
-Purpose: force one project-specific governing idea between Inspiration and Creative Direction.
+## Slice 2 — Creative World Exploration v1
+Status: mainline integration branch.
 
-The slice adds:
+Purpose: require 3–5 authored experience worlds that differ at the structural world level, not by palette/type/layout reskin.
 
-- `modules/creative-thesis/CONTRACT.md`
-- `modules/creative-thesis/runtime.mjs`
-- `.agents/skills/creative-thesis/SKILL.md`
-- routing before Creative Direction for brand-defining workflows
-- skill-registry entry
-- Creative Runtime integration
-- Du Bonheur benchmark binding
-- regression coverage for truth anchors, anti-generic rules, technology neutrality, authored-vs-scaffold state, and fail-closed approval semantics
+Adds:
+- `modules/creative-world/CONTRACT.md`
+- `modules/creative-world/runtime.mjs`
+- `.agents/skills/creative-world-exploration/SKILL.md`
+- canonical `ai-studio-os/creative-world@1`
+- structural divergence heuristic across world class, narrative, composition, image, motion, interaction and responsive behavior
+- explicit `signatureBehavior` and project-specific category-transfer evidence
+- technology-neutrality gate
+- typography-intent handoff compatible with Typography Intelligence on `main`
+- no automatic world selection
+- visual-proof-before-selection gate
+- Du Bonheur benchmark with three authored worlds and no fabricated winner
 
-### Truth boundary
+### Important limitation
+Deterministic field differences are only a structural heuristic. They catch obvious reskins but do not prove semantic or creative divergence. Human/visual review remains required.
 
-The runtime can create a **deterministic scaffold**, but it intentionally marks that state `provisional`. A scaffold is not creative authorship.
+### Selection boundary
+A world cannot become authoritative from prose alone. Selection requires an explicit world id, human confirmation, visual review confirmation, and real visual evidence references. A selected world still does not imply typography or production-technology approval.
 
-A thesis can become structurally `ready-for-creative-direction-review` only when an authored candidate is supplied and passes the contract. Even then:
+### Typography integration
+Typography Intelligence is now on `main`. Its authority contract accepts a Creative World only when `schema === ai-studio-os/creative-world@1`, `reviewReady === true`, and `selected === true`. Slice 2 produces exactly that shape only after visual review-backed human selection.
 
-- human creative approval remains false;
-- the thesis is not frozen;
-- downstream art direction still needs independent review.
-
-This prevents deterministic template prose from being mistaken for high-quality creative judgment.
-
-## Planned slices
-
-### Slice 2 — Creative World exploration
-Generate 3–5 genuinely different visual-world hypotheses from one reviewed thesis. Difference must occur at the world/concept level, not palette/type/layout reskins.
-
-### Slice 3 — Style-frame production
-Produce high-fidelity opening, narrative, product, transition, information, and closing states before implementation.
+## Next slices
+### Slice 3 — Style-frame / visual-world proof
+Produce comparable opening, product/sensory, information/utility, transition and mobile states for **every viable world before selection**.
 
 ### Slice 4 — Creative-direction review
-Independent lenses for thesis fit, originality, visual ownership, typography/composition, asset language, and category-transfer risk.
+Independent lenses for thesis fit, originality, ownership, typography/composition, asset language, and category-transfer risk.
 
 ### Slice 5 — Motion language
-Define authored rhythm, easing, state change, continuity, entrance/exit behavior, signature motion, and reduced-motion equivalents before GSAP/Rive/realtime implementation.
+Define rhythm, easing, state change, continuity, signature motion and reduced-motion equivalents before implementation.
 
 ### Slice 6 — Interaction choreography
-Storyboard scroll, pointer, click/tap, scene change, continuity, and mobile substitutions as experience behavior rather than generic animation requests.
+Storyboard scroll, pointer, click/tap, scene changes and mobile substitutions as experience behavior.
 
 ### Slice 7 — Responsive art direction
-Preserve the creative idea across mobile/tablet/desktop rather than merely stacking the desktop layout.
+Preserve the creative idea across mobile/tablet/desktop rather than stacking desktop.
 
 ### Slice 8 — Asset-production language
-Decide what must be captured, retouched, illustrated, filmed, modeled, simulated, generated, or left absent; maintain provenance and rights truth.
+Decide what must be captured, retouched, illustrated, filmed, modeled, simulated, generated or left absent while preserving provenance/rights truth.
 
 ### Slice 9 — Full-site production benchmark
-Dogfood the entire Creative World → Creative Engineering path on a complete Du Bonheur experience and judge the final experience, not only pipeline completion.
+Dogfood the complete Creative World → Creative Engineering path on Du Bonheur and judge the final experience, not only pipeline completion.
 
 ## Benchmark principle
-
-`Engineering pass ≠ Creative pass.`
-
-A build can be responsive, fast, accessible, and technically correct while still being generic or visually weak. Creative release requires a separate approval gate.
+**Engineering pass ≠ Creative pass. Structural readiness ≠ visual approval.**

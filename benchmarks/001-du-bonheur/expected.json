@@ -1,43 +1,16 @@
 {
-  "requiredStages": [
-    "inspiration",
-    "creative-thesis",
-    "creative-direction",
-    "design",
-    "image",
-    "motion",
-    "creative-eval"
-  ],
-  "requiredInspirationLanes": [
-    "directIndustry",
-    "bestInClass",
-    "adjacentIndustries",
-    "trends",
-    "antiReferences"
-  ],
+  "status": "ready-for-style-frame-proof",
+  "requiredStages": ["inspiration", "creative-thesis", "creative-world", "creative-direction", "design", "image", "motion", "creative-eval"],
+  "requiredInspirationLanes": ["directIndustry", "bestInClass", "adjacentIndustries", "trends", "antiReferences"],
   "requireCreativeThesis": true,
+  "requireCreativeWorldExploration": true,
   "requireReducedMotion": true,
   "requireSharedCreativeDirection": true,
   "assetExpectations": [
-    {
-      "id": "storefront",
-      "action": "retouch"
-    },
-    {
-      "id": "signature-croissant",
-      "action": "retouch"
-    },
-    {
-      "id": "cafe-interior",
-      "action": "generative-edit"
-    },
-    {
-      "id": "signature-eclair-missing",
-      "action": "capture-required"
-    },
-    {
-      "id": "abstract-texture",
-      "action": "generate-supporting"
-    }
+    {"id": "storefront", "action": "retouch"},
+    {"id": "signature-croissant", "action": "retouch"},
+    {"id": "cafe-interior", "action": "generative-edit"},
+    {"id": "signature-eclair-missing", "action": "capture-required"},
+    {"id": "abstract-texture", "action": "generate-supporting"}
   ]
 }
