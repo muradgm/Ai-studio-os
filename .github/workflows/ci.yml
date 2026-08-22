@@ -57,6 +57,18 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+      - name: Run TraderFrame icon visual review patch proof
+        run: npm run proof:traderframe-icon-visual-review
+
+      - name: Upload TraderFrame icon visual-review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traderframe-icon-visual-review-evidence
+          path: artifacts/traderframe/icon-visual-review-patch-v1
+          if-no-files-found: ignore
+          retention-days: 7
+
   browser-release:
     runs-on: ubuntu-latest
     timeout-minutes: 12

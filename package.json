@@ -21,6 +21,8 @@
     "proof:traderframe-icons": "node ./scripts/traderframe-icon-production-proof.mjs",
     "proof:traderframe-icon-creative-loop": "node ./scripts/traderframe-icon-creative-loop.mjs",
     "proof:traderframe-icon-creative-loop:no-browser": "node ./scripts/traderframe-icon-creative-loop.mjs --no-browser-evidence",
+    "proof:traderframe-icon-visual-review": "node ./scripts/traderframe-icon-visual-review-patch.mjs",
+    "test:traderframe-icon-visual-review": "node --test test/traderframe-icon-visual-review-patch.test.mjs",
     "test": "node --test && npm run validate"
   },
   "dependencies": {
