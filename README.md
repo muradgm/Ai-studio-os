@@ -112,6 +112,8 @@ A Brand Kit is not considered complete because a logo, palette and icons exist. 
 - `benchmarks/006-logo-identity/` — v1.2 geometry-locked logo-system fixture
 - `benchmarks/007-creative-engineering/` — v1.3 capability selection and delivery-gate fixture
 - `benchmarks/008-brand-identity-kit/` — Brand DNA inheritance, personalized icons, kit completeness, rights/legal truth fixture
+- `benchmarks/009-typography-intelligence/` — typography strategy, font evidence, pairing critique, and production CSS fixture
+- `benchmarks/010-award-caliber-web/` — internal award-caliber web candidate rubric with human selection, rendered proof, creative-quality review, delivery gates, and bounded polish loops
 
 ## Executable fixtures
 
