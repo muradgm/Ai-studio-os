@@ -1,6 +1,7 @@
 {
   "requiredStages": [
     "inspiration",
+    "creative-thesis",
     "creative-direction",
     "design",
     "image",
@@ -14,6 +15,7 @@
     "trends",
     "antiReferences"
   ],
+  "requireCreativeThesis": true,
   "requireReducedMotion": true,
   "requireSharedCreativeDirection": true,
   "assetExpectations": [
