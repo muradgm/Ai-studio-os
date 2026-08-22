@@ -1,0 +1,54 @@
+{
+  "schema": "ai-studio-os/art-direction-candidates@1",
+  "worldId": "counter-ritual",
+  "directions": [
+    {
+      "id": "the-counter",
+      "label": "The Counter",
+      "premise": "Treat the screen as a working pâtisserie counter: products, service cues and practical information occupy a shared horizontal field where attention moves from overview to one chosen item.",
+      "spatialModel": "A continuous working surface with depth, edge, reach and product zones; the user scans laterally before attention narrows.",
+      "compositionModel": "Wide horizontal staging, generous physical gaps, large product zones and a persistent service rail; asymmetry comes from object placement rather than editorial collage.",
+      "typographicBehavior": "Direct, warm and highly legible sans-led hierarchy with large spoken headings; type sits on the same working plane as products instead of becoming a fashion masthead.",
+      "colorBehavior": "Cool food-service neutrals, stainless and warm butter tones with one appetite accent; avoid the peach/cream palette from the first proof.",
+      "imageRole": "Truthful product and hand-scale photography is primary; imagery must show reach, selection, wrapping or serving rather than isolated luxury still life.",
+      "materialModel": "Stainless steel, paper wrap, tray edges, pastry crumb and glass translated as crisp surface relationships without skeuomorphic decoration.",
+      "motionMetaphor": "Attention travels across the counter: a product is noticed, brought forward, prepared and returned into context through measured spatial shifts.",
+      "interactionExpression": "Pointer/tap changes service focus locally; selection pulls one item into a clear service zone while preserving the larger counter context.",
+      "responsiveExpression": "Desktop feels like standing at a counter; mobile becomes a vertical hand-service lane where one item at a time comes within thumb reach.",
+      "soundPolicy": "Silence by default; optional subtle wrapping or tray contact only if it reinforces a specific handoff state.",
+      "antiPatterns": ["floating product carousel", "generic luxury editorial hero", "rounded SaaS cards as service zones"]
+    },
+    {
+      "id": "the-handoff",
+      "label": "The Handoff",
+      "premise": "Make transfer itself the visual identity: requests cross a threshold, are transformed through preparation, and return as something ready to receive.",
+      "spatialModel": "Two fields separated by an active threshold; content repeatedly crosses, pauses, changes state and completes on the receiving side.",
+      "compositionModel": "Strong directional bands and opposing fields with large negative space; the threshold is the compositional anchor rather than a physical counter.",
+      "typographicBehavior": "Compressed, graphic display statements paired with restrained reading text; words may cross or align to the threshold to reinforce transfer without becoming decorative typography theater.",
+      "colorBehavior": "Deep aubergine and near-black against pale pastry paper with a sharp apricot transfer signal; high contrast and deliberately non-café-pastel.",
+      "imageRole": "Images appear as evidence moving through states: source, preparation crop, finished result and handoff; a single frame may show transformation rather than a static beauty shot.",
+      "materialModel": "Paper folds, cut edges, transfer marks and clean shadow planes; materials describe passing and wrapping rather than nostalgia.",
+      "motionMetaphor": "Everything consequential crosses a boundary: request enters, preparation compresses, result passes through, confirmation settles.",
+      "interactionExpression": "User actions create directional transfer; selected content moves toward the user while previous context recedes instead of opening modal/card layers.",
+      "responsiveExpression": "Mobile turns the threshold vertical: choices move upward into preparation and completed information returns into the lower thumb zone.",
+      "soundPolicy": "No ambient sound; one restrained handoff cue may mark completed service if sound is enabled.",
+      "antiPatterns": ["literal conveyor belt", "fintech progress-flow graphics", "decorative arrows used as the whole concept"]
+    },
+    {
+      "id": "the-conversation",
+      "label": "The Conversation",
+      "premise": "Treat service as a short human exchange: the interface asks, listens, narrows and responds, allowing appetite and practical intent to shape what appears next.",
+      "spatialModel": "A responsive conversational field where one prompt and one answer hold focus; product evidence enters as the consequence of the exchange.",
+      "compositionModel": "Large typographic turns, variable whitespace and minimal persistent chrome; each state is composed around one question, response or recommendation rather than a fixed page grid.",
+      "typographicBehavior": "Typography is the primary actor: expressive but readable prompts, quieter answers and unmistakable action language; no default metadata voice or technical mono layer.",
+      "colorBehavior": "Near-white and ink with one bright citron attention state plus occasional product-derived color; deliberately graphic and contemporary rather than warm-luxury coded.",
+      "imageRole": "Product imagery appears only after the user's intent becomes specific; images function as answers, not wallpaper.",
+      "materialModel": "Almost immaterial interface with selective paper/packaging fragments appearing at preparation and handoff moments; materiality arrives as response.",
+      "motionMetaphor": "Call and response: prompts hold, answers arrive, the field clears, and the next service turn enters with conversational timing rather than continuous scroll spectacle.",
+      "interactionExpression": "Tap/click choices behave like answers; the interface immediately reformulates the next state and preserves an obvious path back without chatbot chrome.",
+      "responsiveExpression": "Mobile is the native form: one prompt, one set of choices, one immediate answer; desktop uses scale and whitespace rather than adding complexity.",
+      "soundPolicy": "Silent by default; no simulated voice or chat sound effects.",
+      "antiPatterns": ["chatbot bubbles", "quiz-funnel gimmick", "AI assistant visual language"]
+    }
+  ]
+}
