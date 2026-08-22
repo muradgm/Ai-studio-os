@@ -33,6 +33,9 @@ jobs:
       - name: Run Brand Identity Kit benchmark
         run: node ./bin/studio.mjs benchmark brand-identity-kit-v1
 
+      - name: Run Typography Intelligence benchmark
+        run: node ./bin/studio.mjs benchmark typography-intelligence-v01
+
       - name: Build The Creative Agency Command Center
         run: npm run build:web
 
@@ -62,6 +65,9 @@ jobs:
 
       - name: Install Playwright Chromium only
         run: npx playwright install chromium
+
+      - name: Run real typography browser proof
+        run: npm run test:typography-browser
 
       - name: Run real browser runtime smoke test
         run: npm run test:browser-runtime

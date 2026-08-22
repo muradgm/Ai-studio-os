@@ -7,6 +7,7 @@ import { runMultimodalRuntime, validateMultimodalBenchmark } from '../lib/multim
 import { runObservationRuntime, validateObservationBenchmark } from '../lib/observation-runtime.mjs';
 import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
+import { buildTypographySystem, validateTypographyBenchmark } from '../modules/typography/runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -76,7 +77,15 @@ const required = [
   'lib/logo-runtime.mjs',
   'kernel/councils/logo.json',
   'benchmarks/006-logo-identity/input.json',
-  'benchmarks/006-logo-identity/expected.json'
+  'benchmarks/006-logo-identity/expected.json',
+  'modules/typography/google-fonts-provider.mjs',
+  'modules/typography/runtime.mjs',
+  'modules/typography/typography-intent.mjs',
+  'modules/typography/application-intelligence.mjs',
+  'modules/typography/project-orchestrator.mjs',
+  'modules/design/typography-consumption.mjs',
+  'benchmarks/009-typography-intelligence/input.json',
+  'benchmarks/009-typography-intelligence/expected.json'
 ];
 
 const failures = [];
@@ -126,10 +135,15 @@ if (!failures.length) {
   const logoExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/006-logo-identity/expected.json'), 'utf8'));
   const logoBenchmark = validateLogoBenchmark(runLogoRuntime(logoInput), logoExpected);
   if (!logoBenchmark.pass) failures.push(...logoBenchmark.failures.map((f) => `logo benchmark: ${f}`));
+
+  const typographyInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/009-typography-intelligence/input.json'), 'utf8'));
+  const typographyExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/009-typography-intelligence/expected.json'), 'utf8'));
+  const typographyBenchmark = validateTypographyBenchmark(buildTypographySystem(typographyInput), typographyExpected);
+  if (!typographyBenchmark.pass) failures.push(...typographyBenchmark.failures.map((f) => `typography benchmark: ${f}`));
 }
 
 if (failures.length) {
   console.error(failures.join('\n'));
   process.exit(1);
 }
-console.log('AI Studio OS v1.2 validation passed.');
+console.log('AI Studio OS v1.3 validation passed.');

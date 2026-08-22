@@ -13,9 +13,12 @@
     "build:creative-engineering": "vite build apps/creative-engineering-fixture --outDir ../../dist/creative-engineering-fixture --emptyOutDir",
     "test:browser-runtime": "node ./scripts/creative-engineering-browser-smoke.mjs",
     "test:command-center": "node ./scripts/command-center-execution-smoke.mjs",
+    "test:typography-browser": "node ./scripts/typography-browser-proof.mjs",
+    "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
+    "fonts:analyze": "node ./scripts/analyze-google-fonts.mjs",
     "studio": "node ./bin/studio.mjs",
     "validate": "node ./scripts/validate.mjs",
-    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11 && node ./bin/studio.mjs benchmark identity-v12 && node ./bin/studio.mjs benchmark creative-engineering-v13 && node ./bin/studio.mjs benchmark brand-identity-kit-v1",
+    "benchmark": "node ./bin/studio.mjs benchmark du-bonheur && node ./bin/studio.mjs benchmark workspace-role-update && node ./bin/studio.mjs benchmark du-bonheur-brand-film && node ./bin/studio.mjs benchmark du-bonheur-post-launch && node ./bin/studio.mjs benchmark du-bonheur-v11 && node ./bin/studio.mjs benchmark identity-v12 && node ./bin/studio.mjs benchmark creative-engineering-v13 && node ./bin/studio.mjs benchmark brand-identity-kit-v1 && node ./bin/studio.mjs benchmark typography-intelligence-v01",
     "logo:integrity": "node ./bin/logo-integrity.mjs",
     "test:logo-integrity": "node --test integration/logo-artifact-integrity.mjs integration/logo-artifact-runtime.mjs",
     "test": "node --test && npm run validate"
