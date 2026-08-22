@@ -36,7 +36,7 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 }
 
-export function renderCommandCenterView({ stages = [], projectName = 'Project 001' } = {}) {
+export function renderCommandCenterView({ stages = [], projectName = 'Project 001', directions = [] } = {}) {
   document.documentElement.classList.add('command-center-fidelity');
   document.querySelector('#app').innerHTML = `
   <div class="app-shell">
@@ -53,7 +53,7 @@ export function renderCommandCenterView({ stages = [], projectName = 'Project 00
       <section class="approved-command-shell">
         <header class="approved-header">
           <div class="approved-project"><span>PROJECT</span><div><h1>${escapeHtml(projectName)}</h1><i aria-hidden="true">☆</i></div></div>
-          <div class="approved-stage"><span>PIPELINE STAGE</span><div><h2 id="active-stage-label">Brief</h2><small><i></i><span id="active-stage-state">Active</span></small></div></div>
+          <div class="approved-stage"><span>PIPELINE STAGE</span><div><h2 id="active-stage-label">Brief</h2><small><i></i><span id="active-stage-state">Direction required</span></small></div></div>
           <div class="approved-actions">
             <button type="button" id="run-execution"><span class="action-icon">⌁</span>Build</button>
             <button type="button" id="run-review-execution"><span class="action-icon">▷</span>Run Review</button>
@@ -69,6 +69,29 @@ export function renderCommandCenterView({ stages = [], projectName = 'Project 00
         </div>
 
         <div class="approved-main-grid">
+          <section class="approved-panel direction-workspace" id="direction-workspace" data-state="selection-required">
+            <header><span>DIRECTION SELECTION</span><b id="direction-count">${String(directions.length).padStart(2, '0')}</b><i id="direction-state">SELECTION REQUIRED</i></header>
+            <div class="direction-grid" id="direction-grid">
+              ${directions.map((direction, index) => `<article class="direction-card" data-direction-id="${escapeHtml(direction.id)}">
+                <div class="direction-card-head"><span>${String(index + 1).padStart(2, '0')}</span><b>${escapeHtml(direction.label)}</b></div>
+                <p>${escapeHtml(direction.premise)}</p>
+                <dl>
+                  <div><dt>Space</dt><dd>${escapeHtml(direction.spatialModel)}</dd></div>
+                  <div><dt>Type</dt><dd>${escapeHtml(direction.typography)}</dd></div>
+                  <div><dt>Interaction</dt><dd>${escapeHtml(direction.interaction)}</dd></div>
+                  <div><dt>Mobile</dt><dd>${escapeHtml(direction.mobile)}</dd></div>
+                </dl>
+                <small>${escapeHtml(direction.risk)}</small>
+                <button type="button" class="direction-select" data-direction-id="${escapeHtml(direction.id)}">Select Direction</button>
+              </article>`).join('')}
+            </div>
+            <aside class="direction-lock" id="direction-lock">
+              <span>LOCKED DIRECTION</span>
+              <b id="selected-direction-label">None selected</b>
+              <p id="selected-direction-summary">Choose one direction before build, review, typography, imagery, or motion work continues.</p>
+            </aside>
+          </section>
+
           <section class="approved-panel approved-queue">
             <header><span>PRODUCTION QUEUE</span><b id="artifact-queue-count">00</b><i>•••</i></header>
             <div class="approved-queue-list" id="artifact-queue"><div class="empty-line">Artifact Graph state is loading.</div></div>

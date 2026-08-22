@@ -30,7 +30,7 @@ export function getExecutionProject(projectId) {
   return project;
 }
 
-export function createExecutionJob({ id, projectId, iteration = 0 } = {}) {
+export function createExecutionJob({ id, projectId, iteration = 0, selectedDirectionId = null } = {}) {
   if (!id) throw new Error('execution id is required');
   getExecutionProject(projectId);
   const now = new Date().toISOString();
@@ -42,6 +42,10 @@ export function createExecutionJob({ id, projectId, iteration = 0 } = {}) {
     iteration,
     createdAt: now,
     updatedAt: now,
+    directionSelection: {
+      selectedDirectionId: selectedDirectionId ? String(selectedDirectionId) : null,
+      status: selectedDirectionId ? 'locked' : 'not-provided'
+    },
     approval: 'pending',
     approvedAt: null,
     productionReady: false,

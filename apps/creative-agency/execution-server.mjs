@@ -353,7 +353,7 @@ async function handler(req, res, serverOrigin) {
       const running = [...jobs.values()].find((item) => item.projectId === projectId && ['queued', 'running'].includes(item.status));
       if (running) return json(res, 409, { error: 'execution-already-running', job: publicJob(running) });
       const id = `exec-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-      const job = createExecutionJob({ id, projectId, iteration: Number(body.iteration ?? 0) });
+      const job = createExecutionJob({ id, projectId, iteration: Number(body.iteration ?? 0), selectedDirectionId: body.selectedDirectionId ?? null });
       jobs.set(id, job);
       queueMicrotask(() => executeJob(job, serverOrigin));
       return json(res, 202, { job: publicJob(job) });

@@ -5,6 +5,7 @@ import {
   approveExecution
 } from './execution-client.js';
 import { renderCommandCenterView, renderArtifactQueue } from './command-center-view.js';
+import { createDirectionSelectionState, directionCandidates } from './direction-state.js';
 import { createExecutionCommandCenterState } from '../command-center-artifacts.mjs';
 
 const stages = [
@@ -19,6 +20,7 @@ const stages = [
 let activeJob = null;
 let pollTimer = null;
 let runtimeOnline = false;
+let directionState = createDirectionSelectionState();
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 
@@ -29,6 +31,32 @@ function setStage(id) {
   const chip = document.querySelector('#phase-chip');
   if (label) label.textContent = stage.label;
   if (chip) chip.textContent = `Current · ${stage.label}`;
+}
+
+function renderDirectionState() {
+  const workspace = document.querySelector('#direction-workspace');
+  const lock = document.querySelector('#direction-lock');
+  const label = document.querySelector('#selected-direction-label');
+  const summary = document.querySelector('#selected-direction-summary');
+  const state = document.querySelector('#direction-state');
+  const activeStageState = document.querySelector('#active-stage-state');
+  if (workspace) workspace.dataset.state = directionState.status;
+  if (state) state.textContent = directionState.status === 'locked' ? 'LOCKED' : 'SELECTION REQUIRED';
+  if (label) label.textContent = directionState.selected?.label ?? 'None selected';
+  if (summary) summary.textContent = directionState.selected
+    ? `${directionState.selected.premise} Next layer: typography, layout, imagery, motion, then measured build.`
+    : 'Choose one direction before build, review, typography, imagery, or motion work continues.';
+  if (activeStageState) activeStageState.textContent = directionState.selected ? 'Direction locked' : 'Direction required';
+  if (lock) lock.dataset.state = directionState.status;
+  document.querySelectorAll('.direction-card').forEach((card) => {
+    const selected = card.dataset.directionId === directionState.selectedId;
+    card.classList.toggle('selected', selected);
+    card.setAttribute('aria-selected', selected ? 'true' : 'false');
+  });
+  document.querySelectorAll('.direction-select').forEach((button) => {
+    const selected = button.dataset.directionId === directionState.selectedId;
+    button.textContent = selected ? 'Selected' : 'Select Direction';
+  });
 }
 
 function toast(title, copy) {
@@ -51,7 +79,7 @@ function setRuntimeStatus(online, label) {
   }
   const runtimeLabel = document.querySelector('#runtime-label');
   if (runtimeLabel) runtimeLabel.textContent = label;
-  const disabled = !online || ['queued','running'].includes(activeJob?.status);
+  const disabled = !online || !directionState.canExecute || ['queued','running'].includes(activeJob?.status);
   const run = document.querySelector('#run-execution');
   const review = document.querySelector('#run-review-execution');
   if (run) run.disabled = disabled;
@@ -206,10 +234,14 @@ async function checkRuntime() {
 
 async function startBuild() {
   if (!runtimeOnline) return toast('Execution unavailable', 'Run npm run dev so the local execution service starts with the Command Center.');
+  if (!directionState.canExecute) {
+    setStage('explore');
+    return toast('Select a direction first', 'Choose one of the three creative directions before the build and review loop can run.');
+  }
   try {
     setStage('make');
     const iteration = Number.isInteger(activeJob?.iteration) ? activeJob.iteration + 1 : 0;
-    const result = await startExecution({ projectId: 'creative-agency', iteration });
+    const result = await startExecution({ projectId: 'creative-agency', iteration, selectedDirectionId: directionState.selectedId });
     activeJob = result.job;
     renderExecution(activeJob);
     toast('Measured production started', `${activeJob.id} is building, capturing and reviewing the current artifact.`);
@@ -273,6 +305,17 @@ async function approveIteration() {
 
 function bind() {
   document.querySelectorAll('.spine-step').forEach((el) => el.addEventListener('click', () => setStage(el.dataset.stage)));
+  document.querySelectorAll('.rail-button').forEach((el) => el.addEventListener('click', () => {
+    if (el.classList.contains('active')) return;
+    toast('Workspace not wired yet', 'This packet makes direction selection real first. Other sections will unlock as their evidence surfaces land.');
+  }));
+  document.querySelectorAll('.direction-select').forEach((el) => el.addEventListener('click', () => {
+    directionState = createDirectionSelectionState({ selectedId: el.dataset.directionId });
+    renderDirectionState();
+    setRuntimeStatus(runtimeOnline, document.querySelector('#runtime-label')?.textContent ?? 'Execution server offline');
+    setStage('explore');
+    toast('Direction locked', `${directionState.selected.label} is now the source direction for the next layers.`);
+  }));
   document.querySelector('#run-execution')?.addEventListener('click', startBuild);
   document.querySelector('#run-review-execution')?.addEventListener('click', () => {
     toast('Measured review pipeline', 'The current local executor performs build, capture and independent review as one auditable job.');
@@ -286,8 +329,9 @@ function bind() {
   });
 }
 
-renderCommandCenterView({ stages, projectName: 'Project 001' });
+renderCommandCenterView({ stages, projectName: 'Project 001', directions: directionCandidates });
 setStage('brief');
+renderDirectionState();
 renderArtifactState(null);
 bind();
 checkRuntime();

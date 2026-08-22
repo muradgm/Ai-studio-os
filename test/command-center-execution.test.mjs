@@ -166,8 +166,9 @@ test('Vite launcher uses the Node executable directly and never npm.cmd or a she
 });
 
 test('execution job uses bounded state transitions and keeps iteration approval separate', () => {
-  const job = createExecutionJob({ id: 'exec-test', projectId: 'creative-agency' });
+  const job = createExecutionJob({ id: 'exec-test', projectId: 'creative-agency', selectedDirectionId: 'the-counter' });
   assert.equal(job.status, 'queued');
+  assert.deepEqual(job.directionSelection, { selectedDirectionId: 'the-counter', status: 'locked' });
   setJobStep(job, 'build', 'running');
   assert.equal(job.stage, 'build');
   assert.equal(job.approval, 'pending');

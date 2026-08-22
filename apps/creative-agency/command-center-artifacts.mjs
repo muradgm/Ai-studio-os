@@ -77,7 +77,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     id: `${projectId}:build`, version, kind: 'web/build', title: 'Production Build', projectId,
     status: artifactStatus(buildStep), reviewStatus: reviewStatus(buildStep), releaseStatus: 'unmeasured',
     previews: job.artifacts?.previewUrl ? [{ ref: job.artifacts.previewUrl, role: 'live-preview' }] : [],
-    source: { executionJobId: job.id }
+    source: { executionJobId: job.id, selectedDirectionId: job.directionSelection?.selectedDirectionId ?? null }
   });
 
   const capture = createArtifact({
@@ -85,7 +85,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     status: artifactStatus(captureStep), reviewStatus: reviewStatus(captureStep), releaseStatus: 'unmeasured',
     files: screenshotFiles(job),
     dependencies: [{ artifactRef: build.ref, relation: 'captures', required: true, impact: 'stale' }],
-    source: { executionJobId: job.id }
+    source: { executionJobId: job.id, selectedDirectionId: job.directionSelection?.selectedDirectionId ?? null }
   });
 
   const releaseReady = job.releaseDecision?.productionReady === true || job.releaseDecision?.status === 'ready';
@@ -97,7 +97,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     files: job.artifacts?.reportUrl ? [{ ref: job.artifacts.reportUrl, role: 'release-report', format: 'json' }] : [],
     measurements: evidenceMeasurements(job), findings: job.findings ?? [],
     dependencies: [{ artifactRef: capture.ref, relation: 'measures', required: true, impact: 'stale' }],
-    source: { executionJobId: job.id }
+    source: { executionJobId: job.id, selectedDirectionId: job.directionSelection?.selectedDirectionId ?? null }
   });
 
   const patches = job.patches ?? [];
@@ -107,7 +107,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     reviewStatus: patches.length ? 'needs-revision' : reviewStatus(patchStep), releaseStatus: 'unmeasured',
     findings: job.findings ?? [], metadata: { patches },
     dependencies: [{ artifactRef: review.ref, relation: 'responds-to', required: true, impact: 'stale' }],
-    source: { executionJobId: job.id }
+    source: { executionJobId: job.id, selectedDirectionId: job.directionSelection?.selectedDirectionId ?? null }
   });
 
   const approved = job.approval === 'iteration-approved' || approvalStep === 'approved';
@@ -122,7 +122,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
       { artifactRef: patch.ref, relation: 'considers', required: true, impact: 'review' }
     ],
     metadata: { approvedAt: job.approvedAt ?? null, productionReady: Boolean(job.productionReady) },
-    source: { executionJobId: job.id }
+    source: { executionJobId: job.id, selectedDirectionId: job.directionSelection?.selectedDirectionId ?? null }
   });
 
   return buildArtifactGraph([build, capture, review, patch, approval]);

@@ -26,10 +26,10 @@ export async function getExecutionStatus() {
   return request('/api/status');
 }
 
-export async function startExecution({ projectId = 'creative-agency', iteration = 0 } = {}) {
+export async function startExecution({ projectId = 'creative-agency', iteration = 0, selectedDirectionId = null } = {}) {
   return request('/api/executions', {
     method: 'POST',
-    body: JSON.stringify({ projectId, iteration })
+    body: JSON.stringify({ projectId, iteration, selectedDirectionId })
   });
 }
 
