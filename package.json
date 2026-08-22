@@ -23,6 +23,9 @@
     "proof:traderframe-icon-creative-loop:no-browser": "node ./scripts/traderframe-icon-creative-loop.mjs --no-browser-evidence",
     "proof:traderframe-icon-visual-review": "node ./scripts/traderframe-icon-visual-review-patch.mjs",
     "test:traderframe-icon-visual-review": "node --test test/traderframe-icon-visual-review-patch.test.mjs",
+    "proof:traderframe-icon-semantic-v2": "node ./scripts/traderframe-icon-semantic-construction-v2.mjs",
+    "proof:traderframe-icon-semantic-v2:no-browser": "node ./scripts/traderframe-icon-semantic-construction-v2.mjs --no-browser-evidence",
+    "test:traderframe-icon-semantic-v2": "node --test test/traderframe-icon-semantic-construction-v2.test.mjs",
     "test": "node --test && npm run validate"
   },
   "dependencies": {
