@@ -1,0 +1,38 @@
+{
+  "schema": "ai-studio-os/typography-intent-authoring@1",
+  "artDirectionId": "the-conversation",
+  "status": "lead-hypothesis-awaiting-visual-typography-review",
+  "statement": "Typography is the primary service actor: large, unmistakably human prompts create attention; quieter responses and actions answer without chatbot chrome, fashion-editorial distance, or a technical metadata voice.",
+  "roles": {
+    "display": "Spoken service prompts: expressive, direct, large-scale and human without looking whimsical, luxury-fashion, or software-generated.",
+    "body": "Calm responses, product explanation, place information and actions: highly legible, contemporary and warm enough to keep the exchange human."
+  },
+  "preferredCategories": {
+    "display": ["sans-serif", "display"],
+    "body": ["sans-serif"]
+  },
+  "avoidCategories": ["monospace"],
+  "pressures": {
+    "trust": 76,
+    "expression": 88,
+    "readingDensity": 68,
+    "warmth": 66,
+    "technicality": 18,
+    "formality": 34,
+    "accessibility": 86,
+    "distinctiveness": 90
+  },
+  "antiPatterns": [
+    "chatbot or AI-assistant typography",
+    "generic luxury high-contrast serif as automatic pâtisserie signal",
+    "monospace metadata layer used merely to look designed",
+    "rounded SaaS-product typography system",
+    "overused geometric-sans neutrality that removes the human service voice"
+  ],
+  "truth": {
+    "artDirectionSelected": false,
+    "typographySystemSelected": false,
+    "typographyApproved": false,
+    "productionReady": false
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "catalog": [
+    {
+      "id": "google-fonts:newsreader",
+      "provider": "google-fonts",
+      "family": "Newsreader",
+      "category": "serif",
+      "variants": ["regular", "500", "600", "700"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/newsreader.woff2"},
+      "axes": [{"tag": "wght", "start": 200, "end": 800}]
+    },
+    {
+      "id": "google-fonts:manrope",
+      "provider": "google-fonts",
+      "family": "Manrope",
+      "category": "sans-serif",
+      "variants": ["regular", "500", "600", "700", "800"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/manrope.woff2"},
+      "axes": [{"tag": "wght", "start": 200, "end": 800}]
+    },
+    {
+      "id": "google-fonts:ibm-plex-mono",
+      "provider": "google-fonts",
+      "family": "IBM Plex Mono",
+      "category": "monospace",
+      "variants": ["regular", "500", "600"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/plex.woff2"},
+      "axes": []
+    },
+    {
+      "id": "google-fonts:poppins",
+      "provider": "google-fonts",
+      "family": "Poppins",
+      "category": "sans-serif",
+      "variants": ["regular", "500", "600", "700"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/poppins.woff2"},
+      "axes": []
+    },
+    {
+      "id": "google-fonts:bodoni-moda",
+      "provider": "google-fonts",
+      "family": "Bodoni Moda",
+      "category": "serif",
+      "variants": ["regular", "700"],
+      "subsets": ["latin", "latin-ext"],
+      "files": {"regular": "https://fonts.gstatic.test/bodoni.woff2"},
+      "axes": []
+    }
+  ],
+  "fontEvidence": [
+    {
+      "family": "Newsreader",
+      "descriptors": {"xHeight": 55, "width": 52, "strokeContrast": 68, "roundness": 45},
+      "sources": [{"type": "benchmark-measured-evidence", "reference": "fixture:newsreader", "confidence": 96}]
+    },
+    {
+      "family": "Manrope",
+      "descriptors": {"xHeight": 66, "width": 55, "strokeContrast": 18, "roundness": 62},
+      "sources": [{"type": "benchmark-measured-evidence", "reference": "fixture:manrope", "confidence": 96}]
+    },
+    {
+      "family": "IBM Plex Mono",
+      "descriptors": {"xHeight": 64, "width": 60, "strokeContrast": 10, "roundness": 42},
+      "sources": [{"type": "benchmark-measured-evidence", "reference": "fixture:ibm-plex-mono", "confidence": 94}]
+    }
+  ],
+  "business": {
+    "type": "French patisserie",
+    "industry": "hospitality food retail",
+    "model": "local-retail",
+    "positioning": "premium but accessible",
+    "audience": "local consumers seeking high-quality everyday treats"
+  },
+  "brand": {
+    "traits": ["warm", "refined", "artisanal", "contemporary"]
+  },
+  "requirements": {
+    "languages": ["de", "fr", "en"]
+  },
+  "typographyIntent": {
+    "statement": "Use an editorial display voice for craft and a restrained contemporary sans for functional reading, with a technical mono utility layer.",
+    "preferredCategories": {
+      "display": ["serif"],
+      "body": ["sans-serif"],
+      "utility": ["monospace"]
+    },
+    "descriptorTargets": {
+      "display": {
+        "strokeContrast": {"target": 68, "tolerance": 18},
+        "xHeight": {"target": 55, "tolerance": 16}
+      },
+      "body": {
+        "xHeight": {"target": 66, "tolerance": 12},
+        "strokeContrast": {"target": 18, "tolerance": 16}
+      },
+      "utility": {
+        "width": {"target": 60, "tolerance": 12},
+        "strokeContrast": {"target": 10, "tolerance": 15}
+      }
+    }
+  },
+  "pairing": {
+    "strategy": "contrast-with-coherence",
+    "minScore": 75
+  },
+  "marketCommonFamilies": ["Poppins"],
+  "avoidFamilies": ["Roboto"]
+}

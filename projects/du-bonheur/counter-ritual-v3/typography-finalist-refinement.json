@@ -1,0 +1,77 @@
+{
+  "schema": "ai-studio-os/conversation-typography-finalist-refinement@1",
+  "status": "two-finalists-awaiting-human-art-direction-review",
+  "experienceThesis": "counter-ritual",
+  "artDirectionHypothesis": "the-conversation",
+  "finalists": [
+    {
+      "id": "bricolage-dm",
+      "display": "Bricolage Grotesque",
+      "body": "DM Sans",
+      "utility": "DM Sans",
+      "workingPosition": "finalist-a",
+      "authoredHypothesis": "The display voice should feel like a person asking a useful question; the reading voice should calm the system down without becoming anonymous.",
+      "tuning": {
+        "desktop": {"displayWeight": 600, "displaySizePx": 108, "displayLineHeight": 0.89, "displayTrackingEm": -0.046, "bodySizePx": 17, "bodyLineHeight": 1.5},
+        "mobile": {"displayWeight": 600, "displaySizePx": 57, "displayLineHeight": 0.91, "displayTrackingEm": -0.043, "bodySizePx": 16, "bodyLineHeight": 1.48}
+      },
+      "killCriteria": [
+        "German or French prompts become visibly clumsy at the same hierarchy",
+        "display quirks overpower practical service information",
+        "mobile labels become harder to scan than the challenger",
+        "product-name strings feel novelty-led rather than food/service-led"
+      ]
+    },
+    {
+      "id": "instrument-manrope",
+      "display": "Instrument Sans",
+      "body": "Manrope",
+      "utility": "Manrope",
+      "workingPosition": "finalist-b",
+      "authoredHypothesis": "The display voice should feel contemporary, exact and culturally current while the reading voice preserves warmth and easy utility scanning.",
+      "tuning": {
+        "desktop": {"displayWeight": 600, "displaySizePx": 106, "displayLineHeight": 0.91, "displayTrackingEm": -0.041, "bodySizePx": 17, "bodyLineHeight": 1.5},
+        "mobile": {"displayWeight": 600, "displaySizePx": 56, "displayLineHeight": 0.92, "displayTrackingEm": -0.038, "bodySizePx": 16, "bodyLineHeight": 1.48}
+      },
+      "killCriteria": [
+        "the conversation reads like a generic design-led product site",
+        "display and body become too similar in role or rhythm",
+        "the visual voice loses warmth in German or French",
+        "utility precision wins at the cost of a memorable service voice"
+      ]
+    }
+  ],
+  "languageStress": [
+    {"id":"en","lang":"en","prompt":"What are you in the mood for?","response":"Something buttery.","utility":"Coming by?"},
+    {"id":"de","lang":"de","prompt":"Worauf hast du heute Lust?","response":"Etwas Butteriges.","utility":"Kommst du vorbei?"},
+    {"id":"fr","lang":"fr","prompt":"Qu’est-ce qui vous ferait plaisir ?","response":"Quelque chose de beurré.","utility":"Vous passez nous voir ?"}
+  ],
+  "nomenclatureSpecimens": [
+    "Croissant au beurre",
+    "Pain au chocolat",
+    "Tarte au citron",
+    "Éclair au chocolat"
+  ],
+  "reviewLenses": [
+    "service-voice character",
+    "multilingual rhythm and line breaks",
+    "display/body role separation",
+    "product-name behavior",
+    "utility scanning",
+    "mobile hierarchy",
+    "motion-state continuity"
+  ],
+  "evidencePolicy": {
+    "tuning": "authored art-direction hypotheses, not measured optima",
+    "fonts": "real Google Fonts browser delivery required in proof",
+    "productNames": "typography specimens only; not Du Bonheur availability claims",
+    "imagery": "real Du Bonheur product/shop imagery remains source dependent"
+  },
+  "truth": {
+    "twoFinalistsAdvanced": true,
+    "humanTypographyWinnerSelected": false,
+    "typographyApproved": false,
+    "artDirectionApproved": false,
+    "productionReady": false
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "schema": "ai-studio-os/high-fidelity-art-direction@1",
+  "experienceThesis": "counter-ritual",
+  "leadHypothesis": "the-conversation",
+  "status": "lead-hypothesis-not-selected",
+  "governingBehavior": "Service behaves as a short human exchange: attention, an expressed need, a specific response, useful next action and a clear path back.",
+  "compositionGrammar": [
+    "One service turn owns the visual field at a time; do not tile competing cards.",
+    "Typography creates spatial hierarchy before decoration does.",
+    "Answers enter as consequences of the user's intent; product imagery is not wallpaper.",
+    "A thin attention signal may cross the field, but chat bubbles, speech balloons and assistant avatars are forbidden.",
+    "Utility information stays inside the same call-and-response rhythm rather than switching to a generic footer/dashboard language."
+  ],
+  "imageGrammar": [
+    "Real Du Bonheur product and shop images are source/capture dependent.",
+    "Until real sources are present, material studies must be visibly marked non-documentary proxies.",
+    "A product image appears only after intent narrows enough to make it an answer.",
+    "Avoid floating isolated pastry objects and luxury still-life staging."
+  ],
+  "colorGrammar": {
+    "base": "warm near-white",
+    "ink": "near-black",
+    "attention": "acid citron used only for attention, selection or service completion",
+    "rule": "Color supports service state; it is not the identity by itself."
+  },
+  "motionStoryboard": [
+    "ATTENTION — prompt holds; only the attention signal changes.",
+    "CHOICE — selected language becomes spatially dominant while unused choices recede without disappearing theatrically.",
+    "RESPONSE — product or place evidence enters as the consequence of the choice.",
+    "PREPARATION — information reorganizes rather than opening a modal layer.",
+    "HANDOFF — the final useful action settles inside the thumb/reading zone.",
+    "RETURN — the previous question remains recoverable without browser-back dependence."
+  ],
+  "mobileRule": "Mobile is the native direct-service form: one prompt, one meaningful response set, one answer and one obvious next action. Desktop gains scale and whitespace, not extra conceptual layers.",
+  "antiPatterns": [
+    "chatbot bubbles",
+    "AI assistant avatar or sparkle language",
+    "quiz funnel progress bar",
+    "rounded SaaS cards",
+    "generic restaurant product grid",
+    "fashion-editorial typography that makes utility information secondary",
+    "decorative motion unrelated to attention, response, preparation or handoff"
+  ],
+  "truth": {
+    "leadHypothesisOnly": true,
+    "humanArtDirectionSelectionConfirmed": false,
+    "humanVisualApproval": false,
+    "typographyApproved": false,
+    "realProductImageryComplete": false,
+    "motionApproved": false,
+    "productionReady": false
+  }
+}
