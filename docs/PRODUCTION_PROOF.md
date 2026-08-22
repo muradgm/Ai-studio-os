@@ -49,14 +49,20 @@ Move toward a shared `StudioRuntime` primitive with capability, task, artifact, 
 
 **Production adapter foundation merged in PR #25.** The shared execution boundary now routes only explicitly assigned adapters, writes real output files, normalizes output into universal Artifacts, returns Artifact Graphs, and fails closed when output/provenance constraints are not satisfied.
 
-**Vector slice PR #26 is CI-green and remains open for explicit merge approval.** `local-svg` writes real SVG masters, records SHA-256/bytes/structural measurements, rejects unsafe/external/raster/font-dependent content when required, and never self-declares creative/logo approval.
+**Vector production merged in PR #26.** `local-svg` writes real SVG masters, records SHA-256/bytes/structural measurements, rejects unsafe/external/raster/font-dependent content when required, and never self-declares creative/logo approval.
 
-**Active stacked slice: `feature/openai-image-adapter-v1`.** Add the first external network production adapter. `openai-image` uses OpenAI's Image API for routed raster generation/edit jobs, writes decoded provider output to real local files, preserves provider/model/request provenance, validates output format bytes, and remains unavailable without an explicit API credential.
+**OpenAI image production merged in PR #27.** `openai-image` uses OpenAI's Image API for routed raster generation/edit jobs, writes decoded provider output to real local files, preserves provider/model/request provenance, validates output format bytes, and remains unavailable without an explicit API credential.
+
+**Active slice: `feature/comfyui-image-adapter-v1`.** Add the first local raster-production adapter. `comfyui-image` executes a supplied ComfyUI API-format workflow through the native prompt/history/view HTTP surface, accepts loopback execution by default, writes the returned raster to a real local Artifact, and records prompt/output provenance without pretending local compute is free or creatively approved.
 
 The adapter roadmap remains:
 
-- vector/SVG — PR #26 green, unmerged
-- image generation/edit — active external adapter slice
+- vector/SVG — merged
+- image generation/edit — OpenAI adapter merged
+- local raster generation — active ComfyUI slice
+- Gemini image adapter — next hosted-provider candidate after local raster proof
+- gateway/orchestration adapters — evaluate OpenClaw after direct-provider/local capability is stable
+- review/planning providers — Claude/DeepSeek should enter recipes where benchmarked value justifies them rather than being mislabeled as image producers
 - video
 - audio/voice
 - 3D/Blender where available
