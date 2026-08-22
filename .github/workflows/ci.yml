@@ -74,6 +74,18 @@ jobs:
       - name: Run measured Command Center release smoke test
         run: npm run test:command-center
 
+      - name: Produce Du Bonheur style-frame visual proof
+        run: npm run proof:du-bonheur-style-frames
+
+      - name: Upload Du Bonheur style-frame proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: du-bonheur-style-frame-proof-v1
+          path: artifacts/du-bonheur/style-frame-proof-v1
+          if-no-files-found: error
+          retention-days: 7
+
       - name: Upload Command Center release evidence
         if: always()
         uses: actions/upload-artifact@v4

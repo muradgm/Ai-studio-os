@@ -3,6 +3,7 @@
     "inspiration",
     "creative-thesis",
     "creative-world",
+    "style-frame-proof",
     "creative-direction",
     "design",
     "image",
@@ -18,6 +19,7 @@
   ],
   "requireCreativeThesis": true,
   "requireCreativeWorldExploration": true,
+  "requireStyleFrameProof": true,
   "requireReducedMotion": true,
   "requireSharedCreativeDirection": true,
   "assetExpectations": [
