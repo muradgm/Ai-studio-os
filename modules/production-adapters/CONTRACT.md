@@ -53,9 +53,9 @@ The runtime owns Artifact normalization and final pass/fail truth.
 
 ## Local SVG adapter
 
-`local-svg` is the first vector-production adapter built on this contract. It writes an actual SVG file and records deterministic structural measurements, but it does **not** approve the design or declare a logo canonical.
+`local-svg` writes actual SVG files and records deterministic structural measurements, but it does **not** approve the design or declare a logo canonical.
 
-Its production guardrails are deliberately strict:
+Production guardrails:
 
 - a valid positive `viewBox` is required
 - scripts, inline event handlers, `foreignObject`, JavaScript URLs, and external network references are blocked
@@ -65,43 +65,58 @@ Its production guardrails are deliberately strict:
 - successful output records SHA-256, bytes, structural measurements, and a real filesystem path
 - `canonicalLogoApproval` and `creativeApproval` remain false; independent logo/vector/creative review is still required
 
-This adapter proves file production and vector hygiene. It is not a substitute for logo integrity review, personalized-icon calibration review, or creative-direction judgment.
-
 ## OpenAI image adapter
 
-`openai-image` is the first external network production adapter. It uses OpenAI's Image API and defaults to `gpt-image-2` for routed raster generation/edit jobs.
+`openai-image` is an external network production adapter using OpenAI's Image API for routed raster generation/edit jobs.
 
 Production rules:
 
-- the adapter is unavailable when `OPENAI_API_KEY` is not present; it never falls back to another provider
-- generation uses the Image API generations endpoint and edit jobs use the Image API edits endpoint
-- edit jobs accept auditable local filesystem source images only in this first slice; remote source URLs are rejected
-- provider responses must include base64 image output, and the decoded bytes must match the requested PNG/JPEG/WebP format before they are written
-- output paths remain constrained to the configured artifact root
-- SHA-256, byte count, request id, provider/model, endpoint, output options, and source count remain on the normalized Artifact
-- `gpt-image-2` transparent-background requests fail closed because that model does not currently support transparent output
-- no provider call implies creative approval, brand fit, rights clearance, accessibility, or release readiness
-- moderation/API failures are blockers; the adapter does not fabricate a fallback image
-- tests use an injected fetch boundary and fake credential, so CI never requires a live OpenAI credential or paid request
-
-The Image API integration follows the current OpenAI documentation contract: `gpt-image-2`, `/images/generations`, `/images/edits`, base64 image responses, configurable size/quality/format/compression/background, and high-fidelity edit inputs. Runtime availability still depends on a separately configured API credential.
+- unavailable when `OPENAI_API_KEY` is absent; no silent provider fallback
+- generation and edits use the provider image endpoints
+- edit jobs accept auditable local filesystem source images only in this first slice
+- decoded bytes must match the requested PNG/JPEG/WebP format before they are written
+- output/source paths stay inside configured roots
+- SHA-256, bytes, request id, provider/model, endpoint and output options remain on the Artifact
+- provider success never implies creative approval, brand fit, rights clearance or release readiness
+- tests use fake HTTP and credentials; CI makes no paid provider request
 
 ## ComfyUI image adapter
 
-`comfyui-image` is the first local raster-production adapter. It drives a supplied ComfyUI API-format workflow through ComfyUI's native HTTP surface and converts the resulting image into a universal Artifact.
+`comfyui-image` is the first local raster-production adapter. It drives a supplied ComfyUI API-format workflow through ComfyUI's native HTTP surface and converts the returned image into a universal Artifact.
 
 Production rules:
 
-- the default endpoint is `http://127.0.0.1:8188`; non-loopback endpoints are unavailable unless `allowRemote` is explicitly enabled
-- this first slice supports routed `generate` jobs only; image editing/upload workflows are deferred until source-upload semantics are added deliberately
-- jobs must provide a real ComfyUI API-format workflow graph; the adapter does not invent or silently repair a missing graph
-- execution submits through `POST /prompt`, polls `GET /history/{prompt_id}`, and downloads the selected output through `GET /view`
-- both prompt-id keyed history responses and the newer `history[]` response shape are accepted
-- a completed execution without a real image output is blocked
-- downloaded bytes must be a recognized PNG/JPEG/WebP raster before the file is accepted
-- output paths remain constrained to the configured artifact root
-- SHA-256, byte count, prompt id, workflow node count, output node id, provider filename, polling attempts, and measured adapter duration remain on the Artifact
-- local compute cost is not fabricated as zero; it is recorded as unmeasured/estimated local compute
-- successful local execution remains `produced / unreviewed / unmeasured`; it does not imply creative approval or release readiness
+- default endpoint `http://127.0.0.1:8188`; non-loopback endpoints require `allowRemote`
+- this first slice supports routed `generate` jobs only
+- jobs must provide a real ComfyUI API-format workflow graph
+- execution uses `POST /prompt`, `GET /history/{prompt_id}`, then `GET /view`
+- prompt-id keyed and `history[]` response forms are accepted
+- a completed job without a real raster output is blocked
+- output paths remain inside the configured artifact root
+- SHA-256, bytes, prompt id, workflow/output node data, polling attempts and measured adapter duration remain on the Artifact
+- local compute cost is recorded as unmeasured rather than fabricated as zero
+- local execution does not imply creative or release approval
 
-The adapter follows ComfyUI's native prompt/history/view execution pattern and keeps local execution as the default security boundary. Remote ComfyUI should require an explicit security decision rather than being enabled by configuration accident.
+## Gemini image adapter
+
+`gemini-image` is the second hosted raster provider and uses Google's current Gemini Interactions image-generation surface.
+
+Production rules:
+
+- defaults to `gemini-3.1-flash-image` (Nano Banana 2); supported explicit production choices are `gemini-3.1-flash-image`, `gemini-3.1-flash-lite-image`, and `gemini-3-pro-image`
+- unavailable when `GEMINI_API_KEY` is absent; no fallback provider is selected inside the adapter
+- both generation and edit/reference jobs call `POST /v1beta/interactions`
+- edit/reference images are auditable local files encoded as image input blocks; remote edit sources and files outside the configured source root are rejected in this slice
+- inline interaction payloads are capped at the documented 20 MB request boundary; larger source workflows should later move through an explicit Files API adapter/ingest path
+- response output can be read from the `output_image` convenience form or explicit `model_output` image blocks
+- decoded output must be a recognized raster and match the requested PNG/JPEG output format before it is written
+- output paths stay inside the configured artifact root
+- current model capability differences are explicit: Flash Image supports 512/1K/2K/4K, Flash Lite Image is constrained to 1K, and Pro Image supports 1K/2K/4K
+- aspect-ratio validation reflects the current Gemini image-model tables rather than silently coercing an unsupported ratio
+- SHA-256, bytes, provider/model/request/interaction ids, aspect ratio, image size and reference-input counts remain on the Artifact
+- `synthIdExpected` records the provider's current generated-image watermark policy as provenance metadata; it is not treated as a local watermark verification result
+- Google Search/Image Search grounding is deliberately disabled in this first adapter, avoiding attribution-display obligations until grounded-image provenance is implemented explicitly
+- generated output remains `produced / unreviewed / unmeasured`; provider success never means creative approval, rights clearance or release readiness
+- tests use an injected fake HTTP boundary and fake credential; CI makes no live Gemini request
+
+Provider-specific adapters are implementation boundaries, not quality rankings. Routing should eventually select among OpenAI, Gemini and local ComfyUI from declared capabilities, availability, cost/evidence and benchmarked production quality rather than vendor preference.
