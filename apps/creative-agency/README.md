@@ -43,7 +43,7 @@ The **Run measured review** action executes a real local pipeline:
 14. runs v1.3 delivery gates and synthesizes a release decision
 15. creates a bounded patch queue from findings
 16. writes a downloadable JSON release report
-17. allows explicit **iteration approval**, which promotes the current reduced-motion screenshots as the next visual baseline without overriding release gates
+17. allows explicit **iteration approval**, promoting reduced-motion screenshots as the next visual baseline only when the release is production-ready
 
 ## Evidence policy
 
@@ -67,7 +67,7 @@ The interaction value stored in `inpMs` is a **controlled lab proxy** measured f
 
 The accessibility lane checks programmatic names/labels, duplicate IDs, image alt presence, iframe titles, zoom restrictions, tabindex misuse, keyboard traversal and visible focus behavior. It is an automated release baseline—not a replacement for complete manual WCAG testing with assistive technology.
 
-Visual regression uses approved **reduced-motion** screenshots so continuous motion does not create meaningless pixel noise. The first approved iteration seeds the baseline; following iterations are compared against it.
+Visual regression uses approved **reduced-motion** screenshots so continuous motion does not create meaningless pixel noise. The first approved production-ready iteration seeds the baseline; following iterations are compared against it.
 
 ## Security boundary
 
@@ -99,6 +99,6 @@ npx playwright install chromium
 npm run test:command-center
 ```
 
-The Command Center smoke performs two measured executions: the first establishes/promotes an approved baseline, and the second verifies measured visual regression against that baseline.
+The Command Center smoke performs two measured executions: the first establishes/promotes a production-ready approved baseline, and the second verifies measured visual regression against that baseline.
 
 The provisional Bounded Flow-style favicon/UI glyph remains **prototype UI art**, not an approved canonical logo master.

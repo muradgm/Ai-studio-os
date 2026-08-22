@@ -12,6 +12,7 @@ import { createViteInvocation } from '../lib/local-vite.mjs';
 import { createDevProcessSpecs, root as devRoot } from '../scripts/dev-creative-agency.mjs';
 import {
   EXECUTION_PROJECTS,
+  canPromoteApprovedBaseline,
   createExecutionJob,
   setJobStep,
   safeResolve
@@ -173,6 +174,37 @@ test('execution job uses bounded state transitions and keeps iteration approval 
   assert.equal(job.productionReady, false);
   assert.equal(job.releaseDecision.status, 'unmeasured');
   assert.equal(job.artifacts.reportUrl, null);
+});
+
+test('baseline promotion requires a completed production-ready release', () => {
+  const captures = [{ reducedMotion: true, screenshot: 'mobile-reduced.png' }];
+  const job = createExecutionJob({ id: 'exec-baseline', projectId: 'creative-agency' });
+  job.status = 'complete';
+  job.releaseDecision = {
+    status: 'blocked',
+    productionReady: false,
+    blockerCount: 1,
+    majorCount: 0,
+    requiredEvidence: ['webVitals'],
+    unmeasuredEvidence: []
+  };
+  job.productionReady = false;
+  assert.equal(canPromoteApprovedBaseline(job, captures), false);
+
+  job.releaseDecision = {
+    status: 'ready',
+    productionReady: true,
+    blockerCount: 0,
+    majorCount: 0,
+    requiredEvidence: ['webVitals'],
+    unmeasuredEvidence: []
+  };
+  assert.equal(canPromoteApprovedBaseline(job, captures), false);
+
+  job.productionReady = true;
+  assert.equal(canPromoteApprovedBaseline(job, []), false);
+  assert.equal(canPromoteApprovedBaseline(job, [{ reducedMotion: false, screenshot: 'desktop.png' }]), false);
+  assert.equal(canPromoteApprovedBaseline(job, captures), true);
 });
 
 test('safeResolve blocks traversal outside preview/artifact roots', () => {
