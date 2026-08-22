@@ -8,6 +8,7 @@ import { runObservationRuntime, validateObservationBenchmark } from '../lib/obse
 import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } from '../lib/creative-production-runtime.mjs';
 import { runLogoRuntime, validateLogoBenchmark } from '../lib/logo-runtime.mjs';
 import { buildTypographySystem, validateTypographyBenchmark } from '../modules/typography/runtime.mjs';
+import { runAwardCaliberWebRuntime, validateAwardCaliberWebBenchmark } from '../lib/award-caliber-web-runtime.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const required = [
@@ -85,7 +86,12 @@ const required = [
   'modules/typography/project-orchestrator.mjs',
   'modules/design/typography-consumption.mjs',
   'benchmarks/009-typography-intelligence/input.json',
-  'benchmarks/009-typography-intelligence/expected.json'
+  'benchmarks/009-typography-intelligence/expected.json',
+  'modules/creative-quality/runtime.mjs',
+  'modules/creative-quality/CONTRACT.md',
+  'lib/award-caliber-web-runtime.mjs',
+  'benchmarks/010-award-caliber-web/input.json',
+  'benchmarks/010-award-caliber-web/expected.json'
 ];
 
 const failures = [];
@@ -140,6 +146,11 @@ if (!failures.length) {
   const typographyExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/009-typography-intelligence/expected.json'), 'utf8'));
   const typographyBenchmark = validateTypographyBenchmark(buildTypographySystem(typographyInput), typographyExpected);
   if (!typographyBenchmark.pass) failures.push(...typographyBenchmark.failures.map((f) => `typography benchmark: ${f}`));
+
+  const awardInput = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/010-award-caliber-web/input.json'), 'utf8'));
+  const awardExpected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/010-award-caliber-web/expected.json'), 'utf8'));
+  const awardBenchmark = validateAwardCaliberWebBenchmark(runAwardCaliberWebRuntime(awardInput), awardExpected);
+  if (!awardBenchmark.pass) failures.push(...awardBenchmark.failures.map((f) => `award-caliber web benchmark: ${f}`));
 }
 
 if (failures.length) {

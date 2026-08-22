@@ -1,0 +1,135 @@
+{
+  "id": "benchmark-010-award-caliber-web",
+  "projectTruth": {
+    "projectId": "the-creative-agency-award-caliber-proof",
+    "nonNegotiables": [
+      "The work must show the actual AI Studio OS process rather than generic AI-dashboard theater.",
+      "Iteration approval and production readiness remain separate.",
+      "Measured browser evidence, accessibility, performance and reduced-motion behavior remain visible."
+    ]
+  },
+  "creativeThesis": {
+    "statement": "A creative production floor where evidence, critique and craft turn ambiguous briefs into accountable work.",
+    "reviewReady": true,
+    "evidenceRef": "benchmark://010/thesis.md"
+  },
+  "creativeWorlds": [
+    {
+      "id": "evidence-theater",
+      "composition": "Large live preview as stage, evidence rails as visible fly system.",
+      "narrative": "The user watches raw creative work earn release in public.",
+      "spatialBehavior": "Deep editorial workspace with inspection layers sliding in from the sides.",
+      "typography": "Editorial display contrast paired with precise production labels.",
+      "imageLanguage": "Browser captures and generated artifacts as the primary visual material.",
+      "motion": "Stage-light reveals and deliberate evidence ticks.",
+      "interaction": "Clicking evidence changes the visible artifact state."
+    },
+    {
+      "id": "atelier-console",
+      "composition": "Dense maker console with one commanding artifact canvas and quiet tool rails.",
+      "narrative": "A digital studio table where disciplines assemble around the current work.",
+      "spatialBehavior": "Flat, high-density panels with no decorative depth.",
+      "typography": "Grotesk utility grid with restrained serif moments for creative decisions.",
+      "imageLanguage": "Work-in-progress assets, typography specimens and motion strips.",
+      "motion": "Subtle object persistence and measured state transitions.",
+      "interaction": "Keyboard-first queue navigation with explicit approval boundaries."
+    },
+    {
+      "id": "living-archive",
+      "composition": "Timeline-first experience where each artifact carries provenance and critique.",
+      "narrative": "The site behaves like a memory system that remembers why work changed.",
+      "spatialBehavior": "Horizontal archive flow that compresses into vertical evidence stacks on mobile.",
+      "typography": "Documentary hierarchy with timestamped annotations.",
+      "imageLanguage": "Version diffs, browser frames and before/after comparisons.",
+      "motion": "Temporal scrubbing, version overlays and gentle continuity cues.",
+      "interaction": "Users compare versions and expose the reason behind each change."
+    }
+  ],
+  "humanSelection": {
+    "selectedWorldId": "evidence-theater",
+    "humanApproved": true,
+    "evidenceRef": "benchmark://010/human-selection.json"
+  },
+  "styleFrames": [
+    {
+      "id": "style-frame-evidence-theater-desktop",
+      "worldId": "evidence-theater",
+      "fidelity": "high",
+      "rendered": true,
+      "artifactRef": "benchmark://010/style-frames/evidence-theater-desktop.png"
+    }
+  ],
+  "motionInteractionThesis": {
+    "statement": "Motion makes evidence feel earned: state changes are deliberate, quiet and tied to visible production progress.",
+    "signatureBehaviors": [
+      "Evidence rails tick forward only after measured browser data arrives.",
+      "The live preview remains spatially persistent while critique and patch queues move around it.",
+      "Approval motion is restrained and never visually overrides blocked release states."
+    ],
+    "reducedMotionPlan": "Replace continuous movement with static state changes, visible labels and preserved hierarchy."
+  },
+  "browserImplementation": {
+    "url": "benchmark://010/browser/the-creative-agency/",
+    "captures": [
+      {"viewport": "mobile", "artifactRef": "benchmark://010/captures/mobile.png"},
+      {"viewport": "tablet", "artifactRef": "benchmark://010/captures/tablet.png"},
+      {"viewport": "desktop", "artifactRef": "benchmark://010/captures/desktop.png"}
+    ]
+  },
+  "creativeQualityReview": {
+    "independent": true,
+    "renderedEvidence": true,
+    "evidenceRef": "benchmark://010/reviews/creative-quality.json",
+    "findings": [
+      {"severity": "minor", "code": "hero-next-section-rhythm-watch", "message": "Hero has a distinct governing idea; verify the next section does not collapse into repetitive cards."},
+      {"severity": "taste", "code": "texture-intensity-tune", "message": "Paper/noise texture could be reduced if it competes with evidence legibility."}
+    ]
+  },
+  "deliveryGates": {
+    "releaseDecision": "ready",
+    "productionReady": true,
+    "accessibility": {"pass": true, "evidenceRef": "benchmark://010/release/accessibility.json"},
+    "performance": {"pass": true, "evidenceRef": "benchmark://010/release/performance.json"},
+    "responsive": {"pass": true, "evidenceRef": "benchmark://010/release/responsive.json"},
+    "reducedMotion": {"pass": true, "evidenceRef": "benchmark://010/release/reduced-motion.json"}
+  },
+  "polishLoops": [
+    {
+      "id": "polish-01-composition",
+      "validatedFindings": ["hero-next-section-rhythm-watch"],
+      "evidenceRef": "benchmark://010/polish/01-composition-before-after.json"
+    },
+    {
+      "id": "polish-02-motion",
+      "validatedFindings": ["approval-motion-too-loud"],
+      "evidenceRef": "benchmark://010/polish/02-motion-before-after.json"
+    },
+    {
+      "id": "polish-03-responsive",
+      "validatedFindings": ["mobile-evidence-stack-density"],
+      "evidenceRef": "benchmark://010/polish/03-responsive-before-after.json"
+    }
+  ],
+  "rubric": [
+    {"id": "concept-singularity", "score": 9, "evidenceRef": "benchmark://010/rubric/concept.json", "rationale": "One governing idea connects process, interface and evidence."},
+    {"id": "composition-tension", "score": 8, "evidenceRef": "benchmark://010/rubric/composition.json", "rationale": "Live preview and evidence rail create productive asymmetry."},
+    {"id": "visual-hierarchy", "score": 8, "evidenceRef": "benchmark://010/rubric/hierarchy.json", "rationale": "Primary artifact, release state and patch queue have clear order."},
+    {"id": "typography-authorship", "score": 8, "evidenceRef": "benchmark://010/rubric/typography.json", "rationale": "Display and utility roles are intentionally separated."},
+    {"id": "asset-quality", "score": 8, "evidenceRef": "benchmark://010/rubric/assets.json", "rationale": "Browser captures and production artifacts are treated as real visual material."},
+    {"id": "motion-coherence", "score": 8, "evidenceRef": "benchmark://010/rubric/motion.json", "rationale": "Motion follows evidence arrival and approval boundaries."},
+    {"id": "interaction-character", "score": 8, "evidenceRef": "benchmark://010/rubric/interaction.json", "rationale": "Interaction reinforces production state rather than generic decoration."},
+    {"id": "responsive-reinterpretation", "score": 8, "evidenceRef": "benchmark://010/rubric/responsive.json", "rationale": "Mobile preserves evidence hierarchy instead of merely shrinking desktop."},
+    {"id": "restraint", "score": 8, "evidenceRef": "benchmark://010/rubric/restraint.json", "rationale": "No decorative 3D or visual effects without a production-state role."},
+    {"id": "distinctiveness", "score": 8, "evidenceRef": "benchmark://010/rubric/distinctiveness.json", "rationale": "The visual system is anchored in earned release, not generic AI SaaS."},
+    {"id": "memorability", "score": 8, "evidenceRef": "benchmark://010/rubric/memorability.json", "rationale": "Evidence theater creates a memorable model for creative production."},
+    {"id": "final-polish", "score": 8, "evidenceRef": "benchmark://010/rubric/polish.json", "rationale": "Polish loops show bounded refinement against rendered critique."}
+  ],
+  "thresholds": {
+    "minDimensionScore": 8
+  },
+  "finalClaims": {
+    "awardWinning": false,
+    "awardReady": false,
+    "externalJuryEvidence": false
+  }
+}

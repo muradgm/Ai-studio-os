@@ -1,0 +1,41 @@
+{
+  "pass": true,
+  "finalStatus": "candidate",
+  "selectedWorldId": "evidence-theater",
+  "minCreativeWorlds": 3,
+  "maxCreativeWorlds": 5,
+  "minPolishLoops": 2,
+  "requireNoAwardClaim": true,
+  "requiredStages": [
+    "creative-thesis",
+    "creative-worlds",
+    "human-selection",
+    "high-fidelity-style-frame",
+    "motion-interaction-thesis",
+    "browser-implementation",
+    "creative-quality-review",
+    "delivery-gates",
+    "polish-loop",
+    "final-verdict"
+  ],
+  "requiredRubricDimensions": [
+    "concept-singularity",
+    "composition-tension",
+    "visual-hierarchy",
+    "typography-authorship",
+    "asset-quality",
+    "motion-coherence",
+    "interaction-character",
+    "responsive-reinterpretation",
+    "restraint",
+    "distinctiveness",
+    "memorability",
+    "final-polish"
+  ],
+  "forbiddenFindingCodes": [
+    "unsupported-award-claim",
+    "human-world-selection-missing",
+    "selected-world-rendered-proof-missing",
+    "delivery-gates-not-ready"
+  ]
+}
