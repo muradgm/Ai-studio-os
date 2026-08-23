@@ -1,0 +1,170 @@
+{
+  "schema": "ai-studio-os/hybrid-world-selection@1",
+  "projectId": "ai-council",
+  "candidateId": "decision-spine-counterpoint-hybrid-v1",
+  "status": "selected-awaiting-visual-system-v1",
+  "pass": true,
+  "reviewReady": true,
+  "constitutionRef": {
+    "schema": "ai-studio-os/hybrid-interface-constitution@1",
+    "candidateId": "decision-spine-counterpoint-hybrid-v1",
+    "fingerprint": "7089f239b24759811145aa51"
+  },
+  "proofRef": {
+    "artifact": "ai-council-hybrid-v1-head-to-head-proof",
+    "architectureFingerprint": "5056066fc0a19d55bc01905b",
+    "canonicalFixtureFingerprint": "230b52245245c2901ea8cdde",
+    "canonicalScreenCoverage": "8/8",
+    "comparisonBoardCount": 8,
+    "candidateOverviewCount": 1,
+    "exactBrowserProof": true,
+    "semanticMarkupIdenticalToDecisionSpine": true
+  },
+  "assistantReviewRef": {
+    "source": "projects/ai-council/hybrid-v1-assistant-review.json",
+    "baselineWorldId": "decision-spine",
+    "baselineScore": 8.98,
+    "candidateScore": 9.11,
+    "delta": 0.13,
+    "recommendation": "advance-hybrid-v1-to-human-head-to-head-review"
+  },
+  "selectedWorld": {
+    "schema": "ai-studio-os/creative-world@1",
+    "id": "decision-spine-counterpoint-hybrid-v1",
+    "label": "Decision Spine × Counterpoint Hybrid V1",
+    "worldIdea": "AI Council uses a calm conversational and editorial surface organized by sparse semantic decision lineage, while a distinct consequence language appears only when advice crosses into authority, mutation, risk, or verification.",
+    "interpretationOfThesis": "A decision resolves through considered reading first, durable lineage second, and explicit authority boundaries only when consequence begins. Open inquiry stays conversational and inspectable; governed commitment becomes visibly different at the moment Council asks to act.",
+    "signatureBehavior": "Ordinary conversation and judgment remain calm and reading-first; semantic lineage appears only where provenance or consequence matters; the interface changes state unmistakably when Council moves from advising to requesting authority to act.",
+    "worldClass": "editorial decision-lineage system with consequence-state boundaries",
+    "narrativeModel": "conversation and evidence lead into a considered recommendation, durable decisions preserve lineage across time, and consequential action crosses a rare explicit authority boundary before execution and verification",
+    "compositionModel": "a restrained conversational shell with editorial reading hierarchy and generous whitespace; sparse lineage structures appear only around real provenance, chronology, decision, or memory relationships; authority surfaces increase separation and operational density without changing the permanent shell",
+    "typographyIntent": {
+      "statement": "Typography should prioritize calm reading, clear recommendation hierarchy, and quiet metadata, becoming more operational only at genuine authority boundaries; final families and weights remain unresolved for Visual System V1.",
+      "roles": {
+        "conversation": "natural and highly readable",
+        "recommendation": "clear considered judgment",
+        "evidence": "quiet inspectable material",
+        "provenance": "precise secondary layer",
+        "authority": "unmistakable but rare"
+      },
+      "preferredCategories": {
+        "display": ["serif", "humanist sans-serif"],
+        "body": ["sans-serif", "serif"]
+      },
+      "avoidCategories": [
+        "terminal monospace as default voice",
+        "monumental all-caps as permanent system language"
+      ],
+      "descriptorTargets": {},
+      "pressures": {
+        "readingClarity": 94,
+        "humanJudgment": 90,
+        "lineageClarity": 86,
+        "authorityContrast": 92,
+        "calmness": 92
+      },
+      "antiPatterns": [
+        "magazine pacing on dense technical content",
+        "workflow graph typography",
+        "compliance dashboard hierarchy"
+      ]
+    },
+    "imageLanguage": "real source fragments, repository/interface evidence, before-and-after captures, and restrained diagrams used as inspectable proof rather than decorative AI imagery",
+    "materialLanguage": "quiet low-chrome surfaces and editorial whitespace for normal work; sparse lineage markers for real relationships; a stronger but rare consequence layer for approval, risk, mutation, destructive action, or verification. Exact colors and surface tokens remain unresolved.",
+    "motionLanguage": "conversation and reading states remain restrained; provenance unfolds only when inspected; decisions can reveal backward and forward lineage; consequential actions introduce a deliberate pause and stronger transition before authority is granted; motion details remain unresolved for Visual System V1",
+    "interactionModel": "talk naturally, inspect evidence and alternatives on demand, follow real decision lineage when needed, edit or supersede durable memory, and cross an explicit approval boundary before Council performs consequential external actions",
+    "responsiveStrategy": "mobile remains a calm single-column conversational surface with focused project/thread continuity; provenance expands in place only when requested and authority boundaries remain explicit without restoring desktop infrastructure",
+    "soundPolicy": "Silence by default; no ambient AI or council sound. Any future consequence cue must be optional, restrained, and have a reduced-sensory equivalent.",
+    "categoryTransferTest": {
+      "whyProjectSpecific": "The hybrid depends on AI Council's combination of project-aware conversation, evidence-backed judgment, durable decision/memory lineage, explicit human approval, and verified execution. Removing those mechanics collapses the world into generic editorial productivity software.",
+      "transferRisk": "medium unless provenance, consequence semantics, and project memory remain product-real rather than decorative"
+    },
+    "antiPatterns": [
+      "decorative spine or node motifs without semantic lineage",
+      "Threshold language in ordinary conversation or navigation",
+      "editorial styling that obscures operational controls",
+      "Project Home as a dashboard",
+      "desktop complexity on mobile",
+      "generic premium productivity minimalism",
+      "agent portraits, neural graphs, terminal chrome, or command-center grids"
+    ],
+    "thesisRef": {
+      "schema": "ai-studio-os/creative-thesis@1",
+      "projectId": "ai-council",
+      "governingIdea": "A decision should not appear; it should resolve. Make the path from ambiguous technical intent to an accountable decision the organizing experience, so evidence, alternatives, hard constraints, dissent, approval, execution consequence, verification, and memory lineage remain legible as the decision earns the right to become action."
+    },
+    "derivation": {
+      "baseWorld": "decision-spine",
+      "readingSource": "counterpoint",
+      "consequenceSource": "threshold",
+      "constitutionSource": "projects/ai-council/hybrid-constitution-v1.json"
+    },
+    "unresolvedRisks": [
+      "Editorial minimalism can become generic premium productivity UI unless typography, iconography, motion, interaction, and brand integration become distinctly AI Council.",
+      "Long and code-heavy Council responses must retain scan speed without magazine pacing.",
+      "Provenance discoverability must remain strong without restoring decorative graph behavior.",
+      "Consequence language must remain rare and semantic."
+    ],
+    "reviewReady": true,
+    "selected": true,
+    "truth": {
+      "humanCreativeSelectionConfirmed": true,
+      "visualWorldProofReviewed": true,
+      "styleFrameReviewComplete": true,
+      "typographyApproved": false,
+      "productionTechnologyApproved": false
+    }
+  },
+  "selection": {
+    "worldId": "decision-spine-counterpoint-hybrid-v1",
+    "humanConfirmed": true,
+    "visualReviewConfirmed": true,
+    "selectedAt": "2026-08-23T18:44:33Z",
+    "selectionStatement": "Select Hybrid V1 and close Creative World exploration.",
+    "selectionSource": "human",
+    "selectedAutomatically": false,
+    "visualEvidenceRefs": [
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/project-home-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/conversation-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/structured-response-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/evidence-context-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/approval-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/decision-detail-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/project-memory-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/comparisons/mobile-conversation-decision-spine-vs-hybrid.png",
+      "artifacts/ai-council/hybrid-v1-head-to-head-proof/hybrid-v1-overview.png"
+    ]
+  },
+  "freezeBoundary": {
+    "frozen": [
+      "Hybrid Constitution V1 source responsibilities",
+      "screen-by-screen source hierarchy",
+      "Decision Spine semantic lineage rule",
+      "Counterpoint reading and judgment role",
+      "Threshold consequence-only role",
+      "canonical Product UX Architecture",
+      "canonical UX fixture"
+    ],
+    "explicitlyNotFrozen": [
+      "exact typography",
+      "current colors",
+      "sidebar proportions",
+      "button appearance",
+      "spacing scale",
+      "border treatment",
+      "icons",
+      "final header hierarchy",
+      "exact mobile measurements",
+      "current component styling",
+      "motion details"
+    ]
+  },
+  "nextStage": "visual-system-v1",
+  "truth": {
+    "creativeWorldExplorationClosed": true,
+    "humanWorldSelectionConfirmed": true,
+    "humanVisualApproval": false,
+    "finalVisualSystemApproved": false,
+    "selectedAutomatically": false
+  }
+}
