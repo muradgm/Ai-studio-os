@@ -26,10 +26,26 @@ export async function getExecutionStatus() {
   return request('/api/status');
 }
 
-export async function startExecution({ projectId = 'creative-agency', iteration = 0 } = {}) {
+export async function getCreativeWorldCatalog(projectId) {
+  return request(`/api/creative-projects/${encodeURIComponent(projectId)}/creative-worlds`);
+}
+
+export async function startExecution({
+  projectId = 'creative-agency',
+  creativeProjectId,
+  iteration = 0,
+  selectedCreativeWorldId,
+  creativeWorldCatalogVersion
+} = {}) {
   return request('/api/executions', {
     method: 'POST',
-    body: JSON.stringify({ projectId, iteration })
+    body: JSON.stringify({
+      projectId,
+      creativeProjectId,
+      iteration,
+      selectedCreativeWorldId,
+      creativeWorldCatalogVersion
+    })
   });
 }
 

@@ -3,12 +3,14 @@
     "product-understanding",
     "inspiration",
     "creative-thesis",
+    "creative-world",
     "creative-direction",
     "design",
     "image",
     "motion",
     "creative-eval"
   ],
+  "status": "ready-for-style-frame-proof",
   "requiredInspirationLanes": [
     "directIndustry",
     "bestInClass",
@@ -18,6 +20,8 @@
   ],
   "requireProductUnderstanding": true,
   "requireCreativeThesis": true,
+  "requireCreativeWorldExploration": true,
+  "requireNoAutomaticWorldSelection": true,
   "requireReducedMotion": true,
   "requireSharedCreativeDirection": true,
   "assetExpectations": [

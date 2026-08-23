@@ -32,6 +32,18 @@ function evidenceMeasurements(job) {
   return Object.entries(job?.evidence ?? {}).map(([type, value]) => ({ type, value }));
 }
 
+function executionSource(job) {
+  return {
+    executionJobId: job?.id ?? null,
+    creativeProjectId: job?.directionSelection?.creativeProjectId ?? null,
+    selectedCreativeWorldId: job?.directionSelection?.selectedCreativeWorldId ?? null,
+    selectedCreativeWorldLabel: job?.directionSelection?.selectedCreativeWorldLabel ?? null,
+    creativeWorldCatalogVersion: job?.directionSelection?.creativeWorldCatalogVersion ?? null,
+    creativeWorldSourceRef: job?.directionSelection?.sourceRef ?? null,
+    visualEvidenceRefs: [...(job?.directionSelection?.visualEvidenceRefs ?? [])]
+  };
+}
+
 function baseProjectArtifacts(projectId) {
   const build = createArtifact({
     id: `${projectId}:build`, version: '1', kind: 'web/build', title: 'Production Build', projectId,
@@ -72,12 +84,13 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
   const reviewStep = stepState(job, 'review');
   const patchStep = stepState(job, 'patch');
   const approvalStep = stepState(job, 'approve');
+  const source = executionSource(job);
 
   const build = createArtifact({
     id: `${projectId}:build`, version, kind: 'web/build', title: 'Production Build', projectId,
     status: artifactStatus(buildStep), reviewStatus: reviewStatus(buildStep), releaseStatus: 'unmeasured',
     previews: job.artifacts?.previewUrl ? [{ ref: job.artifacts.previewUrl, role: 'live-preview' }] : [],
-    source: { executionJobId: job.id }
+    source
   });
 
   const capture = createArtifact({
@@ -85,7 +98,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     status: artifactStatus(captureStep), reviewStatus: reviewStatus(captureStep), releaseStatus: 'unmeasured',
     files: screenshotFiles(job),
     dependencies: [{ artifactRef: build.ref, relation: 'captures', required: true, impact: 'stale' }],
-    source: { executionJobId: job.id }
+    source
   });
 
   const releaseReady = job.releaseDecision?.productionReady === true || job.releaseDecision?.status === 'ready';
@@ -97,7 +110,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     files: job.artifacts?.reportUrl ? [{ ref: job.artifacts.reportUrl, role: 'release-report', format: 'json' }] : [],
     measurements: evidenceMeasurements(job), findings: job.findings ?? [],
     dependencies: [{ artifactRef: capture.ref, relation: 'measures', required: true, impact: 'stale' }],
-    source: { executionJobId: job.id }
+    source
   });
 
   const patches = job.patches ?? [];
@@ -107,7 +120,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
     reviewStatus: patches.length ? 'needs-revision' : reviewStatus(patchStep), releaseStatus: 'unmeasured',
     findings: job.findings ?? [], metadata: { patches },
     dependencies: [{ artifactRef: review.ref, relation: 'responds-to', required: true, impact: 'stale' }],
-    source: { executionJobId: job.id }
+    source
   });
 
   const approved = job.approval === 'iteration-approved' || approvalStep === 'approved';
@@ -122,7 +135,7 @@ export function createExecutionArtifactGraph(job, { projectId = job?.projectId ?
       { artifactRef: patch.ref, relation: 'considers', required: true, impact: 'review' }
     ],
     metadata: { approvedAt: job.approvedAt ?? null, productionReady: Boolean(job.productionReady) },
-    source: { executionJobId: job.id }
+    source
   });
 
   return buildArtifactGraph([build, capture, review, patch, approval]);

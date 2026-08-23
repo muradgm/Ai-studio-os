@@ -36,7 +36,45 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 }
 
-export function renderCommandCenterView({ stages = [], projectName = 'Project 001' } = {}) {
+function directionCard(direction, index, { immutable = false } = {}) {
+  const proofStatus = direction.visualProof?.status ?? 'proof-required';
+  const proofLabel = direction.canLock ? 'Proof reviewed' : proofStatus === 'proof-not-reviewed' ? 'Proof review pending' : 'Visual proof required';
+  return `<article class="direction-card" data-direction-id="${escapeHtml(direction.id)}" data-proof-state="${escapeHtml(proofStatus)}">
+    <div class="direction-card-head"><span>${String(index + 1).padStart(2, '0')}</span><b>${escapeHtml(direction.label)}</b></div>
+    <p>${escapeHtml(direction.premise)}</p>
+    <dl>
+      <div><dt>World</dt><dd>${escapeHtml(direction.worldClass)}</dd></div>
+      <div><dt>Space</dt><dd>${escapeHtml(direction.spatialModel)}</dd></div>
+      <div><dt>Type</dt><dd>${escapeHtml(direction.typography)}</dd></div>
+      <div><dt>Interaction</dt><dd>${escapeHtml(direction.interaction)}</dd></div>
+      <div><dt>Mobile</dt><dd>${escapeHtml(direction.mobile)}</dd></div>
+    </dl>
+    <small>${escapeHtml(direction.risk)}</small>
+    <div class="direction-proof-state">${escapeHtml(proofLabel)}</div>
+    <button type="button" class="direction-select" data-direction-id="${escapeHtml(direction.id)}" ${immutable ? 'disabled' : ''}>${direction.canLock ? 'Lock Reviewed World' : 'Preview World'}</button>
+  </article>`;
+}
+
+export function renderDirectionCandidates({ candidates = [], catalogStatus = 'loading', immutable = false } = {}) {
+  const root = document.querySelector('#direction-grid');
+  const count = document.querySelector('#direction-count');
+  if (count) count.textContent = String(candidates.length).padStart(2, '0');
+  if (!root) return;
+
+  if (!candidates.length) {
+    const message = catalogStatus === 'not-generated'
+      ? 'No Creative World artifacts exist for this project yet. Product Understanding → research → Creative Thesis → Creative Worlds must run first.'
+      : catalogStatus === 'blocked'
+        ? 'Creative World artifacts exist but are not valid enough for direction selection.'
+        : 'Loading project-specific Creative Worlds…';
+    root.innerHTML = `<div class="direction-empty"><strong>${escapeHtml(catalogStatus.replaceAll('-', ' ').toUpperCase())}</strong><span>${escapeHtml(message)}</span></div>`;
+    return;
+  }
+
+  root.innerHTML = candidates.map((candidate, index) => directionCard(candidate, index, { immutable })).join('');
+}
+
+export function renderCommandCenterView({ stages = [], projectName = 'Project 001', creativeProjectId = null } = {}) {
   document.documentElement.classList.add('command-center-fidelity');
   document.querySelector('#app').innerHTML = `
   <div class="app-shell">
@@ -52,11 +90,11 @@ export function renderCommandCenterView({ stages = [], projectName = 'Project 00
     <main class="workspace" id="command-center">
       <section class="approved-command-shell">
         <header class="approved-header">
-          <div class="approved-project"><span>PROJECT</span><div><h1>${escapeHtml(projectName)}</h1><i aria-hidden="true">☆</i></div></div>
-          <div class="approved-stage"><span>PIPELINE STAGE</span><div><h2 id="active-stage-label">Brief</h2><small><i></i><span id="active-stage-state">Active</span></small></div></div>
+          <div class="approved-project"><span>PROJECT</span><div><h1>${escapeHtml(projectName)}</h1><i aria-hidden="true">☆</i></div><small>${escapeHtml(creativeProjectId ?? '')}</small></div>
+          <div class="approved-stage"><span>PIPELINE STAGE</span><div><h2 id="active-stage-label">Brief</h2><small><i></i><span id="active-stage-state">Creative Worlds loading</span></small></div></div>
           <div class="approved-actions">
-            <button type="button" id="run-execution"><span class="action-icon">⌁</span>Build</button>
-            <button type="button" id="run-review-execution"><span class="action-icon">▷</span>Run Review</button>
+            <button type="button" id="run-execution" disabled><span class="action-icon">⌁</span>Build</button>
+            <button type="button" id="run-review-execution" disabled><span class="action-icon">▷</span>Run Review</button>
             <button type="button" id="patch-queue-action"><span class="action-icon">⌘</span>Patch Queue</button>
             <button type="button" class="approved-primary" id="approve-execution" disabled><span class="action-icon">✓</span>Approve Iteration</button>
           </div>
@@ -69,6 +107,16 @@ export function renderCommandCenterView({ stages = [], projectName = 'Project 00
         </div>
 
         <div class="approved-main-grid">
+          <section class="approved-panel direction-workspace" id="direction-workspace" data-state="loading">
+            <header><span>CREATIVE WORLD SELECTION</span><b id="direction-count">00</b><i id="direction-state">LOADING</i></header>
+            <div class="direction-grid" id="direction-grid"><div class="direction-empty"><strong>LOADING</strong><span>Loading project-specific Creative World artifacts…</span></div></div>
+            <aside class="direction-lock" id="direction-lock">
+              <span>AUTHORITATIVE WORLD</span>
+              <b id="selected-direction-label">None selected</b>
+              <p id="selected-direction-summary">A world becomes authoritative only after comparable visual proof is reviewed. Prose cannot authorize production.</p>
+            </aside>
+          </section>
+
           <section class="approved-panel approved-queue">
             <header><span>PRODUCTION QUEUE</span><b id="artifact-queue-count">00</b><i>•••</i></header>
             <div class="approved-queue-list" id="artifact-queue"><div class="empty-line">Artifact Graph state is loading.</div></div>
