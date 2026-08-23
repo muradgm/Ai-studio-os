@@ -151,13 +151,21 @@ export function buildHybridProofEvidence({ plan = null, baselineManifest = null,
 export function evaluateHybridReview({ constitution = null, proof = null, hardFailResults = {}, scores = {} } = {}) {
   const findings = [];
   if (proof?.reviewReady !== true) findings.push(finding('blocker', 'hybrid-review-proof-not-ready', 'Hybrid review requires complete exact-browser head-to-head proof.'));
-  const hardFails = (constitution?.hardFailConditions ?? []).map((item) => ({ id: item.id, triggered: hardFailResults?.[item.id] === true }));
+
+  const hardFails = (constitution?.hardFailConditions ?? []).map((item) => ({
+    id: item.id,
+    reviewed: typeof hardFailResults?.[item.id] === 'boolean',
+    triggered: hardFailResults?.[item.id] === true
+  }));
+  const unreviewed = hardFails.filter((item) => !item.reviewed);
+  if (unreviewed.length) findings.push(finding('major', 'hybrid-review-hard-fails-unreviewed', 'Every hard-fail condition must be explicitly inspected before Hybrid V1 can be compared to the baseline.', { unreviewed: unreviewed.map((item) => item.id) }));
   const triggered = hardFails.filter((item) => item.triggered);
   if (triggered.length) findings.push(finding('blocker', 'hybrid-review-hard-fail-triggered', 'Hybrid V1 is rejected because one or more hard-fail conditions were triggered.', { triggered: triggered.map((item) => item.id) }));
 
-  const values = Object.values(scores ?? {}).map(Number).filter(Number.isFinite);
-  const weightedScore = values.length ? Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 100) / 100 : null;
-  if (weightedScore == null) findings.push(finding('major', 'hybrid-review-score-missing', 'Hybrid review requires scored evaluation after visual inspection.'));
+  const entries = Object.entries(scores ?? {}).filter(([, value]) => Number.isFinite(Number(value)));
+  const values = entries.map(([, value]) => Number(value));
+  const weightedScore = values.length === 8 ? Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 100) / 100 : null;
+  if (values.length !== 8) findings.push(finding('major', 'hybrid-review-proof-questions-incomplete', 'All eight proof questions must be scored after visual inspection.', { actual: values.length, expected: 8 }));
   else if (weightedScore <= Number(constitution?.baseline?.weightedScore ?? proof?.baselineScore ?? 0)) findings.push(finding('blocker', 'hybrid-review-did-not-beat-baseline', 'Hybrid V1 must outperform Decision Spine, not merely match or contain more ideas.', { weightedScore, baseline: constitution?.baseline?.weightedScore ?? proof?.baselineScore ?? null }));
 
   const pass = !findings.some((item) => item.severity === 'blocker' || item.severity === 'major');
@@ -169,6 +177,7 @@ export function evaluateHybridReview({ constitution = null, proof = null, hardFa
     baselineScore: constitution?.baseline?.weightedScore ?? proof?.baselineScore ?? null,
     weightedScore,
     hardFails,
+    scoreCount: values.length,
     status: pass ? 'candidate-outperformed-baseline-awaiting-human-selection' : 'reject-or-revise',
     pass,
     findings,
