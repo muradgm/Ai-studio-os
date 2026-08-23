@@ -30,18 +30,34 @@ export function getExecutionProject(projectId) {
   return project;
 }
 
-export function createExecutionJob({ id, projectId, iteration = 0 } = {}) {
+export function createExecutionJob({ id, projectId, iteration = 0, creativeWorldSelection = null } = {}) {
   if (!id) throw new Error('execution id is required');
   getExecutionProject(projectId);
+  if (!creativeWorldSelection || creativeWorldSelection.status !== 'locked' || !creativeWorldSelection.selectedCreativeWorldId) {
+    throw new Error('validated Creative World selection is required');
+  }
   const now = new Date().toISOString();
   return {
     id,
     projectId,
+    creativeProjectId: creativeWorldSelection.creativeProjectId,
     status: 'queued',
     stage: 'queued',
     iteration,
     createdAt: now,
     updatedAt: now,
+    directionSelection: {
+      status: 'locked',
+      creativeProjectId: creativeWorldSelection.creativeProjectId,
+      selectedCreativeWorldId: creativeWorldSelection.selectedCreativeWorldId,
+      selectedCreativeWorldLabel: creativeWorldSelection.selectedCreativeWorldLabel,
+      creativeWorldCatalogVersion: creativeWorldSelection.catalogVersion,
+      sourceRef: creativeWorldSelection.sourceRef,
+      thesisRef: structuredClone(creativeWorldSelection.thesisRef ?? {}),
+      visualEvidenceRefs: [...(creativeWorldSelection.visualEvidenceRefs ?? [])],
+      comparisonRef: creativeWorldSelection.comparisonRef ?? null,
+      lockedAt: now
+    },
     approval: 'pending',
     approvedAt: null,
     productionReady: false,
