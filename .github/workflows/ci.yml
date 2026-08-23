@@ -30,6 +30,7 @@ jobs:
       - name: Check AI Council proof renderer syntax
         run: |
           node --check scripts/ai-council-ux-wireframe-proof.mjs
+          node --check scripts/finalize-ai-council-ux-wireframe-proof.mjs
           node --check scripts/ai-council-style-frame-proof.mjs
           node --check scripts/finalize-ai-council-style-frame-proof.mjs
 
