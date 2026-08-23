@@ -22,6 +22,7 @@
     "proof:ai-council-motion": "node ./scripts/ai-council-motion-system-v1-proof.mjs",
     "proof:ai-council-motion-review": "node ./scripts/ai-council-motion-system-v1-human-review-proof.mjs",
     "proof:ai-council-icons": "node ./scripts/ai-council-icon-system-v1-proof.mjs",
+    "proof:ai-council-icon-craft": "node ./scripts/ai-council-icon-craft-calibration-v1-proof.mjs",
     "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
     "fonts:analyze": "node ./scripts/analyze-google-fonts.mjs",
     "studio": "node ./bin/studio.mjs",
