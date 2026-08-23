@@ -151,7 +151,7 @@ test('Creative Thesis review rejects implementation technology as the governing 
   assert.ok(review.findings.some((item) => item.code === 'creative-thesis-technology-became-concept'));
 });
 
-test('Du Bonheur Creative Runtime binds downstream direction to Creative Thesis without inventing approval', () => {
+test('Du Bonheur Creative Runtime carries the reviewed thesis into world exploration without fabricating selection', () => {
   const input = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/input.json'), 'utf8'));
   const expected = JSON.parse(fs.readFileSync(path.join(root, 'benchmarks/001-du-bonheur/expected.json'), 'utf8'));
   const output = runCreativeRuntime(input);
@@ -159,9 +159,12 @@ test('Du Bonheur Creative Runtime binds downstream direction to Creative Thesis 
 
   assert.equal(benchmark.pass, true, JSON.stringify(benchmark.failures));
   assert.ok(output.stages.includes('creative-thesis'));
-  assert.equal(output.status, 'provisional');
+  assert.ok(output.stages.includes('creative-world'));
+  assert.equal(output.status, 'ready-for-style-frame-proof');
   assert.equal(output.creativeDirection.thesisContext.statement, output.creativeThesis.statement);
   assert.equal(output.creativeDirection.directionStatement, output.creativeThesis.statement);
+  assert.equal(output.creativeDirection.worldContext, null);
+  assert.equal(output.selectedCreativeWorld, null);
   assert.equal(output.creativeThesis.truth.humanCreativeApproval, false);
   assert.equal(output.creativeThesis.truth.creativeThesisFrozen, false);
 });
