@@ -1,0 +1,97 @@
+{
+  "schema": "ai-studio-os/creative-world-candidates@1",
+  "projectId": "ai-council",
+  "worlds": [
+    {
+      "id": "counterpoint",
+      "label": "Counterpoint",
+      "worldIdea": "The experience behaves like a rigorous deliberation in which competing interpretations, evidence, assumptions, constraints, and rebuttals remain simultaneously legible until a decision visibly settles without erasing the argument that produced it.",
+      "interpretationOfThesis": "Decision resolution becomes an editorial act of structured disagreement: open inquiry stays genuinely plural, while governed commitment is represented by the moment a current settlement emerges from visible counterpoint.",
+      "signatureBehavior": "Any conclusion can unfold into its strongest supporting evidence and strongest counterargument without losing the current decision or its authority state.",
+      "worldClass": "editorial deliberation field",
+      "narrativeModel": "polyphonic argument that moves from competing formulations through evidence and rebuttal toward a provisional or governed settlement",
+      "compositionModel": "asymmetric reading fields, paired propositions, marginal evidence, cross-references, and occasional full-width settlement statements rather than a card dashboard",
+      "typographyIntent": {
+        "statement": "Typography behaves like a high-craft argumentative publication: distinct voices for proposition, evidence, dissent, and settlement, with strong reading rhythm and no automatic technical monospace layer.",
+        "roles": {"decision": "authoritative but reviewable", "evidence": "dense and calm", "counterpoint": "clearly differentiated without theatrical styling"},
+        "preferredCategories": {"display": ["serif", "humanist sans-serif"], "body": ["serif", "sans-serif"]},
+        "avoidCategories": ["terminal monospace as primary voice"],
+        "pressures": {"expression": 72, "readingDensity": 78, "authority": 74, "humanity": 68},
+        "antiPatterns": ["newspaper pastiche", "academic-paper cosplay", "chat bubbles for every voice"]
+      },
+      "imageLanguage": "real source fragments, architecture diagrams, code or interface evidence, and restrained abstract annotations used as citations inside the argument; imagery proves relationships instead of decorating them",
+      "materialLanguage": "paper-like fields, fine rules, editorial marginalia, annotations, redaction-like absences for missing evidence, and crisp settlement surfaces without literal office-paper skeuomorphism",
+      "motionLanguage": "positions enter as independent claims, evidence attaches, counterarguments displace or qualify them, and the final state settles through alignment rather than glow or celebration",
+      "interactionModel": "inspect a claim, reveal its evidence and assumptions, open the strongest counterargument, compare alternatives, and return to the current settlement with lineage intact",
+      "responsiveStrategy": "mobile becomes an ordered counterpoint sequence with persistent referent labels and expandable evidence/counterargument pairs; cross-references survive without forcing side-by-side columns",
+      "soundPolicy": "Silence by default; no conversational voices or synthetic council ambience.",
+      "categoryTransferTest": {
+        "whyProjectSpecific": "The world depends on AI Council preserving alternative problem formulations, strategy candidates, hard constraints, evidence gaps, dissent, and sourced decision criteria instead of producing one agent answer.",
+        "transferRisk": "medium if the product stops exposing meaningful alternatives and evidence lineage"
+      },
+      "antiPatterns": ["agent portraits as speakers", "chat-thread composition", "neon debate graph", "generic editorial magazine layout with no decision mechanics"],
+      "unresolvedRisks": ["Could become intellectually rich but operationally distant if approval, execution consequence, and verification are not made concrete in later style frames."]
+    },
+    {
+      "id": "threshold",
+      "label": "Threshold",
+      "worldIdea": "The experience is organized around boundaries that a technical decision cannot cross until the conditions for commitment are visible: evidence accumulates, hard constraints define the edge, uncertainty can stop progress, approval creates a deliberate pause, and verified action changes the state beyond the boundary.",
+      "interpretationOfThesis": "Open inquiry occupies an unconstrained field; governed commitment is the act of crossing a justified boundary. The decision earns consequence by satisfying or explicitly acknowledging what the threshold demands.",
+      "signatureBehavior": "Nothing consequential advances without visibly crossing a boundary whose evidence, blockers, authority, and reversibility can be inspected at the moment of transition.",
+      "worldClass": "spatial governance architecture",
+      "narrativeModel": "approach a decision boundary, accumulate sufficient evidence, encounter blockers or approval, cross deliberately, then verify the changed state",
+      "compositionModel": "large negative-space fields separated by edges, apertures, bands, or planes; information clusters around the boundary rather than filling a control-room grid",
+      "typographyIntent": {
+        "statement": "Typography is spatial and restrained: monumental decision language at boundaries, compact evidence close to the edge, and unmistakable semantic labels for blocked, approval-required, crossed, and verified states.",
+        "roles": {"boundary": "monumental and calm", "evidence": "compact and exact", "status": "semantic rather than decorative"},
+        "preferredCategories": {"display": ["grotesk", "humanist sans-serif"], "body": ["sans-serif"]},
+        "avoidCategories": ["sci-fi extended display", "terminal monospace as atmosphere"],
+        "pressures": {"expression": 60, "spatiality": 90, "clarity": 86, "authority": 82},
+        "antiPatterns": ["sci-fi portal", "security access-control screen", "giant glowing CTA gate"]
+      },
+      "imageLanguage": "sparse real evidence and source details anchored to the boundary they justify; abstract planes and apertures may establish space but cannot replace concrete decision evidence",
+      "materialLanguage": "precise planes, cuts, seams, translucent boundaries, calibrated empty space, and occasional physical depth that makes commitment feel consequential without becoming cinematic sci-fi",
+      "motionLanguage": "evidence converges toward an edge, movement stops when a blocker or approval is reached, the boundary opens only after authority is satisfied, then the system settles into a verified state",
+      "interactionModel": "approach a boundary, inspect why it is closed or open, resolve evidence or approval conditions, compare the cost of crossing versus stopping, then inspect verification on the other side",
+      "responsiveStrategy": "mobile becomes a vertical sequence of thresholds with pinned boundary labels; evidence and blockers stack immediately before each crossing so the consequence model remains intact",
+      "soundPolicy": "Silence by default; a restrained transition cue may be considered only for a confirmed approval or verification threshold and must have a reduced-sensory equivalent.",
+      "categoryTransferTest": {
+        "whyProjectSpecific": "AI Council has explicit blocking evidence, hard constraints, strategy eligibility, human approval, governed execution, and verification boundaries; the threshold behavior maps directly to those mechanics rather than generic workflow progress.",
+        "transferRisk": "low-to-medium if every boundary remains tied to real decision authority rather than abstract progress"
+      },
+      "antiPatterns": ["cybersecurity lock imagery", "sci-fi portal", "progress-stepper UI", "glowing orb crossing a ring"],
+      "unresolvedRisks": ["Could become too abstract or cinematic unless every major threshold is anchored to concrete evidence, constraints, approval, or verification."]
+    },
+    {
+      "id": "decision-spine",
+      "label": "Decision Spine",
+      "worldIdea": "The experience treats every meaningful decision as a living record with a visible spine: evidence, assumptions, alternatives, and rejected paths fold backward from the current commitment, while execution, verification, consequences, and remembered learning extend forward from it.",
+      "interpretationOfThesis": "Decision resolution becomes temporal lineage. Open inquiry survives as the branching record behind the current decision; governed commitment becomes the point from which accountable consequences and verification can be traced forward.",
+      "signatureBehavior": "Every decision has a reversible spine: unfold backward to inspect why it exists, branch sideways into rejected alternatives, or unfold forward to see what changed, what verified, and what was remembered.",
+      "worldClass": "temporal decision archive",
+      "narrativeModel": "move backward through provenance and alternatives, return to the current decision, then move forward through approval, execution, verification, and memory",
+      "compositionModel": "one persistent decision spine with layered folios, version edges, branches, annotations, and before/after states that can expand around a stable center of gravity",
+      "typographyIntent": {
+        "statement": "Typography behaves like a contemporary decision publication: one strong decision voice, a highly readable narrative voice, and precise provenance/annotation roles that avoid turning metadata into terminal styling.",
+        "roles": {"decision": "stable anchor", "narrative": "continuous reading", "provenance": "small but legible", "version": "quiet structural marker"},
+        "preferredCategories": {"display": ["serif", "sans-serif"], "body": ["serif", "sans-serif"]},
+        "avoidCategories": ["lab-report monospace system", "legal-document imitation"],
+        "pressures": {"expression": 66, "continuity": 90, "readingDensity": 74, "provenanceClarity": 88},
+        "antiPatterns": ["audit-log table", "git graph imitation", "fake archival nostalgia"]
+      },
+      "imageLanguage": "versioned source excerpts, real repository or interface evidence, before/after captures, decision diagrams, and restrained material studies that reinforce provenance and consequence",
+      "materialLanguage": "layered folios, registration edges, ruled spines, translucent overlays, version tabs, and archival depth interpreted abstractly rather than as literal paper documents",
+      "motionLanguage": "layers unfold backward into provenance, rejected branches peel aside, approved consequence extends forward, and verification closes or stamps the current state without celebratory effects",
+      "interactionModel": "scrub or unfold a decision lineage, compare previous alternatives, inspect the exact approval and execution consequence, reopen uncertainty when new evidence invalidates an assumption, and see what entered project memory",
+      "responsiveStrategy": "mobile becomes a vertical spine with expandable backward and forward branches; the current decision remains pinned as an anchor while provenance and consequence open in place",
+      "soundPolicy": "No sound by default; the world should remain convincing as a quiet, durable technical artifact.",
+      "categoryTransferTest": {
+        "whyProjectSpecific": "AI Council explicitly preserves task lineage, decision criteria provenance, rejected strategies, approvals, execution reports, validation, and evidence-backed memory; the spine makes that full decision lifecycle the experience itself.",
+        "transferRisk": "medium if reduced to a generic activity timeline or audit log"
+      },
+      "antiPatterns": ["compliance audit table", "Git branch graph clone", "chat history timeline", "nostalgic dossier styling"],
+      "unresolvedRisks": ["Could drift toward cold audit/compliance software if later art direction prioritizes metadata density over decision clarity and human judgment."]
+    }
+  ],
+  "truth": {"selectedAutomatically": false, "humanWorldSelectionConfirmed": false, "visualProofReviewed": false}
+}

@@ -1,0 +1,48 @@
+{
+  "schema": "ai-studio-os/creative-thesis-authored-input@1",
+  "projectId": "ai-council",
+  "intent": "Create a distinctive product and brand experience for AI Council that expresses its real decision, governance, verification, and memory mechanics without becoming a generic AI dashboard, agent roster, or terminal skin.",
+  "audience": "technical solo founders, senior engineers, and product-minded builders who need better technical decisions rather than more agent activity",
+  "commercialObjective": "Make AI Council's differentiated promise clear enough that a serious builder understands why it belongs between human intent, models, project context, and consequential technical action.",
+  "creativeTraits": ["calm", "forensic", "editorial", "governed", "human-directed"],
+  "antiPrinciples": [
+    "Do not make agents, portraits, node count, or parallel activity the visual hero.",
+    "Do not use a glowing orb, neural graph, or default AI gradient as the governing idea.",
+    "Do not use terminal, IDE, or mission-control chrome as shorthand for technical credibility.",
+    "Do not turn governance into compliance-dashboard bureaucracy.",
+    "Do not hide uncertainty, rejected strategies, or approval boundaries behind one final score."
+  ],
+  "authoredCandidate": {
+    "governingIdea": "A decision should not appear; it should resolve. Make the path from ambiguous technical intent to an accountable decision the organizing experience, so evidence, alternatives, hard constraints, dissent, approval, execution consequence, verification, and memory lineage remain legible as the decision earns the right to become action.",
+    "creativeTension": "open inquiry × governed commitment",
+    "whyThisProject": "AI Council separates understanding, evidence planning, problem formulation, strategy comparison, decision authority, governed action, verification, and memory. Its most ownable experience is therefore the visible transformation of uncertainty into a defensible, reversible, reviewable technical commitment.",
+    "principles": [
+      "Treat the decision as a durable technical artifact, not the last message in a chat stream.",
+      "Keep alternatives, dissent, missing evidence, and hard constraints visible until they are resolved or explicitly accepted.",
+      "Make the boundary between reasoning and consequential action unmistakable; approval is a meaningful pause.",
+      "Show lineage in both directions: what produced the decision and what execution, verification, and memory followed from it.",
+      "Create technical seriousness through hierarchy, material behavior, spatial logic, and precise interaction rather than terminal aesthetics.",
+      "Keep human authority visible as consequence rises without making the product feel bureaucratic."
+    ],
+    "expressionTests": {
+      "typography": "Distinguish proposition, evidence, counterargument, constraint, decision, and verification through authored hierarchy and reading rhythm; monospace is not the default signal for technicality.",
+      "image": "Use real project evidence, source fragments, decision lineage, or concept-specific abstract structure; avoid agent portraits, generic neural imagery, and decorative AI symbols.",
+      "motion": "Motion must change a decision relationship: expose alternatives, align evidence, stop at a boundary, cross after approval, or settle after verification.",
+      "interaction": "The user must be able to inspect why a decision exists, unfold alternatives, understand what blocks commitment, and see what consequence follows from approval.",
+      "sound": "Silence is the default; any later sound must mark a meaningful threshold or verified settlement rather than theatrical presence.",
+      "responsive": "Mobile must preserve decision lineage, counterpoint, thresholds, and approval semantics rather than collapsing into a generic chat feed."
+    },
+    "technologyPolicy": "Implementation tools serve the decision-resolution idea. Technologies may be selected only when they materially clarify lineage, counterpoint, threshold, or settlement; no technology may become the concept.",
+    "competitorTransferTest": {
+      "question": "Could this thesis be used unchanged for a generic coding agent after removing AI Council's evidence planning, problem formulation, strategy comparison, hard constraints, approval, verification, and decision memory?",
+      "passCondition": "No. Removing those mechanics materially breaks the idea of a decision earning the right to become accountable action."
+    },
+    "alternativesConsidered": [
+      {"idea": "The Council Chamber", "rejectedBecause": "It mistakes agent coordination for user value and repeats transferable node or roster metaphors."},
+      {"idea": "Technical Mission Control", "rejectedBecause": "It overweights system activity and converges on familiar agent-dashboard conventions."},
+      {"idea": "The Intelligent Core", "rejectedBecause": "It hides evidence and disagreement inside a generic central intelligence metaphor."}
+    ],
+    "selectionRationale": "Decision resolution is the least transferable thesis because it directly depends on AI Council's cognitive and governance architecture while still allowing materially different Creative Worlds."
+  },
+  "truth": {"humanCreativeApproval": false, "creativeThesisFrozen": false}
+}

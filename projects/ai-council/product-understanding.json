@@ -1,172 +1,183 @@
 {
   "projectId": "ai-council",
   "sourceProject": "muradgm/ai-council",
-  "sourceRevision": "94ae9e2e1612121a200e260da65d7861972edc85",
-  "productDefinition": "AI Council is a local-first intelligent senior technical operating system for builders. It combines project context, specialist technical judgment, decision engines, model/provider routing, governed action planning and execution, validation, observability, and reusable memory around a repository that remains the source of truth.",
-  "productCategory": "AI-assisted technical decision and execution operating system for builders",
-  "productStage": "architecture-complete foundation with Cognitive Foundation V1 merged; runtime is still hardening toward one reliable end-to-end Council loop",
-  "problem": "AI-assisted builders can move quickly across many models and tools but lose project context, decision quality, challenge, provenance, safety boundaries, and continuity. AI Council is intended to turn ambiguous technical work into grounded, challenged, governable decisions and safer execution rather than another chat or agent swarm.",
+  "sourceRevision": "07339ffe056767fd1c2c117cb0ab047de31285e0",
+  "productDefinition": "AI Council is a local-first senior technical decision and execution operating layer for builders. It composes project and conversation context, validates intent, plans evidence, formulates the real problem, compares strategies, coordinates specialist judgment, governs consequential actions, verifies results, and preserves decision memory while the repository remains the source of truth.",
+  "productCategory": "AI-assisted technical decision, reasoning, and governed execution operating system for builders",
+  "productStage": "Cognitive Foundation V1 plus Problem Formulation and Strategy Comparison V1 are merged; Cognitive Critic, confidence calibration, intent verification, routing-intelligence authority, broader execution, and full product-surface migration remain downstream work.",
+  "problem": "AI-assisted builders can move quickly across models and coding tools while losing project context, problem quality, evidence discipline, alternative strategies, hard constraints, dissent, provenance, safe execution boundaries, and continuity. AI Council is intended to make technical work earn the right to become action instead of turning the latest model answer into an unreviewed decision.",
   "primaryUsers": [
     "technical solo founders building serious software with AI assistance",
-    "senior engineers using multiple AI coding/reasoning tools",
-    "product-minded developers managing several evolving projects"
+    "senior engineers using multiple AI coding and reasoning tools",
+    "product-minded developers managing several evolving software projects"
   ],
   "secondaryUsers": [
     "small technical teams",
     "developer-platform and AI-tooling evaluators",
-    "privacy-conscious or local-first builders"
+    "privacy-conscious and local-first builders"
   ],
   "primaryJobs": [
-    "understand an ambiguous technical request in the context of the real project",
-    "route the problem to the right specialist reasoning rather than the loudest model",
-    "surface risks, dissent, evidence gaps, and alternatives before committing",
-    "turn an accepted decision into a governed action plan",
-    "execute only within allowed boundaries and validate the result",
-    "preserve project decisions, context, evidence, traces, and lessons for future work"
+    "recover the real project and conversation context before acting",
+    "separate the surface request from the underlying technical problem",
+    "compare defensible strategies against evidence, constraints, cost, reversibility, and invalidation conditions",
+    "surface dissent, uncertainty, missing evidence, and hard boundaries before commitment",
+    "turn an accepted decision into a governed action and verify the result",
+    "preserve decision lineage so future sessions know what was decided, why, and with what authority"
   ],
   "secondaryJobs": [
-    "inspect model/provider routing and cost",
+    "inspect specialist and provider involvement",
     "review project state across sessions",
-    "audit decisions and actions",
+    "audit decisions and governed actions",
     "run repeatable technical workflows and evaluations"
   ],
   "coreWorkflow": [
-    "receive request and load project/conversation context",
-    "understand task, goal, constraints, ambiguity, risk, and evidence needs",
-    "formulate and route the problem to appropriate specialist reasoning",
-    "collect independent analysis, challenge, dissent, and synthesis",
-    "make a defensible technical decision or escalate uncertainty",
-    "create a governed action plan with approval requirements",
-    "execute only permitted actions",
-    "validate results and record trace/evidence",
-    "update memory, project state, and reusable learning"
+    "compose project collective memory and conversation continuity",
+    "understand the task and validate intent, goal, constraints, ambiguity, and privacy boundaries",
+    "plan required and blocking evidence",
+    "formulate the problem while preserving causal uncertainty and solution-anchoring safeguards",
+    "generate and compare strategies against sourced decision criteria, hard constraints, prerequisites, and invalidation conditions",
+    "coordinate specialist analysis, challenge, synthesis, and preserved dissent where consequence justifies it",
+    "make or withhold a decision based on evidence and confidence",
+    "cross explicit governance and human-approval boundaries before consequential action",
+    "execute only permitted work, verify the outcome, and record trace, rollback, and memory evidence"
   ],
   "coreObjects": [
     "project",
-    "conversation/thread",
-    "request/task",
-    "context/evidence",
-    "council/specialist agent",
+    "conversation and task lineage",
+    "intent and goal",
+    "evidence requirement",
+    "problem formulation",
+    "constraint ledger",
+    "strategy candidate",
+    "decision criterion",
+    "specialist finding and dissent",
     "decision",
-    "action plan",
     "approval",
+    "action plan",
     "execution report",
     "validation result",
-    "trace",
-    "memory"
+    "trace and project memory"
   ],
   "primaryActions": [
-    "ask or submit work",
-    "inspect context and evidence",
-    "review specialist findings and dissent",
-    "accept, reject, or refine a decision",
-    "approve governed actions",
+    "submit or continue work",
+    "inspect the interpreted goal and evidence state",
+    "challenge or refine the formulated problem",
+    "compare strategy candidates and rejection reasons",
+    "inspect evidence, assumptions, constraints, dissent, and confidence",
+    "approve or reject consequential action",
     "execute permitted work",
-    "validate and inspect outcome",
-    "resume from project memory"
+    "verify the outcome and resume later from decision memory"
   ],
   "importantStates": [
     "ambiguous",
     "investigating",
-    "ready-for-reasoning",
-    "under-council-review",
+    "clarification-required",
+    "problem-formulated",
+    "strategy-comparison-ready",
+    "blocked-by-hard-constraint",
     "dissent-present",
     "decision-ready",
+    "decision-withheld",
     "approval-required",
-    "blocked-by-governance",
     "executing",
     "verification-failed",
     "verified",
-    "learned/persisted"
+    "remembered"
   ],
-  "valueProposition": "Give AI-assisted builders something closer to a trusted senior technical partner than a chat window: project-aware technical judgment that is challenged, traceable, provider-agnostic, safely executable, and reusable across the life of the project.",
+  "valueProposition": "Give AI-assisted builders a reviewable path from ambiguous intent to defensible technical action: project-aware reasoning that makes evidence, alternatives, constraints, uncertainty, human authority, execution, verification, and memory lineage visible instead of hiding them behind a confident chat answer.",
   "differentiators": [
-    "The product value is trusted technical judgment plus safe execution, not the number of agents.",
-    "The repository and project evidence remain the source of truth while models are replaceable reasoning engines.",
-    "Conversation continuity and project collective memory have explicit authority, provenance, freshness, and promotion rules instead of treating chat history as truth.",
-    "Consequential actions cross governance and approval boundaries rather than allowing agent reasoning to silently become mutation.",
-    "The system is designed to preserve dissent, uncertainty, validation evidence, and execution trace instead of flattening everything into one confident answer."
+    "The value is trusted technical judgment plus safe execution, not agent quantity.",
+    "Semantic correctness, decision correctness, and execution correctness are separate targets with routing deliberately downstream of understanding and formulation.",
+    "Problem causes remain hypotheses, deterministic alternatives remain visible, and model-supplied strategy attributes are treated as claims rather than self-awarded scores.",
+    "Hard constraints and unresolved prerequisites are non-tradeable; weighted preference cannot rescue an ineligible strategy.",
+    "Conversation continuity and project memory have authority, freshness, provenance, and promotion rules rather than treating chat history as truth.",
+    "Consequential reasoning does not silently become mutation; approval, validation, reversibility, and trace are explicit product mechanics."
   ],
   "alternatives": [
     "single-model coding assistants",
-    "multi-agent chat/orchestration frameworks",
     "AI IDE copilots",
-    "workflow automation tools",
-    "manual combination of ChatGPT/Claude/Codex/GitHub/project docs"
+    "multi-agent chat and orchestration frameworks",
+    "workflow automation systems",
+    "manual combinations of ChatGPT, Claude, Codex, GitHub, and project documentation"
   ],
   "productMechanics": [
-    "Project and conversation context are composed before semantic understanding and evidence planning.",
-    "Specialists return structured findings, risks, uncertainties, recommendations, next actions, and confidence rather than free-form persona theater.",
-    "Council reasoning is expected to include independent review, challenge, rebuttal, synthesis, and preserved dissent for consequential decisions.",
-    "Model/provider routing is a downstream capability and cannot override semantic correctness or privacy/risk boundaries.",
-    "Action execution uses governance decisions, explicit approvals, safe-path/file restrictions, validation command allowlists, backups, rollback metadata, and execution reports.",
-    "Cognitive memory uses separate thread/project semantics, provenance, freshness, optimistic conflict handling, and evidence-backed promotion.",
-    "When model-backed reasoning is unavailable or unusable, the runtime can fall back to deterministic evidence-based behavior instead of fabricating intelligence."
+    "Project memory and thread continuity are composed before semantic understanding.",
+    "Validated intent and an Evidence Plan precede Problem Formulation.",
+    "Problem Formulation preserves hard constraints, symptoms, causal hypotheses, alternatives, and unresolved evidence rather than accepting the user's first causal story as fact.",
+    "Strategy Comparison preserves deterministic anchor strategies, validates model-claimed effort, cost, reversibility, and kind, and exposes candidate-specific prerequisites and invalidation conditions.",
+    "Decision criteria retain source, sourceRef, confidence, hard-versus-soft authority, and all operation-specific success criteria.",
+    "Specialist reasoning and provider output remain advisory to deterministic safety and evidence boundaries.",
+    "Governed execution requires permission and approval state, constrained targets and commands, rollback metadata, validation, and an execution report.",
+    "Memory promotion requires evidence or confirmation; model output cannot become canonical project truth merely because it is confident.",
+    "Provider failure or timeout can fall back to deterministic baselines instead of fabricating intelligence."
   ],
-  "intelligenceModel": "Models are reasoning engines operating over repository/project truth. AI Council is responsible for orchestration, context composition, semantic validation, evidence planning, specialist roles, decision structure, governance, execution boundaries, validation, memory, and trace. Stronger models are not allowed to compensate for misunderstood intent or violated boundaries.",
-  "trustModel": "Trust comes from grounded project context, explicit unknowns, preserved dissent, evidence/provenance, deterministic safety validation, local-first memory, provider transparency, validation results, and the ability to block or require approval. A confident model answer is not itself trusted evidence.",
-  "riskModel": "The system fails if it misunderstands the user's real goal, loses project truth, converts uncertain reasoning into authoritative project memory, executes without appropriate approval, hides dissent, overstates validation, leaks private context, or implies a complete autonomous loop that the current runtime has not actually wired.",
-  "governanceModel": "Human authority is retained at consequential boundaries. Actions are classified by governance policy; unsafe or unsupported actions can be blocked; non-dry-run execution requires explicit approval; runtime execution is intentionally narrow and auditable; memory promotion also requires confirmation or concrete validation evidence.",
-  "desiredPerception": "A calm, precise, technically formidable senior partner and decision operating layer: rigorous without being bureaucratic, collaborative without becoming a swarm, modern without AI-magic theater, and visibly human-directed when consequence rises.",
+  "intelligenceModel": "Models are replaceable reasoning engines operating over repository and project truth. AI Council owns context composition, semantic validation, evidence planning, problem formulation, strategy comparison, specialist coordination, governance, execution boundaries, validation, trace, and memory. Stronger models may enrich reasoning but cannot weaken protected constraints or compensate for a wrongly understood problem.",
+  "trustModel": "Trust comes from being able to inspect what the system believed the goal was, which evidence was available or missing, which assumptions and causal hypotheses remain unproven, which strategies were considered and rejected, which constraints were hard, where dissent remained, what required approval, what actually executed, what validation passed, and what was recorded into memory. Confidence is one signal, never authority by itself.",
+  "riskModel": "The system fails if it optimizes the wrong problem, lets a persuasive model erase deterministic alternatives or hard constraints, converts missing evidence into false certainty, implies routing or execution authority that is not yet shipped, hides dissent, executes without approval, leaks private context, overstates validation, or promotes unverified reasoning into project truth.",
+  "governanceModel": "Human authority remains at consequential boundaries. Hard privacy, approval, forbidden-action, scope, and preservation constraints are explicit and non-tradeable. Routing remains downstream and is not yet controlled by the new cognitive chain. Non-dry-run action is intentionally narrow and auditable, with approval, safe targets, validation, rollback, and evidence-bearing memory promotion.",
+  "desiredPerception": "A calm, precise, technically formidable senior partner that makes difficult technical decisions legible and accountable: rigorous without compliance theater, collaborative without swarm theater, modern without AI magic, and visibly human-directed as consequence rises.",
   "undesiredPerception": [
-    "generic chatbot with multiple personas",
+    "generic chatbot with several personas",
     "agent swarm where quantity implies intelligence",
-    "magical autonomous AI that hides uncertainty",
-    "neon neural-network visualization product",
-    "crypto/network-token aesthetic",
+    "autonomous AI magic that hides uncertainty",
+    "neon neural-network or glowing-orb product",
+    "crypto or network-token visual language",
     "cold enterprise compliance dashboard",
-    "another dark developer terminal skin"
+    "another terminal skin presented as technical credibility"
   ],
   "nonNegotiables": [
-    "Do not visually imply uncontrolled autonomy; governance and human authority are real product mechanics.",
-    "Do not reduce the product to agent avatars or a literal council room; specialist count is not the value proposition.",
-    "Do not represent memory as generic chat history; project memory has provenance, authority, and freshness semantics.",
-    "Do not hide dissent or uncertainty in the name of visual simplicity.",
-    "Do not imply execution or validation capabilities beyond what the runtime can actually perform.",
-    "Treat evidence, decision lineage, approval, verification, and reversibility as first-class product material."
+    "Do not visually imply uncontrolled autonomy; human authority and governance are real mechanics.",
+    "Do not reduce the product to agent portraits, node count, or a literal council room.",
+    "Do not represent project memory as generic chat history; authority, freshness, provenance, and decision lineage matter.",
+    "Do not hide rejected strategies, dissent, assumptions, hard constraints, or missing evidence merely to simplify the interface.",
+    "Do not imply routing, execution, validation, or end-to-end-loop maturity beyond what current AI Council main actually ships.",
+    "Treat problem formulation, evidence, decision criteria, approval, reversibility, verification, and memory lineage as first-class product material."
   ],
   "constraints": [
-    "The complete closed-loop Council controller is not yet unified; Problem Formulation and Strategy Comparison remain upcoming cognitive slices.",
-    "The normal Web /ask path is not yet fully migrated onto the Cognitive Foundation runtime.",
+    "Problem Formulation and Strategy Comparison V1 are implemented, but they do not yet own council, provider, tool, or execution routing authority.",
+    "Cognitive Critic, Confidence Calibration, Intent Verification, and broader Cognitive Reliability evaluation remain deferred.",
+    "The normal Web /ask experience is not yet fully migrated onto the cognitive runtime.",
     "The governed action runtime intentionally executes only a narrow low-risk slice.",
-    "Current product maturity should be represented honestly; architecture intent and shipped behavior must remain distinct."
+    "Current shipped behavior and architecture intent must remain visually distinguishable."
   ],
   "categoryConventions": [
-    "dark AI/developer dashboards",
-    "chat-first primary interface",
-    "agent avatar/persona rows",
+    "chat-first AI interfaces",
+    "dark developer dashboards",
+    "agent avatar or persona rows",
     "node graphs and neural-network diagrams",
-    "terminal/monospace styling",
-    "glowing orb or central AI brain metaphor",
-    "confidence percentages presented as authority"
+    "terminal and monospace styling as shorthand for technicality",
+    "glowing orb or central AI brain metaphors",
+    "confidence percentages presented as authority",
+    "mission-control grids centered on simultaneous agent activity"
   ],
   "categoryCliches": [
-    "black background plus neon blue/purple/cyan glow",
+    "black background with neon blue, purple, and cyan glow",
     "floating connected nodes as shorthand for intelligence",
-    "seven AI headshots around a council table",
-    "sparkle/star iconography for AI magic",
-    "generic command-center card grid",
-    "matrix/terminal aesthetics that communicate technicality without product meaning"
+    "AI headshots around a virtual council table",
+    "sparkle or star iconography for intelligence",
+    "generic command-center card grids",
+    "matrix or terminal aesthetics detached from product meaning",
+    "animated reasoning particles that conceal rather than explain decision state"
   ],
   "opportunitiesToBreakConvention": [
-    "Make the transformation from ambiguity to defensible action the primary experience rather than the agents themselves.",
-    "Use dissent, evidence strength, provenance, lineage, and unresolved uncertainty as visible compositional material.",
-    "Express governance through thresholds, boundaries, pauses, approvals, reversibility, and verification instead of security/compliance chrome.",
-    "Treat project memory as a living decision record with authority and freshness, not a transcript archive.",
-    "Let multiple perspectives appear as structured counterpoint and competing interpretations rather than portraits/personas.",
-    "Build visual identity around convergence toward a governed decision without defaulting to literal nodes, orbits, or a boardroom."
+    "Make the path from ambiguous intent to a defensible decision the primary experience rather than the agents themselves.",
+    "Treat a technical decision as a durable artifact with inspectable evidence, alternatives, constraints, dissent, approval, execution consequence, verification, and memory lineage.",
+    "Use rejected strategies, invalidation conditions, evidence strength, provenance, and unresolved uncertainty as compositional material.",
+    "Express governance through thresholds, boundaries, pauses, reversibility, and proof rather than security-dashboard chrome.",
+    "Treat project memory as a living decision record rather than a transcript archive.",
+    "Create technical seriousness through editorial, spatial, or archival craft instead of terminal aesthetics."
   ],
   "unknowns": [
     "Which user segment should dominate the first commercial product experience: solo founder, senior engineer, or small technical team?",
-    "What is the narrow first sellable promise once the end-to-end loop is reliable?",
-    "How much of the internal technical architecture should be visible to end users versus absorbed into a simpler decision workflow?",
-    "Which Council loop phases will become interactive product states versus background orchestration?",
-    "How will users calibrate trust/confidence without turning scores into false authority?"
+    "What narrow promise should become the first sellable end-to-end loop?",
+    "Which cognitive stages should be directly manipulable in the product UI versus mostly background orchestration?",
+    "How much internal architecture should remain visible to users once the decision workflow becomes simpler?",
+    "How should confidence be communicated without turning a score into false authority?"
   ],
   "assumptions": [
-    "The local-first and privacy-conscious positioning remains strategically important.",
-    "AI Council continues to prioritize technical/product-building decisions before broadening into generic business decision software.",
-    "The brand north star 'Orchestrated Intelligence' remains active unless explicitly reopened."
+    "Local-first and privacy-conscious behavior remains strategically important.",
+    "AI Council remains focused on technical and product-building decisions before broadening to generic business decision software.",
+    "The brand north star Orchestrated Intelligence remains active, but the draft violet-blue-cyan interface palette is not mandatory for every Creative World."
   ],
   "authorship": {
     "mode": "authored-from-evidence",
@@ -177,43 +188,50 @@
     {
       "id": "ac-e1",
       "sourceType": "repository-readme",
-      "sourceRef": "muradgm/ai-council@94ae9e2:README.md",
-      "claim": "AI Council defines itself as an intelligent senior technical operating system for builders whose value is trusted technical judgment plus safe execution, with the repository as source of truth.",
+      "sourceRef": "muradgm/ai-council@07339ff:README.md",
+      "claim": "AI Council defines itself as a senior technical operating system for builders whose value is trusted technical judgment plus safe execution, with the repository as source of truth.",
       "supports": ["definition", "problem", "users", "jobs", "workflow", "differentiation"]
     },
     {
       "id": "ac-e2",
       "sourceType": "operational-handoff",
-      "sourceRef": "muradgm/ai-council@94ae9e2:handoff.md",
-      "claim": "Cognitive Foundation V1 provides project collective memory, conversation continuity, task understanding, validated intent/goal resolution, evidence planning, and explicit product/routing authority boundaries.",
+      "sourceRef": "muradgm/ai-council@07339ff:handoff.md",
+      "claim": "The current cognitive sequence is Project Collective Memory through Conversation Continuity, Task Understanding, validated Intent/Goal, Evidence Planning, Problem Formulation, and Strategy Comparison, while routing and execution authority remain downstream.",
       "supports": ["workflow", "mechanics", "trust", "governance", "differentiation"]
     },
     {
       "id": "ac-e3",
       "sourceType": "architecture",
-      "sourceRef": "muradgm/ai-council@94ae9e2:docs/architecture/10-cognitive-control-plane.md",
-      "claim": "The product separates semantic correctness, decision correctness, and execution correctness and places routing downstream of understanding and evidence.",
+      "sourceRef": "muradgm/ai-council@07339ff:docs/architecture/10-cognitive-control-plane.md",
+      "claim": "AI Council separates semantic correctness, decision correctness, and execution correctness and makes routing downstream of understanding, evidence, formulation, and comparison.",
       "supports": ["mechanics", "trust", "governance", "differentiation"]
     },
     {
       "id": "ac-e4",
-      "sourceType": "runtime-code",
-      "sourceRef": "muradgm/ai-council@94ae9e2:packages/action-runtime/src/action-executor.ts",
-      "claim": "Execution is constrained by governance status, explicit per-action approval, safe Markdown/file boundaries, command allowlists, backups, rollback metadata, and execution reports.",
-      "supports": ["mechanics", "trust", "governance", "workflow"]
+      "sourceType": "architecture",
+      "sourceRef": "muradgm/ai-council@07339ff:docs/architecture/13-problem-formulation-strategy-comparison.md",
+      "claim": "Problem Formulation preserves hard constraints, causal uncertainty, alternatives, and evidence gaps; Strategy Comparison preserves deterministic anchors, validates model claims, gates prerequisites, and treats hard criteria as non-tradeable.",
+      "supports": ["problem", "workflow", "mechanics", "differentiation", "trust", "governance"]
     },
     {
       "id": "ac-e5",
-      "sourceType": "brand-brief",
-      "sourceRef": "muradgm/ai-council@94ae9e2:docs/brand/ai-council-logo-design-brief.md",
-      "claim": "Brand positioning emphasizes a senior technical partner, governed intelligence, practical builder tool, calm/precise/confident personality, and explicit rejection of generic chatbot, magical AI, random swarm, crypto-token, and neural-network poster cues.",
-      "supports": ["users", "differentiation", "perception"]
+      "sourceType": "brand-system",
+      "sourceRef": "muradgm/ai-council@07339ff:docs/brand/brand-system.md",
+      "claim": "The product brand is Orchestrated Intelligence and should expose context, evidence quality, uncertainty, approval, validation, ledger, and memory while avoiding magical, theatrical, swarm-like behavior.",
+      "supports": ["perception", "trust", "governance", "differentiation"]
     },
     {
       "id": "ac-e6",
-      "sourceType": "e2e-proof",
-      "sourceRef": "muradgm/ai-council@94ae9e2:scripts/e2e-proof.ts",
-      "claim": "Current end-to-end proof sequences route/classification, grounded context, orchestrator response, then a separate governed action-plan dry run, showing that reasoning and execution capabilities exist but are not yet one unified closed-loop controller.",
+      "sourceType": "brand-brief",
+      "sourceRef": "muradgm/ai-council@07339ff:docs/brand/ai-council-logo-design-brief.md",
+      "claim": "The identity brief rejects generic chatbot, magical AI sparkle, random agent swarm, crypto-token, neural-network poster, and glow-dependent technical aesthetics.",
+      "supports": ["perception", "differentiation"]
+    },
+    {
+      "id": "ac-e7",
+      "sourceType": "runtime-and-governance",
+      "sourceRef": "muradgm/ai-council@07339ff:packages/action-runtime + packages/governance",
+      "claim": "Consequential action remains bounded by explicit governance, approval, constrained execution, validation, and trace rather than model autonomy.",
       "supports": ["workflow", "mechanics", "trust", "governance"]
     }
   ]
