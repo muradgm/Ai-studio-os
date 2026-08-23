@@ -39,7 +39,7 @@
       "Test metadata legibility on Windows, lower-density displays, zoom, Android tablets, and vision-accessibility settings.",
       "Test intermediate conversation densities, not only sparse and deliberately dense extremes.",
       "Prove right-inspector selected, hover, keyboard-focus, notification, loading, empty, long-content, tablet, and mobile-drawer states.",
-      "Complete iconography and refined product-native motion before final visual-system approval."
+      "Complete iconography and production interaction proof before final visual-system approval."
     ]
   },
   "freezeBoundary": {
@@ -60,7 +60,7 @@
       "exact spacing and shell proportions",
       "icon system production masters",
       "interactive component-state implementation",
-      "Motion System choreography",
+      "Motion System production implementation",
       "dark-mode production proof",
       "broader responsive behavior",
       "accessibility interaction proof",
@@ -73,6 +73,7 @@
     "visualSystemDirectionFrozen": true,
     "conceptualVisualSearchClosed": true,
     "motionHumanApproved": false,
+    "motionApprovalHandledBy": "projects/ai-council/motion-system-v1-human-approval.json",
     "iconSystemHumanApproved": false,
     "darkModeHumanApproved": false,
     "productionInteractionProofComplete": false,
