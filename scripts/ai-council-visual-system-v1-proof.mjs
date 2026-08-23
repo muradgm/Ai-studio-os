@@ -82,9 +82,9 @@ code,pre,.code{font-family:var(--mono)!important}
 :focus-visible{outline:2px solid var(--focus)!important;outline-offset:2px}
 `;
 
-function applyVisualSystem(html, screenId) {
+function applyVisualSystem(html) {
   const withFonts = html.replace('</head>', `${fontLinks}<style data-visual-system-v1>${VS_CSS}</style></head>`);
-  return withFonts.replace(/<body([^>]*)>/i, (_match, attrs) => `<body${attrs} data-visual-system="visual-system-v1" data-proof-screen="${screenId}">`);
+  return withFonts.replace(/<body([^>]*)>/i, (_match, attrs) => `<body${attrs} data-visual-system="visual-system-v1">`);
 }
 
 const C = fixture.conversation;
@@ -134,7 +134,7 @@ try {
     const basePath = path.join(hybridRoot, 'source-html', `decision-spine-counterpoint-hybrid-v1-${screenId}.html`);
     const baseHtml = await fs.readFile(basePath, 'utf8');
     const semanticFingerprint = hash(semanticSource(baseHtml));
-    const html = applyVisualSystem(baseHtml, screenId);
+    const html = applyVisualSystem(baseHtml);
     if (hash(semanticSource(html)) !== semanticFingerprint) throw new Error(`Visual System changed canonical semantic markup for ${screenId}`);
     const sourcePath = path.join(sourceRoot, `canonical-${screenId}.html`); const imagePath = path.join(canonicalRoot, `${screenId}.png`); await fs.writeFile(sourcePath, html);
     const viewport = screenId === 'mobile-conversation' ? fixture.viewports.mobile : fixture.viewports.desktop;
