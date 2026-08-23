@@ -36,6 +36,7 @@ const REQUIRED_STRESS_STATES = [
   'very-long-project-memory'
 ];
 
+// Deprecated compatibility export. Formal motion authority now lives in ai-studio-os/motion-system@1.
 const REQUIRED_MOTION_STATES = [
   'context-reading',
   'council-working',
@@ -64,7 +65,7 @@ const REQUIRED_COMPONENTS = [
   'error-message'
 ];
 
-export function buildVisualSystem(input = {}, { selection = null, architectureRef = null, fixtureRef = null } = {}) {
+export function buildVisualSystem(input = {}, { selection = null, architectureRef = null, fixtureRef = null, motionSystem = null } = {}) {
   const system = structuredClone(input ?? {});
   const findings = [];
 
@@ -137,12 +138,31 @@ export function buildVisualSystem(input = {}, { selection = null, architectureRe
     if (!stressStates.includes(id)) findings.push(finding('major', 'visual-system-stress-state-missing', 'Visual System cannot become browser-proof ready without the required dense/edge-state stress case.', { stressStateId: id }));
   }
 
-  const motionStates = cleanList((system.motion?.states ?? []).map((item) => item?.id ?? item));
-  for (const id of REQUIRED_MOTION_STATES) {
-    if (!motionStates.includes(id)) findings.push(finding('major', 'visual-system-motion-state-missing', 'Motion system must define the core AI Council work-state behavior.', { motionStateId: id }));
+  const motionRef = system.motionSystemRef ?? {};
+  if (motionSystem?.schema !== 'ai-studio-os/motion-system@1'
+    || motionSystem?.reviewReady !== true
+    || clean(motionRef.id) !== clean(motionSystem?.id)
+    || clean(motionRef.schema) !== motionSystem?.schema) {
+    findings.push(finding('blocker', 'visual-system-motion-system-not-ready', 'Visual System V1 requires a review-ready formal Motion System V1 artifact.', {
+      motionSystemRef: motionRef,
+      suppliedMotionSystemId: motionSystem?.id ?? null,
+      suppliedMotionSystemStatus: motionSystem?.status ?? null
+    }));
+  } else {
+    if (motionSystem.selectedWorldRef?.id !== system.selectedWorldRef?.id
+      || motionSystem.visualSystemCandidateRef?.id !== system.id) {
+      findings.push(finding('blocker', 'visual-system-motion-system-authority-mismatch', 'Motion System must inherit the same selected Hybrid world and current Visual System candidate.'));
+    }
+    if (motionSystem.architectureRef?.fingerprint !== architectureRef?.fingerprint
+      || motionSystem.canonicalFixtureRef?.fingerprint !== fixtureRef?.fingerprint) {
+      findings.push(finding('blocker', 'visual-system-motion-system-proof-stale', 'Motion System is bound to stale product architecture or canonical fixture evidence.'));
+    }
   }
-  if (system.motion?.reducedMotion?.supported !== true) {
-    findings.push(finding('major', 'visual-system-reduced-motion-missing', 'Motion system requires a reduced-motion equivalent.'));
+  if (clean(system.motion?.sourceOfTruth) !== clean(motionRef.sourceRef)) {
+    findings.push(finding('major', 'visual-system-motion-consumption-source-invalid', 'Inline Visual System motion rules must identify the formal Motion System artifact as their source of truth.'));
+  }
+  if (system.motion?.humanApproved !== false) {
+    findings.push(finding('blocker', 'visual-system-motion-approval-fabricated', 'Visual System candidate may not claim Motion System human approval before explicit review.'));
   }
 
   if (!Array.isArray(system.responsive?.breakpoints) || system.responsive.breakpoints.length < 3
@@ -161,6 +181,8 @@ export function buildVisualSystem(input = {}, { selection = null, architectureRe
     pass: blockers.length === 0,
     reviewReady,
     selectedWorldRef: structuredClone(system.selectedWorldRef ?? null),
+    motionSystemRef: structuredClone(system.motionSystemRef ?? null),
+    motionSystemFingerprint: motionSystem?.motionSystemFingerprint ?? null,
     architectureRef: structuredClone(architectureRef ?? null),
     canonicalFixtureRef: structuredClone(fixtureRef ?? null),
     findings,
@@ -169,12 +191,17 @@ export function buildVisualSystem(input = {}, { selection = null, architectureRe
       stressStates: REQUIRED_STRESS_STATES,
       exactBrowserProof: true,
       semanticFixtureInvariant: true,
+      exactMotionBrowserProof: true,
+      reducedMotionEquivalence: true,
+      runtimeEventAdaptersRequiredBeforeProduction: true,
       humanVisualApprovalRequiredAfterProof: true
     },
     truth: {
       creativeWorldSelected: selection?.truth?.humanWorldSelectionConfirmed === true,
       creativeWorldExplorationClosed: selection?.truth?.creativeWorldExplorationClosed === true,
       visualSystemCandidateAuthored: true,
+      formalMotionSystemBound: motionSystem?.reviewReady === true,
+      runtimeMotionAdaptersImplemented: motionSystem?.truth?.runtimeEventAdaptersImplemented === true,
       typographyHumanApproved: false,
       colorHumanApproved: false,
       motionHumanApproved: false,
