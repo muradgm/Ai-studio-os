@@ -7,6 +7,52 @@ import { startExecutionServer } from '../apps/creative-agency/execution-server.m
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const smokeBaseline = path.join(root, 'artifacts/command-center/baselines/creative-agency');
+const smokeProjectId = 'command-center-smoke';
+const smokeProjectDir = path.join(root, 'projects', smokeProjectId);
+const smokeWorldFile = path.join(smokeProjectDir, 'creative-worlds.json');
+
+function world(id, index) {
+  return {
+    schema: 'ai-studio-os/creative-world@1',
+    id,
+    label: `Smoke World ${index}`,
+    worldIdea: `Smoke world ${index} exists only to prove execution selection provenance.`,
+    interpretationOfThesis: `Interpretation ${index}`,
+    signatureBehavior: `signature-${index}`,
+    worldClass: `class-${index}`,
+    narrativeModel: `narrative-${index}`,
+    compositionModel: `composition-${index}`,
+    typographyIntent: { statement: `Typography intent ${index}` },
+    imageLanguage: `image-${index}`,
+    materialLanguage: `material-${index}`,
+    motionLanguage: `motion-${index}`,
+    interactionModel: `interaction-${index}`,
+    responsiveStrategy: `responsive-${index}`,
+    categoryTransferTest: { whyProjectSpecific: `smoke-specific-${index}`, transferRisk: 'low' },
+    antiPatterns: [`anti-${index}-a`, `anti-${index}-b`],
+    thesisRef: { schema: 'ai-studio-os/creative-thesis@1', projectId: smokeProjectId, governingIdea: 'Smoke-test governed creative execution.' },
+    reviewReady: true,
+    selected: false,
+    truth: { humanCreativeSelectionConfirmed: false, visualWorldProofReviewed: false }
+  };
+}
+
+const smokeExploration = {
+  schema: 'ai-studio-os/creative-world-exploration@1',
+  stage: 'creative-world',
+  reviewReady: true,
+  thesisRef: { schema: 'ai-studio-os/creative-thesis@1', projectId: smokeProjectId, governingIdea: 'Smoke-test governed creative execution.' },
+  worlds: [world('smoke-world-1', 1), world('smoke-world-2', 2), world('smoke-world-3', 3)],
+  visualProof: {
+    reviewReady: true,
+    comparisonRef: 'artifact://smoke/comparison-board',
+    worlds: [
+      { worldId: 'smoke-world-1', reviewReady: true, evidenceRefs: ['artifact://smoke/world-1-proof'] },
+      { worldId: 'smoke-world-2', reviewReady: true, evidenceRefs: ['artifact://smoke/world-2-proof'] },
+      { worldId: 'smoke-world-3', reviewReady: true, evidenceRefs: ['artifact://smoke/world-3-proof'] }
+    ]
+  }
+};
 
 async function json(url, options = {}) {
   const response = await fetch(url, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) } });
@@ -15,12 +61,28 @@ async function json(url, options = {}) {
   return body;
 }
 
+async function selection(origin) {
+  const { catalog } = await json(`${origin}/api/creative-projects/${smokeProjectId}/creative-worlds`);
+  assert.equal(catalog.status, 'visual-proof-ready');
+  assert.equal(catalog.candidates.length, 3);
+  assert.ok(catalog.candidates.every((candidate) => candidate.canLock));
+  return {
+    creativeProjectId: smokeProjectId,
+    selectedCreativeWorldId: catalog.candidates[0].id,
+    creativeWorldCatalogVersion: catalog.catalogVersion
+  };
+}
+
 async function runExecution(origin, iteration = 0) {
+  const selected = await selection(origin);
   const started = await json(`${origin}/api/executions`, {
     method: 'POST',
-    body: JSON.stringify({ projectId: 'creative-agency', iteration })
+    body: JSON.stringify({ projectId: 'creative-agency', iteration, ...selected })
   });
   assert.ok(started.job.id);
+  assert.equal(started.job.directionSelection.status, 'locked');
+  assert.equal(started.job.directionSelection.selectedCreativeWorldId, selected.selectedCreativeWorldId);
+  assert.ok(started.job.directionSelection.visualEvidenceRefs.length > 0);
 
   let job = started.job;
   const deadline = Date.now() + 180000;
@@ -72,6 +134,8 @@ function assertMeasuredRelease(job) {
 }
 
 await fs.rm(smokeBaseline, { recursive: true, force: true });
+await fs.mkdir(smokeProjectDir, { recursive: true });
+await fs.writeFile(smokeWorldFile, `${JSON.stringify(smokeExploration, null, 2)}\n`, 'utf8');
 
 const runtime = await startExecutionServer({ port: 0 });
 try {
@@ -79,6 +143,7 @@ try {
   assert.equal(status.status, 'ready');
   assert.equal(status.runtime, 'creative-engineering-v1.3');
   assert.equal(status.measurement, 'release-intelligence-v1');
+  assert.equal(status.creativeWorldSelection, 'evidence-gated-v1');
 
   const first = await runExecution(runtime.origin, 0);
   assertMeasuredRelease(first);
@@ -87,6 +152,7 @@ try {
   const report = await json(first.artifacts.reportUrl);
   assert.equal(report.id, first.id);
   assert.equal(report.releaseDecision.status, 'ready');
+  assert.equal(report.directionSelection.selectedCreativeWorldId, 'smoke-world-1');
 
   const approved = await json(`${runtime.origin}/api/executions/${first.id}/approve`, { method: 'POST', body: '{}' });
   assert.equal(approved.job.approval, 'iteration-approved');
@@ -105,6 +171,7 @@ try {
     pass: true,
     firstJob: first.id,
     secondJob: second.id,
+    selectedCreativeWorldId: second.directionSelection.selectedCreativeWorldId,
     captures: second.artifacts.captures.length,
     webVitals: second.evidence.webVitals,
     runtime: second.evidence.runtime,
@@ -119,4 +186,5 @@ try {
   }, null, 2));
 } finally {
   await runtime.close();
+  await fs.rm(smokeProjectDir, { recursive: true, force: true });
 }
