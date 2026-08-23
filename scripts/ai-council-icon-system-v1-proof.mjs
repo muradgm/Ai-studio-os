@@ -79,9 +79,9 @@ function svgUrl(worldId, iconId) {
 function specimenHtml(worldId) {
   const world = worldById.get(worldId);
   const rows = REQUIRED_CALIBRATION_ICONS.map((iconId) => {
-    const icon = iconById.get(iconId);
+    const iconSpec = iconById.get(iconId);
     const sizes = REQUIRED_SIZE_MATRIX.map((size) => `<div class="size"><img class="glyph" src="${svgUrl(worldId, iconId)}" width="${size}" height="${size}"><span>${size}</span></div>`).join('');
-    return `<div class="row"><div class="identity"><img class="glyph" src="${svgUrl(worldId, iconId)}" width="32" height="32"><div><b>${esc(icon.label)}</b><small>${esc(icon.semanticClass)}</small></div></div><div class="sizes">${sizes}</div><div class="rule">${esc(icon.recognitionRule)}</div></div>`;
+    return `<div class="row"><div class="identity"><img class="glyph" src="${svgUrl(worldId, iconId)}" width="32" height="32"><div><b>${esc(iconSpec.label)}</b><small>${esc(iconSpec.semanticClass)}</small></div></div><div class="sizes">${sizes}</div><div class="rule">${esc(iconSpec.recognitionRule)}</div></div>`;
   }).join('');
   return `<!doctype html><html><head><meta charset="utf-8"><style>${baseCss}
     body{min-width:1240px}.header{max-width:1080px;margin:0 auto 24px}.world-note{margin-top:12px;max-width:760px}.specimen{max-width:1180px;margin:0 auto;border-top:1px solid ${tokens.ink}}.row{display:grid;grid-template-columns:240px 390px minmax(0,1fr);gap:20px;align-items:center;padding:16px 0;border-bottom:1px solid ${tokens.line}}.identity{display:flex;align-items:center;gap:14px}.identity b{font-size:12px}.identity small{display:block;font-size:9px;color:${tokens.mutedInk};margin-top:3px}.sizes{display:flex;align-items:end;gap:15px}.size{width:38px;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}.size span{font:9px/1 monospace;color:${tokens.mutedInk}}.rule{font-size:10px;line-height:1.45;color:${tokens.mutedInk}}
@@ -100,7 +100,7 @@ function interfaceHtml(worldId) {
 }
 
 function comparisonHtml(iconId) {
-  const icon = iconById.get(iconId);
+  const iconSpec = iconById.get(iconId);
   const columns = REQUIRED_ICON_WORLDS.map((worldId) => {
     const world = worldById.get(worldId);
     const sizes = [14,16,18,24].map((size) => `<div class="cmp-size">${icon(worldId, iconId, size)}<span>${size}px</span></div>`).join('');
@@ -108,7 +108,7 @@ function comparisonHtml(iconId) {
   }).join('');
   return `<!doctype html><html><head><meta charset="utf-8"><style>${baseCss}
     body{min-width:1000px}.head{max-width:940px;margin:0 auto 22px}.grid{max-width:940px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.world{background:${tokens.surface};border:1px solid ${tokens.line};padding:20px;min-height:270px}.large{height:78px;display:flex;align-items:center;justify-content:center}.cmp-sizes{display:flex;justify-content:center;align-items:flex-end;gap:18px;padding:12px 0 18px;border-top:1px solid ${tokens.line};border-bottom:1px solid ${tokens.line}}.cmp-size{display:flex;flex-direction:column;align-items:center;gap:7px}.cmp-size span{font:9px/1 monospace;color:${tokens.mutedInk}}.world p{font-size:10px;margin-top:14px}
-  </style></head><body><header class="head"><div class="kicker">Same concept · same sizes · same semantics</div><h1>${esc(icon.label)}</h1><p>${esc(icon.meaning)}</p><p><b>Recognition rule:</b> ${esc(icon.recognitionRule)}</p></header><main class="grid">${columns}</main></body></html>`;
+  </style></head><body><header class="head"><div class="kicker">Same concept · same sizes · same semantics</div><h1>${esc(iconSpec.label)}</h1><p>${esc(iconSpec.meaning)}</p><p><b>Recognition rule:</b> ${esc(iconSpec.recognitionRule)}</p></header><main class="grid">${columns}</main></body></html>`;
 }
 
 function confusingPairsHtml() {
