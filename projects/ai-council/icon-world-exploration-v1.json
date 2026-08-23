@@ -20,8 +20,10 @@
     "Static semantic recognition outranks clever geometry.",
     "Monochrome geometry first; semantic color belongs to the Visual System state.",
     "Nodes, lines, cuts, and relationships appear only when they carry meaning.",
+    "Icon absence is part of the system: having a glyph available does not imply displaying it.",
     "No icon world may remove or simplify away a difficult calibration concept to look cleaner.",
-    "The selected world must survive 14–18px use before the family can scale."
+    "The selected world must survive 14–18px use and dense repetition before the family can scale.",
+    "The first independent review may rank or reject worlds but may not recommend hybridization."
   ],
   "worlds": [
     {
@@ -42,11 +44,7 @@
         "opticalCenter": {"x": 12, "y": 12},
         "stroke": {"width": 1.5, "cap": "butt", "join": "miter"},
         "targetSizes": [12, 14, 16, 18, 20, 24, 32],
-        "layers": [
-          {"id": "base", "z": 0},
-          {"id": "structure", "z": 10},
-          {"id": "registration", "z": 20}
-        ],
+        "layers": [{"id":"base","z":0},{"id":"structure","z":10},{"id":"registration","z":20}],
         "geometry": {
           "minimumGap": 1.5,
           "angleFamilyDegrees": [0, 45, 90, 135],
@@ -77,11 +75,7 @@
         "opticalCenter": {"x": 12, "y": 12},
         "stroke": {"width": 1.5, "cap": "round", "join": "round"},
         "targetSizes": [12, 14, 16, 18, 20, 24, 32],
-        "layers": [
-          {"id": "base", "z": 0},
-          {"id": "gesture", "z": 10},
-          {"id": "semantic-mark", "z": 20}
-        ],
+        "layers": [{"id":"base","z":0},{"id":"gesture","z":10},{"id":"semantic-mark","z":20}],
         "geometry": {
           "minimumGap": 1.75,
           "angleFamilyDegrees": [0, 30, 60, 90],
@@ -112,11 +106,7 @@
         "opticalCenter": {"x": 12, "y": 12},
         "stroke": {"width": 1.5, "cap": "square", "join": "bevel"},
         "targetSizes": [12, 14, 16, 18, 20, 24, 32],
-        "layers": [
-          {"id": "state", "z": 0},
-          {"id": "lineage", "z": 10},
-          {"id": "registration", "z": 20}
-        ],
+        "layers": [{"id":"state","z":0},{"id":"lineage","z":10},{"id":"registration","z":20}],
         "geometry": {
           "minimumGap": 1.75,
           "angleFamilyDegrees": [0, 45, 90],
@@ -131,24 +121,19 @@
     }
   ],
   "proofRequirements": {
-    "calibrationIconIds": [
-      "council",
-      "decision",
-      "evidence",
-      "provenance",
-      "memory",
-      "supersede",
-      "authority",
-      "verification",
-      "projects",
-      "search"
-    ],
+    "calibrationIconIds": ["council","decision","evidence","provenance","memory","supersede","authority","verification","projects","search"],
     "sizeMatrix": [12, 14, 16, 18, 20, 24, 32],
     "criticalSizeRange": [14, 16, 18],
     "sameWordsSameSemantics": true,
+    "sameDataSameIconOpportunities": true,
     "monochromeMasters": true,
     "exactBrowserProof": true,
     "svgIntegrityRequired": true,
+    "displayPolicyEnforced": true,
+    "denseSystemProof": true,
+    "mobileComposerProof": true,
+    "labelBlindRecognitionProof": true,
+    "hybridRecommendationAllowed": false,
     "interfaceContexts": [
       "left navigation",
       "conversation composer",
@@ -160,12 +145,24 @@
       "mobile navigation"
     ],
     "confusingPairs": [
-      ["evidence", "verification"],
-      ["decision", "approve"],
-      ["history", "provenance"],
-      ["memory", "activity"],
-      ["authority", "blocked"],
-      ["supersede", "retry"]
+      ["evidence","verification"],
+      ["decision","approve"],
+      ["history","provenance"],
+      ["memory","activity"],
+      ["authority","blocked"],
+      ["supersede","retry"],
+      ["council","decision"],
+      ["verification","approve"],
+      ["authority","action"],
+      ["projects","memory"]
+    ],
+    "labelBlindPairs": [
+      ["council","decision"],
+      ["evidence","verification"],
+      ["authority","action"],
+      ["supersede","retry"],
+      ["provenance","history"],
+      ["projects","memory"]
     ]
   },
   "selection": null,
@@ -173,10 +170,16 @@
   "truth": {
     "iconSemanticInventoryAuthored": true,
     "iconWorldExplorationComplete": false,
+    "semanticCollisionReviewComplete": false,
+    "denseIconProofComplete": false,
+    "mobileIconProofComplete": false,
+    "labelBlindRecognitionProofComplete": false,
+    "independentIconWorldReviewComplete": false,
     "quiverLineSelected": false,
     "iconWorldHumanSelected": false,
     "iconSystemHumanApproved": false,
     "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
     "appIconHumanApproved": false,
     "finalVisualSystemApproved": false
   }
