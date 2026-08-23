@@ -35,6 +35,7 @@ jobs:
           node --check scripts/finalize-ai-council-style-frame-proof.mjs
           node --check scripts/ai-council-canonical-ux-world-proof.mjs
           node --check scripts/ai-council-hybrid-v1-proof.mjs
+          node --check scripts/ai-council-visual-system-v1-proof.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
         run: node ./bin/studio.mjs benchmark creative-engineering-v13
@@ -59,7 +60,7 @@ jobs:
 
   browser-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -120,6 +121,18 @@ jobs:
         with:
           name: ai-council-hybrid-v1-head-to-head-proof
           path: artifacts/ai-council/hybrid-v1-head-to-head-proof
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Render AI Council Visual System V1 canonical and stress proof
+        run: npm run proof:ai-council-visual-system
+
+      - name: Upload AI Council Visual System V1 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-visual-system-v1-proof
+          path: artifacts/ai-council/visual-system-v1-proof
           if-no-files-found: error
           retention-days: 14
 
