@@ -50,7 +50,7 @@ const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':
 const iconById = new Map(inventory.icons.map((item) => [item.id, item]));
 const worldById = new Map(exploration.worlds.map((item) => [item.id, item]));
 
-const SUPPORT_GLYPHS = ['attach', 'send', 'inspect', 'back', 'action', 'conversation', 'project-home'];
+const SUPPORT_GLYPHS = ['attach', 'send', 'inspect', 'back', 'action', 'edit', 'conversation', 'project-home'];
 const contrastIds = [...new Set(REQUIRED_CONFUSING_PAIRS.flat())].filter((id) => !REQUIRED_CALIBRATION_ICONS.includes(id));
 const allGlyphIds = [...new Set([...REQUIRED_CALIBRATION_ICONS, ...contrastIds, ...SUPPORT_GLYPHS])];
 
@@ -68,6 +68,7 @@ function supportSvg(worldId, iconId, title = '') {
     inspect: '<path d="M4 8V4H8M16 4H20V8M20 16V20H16M8 20H4V16"/><circle cx="12" cy="12" r="3.5"/>',
     back: '<path d="M19 12H5M10 6L4 12L10 18"/>',
     action: '<rect x="3" y="8" width="6" height="8"/><path d="M9 12H20M16 8L20 12L16 16"/>',
+    edit: '<path d="M5 17.5L6 13.5L15.8 3.7L20.3 8.2L10.5 18L6.5 19Z"/><path d="M13.8 5.7L18.3 10.2"/>',
     conversation: '<path d="M4 5H20V16H10L6 20V16H4Z"/><path d="M8 9H16M8 12H14"/>',
     'project-home': '<path d="M4 11L12 4L20 11V20H5V11"/><path d="M9 20V14H15V20"/>'
   };
@@ -81,7 +82,7 @@ function renderGlyphSvg(worldId, iconId, title) {
   try {
     return renderCalibrationSvg(worldId, iconId, { title });
   } catch (error) {
-    if (!String(error?.message ?? '').includes('Unknown calibration glyph')) throw error;
+    if (!String(error?.message ?? '').includes('Unknown')) throw error;
     return supportSvg(worldId, iconId, title);
   }
 }
