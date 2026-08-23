@@ -139,23 +139,28 @@ export function buildVisualSystem(input = {}, { selection = null, architectureRe
   }
 
   const motionRef = system.motionSystemRef ?? {};
-  if (motionSystem?.schema !== 'ai-studio-os/motion-system@1'
-    || motionSystem?.reviewReady !== true
-    || clean(motionRef.id) !== clean(motionSystem?.id)
-    || clean(motionRef.schema) !== motionSystem?.schema) {
-    findings.push(finding('blocker', 'visual-system-motion-system-not-ready', 'Visual System V1 requires a review-ready formal Motion System V1 artifact.', {
-      motionSystemRef: motionRef,
-      suppliedMotionSystemId: motionSystem?.id ?? null,
-      suppliedMotionSystemStatus: motionSystem?.status ?? null
-    }));
-  } else {
-    if (motionSystem.selectedWorldRef?.id !== system.selectedWorldRef?.id
-      || motionSystem.visualSystemCandidateRef?.id !== system.id) {
-      findings.push(finding('blocker', 'visual-system-motion-system-authority-mismatch', 'Motion System must inherit the same selected Hybrid world and current Visual System candidate.'));
-    }
-    if (motionSystem.architectureRef?.fingerprint !== architectureRef?.fingerprint
-      || motionSystem.canonicalFixtureRef?.fingerprint !== fixtureRef?.fingerprint) {
-      findings.push(finding('blocker', 'visual-system-motion-system-proof-stale', 'Motion System is bound to stale product architecture or canonical fixture evidence.'));
+  if (clean(motionRef.schema) !== 'ai-studio-os/motion-system@1' || !clean(motionRef.id) || !clean(motionRef.sourceRef)) {
+    findings.push(finding('blocker', 'visual-system-motion-system-ref-invalid', 'Visual System V1 must declare the formal Motion System V1 artifact that owns motion truth.'));
+  }
+  if (motionSystem) {
+    if (motionSystem?.schema !== 'ai-studio-os/motion-system@1'
+      || motionSystem?.reviewReady !== true
+      || clean(motionRef.id) !== clean(motionSystem?.id)
+      || clean(motionRef.schema) !== motionSystem?.schema) {
+      findings.push(finding('blocker', 'visual-system-motion-system-not-ready', 'Supplied Motion System V1 is not review-ready or does not match the declared reference.', {
+        motionSystemRef: motionRef,
+        suppliedMotionSystemId: motionSystem?.id ?? null,
+        suppliedMotionSystemStatus: motionSystem?.status ?? null
+      }));
+    } else {
+      if (motionSystem.selectedWorldRef?.id !== system.selectedWorldRef?.id
+        || motionSystem.visualSystemCandidateRef?.id !== system.id) {
+        findings.push(finding('blocker', 'visual-system-motion-system-authority-mismatch', 'Motion System must inherit the same selected Hybrid world and current Visual System candidate.'));
+      }
+      if (motionSystem.architectureRef?.fingerprint !== architectureRef?.fingerprint
+        || motionSystem.canonicalFixtureRef?.fingerprint !== fixtureRef?.fingerprint) {
+        findings.push(finding('blocker', 'visual-system-motion-system-proof-stale', 'Motion System is bound to stale product architecture or canonical fixture evidence.'));
+      }
     }
   }
   if (clean(system.motion?.sourceOfTruth) !== clean(motionRef.sourceRef)) {
@@ -200,6 +205,7 @@ export function buildVisualSystem(input = {}, { selection = null, architectureRe
       creativeWorldSelected: selection?.truth?.humanWorldSelectionConfirmed === true,
       creativeWorldExplorationClosed: selection?.truth?.creativeWorldExplorationClosed === true,
       visualSystemCandidateAuthored: true,
+      formalMotionSystemRefDeclared: clean(motionRef.schema) === 'ai-studio-os/motion-system@1' && Boolean(clean(motionRef.id)),
       formalMotionSystemBound: motionSystem?.reviewReady === true,
       runtimeMotionAdaptersImplemented: motionSystem?.truth?.runtimeEventAdaptersImplemented === true,
       typographyHumanApproved: false,
