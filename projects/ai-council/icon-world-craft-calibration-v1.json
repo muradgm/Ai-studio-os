@@ -95,10 +95,12 @@
       ["projects", "memory"]
     ],
     "sizes": [14, 16, 18],
-    "warningThreshold": 0.88,
+    "metric": "alpha-mask-jaccard",
+    "alphaThreshold": 20,
+    "warningThreshold": 0.55,
     "machineMaySelect": false,
     "semanticScoreAllowed": false,
-    "rule": "High raster similarity is a human-inspection warning only; low similarity is not evidence of semantic quality."
+    "rule": "High ink-overlap similarity is a human-inspection warning only; low similarity is not evidence of semantic quality. Empty canvas pixels are excluded from the comparison."
   },
   "forbidden": {
     "newWorlds": true,
