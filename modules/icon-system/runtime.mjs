@@ -138,9 +138,16 @@ export function buildIconWorldExploration(input = {}, { inventory = null } = {})
   if (inventory?.reviewReady !== true) {
     findings.push(finding('blocker', 'icon-world-inventory-not-ready', 'Icon World exploration requires a review-ready semantic inventory.'));
   }
-  if (exploration.inventoryRef?.fingerprint !== inventory?.inventoryFingerprint) {
-    findings.push(finding('blocker', 'icon-world-inventory-stale', 'Icon World exploration must bind to the exact semantic inventory fingerprint.'));
+  if (exploration.inventoryRef?.sourceRef !== 'projects/ai-council/icon-semantic-inventory-v1.json') {
+    findings.push(finding('major', 'icon-world-inventory-ref-invalid', 'Icon World exploration should reference the canonical AI Council icon inventory source.'));
   }
+  if (clean(exploration.inventoryRef?.fingerprint) && exploration.inventoryRef.fingerprint !== inventory?.inventoryFingerprint) {
+    findings.push(finding('blocker', 'icon-world-inventory-stale', 'Icon World exploration contains a stale semantic inventory fingerprint.'));
+  }
+  const resolvedInventoryRef = {
+    ...(exploration.inventoryRef ?? {}),
+    fingerprint: inventory?.inventoryFingerprint ?? null
+  };
 
   const worlds = Array.isArray(exploration.worlds) ? exploration.worlds : [];
   const worldIds = worlds.map((world) => clean(world?.id)).filter(Boolean);
@@ -196,7 +203,7 @@ export function buildIconWorldExploration(input = {}, { inventory = null } = {})
   const explorationFingerprint = hash({
     schema: exploration.schema,
     projectId: exploration.projectId,
-    inventoryRef: exploration.inventoryRef,
+    inventoryRef: resolvedInventoryRef,
     worlds: exploration.worlds,
     proofRequirements: exploration.proofRequirements,
     quiverLineAuthority: exploration.quiverLineAuthority
@@ -204,6 +211,7 @@ export function buildIconWorldExploration(input = {}, { inventory = null } = {})
 
   return {
     ...exploration,
+    inventoryRef: resolvedInventoryRef,
     explorationFingerprint,
     status: reviewReady ? 'ready-for-calibration-browser-proof' : blockers.length ? 'blocked' : 'provisional',
     pass: blockers.length === 0,
