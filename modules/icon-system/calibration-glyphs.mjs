@@ -8,7 +8,7 @@ const Q = {
   council: `<g id="base"><path d="M3 5L10 12M3 12H10M3 19L10 12"/></g><g id="structure"><path d="M10 12H20"/><path d="M17 9L20 12L17 15"/></g><g id="registration"><rect x="9" y="11" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
   decision: `<g id="base"><path d="M3 6H8L13 12M3 18H8L13 12"/></g><g id="structure"><path d="M13 12H20"/><path d="M17 9L20 12L17 15"/></g>`,
   evidence: `<g id="base"><path d="M10 4H4V20H10"/><path d="M7 8H12M7 12H11M7 16H12"/></g><g id="structure"><path d="M12 12H18"/></g><g id="registration"><rect x="17" y="11" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
-  provenance: `<g id="base"><path d="M5 12H11M13 12H19"/></g><g id="registration"><rect x="4" y="11" width="2" height="2" fill="currentColor" stroke="none"/><rect x="11" y="11" width="2" height="2" fill="currentColor" stroke="none"/><rect x="18" y="11" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
+  provenance: `<g id="base"><path d="M5 12H10M14 12H19"/></g><g id="registration"><rect x="4" y="11" width="2" height="2" fill="currentColor" stroke="none"/><rect x="11" y="11" width="2" height="2" fill="currentColor" stroke="none"/><rect x="18" y="11" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
   memory: `<g id="base"><path d="M6 5H15V17H7V7H6Z"/><path d="M9 8H18V20H9"/></g><g id="registration"><path d="M12 12H15"/><rect x="14" y="11" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
   supersede: `<g id="base"><path d="M3 8H11M3 16H9"/></g><g id="structure"><path d="M9 16L13 12L9 8M13 12H20"/><path d="M17 9L20 12L17 15"/></g><g id="registration"><path d="M5 6L9 10"/></g>`,
   authority: `<g id="base"><path d="M12 3V9M12 15V21"/></g><g id="structure"><path d="M3 12H9M15 12H21"/><path d="M18 9L21 12L18 15"/></g><g id="registration"><path d="M9 10V14M15 10V14"/></g>`,
@@ -52,10 +52,20 @@ const P = {
   projects: `<g id="state"><rect x="4" y="4" width="10" height="10"/><rect x="10" y="10" width="10" height="10"/></g><g id="lineage"><path d="M14 8H17V10"/></g>`,
   search: `<g id="state"><circle cx="9.5" cy="9.5" r="5.5"/></g><g id="lineage"><path d="M13.5 13.5L16 16M18 18L20 20"/></g><g id="registration"><rect x="16" y="16" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
   approve: `<g id="state"><rect x="4" y="4" width="16" height="16"/></g><g id="lineage"><path d="M7 12L10.5 15.5L17 8.5"/></g>`,
-  history: `<g id="state"><rect x="4" y="4" width="16" height="16"/></g><g id="lineage"><path d="M12 7V12L16 14"/><path d="M7 7H4V4"/></g><g id="registration"><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g>`,
-  activity: `<g id="state"><rect x="3" y="10.5" width="3" height="3"/><rect x="18" y="10.5" width="3" height="3"/></g><g id="lineage"><path d="M6 12H8L10 8L13 16L16 12H18"/></g>`,
-  blocked: `<g id="state"><rect x="4" y="4" width="16" height="16"/></g><g id="lineage"><path d="M6.5 17.5L17.5 6.5"/></g><g id="registration"><rect x="10.5" y="10.5" width="3" height="3" fill="currentColor" stroke="none"/></g>`,
-  retry: `<g id="state"><rect x="4" y="5" width="3" height="3"/><rect x="17" y="16" width="3" height="3"/></g><g id="lineage"><path d="M7 6.5H13C17 6.5 19 9 19 12C19 15 17 17.5 13 17.5H7"/><path d="M7 17.5L10 14.5M7 17.5L10 20.5"/></g>`
+  history: `<g id="state"><rect x="4" y="4" width="16" height="16"/></g><g id="lineage"><path d="M12 7V12L16 14"/><path d="M7 6H4V9"/></g><g id="registration"><rect x="3" y="5" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
+  activity: `<g id="state"><rect x="3" y="11" width="2" height="2"/><rect x="19" y="11" width="2" height="2"/></g><g id="lineage"><path d="M5 12H8L10 8L13 16L16 10L18 12H19"/></g>`,
+  blocked: `<g id="state"><rect x="4" y="4" width="16" height="16"/></g><g id="lineage"><path d="M7 17L17 7"/></g><g id="registration"><rect x="16" y="6" width="2" height="2" fill="currentColor" stroke="none"/></g>`,
+  retry: `<g id="state"><rect x="5" y="5" width="14" height="14"/></g><g id="lineage"><path d="M7 9H4V6M4 9C7 5 13 4 17 7C20 10 20 15 17 18"/></g><g id="registration"><rect x="16" y="17" width="2" height="2" fill="currentColor" stroke="none"/></g>`
+};
+
+const SUPPORT = {
+  attach: `<g id="base"><path d="M8 12.5L13.8 6.7C15.2 5.3 17.4 5.3 18.8 6.7C20.2 8.1 20.2 10.3 18.8 11.7L11.1 19.4C8.9 21.6 5.4 21.6 3.2 19.4C1 17.2 1 13.7 3.2 11.5L10.2 4.5"/></g>`,
+  send: `<g id="base"><path d="M3 5L21 12L3 19L7 12Z"/><path d="M7 12H16"/></g>`,
+  inspect: `<g id="base"><path d="M4 8V4H8M16 4H20V8M20 16V20H16M8 20H4V16"/><circle cx="12" cy="12" r="3.5"/></g>`,
+  back: `<g id="base"><path d="M19 12H5M10 6L4 12L10 18"/></g>`,
+  action: `<g id="base"><rect x="3" y="8" width="6" height="8"/><path d="M9 12H20M16 8L20 12L16 16"/></g>`,
+  conversation: `<g id="base"><path d="M4 5H20V16H10L6 20V16H4Z"/><path d="M8 9H16M8 12H14"/></g>`,
+  'project-home': `<g id="base"><path d="M4 11L12 4L20 11V20H5V11"/><path d="M9 20V14H15V20"/></g>`
 };
 
 const SHAPES = {
@@ -64,18 +74,20 @@ const SHAPES = {
   'provenance-glyph': P
 };
 
-export const CALIBRATION_GLYPH_IDS = ['council','decision','evidence','provenance','memory','supersede','authority','verification','projects','search'];
-export const CONTRAST_GLYPH_IDS = ['approve','history','activity','blocked','retry'];
-export const PROOF_GLYPH_IDS = [...CALIBRATION_GLYPH_IDS, ...CONTRAST_GLYPH_IDS];
+export const CALIBRATION_GLYPH_IDS = Object.keys(Q);
+export const SUPPORT_GLYPH_IDS = Object.keys(SUPPORT);
 
 export function renderCalibrationSvg(worldId, iconId, { title = null } = {}) {
   const shapes = SHAPES[worldId];
   if (!shapes) throw new Error(`Unknown Icon World: ${worldId}`);
-  const body = shapes[iconId];
+  const body = shapes[iconId] ?? SUPPORT[iconId];
   if (!body) throw new Error(`Unknown proof glyph: ${iconId}`);
   const attrs = WORLD_ATTRS[worldId];
   const titleNode = title ? `<title>${String(title).replace(/[&<>]/g, '')}</title>` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" ${attrs} vector-effect="non-scaling-stroke">${titleNode}${body}</svg>`;
+  const familyMark = worldId === 'provenance-glyph' && SUPPORT[iconId]
+    ? '<g id="family-mark"><rect x="18" y="18" width="2" height="2" fill="currentColor" stroke="none"/></g>'
+    : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" ${attrs} vector-effect="non-scaling-stroke">${titleNode}${body}${familyMark}</svg>`;
 }
 
 export function validateCalibrationSvg(svg) {
