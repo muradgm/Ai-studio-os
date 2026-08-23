@@ -76,12 +76,17 @@
       "failure-to-stillness",
       "decision lineage and memory supersession",
       "reduced-motion equivalence"
-    ]
+    ],
+    "supersedingProof": {
+      "script": "scripts/ai-council-motion-system-v1-human-review-proof.mjs",
+      "artifact": "ai-council-motion-system-v1-human-review-proof",
+      "status": "pending-ci-and-human-inspection"
+    }
   },
   "truth": {
     "assistantReviewOnly": true,
     "humanMotionApproval": false,
-    "humanVisualApproval": false,
+    "humanVisualApproval": true,
     "finalVisualSystemApproved": false,
     "runtimeEventAdaptersImplemented": false
   }
