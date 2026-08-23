@@ -68,9 +68,13 @@ export function buildIconCraftCalibrationPlan(input = {}, { exploration = null, 
     findings.push(finding('blocker', 'icon-craft-selection-present', 'Craft calibration cannot select an Icon World.'));
   }
 
-  const targetWorldIds = Object.keys(plan.targetedCorrections ?? {});
-  if (!same(targetWorldIds, ICON_CRAFT_WORLDS)) {
-    findings.push(finding('blocker', 'icon-craft-world-set-drift', 'Craft calibration must refine the same three Icon Worlds without adding or removing a world.', { targetWorldIds }));
+  const targetWorldIds = Object.keys(plan.targetedCorrections ?? {}).sort();
+  const expectedWorldIds = [...ICON_CRAFT_WORLDS].sort();
+  if (!same(targetWorldIds, expectedWorldIds)) {
+    findings.push(finding('blocker', 'icon-craft-world-set-drift', 'Craft calibration must refine the same three Icon Worlds without adding or removing a world.', {
+      targetWorldIds,
+      expectedWorldIds
+    }));
   }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
