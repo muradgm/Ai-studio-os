@@ -20,6 +20,7 @@ const read = async (name) => JSON.parse(await fs.readFile(new URL(`../projects/a
 const visualApproval = await read('visual-system-v1-human-approval.json');
 const inventoryInput = await read('icon-semantic-inventory-v1.json');
 const explorationInput = await read('icon-world-exploration-v1.json');
+const independentReviewInput = await read('icon-world-independent-review-v1.json');
 
 function build() {
   const inventory = buildIconSemanticInventory(inventoryInput, { visualSystemApproval: visualApproval });
@@ -200,6 +201,22 @@ test('Independent Icon World review may rank but cannot hybridize or fabricate h
   const blocked = buildIndependentIconWorldReview(selected, { proof });
   assert.equal(blocked.reviewReady, false);
   assert.ok(blocked.findings.some((item) => item.code === 'icon-independent-review-selection-fabricated'));
+});
+
+test('Committed AI Council independent review binds the hardened proof and stops before human selection', () => {
+  const proof = buildIconCalibrationProofEvidence(evidenceSet());
+  assert.equal(independentReviewInput.proofRef.explorationFingerprint, proof.explorationFingerprint);
+  const review = buildIndependentIconWorldReview(independentReviewInput, { proof });
+  assert.equal(review.reviewReady, true, JSON.stringify(review.findings, null, 2));
+  assert.equal(review.status, 'ready-for-human-icon-world-selection');
+  assert.equal(review.hybridRecommendationAllowed, false);
+  assert.deepEqual(review.ranking, ['provenance-glyph','editorial-sign','quiver-construct']);
+  assert.equal(review.recommendation.worldId, 'provenance-glyph');
+  assert.equal(review.selectedWorld, null);
+  assert.equal(review.truth.independentIconWorldReviewComplete, true);
+  assert.equal(review.truth.iconWorldHumanSelected, false);
+  assert.equal(review.truth.iconSystemHumanApproved, false);
+  assert.equal(review.truth.finalVisualSystemApproved, false);
 });
 
 test('Icon exploration fails closed without human Visual System approval', () => {
