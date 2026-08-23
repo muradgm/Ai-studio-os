@@ -1,0 +1,85 @@
+{
+  "schema": "ai-studio-os/hybrid-interface-review@1",
+  "projectId": "ai-council",
+  "candidateId": "decision-spine-counterpoint-hybrid-v1",
+  "baselineWorldId": "decision-spine",
+  "baselineScore": 8.98,
+  "proof": {
+    "artifact": "ai-council-hybrid-v1-head-to-head-proof",
+    "workflowRun": 32657711359,
+    "artifactDigest": "sha256:cf861be65a44d018b1e8d753029ae619d93327bba259d7b1c037660af9283293",
+    "architectureFingerprint": "5056066fc0a19d55bc01905b",
+    "canonicalFixtureFingerprint": "230b52245245c2901ea8cdde",
+    "constitutionFingerprint": "7089f239b24759811145aa51",
+    "canonicalScreenCoverage": "8/8",
+    "comparisonBoardCount": 8,
+    "candidateOverviewCount": 1,
+    "exactBrowserProof": true,
+    "semanticMarkupIdenticalToDecisionSpine": true
+  },
+  "reviewMethod": {
+    "mode": "assistant-rendered-head-to-head-visual-inspection",
+    "selectionAuthority": false,
+    "inspected": [
+      "Project Home comparison",
+      "Normal Conversation comparison",
+      "Structured Council Recommendation comparison",
+      "Context and Evidence Inspection comparison",
+      "Approval Request comparison",
+      "Decision Detail comparison",
+      "Project Memory comparison",
+      "Mobile Conversation Continuity comparison",
+      "complete Hybrid V1 eight-screen overview",
+      "proof manifest architecture, fixture, constitution, semantic, and truth evidence"
+    ]
+  },
+  "hardFails": [
+    { "id": "decorative-spine", "triggered": false, "finding": "Lineage markers were removed from ordinary conversation/evidence and retained only where current state or decision lineage carries meaning." },
+    { "id": "threshold-leak", "triggered": false, "finding": "Consequence red is isolated to Approval Request; ordinary navigation and conversation remain calm." },
+    { "id": "editorial-control-ambiguity", "triggered": false, "finding": "Editorial reading treatment does not obscure composer, evidence controls, memory actions, or approval controls." },
+    { "id": "drama-reduces-readability", "triggered": false, "finding": "Hybrid V1 reduces boxes and visual noise while preserving all canonical content and improving reading rhythm." },
+    { "id": "context-competes", "triggered": false, "finding": "The right context panel is softer and remains subordinate to the conversation workspace." },
+    { "id": "approval-authority-unclear", "triggered": false, "finding": "Approval introduces a distinct consequence line, red semantic state, and red primary approval control without changing the permanent shell." },
+    { "id": "project-home-dashboard", "triggered": false, "finding": "Project Home becomes less dashboard-like than Decision Spine while keeping Continue Current Work dominant." },
+    { "id": "mobile-desktop-complexity", "triggered": false, "finding": "Mobile removes desktop lineage decoration, keeps the thread trigger, and preserves a calm single-column conversation surface." },
+    { "id": "canonical-information-removed", "triggered": false, "finding": "The renderer mechanically verifies identical normalized semantic markup between Decision Spine and Hybrid V1 for every canonical screen." }
+  ],
+  "proofQuestionScores": {
+    "conversation-remains-dominant": 9.2,
+    "recommendations-easier-to-read": 9.3,
+    "provenance-meaningful-not-graph": 9.0,
+    "approval-unmistakably-different": 9.1,
+    "decision-detail-feels-durable": 9.1,
+    "memory-editable-and-trustworthy": 9.0,
+    "mobile-stays-calm": 9.3,
+    "uniquely-ai-council": 8.9
+  },
+  "weightedScore": 9.11,
+  "deltaVersusBaseline": 0.13,
+  "assessment": {
+    "result": "hybrid-v1-outperformed-decision-spine-in-this-proof",
+    "confidence": "moderate",
+    "why": [
+      "Conversation and recommendation surfaces lose decorative workflow treatment and read more like considered technical judgment.",
+      "Decision lineage remains available where it explains provenance rather than becoming a motif on every card.",
+      "Approval is the only surface that meaningfully changes state language, making the advice-to-action boundary more legible.",
+      "Project Home reads more like a continuation surface than a dashboard.",
+      "Mobile is materially calmer and more conversational than the Decision Spine baseline."
+    ],
+    "remainingRisks": [
+      "The warm editorial minimalism could still drift toward generic premium productivity software if final typography, iconography, motion, and brand integration are not AI-Council-specific.",
+      "Decision lineage is now intentionally quieter; later interaction design must preserve provenance discoverability without restoring decorative graph behavior.",
+      "The consequence color/state must remain rare. If red boundary language spreads into normal workflow, the hybrid loses its advantage.",
+      "The 0.13 score margin is directional rather than scientific; it is enough to justify human comparison, not automatic selection."
+    ]
+  },
+  "status": "candidate-outperformed-baseline-awaiting-human-selection",
+  "recommendation": "advance-hybrid-v1-to-human-head-to-head-review",
+  "truth": {
+    "assistantReviewOnly": true,
+    "humanWorldSelectionConfirmed": false,
+    "humanVisualApproval": false,
+    "finalVisualSystemApproved": false,
+    "hybridAutomaticallySelected": false
+  }
+}
