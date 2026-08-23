@@ -12,6 +12,7 @@ export function buildMotionSystemProofEvidence({ system = null, canonicalClips =
   const expectedPrimitives = (system?.primitives ?? []).map((primitive) => primitive.id);
 
   if (system?.reviewReady !== true) findings.push(finding('blocker', 'motion-proof-system-not-ready', 'Motion System must be review-ready before browser proof.'));
+  if (system?.truth?.motionRuntimeTaxonomyResolved !== true) findings.push(finding('blocker', 'motion-proof-taxonomy-unresolved', 'Motion proof requires the resolved operationalState + motionRole taxonomy.'));
 
   const canonicalByScreen = new Map((Array.isArray(canonicalClips) ? canonicalClips : []).map((clip) => [clip.screenId, clip]));
   for (const screenId of expectedScreens) {
@@ -29,6 +30,11 @@ export function buildMotionSystemProofEvidence({ system = null, canonicalClips =
     }
     if (clip?.eventEvidenceMode !== 'proof-fixture') {
       findings.push(finding('blocker', 'motion-proof-fixture-truth-missing', 'Motion browser scenarios must clearly identify fixture event evidence rather than pretending to be production telemetry.', { scenarioId }));
+    }
+    for (const event of clip?.eventTrace ?? []) {
+      if (!clean(event?.operationalState) || !clean(event?.motionRole)) {
+        findings.push(finding('blocker', 'motion-proof-event-taxonomy-missing', 'Proof event traces must expose operationalState and motionRole independently.', { scenarioId, eventId: event?.id ?? null }));
+      }
     }
   }
 
@@ -49,6 +55,7 @@ export function buildMotionSystemProofEvidence({ system = null, canonicalClips =
     projectId: system?.projectId ?? null,
     motionSystemId: system?.id ?? null,
     motionSystemFingerprint: system?.motionSystemFingerprint ?? null,
+    eventTaxonomyRef: system?.eventTaxonomyRef ?? null,
     status: reviewReady ? 'ready-for-human-motion-review' : 'blocked',
     pass: reviewReady,
     reviewReady,
@@ -63,7 +70,8 @@ export function buildMotionSystemProofEvidence({ system = null, canonicalClips =
     findings,
     truth: {
       proofFixturesAreProductionTelemetry: false,
-      runtimeEventAdaptersImplemented: system?.truth?.runtimeEventAdaptersImplemented === true,
+      motionRuntimeTaxonomyResolved: system?.truth?.motionRuntimeTaxonomyResolved === true,
+      runtimeEventAdaptersImplemented: false,
       exactBrowserMotionProofComplete: reviewReady,
       reducedMotionProofComplete: reducedMotionCheck?.pass === true,
       humanMotionApproval: false,
