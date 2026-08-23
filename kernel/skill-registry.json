@@ -33,6 +33,7 @@
     {"id":"three-d-technical-artist","category":"role","domains":["creative-engineering","3d","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/three-d-technical-artist/SKILL.md","status":"active"},
     {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign","vector","icon-system","creative-engineering","immersive-web","cinematic-product-page","interactive-world","webgl","3d"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
 
+    {"id":"product-understanding","category":"task","domains":["product","brand","identity","logo","landing-page","campaign","creative-engineering","immersive-web","cinematic-product-page","interface"],"phases":["research","direction"],"path":".agents/skills/product-understanding/SKILL.md","status":"active"},
     {"id":"creative-thesis","category":"task","domains":["brand","identity","landing-page","campaign","product","creative-engineering","immersive-web","cinematic-product-page"],"phases":["direction"],"path":".agents/skills/creative-thesis/SKILL.md","status":"active"},
     {"id":"logo-exploration","category":"task","domains":["logo","identity"],"phases":["explore"],"path":".agents/skills/logo-exploration/SKILL.md","status":"active"},
     {"id":"motion-choreography","category":"task","domains":["motion","landing-page","campaign"],"phases":["create"],"path":".agents/skills/motion-choreography/SKILL.md","status":"active"},

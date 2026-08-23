@@ -4,14 +4,18 @@
 
 AI Studio OS already has strong execution infrastructure after a direction is approved: production routing, browser builds, motion/realtime capabilities, responsive evidence, performance/accessibility gates, and bounded patch loops.
 
-The current quality bottleneck is earlier: turning project truth and research into an exceptional, ownable creative idea and visual world before implementation begins.
+The current quality bottleneck is earlier: understanding the real product, then turning product truth and research into an exceptional, ownable creative idea and visual world before implementation begins.
 
 The Creative World Runtime closes that gap.
 
 ## Target flow
 
 ```text
-BUSINESS / PRODUCT TRUTH
+PROJECT / REPOSITORY / BUSINESS SOURCES
+        ↓
+PRODUCT UNDERSTANDING
+        ↓
+PRODUCT EVIDENCE + UNCERTAINTY GATE
         ↓
 RESEARCH + INSPIRATION EVIDENCE
         ↓
@@ -38,13 +42,51 @@ APPROVED EXPERIENCE DIRECTION
 EXISTING CREATIVE ENGINEERING RUNTIME
 ```
 
-Technology is downstream. WebGL, Three.js, GSAP, Rive, Blender, video, generative imagery, and other tools are capabilities selected only after the creative idea earns them.
+Technology is downstream. WebGL, Three.js, GSAP, Rive, Blender, video, generative imagery, and other tools are capabilities selected only after the product is understood and the creative idea earns them.
+
+## Slice 0 — Product Understanding v1
+
+Status: implemented on `feature/product-understanding-v1`.
+
+Purpose: prevent AI Studio OS from generating visual worlds from a name, category, screenshot, or thin brief before it can explain what the product actually is.
+
+The slice adds:
+
+- `modules/product-understanding/CONTRACT.md`
+- `modules/product-understanding/runtime.mjs`
+- `.agents/skills/product-understanding/SKILL.md`
+- a fail-closed Product Understanding gate before brand-defining creative routes
+- Creative Runtime blocking semantics before inspiration / Creative Thesis
+- evidence coverage and confidence requirements
+- AI Council as the first repository-driven dogfood Product Understanding report
+- regression coverage for missing mechanics/evidence, authorship, routing order, and downstream blocking
+
+### Gate truth boundary
+
+The runtime can normalize and validate an authored report. It does not pretend a template or a product name is senior product understanding.
+
+A report becomes `ready-for-creative-thesis` only when:
+
+- concrete project/product evidence is mapped to required dimensions,
+- product mechanics, users, jobs, differentiation, trust/governance, perception and non-negotiables are explicit,
+- material unknowns remain visible,
+- authorship is evidence-backed,
+- confidence is at least `0.75`,
+- there are no blocker or major findings.
+
+If the report is not ready:
+
+```text
+DO NOT CREATE CREATIVE THESIS
+DO NOT CREATE CREATIVE WORLDS
+DO NOT GENERATE ART DIRECTION
+```
 
 ## Slice 1 — Creative Thesis v1
 
-Status: implemented on `feature/creative-thesis-v1`.
+Status: implemented.
 
-Purpose: force one project-specific governing idea between Inspiration and Creative Direction.
+Purpose: force one project-specific governing idea between Product Understanding / Inspiration and Creative Direction.
 
 The slice adds:
 
@@ -69,7 +111,7 @@ A thesis can become structurally `ready-for-creative-direction-review` only when
 
 This prevents deterministic template prose from being mistaken for high-quality creative judgment.
 
-## Planned slices
+## Planned / continuing slices
 
 ### Slice 2 — Creative World exploration
 Generate 3–5 genuinely different visual-world hypotheses from one reviewed thesis. Difference must occur at the world/concept level, not palette/type/layout reskins.
@@ -93,9 +135,11 @@ Preserve the creative idea across mobile/tablet/desktop rather than merely stack
 Decide what must be captured, retouched, illustrated, filmed, modeled, simulated, generated, or left absent; maintain provenance and rights truth.
 
 ### Slice 9 — Full-site production benchmark
-Dogfood the entire Creative World → Creative Engineering path on a complete Du Bonheur experience and judge the final experience, not only pipeline completion.
+Dogfood the entire Product Understanding → Creative World → Creative Engineering path on complete real projects and judge the final experience, not only pipeline completion.
 
 ## Benchmark principle
+
+`Product name ≠ Product understanding.`
 
 `Engineering pass ≠ Creative pass.`
 
