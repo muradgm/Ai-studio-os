@@ -8,6 +8,11 @@
     "selectionSource": "projects/ai-council/hybrid-v1-selection.json",
     "humanSelected": true
   },
+  "motionSystemRef": {
+    "schema": "ai-studio-os/motion-system@1",
+    "id": "hybrid-v1-motion-system-v1",
+    "sourceRef": "projects/ai-council/motion-system-v1.json"
+  },
   "canonicalScreenIds": [
     "project-home",
     "conversation",
@@ -215,27 +220,11 @@
     "rule": "Authority state must be distinguishable by wording, structure, iconography, and control availability; color alone is insufficient."
   },
   "motion": {
-    "personality": "quiet, directional, evidence-aware, and consequence-sensitive; motion explains state change rather than decorating thought.",
-    "states": [
-      { "id": "context-reading", "behavior": "High-level status copy updates from real lifecycle events while a single short directional tick traverses the context edge once; no fake chain-of-thought steps.", "duration": "180–260ms transitions" },
-      { "id": "council-working", "behavior": "A compact three-mark directional indicator advances gently beside plain-language status such as Reviewing context, Using tools, or Preparing response. It never implies hidden reasoning content.", "duration": "600ms restrained loop while truly working" },
-      { "id": "streaming-response", "behavior": "Text streams naturally; the work indicator settles rather than pulsing behind the response.", "duration": "runtime-driven" },
-      { "id": "evidence-attachment", "behavior": "Source references attach with a 4–6px directional reveal or margin registration mark; no floating card entrance.", "duration": "140–200ms" },
-      { "id": "approval-boundary", "behavior": "The consequence boundary draws once, ordinary accents recede, authority label and controls become explicit, and motion pauses before the Approve action is available.", "duration": "220–320ms" },
-      { "id": "execution-progress", "behavior": "Discrete real execution states advance with short directional transitions; no indefinite decorative spinner when step state is known.", "duration": "event-driven" },
-      { "id": "verification", "behavior": "The lineage/consequence state closes into a stable Verified result with a restrained registration motion; no celebration or confetti.", "duration": "180–240ms" }
-    ],
-    "reducedMotion": {
-      "supported": true,
-      "behavior": "Replace translation/drawing with immediate state change plus short opacity transition; preserve wording, hierarchy and status semantics."
-    },
-    "antiPatterns": [
-      "glowing AI thinking orb",
-      "typing dots as the only work state",
-      "constant ambient motion",
-      "motion that invents internal reasoning steps",
-      "celebratory approval or verification effects"
-    ]
+    "sourceOfTruth": "projects/ai-council/motion-system-v1.json",
+    "systemId": "hybrid-v1-motion-system-v1",
+    "personality": "quiet, directional, evidence-aware, and consequence-sensitive",
+    "consumptionRule": "Visual components consume Motion System V1 primitives and runtime-event truth rules; they may not invent local loaders, thinking animations, authority transitions, or progress semantics that drift from the formal system.",
+    "humanApproved": false
   },
   "responsive": {
     "breakpoints": [
@@ -282,7 +271,8 @@
     "mobile-calmness",
     "accessibility",
     "brand-distinctiveness",
-    "implementation-coherence"
+    "implementation-coherence",
+    "motion-state-truthfulness"
   ],
   "antiPatterns": [
     "beautiful sparse proof that fails dense real content",
@@ -293,13 +283,15 @@
     "right inspector competing with conversation",
     "mobile desktop miniaturization",
     "generic premium productivity UI",
-    "agent-dashboard or command-center visual language"
+    "agent-dashboard or command-center visual language",
+    "component-local motion that contradicts Motion System V1"
   ],
   "truth": {
     "humanVisualApproval": false,
     "finalVisualSystemApproved": false,
     "typographyHumanApproved": false,
     "colorHumanApproved": false,
-    "motionHumanApproved": false
+    "motionHumanApproved": false,
+    "runtimeMotionAdaptersImplemented": false
   }
 }
