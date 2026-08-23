@@ -1,0 +1,229 @@
+{
+  "schema": "ai-studio-os/canonical-interface-fixture@1",
+  "projectId": "ai-council",
+  "fixtureId": "control-plane-architecture-decision",
+  "version": 1,
+  "purpose": "Provide one semantically coherent, architecture-bound data and copy fixture for every AI Council Creative World proof so worlds compete on design rather than easier content.",
+  "canonicalScreenIds": [
+    "project-home",
+    "conversation",
+    "structured-response",
+    "evidence-context",
+    "approval",
+    "decision-detail",
+    "project-memory",
+    "mobile-conversation"
+  ],
+  "viewports": {
+    "desktop": { "width": 1440, "height": 900 },
+    "mobile": { "width": 390, "height": 844 }
+  },
+  "activeProject": {
+    "id": "ai-council",
+    "label": "AI Council"
+  },
+  "activeThread": {
+    "id": "architecture",
+    "label": "Architecture",
+    "topic": "Control-plane architecture"
+  },
+  "currentContext": {
+    "threadId": "architecture",
+    "label": "Control-plane architecture",
+    "goal": "Decide whether rewriting the AI Council control plane materially improves reliability, governance, or execution safety.",
+    "using": [
+      "Current architecture",
+      "Runtime contracts",
+      "Migration cost analysis",
+      "Project memory constraints"
+    ]
+  },
+  "projectState": {
+    "currentFocus": "Cognitive Reliability Benchmark",
+    "phase": "Cognitive Core hardening",
+    "activeTasks": 3,
+    "decisions": 12,
+    "openQuestions": 2,
+    "blockers": 0,
+    "recent": [
+      "Reliability benchmark updated",
+      "Problem Formulation + Strategy Comparison merged",
+      "Routing authority remains unchanged"
+    ],
+    "suggestedNext": [
+      "Review benchmark threshold",
+      "Resolve reliability question",
+      "Decide routing entry gate"
+    ],
+    "conversations": [
+      "Architecture",
+      "Cognitive Reliability",
+      "Routing Intelligence",
+      "Memory Architecture"
+    ]
+  },
+  "conversation": {
+    "userQuestion": "Should we rewrite AI Council in Python?",
+    "answer": "Keep the current TypeScript control plane. The strongest risks are decision quality, evidence discipline, and authority boundaries—not language capability.",
+    "recommendation": "Keep the current TypeScript control plane.",
+    "why": "Current architecture benefits more from contract consistency than a rewrite.",
+    "nextAction": "Finish reliability benchmarking before changing routing authority.",
+    "evidenceSummary": "3 evidence sources",
+    "specialistSummary": "3 specialists consulted"
+  },
+  "evidenceInspection": {
+    "userQuestion": "Why keep TypeScript?",
+    "answer": "Because the current evidence points to reasoning and governance reliability as the bottleneck, not language capability.",
+    "evidenceSummary": "3 evidence sources",
+    "constraintSummary": "2 constraints"
+  },
+  "approval": {
+    "eyebrow": "Approval required · advice ends here",
+    "proposedAction": "Create branch feat/routing-intelligence-v1",
+    "why": "Council proposes this because implementation can begin reversibly while current routing remains authoritative.",
+    "changes": [
+      "Create one Git branch",
+      "Prepare routing implementation slice",
+      "Estimated 12 files affected"
+    ],
+    "risk": "Medium",
+    "reversible": "Yes",
+    "productionImpact": "No production impact yet",
+    "rollback": "Delete branch; no mainline state changes.",
+    "validationPlan": "Run repository tests and browser proof before any merge.",
+    "authority": "Approval required",
+    "actions": ["Review plan", "Modify", "Reject", "Approve"]
+  },
+  "decision": {
+    "statement": "Keep TypeScript as AI Council control plane",
+    "date": "23 Aug 2026",
+    "lifecycle": "Active",
+    "confidence": "High",
+    "authority": "Advisory",
+    "rationale": "Contract consistency, orchestration fit, and migration cost outweigh the speculative benefit of a rewrite.",
+    "remainingUncertainty": "Future ML-heavy services may justify bounded Python services.",
+    "alternatives": [
+      "Rewrite in Python",
+      "Hybrid TypeScript / Python",
+      "Go control plane",
+      "Rust control plane"
+    ],
+    "evidence": [
+      "Current architecture",
+      "Runtime contracts",
+      "Migration cost analysis"
+    ]
+  },
+  "memory": [
+    {
+      "id": "control-plane-language",
+      "kind": "Decision",
+      "statement": "Use TypeScript as control plane",
+      "verification": "Confirmed",
+      "lifecycle": "Active",
+      "updated": "23 Aug 2026",
+      "actions": ["Edit", "Supersede", "Remove from active memory"]
+    },
+    {
+      "id": "routing-authority-gate",
+      "kind": "Constraint",
+      "statement": "Routing remains advisory until reliability benchmark passes",
+      "verification": "Confirmed",
+      "lifecycle": "Active",
+      "updated": "23 Aug 2026",
+      "actions": ["Edit", "Supersede", "Remove from active memory"]
+    },
+    {
+      "id": "bounded-python-services",
+      "kind": "Assumption",
+      "statement": "ML-heavy services may justify bounded Python services",
+      "verification": "Proposed",
+      "lifecycle": "Active",
+      "updated": "23 Aug 2026",
+      "actions": ["Confirm", "Reject", "Edit"]
+    }
+  ],
+  "memoryHistoryExample": {
+    "kind": "Decision",
+    "statement": "Rewrite the entire control plane in Python",
+    "verification": "Confirmed",
+    "lifecycle": "Superseded",
+    "replacementId": "control-plane-language",
+    "actions": ["View replacement", "Restore / reopen if permitted"]
+  },
+  "memoryRemovalSemantics": {
+    "label": "Remove from active memory",
+    "meaning": "Stop treating the item as active project truth while preserving historical evidence, provenance, source linkage, and audit history.",
+    "preservesHistory": true,
+    "destructiveErase": false
+  },
+  "statusTaxonomy": {
+    "decisionLifecycle": {
+      "label": "Decision lifecycle",
+      "values": ["Active", "Superseded", "Rejected"]
+    },
+    "memoryVerification": {
+      "label": "Memory verification",
+      "values": ["Confirmed", "Proposed", "Disputed"]
+    },
+    "confidence": {
+      "label": "Confidence",
+      "values": ["High", "Medium", "Low"]
+    },
+    "authority": {
+      "label": "Authority",
+      "values": ["Advisory", "Approval required", "Authorized"]
+    }
+  },
+  "mobileNavigation": {
+    "triggerLabel": "Architecture",
+    "behavior": "The project/thread trigger opens focused project and conversation navigation without restoring the desktop shell.",
+    "items": [
+      "Project Home",
+      "AI Council project",
+      "Architecture · current thread",
+      "Cognitive Reliability",
+      "Routing Intelligence",
+      "Memory Architecture",
+      "New conversation"
+    ]
+  },
+  "screenModel": {
+    "workspaceStates": [
+      "conversation",
+      "structured-response",
+      "evidence-context"
+    ],
+    "destinationSurfaces": [
+      "project-home",
+      "approval",
+      "decision-detail",
+      "project-memory"
+    ],
+    "responsiveExpressions": [
+      { "screenId": "mobile-conversation", "expressionOf": "conversation" }
+    ],
+    "rule": "The canonical proof set is not a mandate for eight unrelated routes. Conversation variants are states of one workspace; destination surfaces are durable navigation targets; mobile is a responsive expression of the conversation model."
+  },
+  "comparisonInvariants": [
+    "same words",
+    "same data",
+    "same information priority",
+    "same functionality",
+    "same viewport",
+    "same interaction state",
+    "same canonical screen identity"
+  ],
+  "worldVariationAllowed": [
+    "composition",
+    "spacing",
+    "surface treatment",
+    "typographic hierarchy",
+    "navigation expression",
+    "density",
+    "visual rhythm",
+    "iconography",
+    "materiality",
+    "motion thesis later"
+  ]
+}
