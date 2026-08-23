@@ -17,11 +17,13 @@ const fixtureRef = buildCanonicalInterfaceFixtureReference(fixture, { architectu
 const selection = await read('hybrid-v1-selection.json');
 const visualInput = await read('visual-system-v1.json');
 const motionInput = await read('motion-system-v1.json');
+const motionTaxonomy = await read('motion-event-taxonomy-v1.json');
 const motionSystem = buildMotionSystem(motionInput, {
   selection,
   visualSystemId: visualInput.id,
   architectureRef,
-  fixtureRef
+  fixtureRef,
+  taxonomy: motionTaxonomy
 });
 
 function build(options = {}) {
@@ -57,11 +59,20 @@ test('Visual System V1 contains the complete dense-state stress harness and comp
   for (const id of REQUIRED_COMPONENTS) assert.ok(componentIds.includes(id), `missing component ${id}`);
 });
 
-test('Visual System consumes Motion System as source of truth instead of defining ad-hoc local animation', () => {
+test('Visual System consumes approved Motion System as source of truth without claiming production readiness', () => {
   assert.equal(visualInput.motionSystemRef.schema, 'ai-studio-os/motion-system@1');
   assert.equal(visualInput.motionSystemRef.id, 'hybrid-v1-motion-system-v1');
   assert.equal(visualInput.motion.sourceOfTruth, visualInput.motionSystemRef.sourceRef);
-  assert.equal(visualInput.motion.humanApproved, false);
+  assert.equal(visualInput.motion.humanApproved, true);
+  assert.equal(
+    visualInput.motion.humanApprovalSourceRef,
+    'projects/ai-council/motion-system-v1-human-approval.json'
+  );
+  assert.equal(
+    visualInput.motion.eventTaxonomySourceRef,
+    'projects/ai-council/motion-event-taxonomy-v1.json'
+  );
+  assert.equal(visualInput.motion.productionReady, false);
   assert.match(visualInput.motion.consumptionRule, /may not invent/i);
 });
 
