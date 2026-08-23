@@ -5,7 +5,8 @@ import test from 'node:test';
 import { buildProductUXArchitecture } from '../modules/product-ux-architecture/runtime.mjs';
 import { buildProductUXArchitectureReference } from '../modules/product-ux-architecture/reference.mjs';
 import { buildCanonicalInterfaceFixture, buildCanonicalInterfaceFixtureReference } from '../modules/interface-world-proof/fixture.mjs';
-import { buildVisualSystem, REQUIRED_STRESS_STATES, REQUIRED_MOTION_STATES, REQUIRED_COMPONENTS } from '../modules/visual-system/runtime.mjs';
+import { buildMotionSystem } from '../modules/motion-system/runtime.mjs';
+import { buildVisualSystem, REQUIRED_STRESS_STATES, REQUIRED_COMPONENTS } from '../modules/visual-system/runtime.mjs';
 
 const read = async (name) => JSON.parse(await fs.readFile(new URL(`../projects/ai-council/${name}`, import.meta.url), 'utf8'));
 
@@ -15,26 +16,53 @@ const fixture = buildCanonicalInterfaceFixture(await read('canonical-ux-fixture.
 const fixtureRef = buildCanonicalInterfaceFixtureReference(fixture, { architectureRef });
 const selection = await read('hybrid-v1-selection.json');
 const visualInput = await read('visual-system-v1.json');
+const motionInput = await read('motion-system-v1.json');
+const motionSystem = buildMotionSystem(motionInput, {
+  selection,
+  visualSystemId: visualInput.id,
+  architectureRef,
+  fixtureRef
+});
 
-test('AI Council Visual System V1 is bound to the human-selected Hybrid and frozen product fixture', () => {
-  const system = buildVisualSystem(visualInput, { selection, architectureRef, fixtureRef });
+function build(options = {}) {
+  return buildVisualSystem(visualInput, {
+    selection: options.selection ?? selection,
+    architectureRef,
+    fixtureRef,
+    motionSystem: options.motionSystem ?? motionSystem
+  });
+}
+
+test('AI Council Visual System V1 is bound to human-selected Hybrid, frozen fixture, and formal Motion System V1', () => {
+  const system = build();
+  assert.equal(motionSystem.reviewReady, true, JSON.stringify(motionSystem.findings, null, 2));
   assert.equal(system.reviewReady, true, JSON.stringify(system.findings, null, 2));
   assert.equal(system.status, 'ready-for-visual-system-browser-proof');
   assert.equal(system.selectedWorldRef.id, 'decision-spine-counterpoint-hybrid-v1');
+  assert.equal(system.motionSystemRef.id, 'hybrid-v1-motion-system-v1');
+  assert.equal(system.motionSystemFingerprint, motionSystem.motionSystemFingerprint);
   assert.deepEqual(system.canonicalScreenIds, fixtureRef.screenIds);
   assert.equal(system.truth.creativeWorldSelected, true);
   assert.equal(system.truth.creativeWorldExplorationClosed, true);
+  assert.equal(system.truth.formalMotionSystemBound, true);
+  assert.equal(system.truth.runtimeMotionAdaptersImplemented, false);
   assert.equal(system.truth.humanVisualApproval, false);
   assert.equal(system.truth.finalVisualSystemApproved, false);
 });
 
-test('Visual System V1 contains the complete dense-state stress harness', () => {
+test('Visual System V1 contains the complete dense-state stress harness and component grammar', () => {
   const stressIds = visualInput.stressTests.map((item) => item.id);
   for (const id of REQUIRED_STRESS_STATES) assert.ok(stressIds.includes(id), `missing stress state ${id}`);
-  const motionIds = visualInput.motion.states.map((item) => item.id);
-  for (const id of REQUIRED_MOTION_STATES) assert.ok(motionIds.includes(id), `missing motion state ${id}`);
   const componentIds = visualInput.componentGrammar.components.map((item) => item.id);
   for (const id of REQUIRED_COMPONENTS) assert.ok(componentIds.includes(id), `missing component ${id}`);
+});
+
+test('Visual System consumes Motion System as source of truth instead of defining ad-hoc local animation', () => {
+  assert.equal(visualInput.motionSystemRef.schema, 'ai-studio-os/motion-system@1');
+  assert.equal(visualInput.motionSystemRef.id, 'hybrid-v1-motion-system-v1');
+  assert.equal(visualInput.motion.sourceOfTruth, visualInput.motionSystemRef.sourceRef);
+  assert.equal(visualInput.motion.humanApproved, false);
+  assert.match(visualInput.motion.consumptionRule, /may not invent/i);
 });
 
 test('Visual System keeps Threshold consequence language out of ordinary conversation and navigation', () => {
@@ -54,16 +82,22 @@ test('Typography density rules explicitly protect long and code-heavy Council re
   assert.ok(visualInput.typography.rules.some((rule) => /Never use monospace as atmosphere/i.test(rule)));
 });
 
-test('Visual System cannot proceed if selected-world authority or canonical proof fingerprints drift', () => {
+test('Visual System cannot proceed if selected-world authority, canonical proof, or Motion System authority drifts', () => {
   const staleSelection = structuredClone(selection);
   staleSelection.proofRef.canonicalFixtureFingerprint = 'stale-fixture';
-  const system = buildVisualSystem(visualInput, { selection: staleSelection, architectureRef, fixtureRef });
-  assert.equal(system.reviewReady, false);
-  assert.ok(system.findings.some((item) => item.code === 'visual-system-product-proof-stale'));
+  const stale = build({ selection: staleSelection });
+  assert.equal(stale.reviewReady, false);
+  assert.ok(stale.findings.some((item) => item.code === 'visual-system-product-proof-stale'));
 
   const noHuman = structuredClone(selection);
   noHuman.truth.humanWorldSelectionConfirmed = false;
-  const blocked = buildVisualSystem(visualInput, { selection: noHuman, architectureRef, fixtureRef });
+  const blocked = build({ selection: noHuman });
   assert.equal(blocked.reviewReady, false);
   assert.ok(blocked.findings.some((item) => item.code === 'visual-system-selected-world-not-authoritative'));
+
+  const badMotion = structuredClone(motionSystem);
+  badMotion.reviewReady = false;
+  const noMotion = build({ motionSystem: badMotion });
+  assert.equal(noMotion.reviewReady, false);
+  assert.ok(noMotion.findings.some((item) => item.code === 'visual-system-motion-system-not-ready'));
 });
