@@ -1,5 +1,6 @@
 {
   "requiredStages": [
+    "product-understanding",
     "reference-extraction",
     "design-read",
     "creative-dials",
@@ -13,18 +14,13 @@
     "asset-patch"
   ],
   "status": "production-plan-ready",
+  "requireProductUnderstanding": true,
   "selectedConceptId": "berlin-atelier",
   "recipeId": "editorial-brand-site",
   "requireProviderAgnostic": true,
   "requireSharedDirection": true,
   "assignments": [
-    {
-      "assetId": "DB-HERO-001",
-      "action": "route"
-    },
-    {
-      "assetId": "DB-SUPPORT-002",
-      "action": "route"
-    }
+    {"assetId": "DB-HERO-001", "action": "route"},
+    {"assetId": "DB-SUPPORT-002", "action": "route"}
   ]
 }
