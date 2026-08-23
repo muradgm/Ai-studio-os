@@ -18,6 +18,7 @@
     "proof:ai-council-ux": "node ./scripts/ai-council-ux-wireframe-proof.mjs && node ./scripts/finalize-ai-council-ux-wireframe-proof.mjs",
     "proof:ai-council-worlds": "node ./scripts/ai-council-canonical-ux-world-proof.mjs",
     "proof:ai-council-hybrid": "node ./scripts/ai-council-hybrid-v1-proof.mjs",
+    "proof:ai-council-visual-system": "node ./scripts/ai-council-visual-system-v1-proof.mjs",
     "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
     "fonts:analyze": "node ./scripts/analyze-google-fonts.mjs",
     "studio": "node ./bin/studio.mjs",
