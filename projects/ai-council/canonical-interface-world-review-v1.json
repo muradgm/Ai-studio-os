@@ -1,0 +1,182 @@
+{
+  "schema": "ai-studio-os/interface-world-review@1",
+  "projectId": "ai-council",
+  "proof": {
+    "schema": "ai-studio-os/interface-world-proof-evidence@1",
+    "artifact": "ai-council-canonical-interface-world-proof-v1",
+    "architectureFingerprint": "5056066fc0a19d55bc01905b",
+    "canonicalFixtureFingerprint": "230b52245245c2901ea8cdde",
+    "canonicalScreenCoverage": "8/8 per world",
+    "exactBrowserProof": true,
+    "comparisonBoardCount": 8,
+    "worldOverviewCount": 3
+  },
+  "reviewMethod": {
+    "mode": "assistant-rendered-visual-inspection",
+    "selectionAuthority": false,
+    "inspected": [
+      "all three complete-world overview boards",
+      "all eight same-screen comparison boards",
+      "full-size Structured Council Recommendation frames",
+      "full-size Approval Request frames",
+      "full-size Project Memory frame semantics",
+      "manifest truth, fixture, taxonomy, mobile, and fingerprint evidence"
+    ],
+    "decisiveScreens": [
+      "structured-response",
+      "evidence-context",
+      "approval",
+      "project-memory"
+    ],
+    "truth": {
+      "humanWorldSelectionConfirmed": false,
+      "humanVisualApproval": false,
+      "selectedAutomatically": false,
+      "finalVisualSystemApproved": false
+    }
+  },
+  "criteria": [
+    { "id": "product-clarity", "weight": 0.15 },
+    { "id": "complexity-handling", "weight": 0.15 },
+    { "id": "trust-evidence-legibility", "weight": 0.15 },
+    { "id": "authority-governance-legibility", "weight": 0.15 },
+    { "id": "memory-lineage-legibility", "weight": 0.15 },
+    { "id": "category-distinctiveness", "weight": 0.10 },
+    { "id": "mobile-coherence", "weight": 0.075 },
+    { "id": "system-scalability", "weight": 0.075 }
+  ],
+  "worlds": [
+    {
+      "worldId": "counterpoint",
+      "label": "Counterpoint",
+      "scores": {
+        "product-clarity": 8.6,
+        "complexity-handling": 8.4,
+        "trust-evidence-legibility": 8.7,
+        "authority-governance-legibility": 8.4,
+        "memory-lineage-legibility": 8.5,
+        "category-distinctiveness": 8.6,
+        "mobile-coherence": 8.5,
+        "system-scalability": 8.3
+      },
+      "weightedScore": 8.51,
+      "strengths": [
+        "Strongest editorial expression of human judgment rather than machine authority.",
+        "Recommendation and evidence read as an argument with hierarchy rather than a dashboard of modules.",
+        "Warm, restrained material language keeps Council from drifting into developer-tool or enterprise-command-center styling.",
+        "Project Memory remains understandable even at high semantic density."
+      ],
+      "risks": [
+        "Can become too publication-like or static if interaction, approvals, and execution consequence are not made more operational.",
+        "Editorial serif hierarchy can become precious or magazine-like if applied indiscriminately to dense technical states.",
+        "Approval boundary is clear but less intrinsically consequential than Threshold or Decision Spine."
+      ],
+      "disposition": "retain-as-hybrid-source"
+    },
+    {
+      "worldId": "threshold",
+      "label": "Threshold",
+      "scores": {
+        "product-clarity": 8.3,
+        "complexity-handling": 8.7,
+        "trust-evidence-legibility": 8.1,
+        "authority-governance-legibility": 9.3,
+        "memory-lineage-legibility": 7.8,
+        "category-distinctiveness": 7.3,
+        "mobile-coherence": 8.2,
+        "system-scalability": 8.5
+      },
+      "weightedScore": 8.31,
+      "strengths": [
+        "Strongest visual distinction between advisory work and an authority boundary.",
+        "Approval Request communicates consequence, risk, reversibility, and permission with immediate clarity.",
+        "Dense decision metadata remains orderly and operational."
+      ],
+      "risks": [
+        "Black navigation rail, hard boxes, and all-caps hierarchy drift toward cold enterprise admin/compliance software.",
+        "The world is less convincing for Project Memory and long-form deliberation than for approval/governance states.",
+        "If promoted to the whole system, boundary language could become a generic workflow-stepper aesthetic."
+      ],
+      "disposition": "reject-as-primary-world-retain-boundary-semantics"
+    },
+    {
+      "worldId": "decision-spine",
+      "label": "Decision Spine",
+      "scores": {
+        "product-clarity": 8.8,
+        "complexity-handling": 9.1,
+        "trust-evidence-legibility": 8.9,
+        "authority-governance-legibility": 9.0,
+        "memory-lineage-legibility": 9.2,
+        "category-distinctiveness": 8.7,
+        "mobile-coherence": 9.0,
+        "system-scalability": 9.1
+      },
+      "weightedScore": 8.98,
+      "strengths": [
+        "Best overall fit for AI Council's durable decision, provenance, approval, verification, and memory model.",
+        "Handles the difficult Structured Recommendation, Approval, Decision Detail, and Project Memory screens without losing one coherent grammar.",
+        "Lineage markers make state and consequence legible without exposing runtime internals as navigation.",
+        "Mobile preserves the same decision-oriented identity without restoring desktop infrastructure.",
+        "Scales naturally toward future decision history, supersession, evidence updates, and verification states."
+      ],
+      "risks": [
+        "Line and node motifs can drift into workflow diagrams or Git-graph imitation if overused.",
+        "The current proof can feel slightly clinical; it needs more human/editorial judgment in typography and content rhythm.",
+        "Lineage must remain semantic and sparse rather than becoming decorative connective tissue."
+      ],
+      "disposition": "preferred-hybrid-base"
+    }
+  ],
+  "ranking": [
+    "decision-spine",
+    "counterpoint",
+    "threshold"
+  ],
+  "recommendation": {
+    "type": "hybridize",
+    "selectionStatus": "not-human-locked",
+    "baseWorld": "decision-spine",
+    "borrowFrom": [
+      {
+        "worldId": "counterpoint",
+        "retain": [
+          "editorial hierarchy",
+          "human judgment character",
+          "argument / evidence reading rhythm",
+          "warmer and less administrative surface behavior"
+        ]
+      },
+      {
+        "worldId": "threshold",
+        "retain": [
+          "approval-boundary semantics",
+          "clear risk / authority transition",
+          "deliberate pause before consequential action"
+        ],
+        "reject": [
+          "black enterprise navigation rail as system identity",
+          "all-caps monumental hierarchy as default",
+          "compliance-dashboard box language outside authority boundaries"
+        ]
+      }
+    ],
+    "guardrails": [
+      "Do not combine the three visual systems indiscriminately; Decision Spine remains the structural grammar.",
+      "Use Counterpoint primarily to humanize hierarchy, reading rhythm, and evidence treatment.",
+      "Use Threshold only where authority, permission, risk, or verification genuinely crosses a boundary.",
+      "Keep lineage markers semantic, sparse, and attached to real provenance or consequence.",
+      "Do not introduce agent portraits, neural graphs, dark developer chrome, terminal styling, or generic command-center grids.",
+      "Do not change the frozen canonical UX architecture or canonical fixture during hybrid visual development."
+    ],
+    "nextProofRequired": {
+      "candidate": "decision-spine-counterpoint-hybrid",
+      "canonicalScreens": 8,
+      "architectureFingerprintMustMatch": "5056066fc0a19d55bc01905b",
+      "canonicalFixtureFingerprintMustMatch": "230b52245245c2901ea8cdde",
+      "exactBrowserProofRequired": true,
+      "humanVisualInspectionRequired": true,
+      "humanSelectionRequired": true
+    }
+  }
+}

@@ -33,6 +33,7 @@ jobs:
           node --check scripts/finalize-ai-council-ux-wireframe-proof.mjs
           node --check scripts/ai-council-style-frame-proof.mjs
           node --check scripts/finalize-ai-council-style-frame-proof.mjs
+          node --check scripts/ai-council-canonical-ux-world-proof.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
         run: node ./bin/studio.mjs benchmark creative-engineering-v13
@@ -57,7 +58,7 @@ jobs:
 
   browser-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -94,6 +95,18 @@ jobs:
         with:
           name: ai-council-style-frame-proof-v2
           path: artifacts/ai-council/style-frame-proof-v2
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Render AI Council canonical 8 × 3 Creative World proof
+        run: npm run proof:ai-council-worlds
+
+      - name: Upload AI Council canonical Creative World evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-canonical-interface-world-proof-v1
+          path: artifacts/ai-council/canonical-interface-world-proof-v1
           if-no-files-found: error
           retention-days: 14
 
