@@ -12,7 +12,12 @@ import {
   REQUIRED_SIZE_MATRIX,
   REQUIRED_CONFUSING_PAIRS
 } from '../modules/icon-system/runtime.mjs';
-import { renderCalibrationSvg, validateCalibrationSvg } from '../modules/icon-system/calibration-glyphs.mjs';
+import {
+  renderCalibrationSvg,
+  validateCalibrationSvg,
+  PROOF_GLYPH_IDS,
+  CONTRAST_GLYPH_IDS
+} from '../modules/icon-system/calibration-glyphs.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
@@ -49,8 +54,10 @@ let svgIntegrityPass = true;
 const svgIntegrityFindings = [];
 
 for (const worldId of REQUIRED_ICON_WORLDS) {
-  for (const iconId of REQUIRED_CALIBRATION_ICONS) {
-    const svg = renderCalibrationSvg(worldId, iconId, { title: `${worldById.get(worldId).label}: ${iconById.get(iconId).label}` });
+  for (const iconId of PROOF_GLYPH_IDS) {
+    const iconSpec = iconById.get(iconId);
+    if (!iconSpec) throw new Error(`Proof glyph ${iconId} is not present in the semantic inventory.`);
+    const svg = renderCalibrationSvg(worldId, iconId, { title: `${worldById.get(worldId).label}: ${iconSpec.label}` });
     const integrity = validateCalibrationSvg(svg);
     if (!integrity.pass) {
       svgIntegrityPass = false;
@@ -73,7 +80,9 @@ const baseCss = `
 `;
 
 function svgUrl(worldId, iconId) {
-  return pathToFileURL(svgRefs.get(`${worldId}:${iconId}`)).href;
+  const file = svgRefs.get(`${worldId}:${iconId}`);
+  if (!file) throw new Error(`Missing generated SVG for ${worldId}:${iconId}`);
+  return pathToFileURL(file).href;
 }
 
 function specimenHtml(worldId) {
@@ -182,6 +191,7 @@ try {
     },
     quiverLineAuthority: exploration.quiverLineAuthority,
     calibrationIconIds: REQUIRED_CALIBRATION_ICONS,
+    contrastGlyphIds: CONTRAST_GLYPH_IDS,
     sizeMatrix: REQUIRED_SIZE_MATRIX,
     criticalSizeRange: [14,16,18],
     confusingPairs: REQUIRED_CONFUSING_PAIRS,
@@ -202,7 +212,7 @@ try {
     }
   };
   await fs.writeFile(path.join(outputRoot, 'manifest.json'), JSON.stringify(manifest, null, 2));
-  console.log(`AI Council Icon System V1 calibration: ${worldEvidence.length} worlds × ${REQUIRED_CALIBRATION_ICONS.length} glyphs, ${semanticComparisons.length} comparisons, no selection.`);
+  console.log(`AI Council Icon System V1 calibration: ${worldEvidence.length} worlds × ${REQUIRED_CALIBRATION_ICONS.length} calibration glyphs + ${CONTRAST_GLYPH_IDS.length} contrast glyphs/world, ${semanticComparisons.length} comparisons, no selection.`);
 } finally {
   await browser.close();
 }
