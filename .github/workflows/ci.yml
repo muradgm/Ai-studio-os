@@ -50,7 +50,7 @@ jobs:
 
   browser-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -65,6 +65,18 @@ jobs:
 
       - name: Install Playwright Chromium only
         run: npx playwright install chromium
+
+      - name: Render AI Council Style Frame Proof V2
+        run: npm run proof:ai-council
+
+      - name: Upload AI Council style-frame evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-style-frame-proof-v2
+          path: artifacts/ai-council/style-frame-proof-v2
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Run real typography browser proof
         run: npm run test:typography-browser
