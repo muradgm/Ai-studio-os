@@ -39,8 +39,11 @@ jobs:
           node --check scripts/finalize-ai-council-visual-system-v1-proof.mjs
           node --check scripts/ai-council-motion-system-v1-proof.mjs
           node --check scripts/ai-council-motion-system-v1-human-review-proof.mjs
+          node --check scripts/ai-council-icon-system-v1-proof.mjs
           node --check modules/motion-system/runtime.mjs
           node --check modules/motion-system/approval.mjs
+          node --check modules/icon-system/runtime.mjs
+          node --check modules/icon-system/calibration-glyphs.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
         run: node ./bin/studio.mjs benchmark creative-engineering-v13
@@ -138,6 +141,18 @@ jobs:
         with:
           name: ai-council-visual-system-v1-proof
           path: artifacts/ai-council/visual-system-v1-proof
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Render AI Council Icon System V1 calibration proof
+        run: npm run proof:ai-council-icons
+
+      - name: Upload AI Council Icon System V1 calibration evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-icon-system-v1-calibration
+          path: artifacts/ai-council/icon-system-v1-calibration
           if-no-files-found: error
           retention-days: 14
 
