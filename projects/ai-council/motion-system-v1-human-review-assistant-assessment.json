@@ -1,0 +1,52 @@
+{
+  "schema": "ai-studio-os/motion-system-human-review-assessment@1",
+  "projectId": "ai-council",
+  "motionSystemRef": {
+    "id": "hybrid-v1-motion-system-v1",
+    "sourceRef": "projects/ai-council/motion-system-v1.json"
+  },
+  "reviewedEvidence": {
+    "workflowRun": 203,
+    "artifact": "ai-council-motion-system-v1-human-review-proof",
+    "artifactDigest": "sha256:72a077326ee86b4397486c7d68c216922b9a74b4e032a8c0f24eef76bf37db44",
+    "primaryClips": 6,
+    "auxiliaryClips": 1,
+    "exactBrowserProof": true,
+    "visualSystemHumanApprovalResolved": true
+  },
+  "result": "ready-for-human-motion-review",
+  "selectionAuthority": false,
+  "review": {
+    "closedFirstPassFindings": [
+      "Working state now lives inside the conversation or context/evidence surface instead of depending on a floating global proof strip.",
+      "Project context visibly resolves into the right inspector and becomes stable product context.",
+      "Evidence registers into provenance only when evidence-source-added fixture events arrive.",
+      "Structured Recommendation resolves by completed section rather than animating a fully visible finished answer.",
+      "Approval begins in neutral advisory presentation and crosses into consequence language only when approval-required arrives.",
+      "Execution uses present-tense language only for the active operation and completed-language labels for settled work.",
+      "Execution completion resolves into a restrained Decision → Action → Verified → History lineage rather than celebration.",
+      "Mobile now demonstrates the actual project/thread continuity sheet instead of only animating its trigger."
+    ],
+    "qualitativeStrengths": [
+      "Motion is much more product-native and less like an observability/proof overlay.",
+      "The six-moment sequence tells AI Council's product story without introducing a separate motion aesthetic.",
+      "Counterpoint remains the reading/conversation rhythm, Decision Spine owns provenance and settlement, and Threshold remains rare and consequential.",
+      "The strongest motion remains the advice → approval boundary, which is appropriate because authority genuinely changes there.",
+      "The execution sequence communicates progress without fake percentage completion or spectacle."
+    ],
+    "remainingProductionRisks": [
+      "Production runtime adapters still need to emit the event vocabulary; current browser telemetry is explicitly fixture evidence.",
+      "The Structured Recommendation proof should eventually cover a real multi-section production response with variable section lengths and asynchronous readiness.",
+      "Evidence acquisition needs production tests with large source counts and sources arriving out of order.",
+      "The mobile sheet needs focus trapping, escape/back behavior, touch target and reduced-motion accessibility proof in the implemented product.",
+      "Execution progress needs cancellation, partial failure, rollback and retry paths before final Visual System approval."
+    ]
+  },
+  "truth": {
+    "humanVisualApproval": true,
+    "assistantMotionReviewComplete": true,
+    "humanMotionApproval": false,
+    "runtimeEventAdaptersImplemented": false,
+    "finalVisualSystemApproved": false
+  }
+}
