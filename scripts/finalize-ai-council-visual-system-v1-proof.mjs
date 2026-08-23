@@ -5,10 +5,13 @@ import { chromium } from 'playwright';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
+const projectRoot = path.join(repoRoot, 'projects', 'ai-council');
 const outputRoot = path.join(repoRoot, 'artifacts', 'ai-council', 'visual-system-v1-proof');
 const canonicalRoot = path.join(outputRoot, 'canonical');
 const stressRoot = path.join(outputRoot, 'stress');
 const sourceRoot = path.join(outputRoot, 'source-html');
+const approval = JSON.parse(await fs.readFile(path.join(projectRoot, 'visual-system-v1-human-approval.json'), 'utf8'));
+const humanVisualApproved = approval?.truth?.humanVisualApproval === true && approval?.truth?.finalVisualSystemApproved === false;
 
 const canonicalIds = [
   'project-home',
@@ -33,15 +36,22 @@ const stressIds = [
   'very-long-project-memory'
 ];
 
+const worldChrome = humanVisualApproved
+  ? 'HYBRID V1 SELECTED · VISUAL SYSTEM V1 HUMAN-APPROVED DIRECTION'
+  : 'HYBRID V1 SELECTED · VISUAL SYSTEM V1 CANDIDATE';
+const approvalChrome = humanVisualApproved
+  ? 'VISUAL SYSTEM V1 · PRODUCTION REFINEMENT · FINAL APPROVAL PENDING'
+  : 'VISUAL SYSTEM V1 · HUMAN VISUAL APPROVAL PENDING';
+
 const PROOF_CHROME_CSS = `
 .worldmark,.proof{font-size:0!important;color:transparent!important}
-.worldmark:after{content:'HYBRID V1 SELECTED · VISUAL SYSTEM V1 CANDIDATE'!important;font-family:Inter,Arial,sans-serif!important;font-size:8px!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--muted)!important}
-.proof:after{content:'VISUAL SYSTEM V1 · HUMAN VISUAL APPROVAL PENDING'!important;font-family:Inter,Arial,sans-serif!important;font-size:7px!important;letter-spacing:.07em!important;text-transform:uppercase!important;color:var(--muted)!important}
+.worldmark:after{content:'${worldChrome}'!important;font-family:Inter,Arial,sans-serif!important;font-size:8px!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:var(--muted)!important}
+.proof:after{content:'${approvalChrome}'!important;font-family:Inter,Arial,sans-serif!important;font-size:7px!important;letter-spacing:.07em!important;text-transform:uppercase!important;color:var(--muted)!important}
 `;
 
 function addFinalChrome(html) {
-  if (html.includes('data-visual-system-final-chrome')) return html;
-  return html.replace('</head>', `<style data-visual-system-final-chrome>${PROOF_CHROME_CSS}</style></head>`);
+  const stripped = html.replace(/<style data-visual-system-final-chrome>[\s\S]*?<\/style>/gi, '');
+  return stripped.replace('</head>', `<style data-visual-system-final-chrome>${PROOF_CHROME_CSS}</style></head>`);
 }
 
 async function waitFonts(page) {
@@ -95,20 +105,42 @@ try {
 
   await renderOverview(browser, {
     title: 'AI Council Visual System V1 · canonical screens',
-    subtitle: 'Hybrid V1 selected · exact browser candidate · human visual approval still pending.',
+    subtitle: humanVisualApproved
+      ? 'Hybrid V1 selected · visual language human-approved · production refinement and final approval remain open.'
+      : 'Hybrid V1 selected · exact browser candidate · human visual approval still pending.',
     ids: canonicalIds,
     imageRoot: canonicalRoot,
     outputName: 'canonical-overview'
   });
   await renderOverview(browser, {
     title: 'AI Council Visual System V1 · stress states',
-    subtitle: 'Dense and edge cases are part of the visual-system gate, not late QA.',
+    subtitle: humanVisualApproved
+      ? 'Approved visual language under production refinement · dense and edge cases remain part of the gate.'
+      : 'Dense and edge cases are part of the visual-system gate, not late QA.',
     ids: stressIds,
     imageRoot: stressRoot,
     outputName: 'stress-overview'
   });
 
-  console.log('Finalized Visual System V1 proof chrome and streaming-state product copy.');
+  const manifestPath = path.join(outputRoot, 'manifest.json');
+  const manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+  manifest.humanApprovalRef = {
+    schema: approval.schema,
+    sourceRef: 'projects/ai-council/visual-system-v1-human-approval.json',
+    recordedAt: approval.approvalEvent?.recordedAt ?? null
+  };
+  manifest.status = humanVisualApproved ? 'human-visual-language-approved-production-refinement' : manifest.status;
+  manifest.truth = {
+    ...(manifest.truth ?? {}),
+    humanVisualApproval: humanVisualApproved,
+    visualSystemDirectionFrozen: humanVisualApproved,
+    conceptualVisualSearchClosed: humanVisualApproved,
+    motionHumanApproved: false,
+    finalVisualSystemApproved: false
+  };
+  await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+
+  console.log(`Finalized Visual System V1 proof chrome, streaming copy, and human-approval state: ${humanVisualApproved ? 'approved direction' : 'pending'}.`);
 } finally {
   await browser.close();
 }
