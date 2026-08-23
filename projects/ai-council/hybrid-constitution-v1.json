@@ -1,0 +1,100 @@
+{
+  "schema": "ai-studio-os/hybrid-interface-constitution@1",
+  "projectId": "ai-council",
+  "candidateId": "decision-spine-counterpoint-hybrid-v1",
+  "label": "Decision Spine × Counterpoint Hybrid V1",
+  "status": "ready-for-proof",
+  "baseline": {
+    "worldId": "decision-spine",
+    "weightedScore": 8.98,
+    "rule": "Hybrid V1 must outperform Decision Spine rather than merely contain more ideas."
+  },
+  "sourceResponsibilities": {
+    "decisionSpine": {
+      "owns": [
+        "application shell",
+        "spatial hierarchy",
+        "semantic relationships",
+        "provenance",
+        "chronology",
+        "decision lineage",
+        "memory lineage",
+        "status progression"
+      ],
+      "rule": "The spine appears only when there is an actual semantic relationship, provenance chain, chronology, or consequence."
+    },
+    "counterpoint": {
+      "owns": [
+        "recommendation typography",
+        "explanatory prose",
+        "evidence reading rhythm",
+        "argument versus metadata hierarchy",
+        "generous whitespace",
+        "quiet secondary information",
+        "human-judgment moments"
+      ],
+      "rule": "Counterpoint must improve reading and evaluation, not merely substitute a serif font."
+    },
+    "threshold": {
+      "owns": [
+        "approval required",
+        "authorization",
+        "rejected action",
+        "blocked operation",
+        "high risk",
+        "external mutation",
+        "destructive operation",
+        "irreversible consequence",
+        "security verification"
+      ],
+      "rule": "Threshold is a consequence state language, not navigation or the default product world."
+    }
+  },
+  "screenHierarchy": [
+    { "screenId": "project-home", "primary": "decision-spine", "secondary": "counterpoint", "threshold": "almost-none" },
+    { "screenId": "conversation", "primary": "counterpoint", "secondary": "decision-spine", "threshold": "none" },
+    { "screenId": "structured-response", "primary": "counterpoint", "secondary": "decision-spine", "threshold": "risk-state-only" },
+    { "screenId": "evidence-context", "primary": "counterpoint", "secondary": "decision-spine", "threshold": "verification-exceptions-only" },
+    { "screenId": "approval", "primary": "threshold", "secondary": "decision-spine", "threshold": "dominant" },
+    { "screenId": "decision-detail", "primary": "decision-spine", "secondary": "counterpoint", "threshold": "authority-status-only" },
+    { "screenId": "project-memory", "primary": "decision-spine", "secondary": "counterpoint", "threshold": "disputed-or-risky-memory-only" },
+    { "screenId": "mobile-conversation", "primary": "counterpoint", "secondary": "decision-spine", "threshold": "action-boundaries-only" }
+  ],
+  "proofQuestions": [
+    "Does conversation remain dominant?",
+    "Are recommendations materially easier to read?",
+    "Does provenance feel meaningful without becoming a graph?",
+    "Is approval unmistakably different from advisory work?",
+    "Does Decision Detail feel durable enough to reference months later?",
+    "Does Project Memory feel editable while remaining trustworthy?",
+    "Does mobile stay calm and avoid desktop complexity?",
+    "Does the result feel uniquely AI Council rather than a styled generic AI workspace?"
+  ],
+  "hardFailConditions": [
+    { "id": "decorative-spine", "rule": "Reject if spine decoration appears without semantic lineage." },
+    { "id": "threshold-leak", "rule": "Reject if Threshold visual language leaks into ordinary conversation or navigation." },
+    { "id": "editorial-control-ambiguity", "rule": "Reject if editorial styling makes operational controls ambiguous." },
+    { "id": "drama-reduces-readability", "rule": "Reject if visual drama reduces information density or readability." },
+    { "id": "context-competes", "rule": "Reject if the right context panel competes with the conversation." },
+    { "id": "approval-authority-unclear", "rule": "Reject if approval does not visibly alter authority state." },
+    { "id": "project-home-dashboard", "rule": "Reject if Project Home becomes a dashboard instead of a continuation surface." },
+    { "id": "mobile-desktop-complexity", "rule": "Reject if mobile restores desktop complexity." },
+    { "id": "canonical-information-removed", "rule": "Reject if Hybrid V1 removes canonical information to look cleaner." }
+  ],
+  "comparison": {
+    "question": "Did Hybrid V1 materially improve the current winner?",
+    "baselineWorldId": "decision-spine",
+    "candidateId": "decision-spine-counterpoint-hybrid-v1",
+    "requiredCanonicalScreens": 8,
+    "boardMode": "same-screen-head-to-head",
+    "requiredComparisonBoards": 8,
+    "requiredCandidateOverviewBoards": 1,
+    "winnerRule": "Hybrid V1 may be recommended only if no hard-fail condition is triggered and its weighted review score is greater than 8.98."
+  },
+  "truth": {
+    "humanWorldSelectionConfirmed": false,
+    "humanVisualApproval": false,
+    "finalVisualSystemApproved": false,
+    "hybridAutomaticallySelected": false
+  }
+}
