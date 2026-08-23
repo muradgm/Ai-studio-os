@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+import { buildProductUnderstanding } from '../modules/product-understanding/runtime.mjs';
 import {
   extractReferenceSystem,
   buildDesignRead,
@@ -17,11 +18,18 @@ import { runCreativeProductionRuntime, validateCreativeProductionBenchmark } fro
 const input = JSON.parse(fs.readFileSync(new URL('../benchmarks/005-du-bonheur-creative-production/input.json', import.meta.url)));
 const expected = JSON.parse(fs.readFileSync(new URL('../benchmarks/005-du-bonheur-creative-production/expected.json', import.meta.url)));
 
+function readyProductUnderstanding() { return buildProductUnderstanding({ ...input.productUnderstanding, projectId: input.id }); }
 function readyReferenceSystem() { return extractReferenceSystem({ references: input.references }); }
 function readyDesignRead() { return buildDesignRead(input.designRead); }
 function readyDials() { return buildCreativeDials(input.creativeDials); }
 function readyExploration() {
-  return buildConceptExploration({ concepts: input.concepts, designRead: readyDesignRead(), creativeDials: readyDials(), referenceSystem: readyReferenceSystem() });
+  return buildConceptExploration({
+    concepts: input.concepts,
+    productUnderstanding: readyProductUnderstanding(),
+    designRead: readyDesignRead(),
+    creativeDials: readyDials(),
+    referenceSystem: readyReferenceSystem()
+  });
 }
 
 test('reference extraction rejects exact-copy intent', () => {
@@ -50,14 +58,20 @@ test('creative dials require rationale, not naked numbers', () => {
   const bad = structuredClone(input.creativeDials); bad.texture.rationale = ' '; assert.equal(buildCreativeDials(bad).pass, false);
 });
 
+test('exploration blocks when Product Understanding is missing', () => {
+  const output = buildConceptExploration({ concepts: input.concepts, designRead: readyDesignRead(), creativeDials: readyDials(), referenceSystem: readyReferenceSystem() });
+  assert.equal(output.pass, false);
+  assert.ok(output.findings.some((f) => f.code === 'product-understanding-not-ready'));
+});
+
 test('exploration requires three to five concepts', () => {
-  const output = buildConceptExploration({ concepts: input.concepts.slice(0, 2), designRead: readyDesignRead(), creativeDials: readyDials(), referenceSystem: readyReferenceSystem() });
+  const output = buildConceptExploration({ concepts: input.concepts.slice(0, 2), productUnderstanding: readyProductUnderstanding(), designRead: readyDesignRead(), creativeDials: readyDials(), referenceSystem: readyReferenceSystem() });
   assert.equal(output.pass, false); assert.ok(output.findings.some((f) => f.code === 'concept-count-out-of-range'));
 });
 
 test('exploration rejects cosmetic variants masquerading as alternatives', () => {
   const concepts = structuredClone(input.concepts.slice(0, 3)); concepts[1] = { ...concepts[0], id: 'copy-b' }; concepts[2] = { ...concepts[0], id: 'copy-c' };
-  const output = buildConceptExploration({ concepts, designRead: readyDesignRead(), creativeDials: readyDials(), referenceSystem: readyReferenceSystem() });
+  const output = buildConceptExploration({ concepts, productUnderstanding: readyProductUnderstanding(), designRead: readyDesignRead(), creativeDials: readyDials(), referenceSystem: readyReferenceSystem() });
   assert.equal(output.pass, false); assert.ok(output.findings.some((f) => f.code === 'concepts-too-similar'));
 });
 
@@ -161,9 +175,9 @@ test('provider names are not embedded in production recipes', () => {
   }
 });
 
-test('creative-production route includes calibration, gateway, registry, and patch stages', () => {
+test('creative-production route includes Product Understanding, calibration, gateway, registry, and patch stages', () => {
   const routes = JSON.parse(fs.readFileSync(new URL('../kernel/routes.json', import.meta.url)));
-  for (const stage of ['reference-extraction','design-read','creative-dials','explore','concept-selection','production-mode','production-recipe','tool-gateway','asset-registry','asset-patch']) assert.ok(routes['creative-production'].includes(stage), `missing ${stage}`);
+  for (const stage of ['product-understanding','reference-extraction','design-read','creative-dials','explore','concept-selection','production-mode','production-recipe','tool-gateway','asset-registry','asset-patch']) assert.ok(routes['creative-production'].includes(stage), `missing ${stage}`);
 });
 
 test('creative-production council includes production, asset, accessibility, and skeptic roles', () => {
