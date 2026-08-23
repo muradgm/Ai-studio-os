@@ -60,7 +60,7 @@
         "transferRisk": "low-to-medium if every boundary remains tied to real decision authority rather than abstract progress"
       },
       "antiPatterns": ["cybersecurity lock imagery", "sci-fi portal", "progress-stepper UI", "glowing orb crossing a ring"],
-      "unresolvedRisks": ["Could become too abstract or cinematic unless every major threshold is anchored to concrete evidence, constraints, approval, or verification.]"]
+      "unresolvedRisks": ["Could become too abstract or cinematic unless every major threshold is anchored to concrete evidence, constraints, approval, or verification."]
     },
     {
       "id": "decision-spine",
