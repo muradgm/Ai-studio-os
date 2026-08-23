@@ -33,30 +33,41 @@ export function getExecutionProject(projectId) {
 export function createExecutionJob({ id, projectId, iteration = 0, creativeWorldSelection = null } = {}) {
   if (!id) throw new Error('execution id is required');
   getExecutionProject(projectId);
-  if (!creativeWorldSelection || creativeWorldSelection.status !== 'locked' || !creativeWorldSelection.selectedCreativeWorldId) {
-    throw new Error('validated Creative World selection is required');
-  }
+  const validatedSelection = creativeWorldSelection?.status === 'locked' && creativeWorldSelection?.selectedCreativeWorldId
+    ? creativeWorldSelection
+    : null;
   const now = new Date().toISOString();
   return {
     id,
     projectId,
-    creativeProjectId: creativeWorldSelection.creativeProjectId,
+    creativeProjectId: validatedSelection?.creativeProjectId ?? null,
     status: 'queued',
     stage: 'queued',
     iteration,
     createdAt: now,
     updatedAt: now,
-    directionSelection: {
+    directionSelection: validatedSelection ? {
       status: 'locked',
-      creativeProjectId: creativeWorldSelection.creativeProjectId,
-      selectedCreativeWorldId: creativeWorldSelection.selectedCreativeWorldId,
-      selectedCreativeWorldLabel: creativeWorldSelection.selectedCreativeWorldLabel,
-      creativeWorldCatalogVersion: creativeWorldSelection.catalogVersion,
-      sourceRef: creativeWorldSelection.sourceRef,
-      thesisRef: structuredClone(creativeWorldSelection.thesisRef ?? {}),
-      visualEvidenceRefs: [...(creativeWorldSelection.visualEvidenceRefs ?? [])],
-      comparisonRef: creativeWorldSelection.comparisonRef ?? null,
+      creativeProjectId: validatedSelection.creativeProjectId,
+      selectedCreativeWorldId: validatedSelection.selectedCreativeWorldId,
+      selectedCreativeWorldLabel: validatedSelection.selectedCreativeWorldLabel,
+      creativeWorldCatalogVersion: validatedSelection.catalogVersion,
+      sourceRef: validatedSelection.sourceRef,
+      thesisRef: structuredClone(validatedSelection.thesisRef ?? {}),
+      visualEvidenceRefs: [...(validatedSelection.visualEvidenceRefs ?? [])],
+      comparisonRef: validatedSelection.comparisonRef ?? null,
       lockedAt: now
+    } : {
+      status: 'not-provided',
+      creativeProjectId: null,
+      selectedCreativeWorldId: null,
+      selectedCreativeWorldLabel: null,
+      creativeWorldCatalogVersion: null,
+      sourceRef: null,
+      thesisRef: {},
+      visualEvidenceRefs: [],
+      comparisonRef: null,
+      lockedAt: null
     },
     approval: 'pending',
     approvedAt: null,
