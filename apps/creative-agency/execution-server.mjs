@@ -17,6 +17,10 @@ import {
 } from '../../modules/creative-engineering/index.mjs';
 import { createViteInvocation } from '../../lib/local-vite.mjs';
 import {
+  loadCreativeWorldCatalog,
+  validateCreativeWorldSelection
+} from './creative-world-catalog.mjs';
+import {
   REPO_ROOT,
   getExecutionProject,
   createExecutionJob,
@@ -340,20 +344,58 @@ async function handler(req, res, serverOrigin) {
       status: 'ready',
       runtime: 'creative-engineering-v1.3',
       measurement: 'release-intelligence-v1',
+      creativeWorldSelection: 'evidence-gated-v1',
       transport: 'local-http',
       host: '127.0.0.1'
     });
+  }
+
+  const worldCatalogMatch = pathname.match(/^\/api\/creative-projects\/([^/]+)\/creative-worlds$/);
+  if (worldCatalogMatch && req.method === 'GET') {
+    try {
+      const creativeProjectId = decodeURIComponent(worldCatalogMatch[1]);
+      const catalog = await loadCreativeWorldCatalog(creativeProjectId);
+      return json(res, 200, { catalog });
+    } catch (error) {
+      return json(res, 400, { error: error instanceof Error ? error.message : String(error) });
+    }
   }
 
   if (pathname === '/api/executions' && req.method === 'POST') {
     try {
       const body = await readJson(req);
       const projectId = body.projectId ?? 'creative-agency';
+      const creativeProjectId = body.creativeProjectId;
       getExecutionProject(projectId);
+      if (!creativeProjectId) return json(res, 422, { error: 'creative-project-id-required' });
+
+      const catalog = await loadCreativeWorldCatalog(creativeProjectId);
+      const validated = validateCreativeWorldSelection(catalog, {
+        selectedWorldId: body.selectedCreativeWorldId,
+        catalogVersion: body.creativeWorldCatalogVersion
+      });
+      if (!validated.pass) {
+        return json(res, 422, {
+          error: 'creative-world-selection-invalid',
+          catalog: {
+            projectId: catalog.projectId,
+            status: catalog.status,
+            catalogVersion: catalog.catalogVersion,
+            lockableCount: catalog.lockableCount
+          },
+          findings: validated.findings
+        });
+      }
+
       const running = [...jobs.values()].find((item) => item.projectId === projectId && ['queued', 'running'].includes(item.status));
       if (running) return json(res, 409, { error: 'execution-already-running', job: publicJob(running) });
       const id = `exec-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-      const job = createExecutionJob({ id, projectId, iteration: Number(body.iteration ?? 0) });
+      const job = createExecutionJob({
+        id,
+        projectId,
+        iteration: Number(body.iteration ?? 0),
+        creativeWorldSelection: validated.selection
+      });
       jobs.set(id, job);
       queueMicrotask(() => executeJob(job, serverOrigin));
       return json(res, 202, { job: publicJob(job) });
