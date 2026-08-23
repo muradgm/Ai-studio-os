@@ -166,8 +166,8 @@ export function buildVisualSystem(input = {}, { selection = null, architectureRe
   if (clean(system.motion?.sourceOfTruth) !== clean(motionRef.sourceRef)) {
     findings.push(finding('major', 'visual-system-motion-consumption-source-invalid', 'Inline Visual System motion rules must identify the formal Motion System artifact as their source of truth.'));
   }
-  if (system.motion?.humanApproved !== false) {
-    findings.push(finding('blocker', 'visual-system-motion-approval-fabricated', 'Visual System candidate may not claim Motion System human approval before explicit review.'));
+  if (system.motion?.humanApproved === true && !clean(system.motion?.humanApprovalSourceRef)) {
+    findings.push(finding('blocker', 'visual-system-motion-approval-fabricated', 'A Visual System candidate may reference Motion human approval only when it points to the separate human-approval artifact; the rendering stage itself does not make that approval authoritative.'));
   }
 
   if (!Array.isArray(system.responsive?.breakpoints) || system.responsive.breakpoints.length < 3
