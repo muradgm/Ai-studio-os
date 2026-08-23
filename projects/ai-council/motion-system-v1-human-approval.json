@@ -10,6 +10,11 @@
     "schema": "ai-studio-os/motion-event-taxonomy@1",
     "sourceRef": "projects/ai-council/motion-event-taxonomy-v1.json"
   },
+  "constitutionRef": {
+    "schema": "ai-studio-os/motion-system-constitution@1",
+    "id": "hybrid-v1-motion-constitution-v1",
+    "sourceRef": "projects/ai-council/motion-system-v1-constitution.json"
+  },
   "visualSystemApprovalRef": {
     "schema": "ai-studio-os/visual-system-human-approval@1",
     "sourceRef": "projects/ai-council/visual-system-v1-human-approval.json",
