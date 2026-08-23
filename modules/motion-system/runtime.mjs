@@ -13,7 +13,25 @@ function hash(value) {
   return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24);
 }
 
-export const REQUIRED_STATE_CLASSES = ['loading', 'working', 'reasoning-status', 'execution-progress'];
+export const REQUIRED_OPERATIONAL_STATES = ['loading', 'working', 'reasoning-status', 'execution-progress'];
+// Backward-compatible export name. These are operational states, not motion roles.
+export const REQUIRED_STATE_CLASSES = REQUIRED_OPERATIONAL_STATES;
+export const ALLOWED_OPERATIONAL_STATES = ['none', ...REQUIRED_OPERATIONAL_STATES];
+export const REQUIRED_MOTION_ROLES = [
+  'none',
+  'content-transition',
+  'context-registration',
+  'evidence-registration',
+  'coordination-transition',
+  'comparison-transition',
+  'authority-transition',
+  'verification-transition',
+  'result-transition',
+  'failure-transition',
+  'lineage-transition',
+  'memory-transition',
+  'navigation-transition'
+];
 export const REQUIRED_MOTION_PRIMITIVES = [
   'message-submission',
   'task-understanding',
@@ -52,6 +70,7 @@ function stableFingerprint(system) {
     stateClasses: system.stateClasses,
     speedHierarchy: system.speedHierarchy,
     runtimeEvidencePolicy: system.runtimeEvidencePolicy,
+    eventTaxonomyRef: system.eventTaxonomyRef,
     eventVocabulary: system.eventVocabulary,
     primitives: system.primitives,
     canonicalScreenBindings: system.canonicalScreenBindings,
@@ -76,7 +95,80 @@ function normalizeEvents(events = []) {
   }).filter((event) => event.id);
 }
 
-export function buildMotionSystem(input = {}, { selection = null, visualSystemId = null, architectureRef = null, fixtureRef = null } = {}) {
+function resolveEventTaxonomy(rawEvents, taxonomy, findings) {
+  if (taxonomy?.schema !== 'ai-studio-os/motion-event-taxonomy@1') {
+    findings.push(finding('blocker', 'motion-system-taxonomy-schema-invalid', 'Motion System requires ai-studio-os/motion-event-taxonomy@1 before production integration.'));
+    return rawEvents.map(({ class: _legacyClass, ...event }) => ({ ...event, operationalState: 'none', motionRole: 'none' }));
+  }
+  if (clean(taxonomy.motionSystemId) === '' || clean(taxonomy.motionSystemId) !== clean(taxonomy.__expectedMotionSystemId)) {
+    findings.push(finding('blocker', 'motion-system-taxonomy-system-mismatch', 'Motion event taxonomy must reference the exact Motion System id.', {
+      expected: taxonomy.__expectedMotionSystemId ?? null,
+      received: taxonomy.motionSystemId ?? null
+    }));
+  }
+
+  const semanticRows = Array.isArray(taxonomy.events) ? taxonomy.events : [];
+  const semanticIds = semanticRows.map((row) => clean(row?.id)).filter(Boolean);
+  if (semanticIds.length !== new Set(semanticIds).size) {
+    findings.push(finding('blocker', 'motion-system-taxonomy-event-duplicate', 'Motion event taxonomy ids must be unique.'));
+  }
+  const rawIds = rawEvents.map((event) => clean(event?.id)).filter(Boolean);
+  if (JSON.stringify([...semanticIds].sort()) !== JSON.stringify([...rawIds].sort())) {
+    findings.push(finding('blocker', 'motion-system-taxonomy-coverage-mismatch', 'Motion event taxonomy must cover exactly the authored event vocabulary.', {
+      authoredEventIds: rawIds,
+      taxonomyEventIds: semanticIds
+    }));
+  }
+
+  const semantics = new Map(semanticRows.map((row) => [clean(row?.id), row]));
+  const resolved = rawEvents.map((raw) => {
+    const row = semantics.get(clean(raw?.id)) ?? {};
+    const operationalState = clean(row.operationalState);
+    const motionRole = clean(row.motionRole);
+    if (!ALLOWED_OPERATIONAL_STATES.includes(operationalState)) {
+      findings.push(finding('blocker', 'motion-system-operational-state-invalid', 'Each event must map to none or one of the four operational states.', {
+        eventId: raw?.id ?? null,
+        operationalState: row.operationalState ?? null
+      }));
+    }
+    if (!REQUIRED_MOTION_ROLES.includes(motionRole)) {
+      findings.push(finding('blocker', 'motion-system-motion-role-invalid', 'Each event must map to a known orthogonal motion role.', {
+        eventId: raw?.id ?? null,
+        motionRole: row.motionRole ?? null
+      }));
+    }
+    const { class: _legacyClass, ...canonical } = raw ?? {};
+    return { ...canonical, operationalState, motionRole };
+  });
+
+  const byId = new Map(resolved.map((event) => [event.id, event]));
+  const requiredSemantics = [
+    ['approval-required', 'none', 'authority-transition'],
+    ['ui-project-navigation-opened', 'none', 'navigation-transition'],
+    ['evidence-source-added', 'working', 'evidence-registration'],
+    ['validation-started', 'execution-progress', 'none'],
+    ['execution-completed', 'none', 'lineage-transition']
+  ];
+  for (const [eventId, operationalState, motionRole] of requiredSemantics) {
+    const event = byId.get(eventId);
+    if (!event || event.operationalState !== operationalState || event.motionRole !== motionRole) {
+      findings.push(finding('blocker', 'motion-system-semantic-assertion-failed', 'Motion event taxonomy violates an authority/navigation/provenance semantic invariant.', {
+        eventId,
+        expected: { operationalState, motionRole },
+        received: event ? { operationalState: event.operationalState, motionRole: event.motionRole } : null
+      }));
+    }
+  }
+  return resolved;
+}
+
+export function buildMotionSystem(input = {}, {
+  selection = null,
+  visualSystemId = null,
+  architectureRef = null,
+  fixtureRef = null,
+  taxonomy = null
+} = {}) {
   const system = structuredClone(input ?? {});
   const findings = [];
 
@@ -103,8 +195,8 @@ export function buildMotionSystem(input = {}, { selection = null, visualSystemId
     findings.push(finding('major', 'motion-system-governing-rule-missing', 'Motion System requires a governing idea and truth-first core rule.'));
   }
 
-  for (const stateClass of REQUIRED_STATE_CLASSES) {
-    if (!system.stateClasses?.[stateClass]) findings.push(finding('major', 'motion-system-state-class-missing', 'Motion System is missing one of the four required state classes.', { stateClass }));
+  for (const operationalState of REQUIRED_OPERATIONAL_STATES) {
+    if (!system.stateClasses?.[operationalState]) findings.push(finding('major', 'motion-system-state-class-missing', 'Motion System is missing one of the four required operational states.', { operationalState }));
   }
 
   const speed = system.speedHierarchy ?? {};
@@ -133,14 +225,27 @@ export function buildMotionSystem(input = {}, { selection = null, visualSystemId
     if (policy[key] !== expected) findings.push(finding('blocker', 'motion-system-runtime-truth-policy-invalid', 'Motion System runtime-evidence policy would permit misleading activity.', { key, expected, received: policy[key] }));
   }
 
-  const events = Array.isArray(system.eventVocabulary) ? system.eventVocabulary : [];
-  const eventIds = events.map((event) => clean(event?.id)).filter(Boolean);
-  if (eventIds.length !== new Set(eventIds).size) findings.push(finding('blocker', 'motion-system-event-id-duplicate', 'Motion event vocabulary ids must be unique.'));
-  for (const event of events) {
+  const rawEvents = Array.isArray(system.eventVocabulary) ? system.eventVocabulary : [];
+  const rawEventIds = rawEvents.map((event) => clean(event?.id)).filter(Boolean);
+  if (rawEventIds.length !== new Set(rawEventIds).size) findings.push(finding('blocker', 'motion-system-event-id-duplicate', 'Motion event vocabulary ids must be unique.'));
+  for (const event of rawEvents) {
     if (!clean(event?.copy) || BANNED_COPY.test(clean(event?.copy))) findings.push(finding('blocker', 'motion-system-event-copy-invalid', 'Motion event copy is missing or simulates hidden thought.', { eventId: event?.id ?? null, copy: event?.copy ?? null }));
-    if (!REQUIRED_STATE_CLASSES.includes(clean(event?.class))) findings.push(finding('major', 'motion-system-event-class-invalid', 'Runtime event vocabulary must map to one of the four work-state classes.', { eventId: event?.id ?? null, eventClass: event?.class ?? null }));
   }
 
+  const taxonomyInput = structuredClone(taxonomy ?? {});
+  taxonomyInput.__expectedMotionSystemId = system.id;
+  system.eventVocabulary = resolveEventTaxonomy(rawEvents, taxonomyInput, findings);
+  system.eventTaxonomyRef = taxonomy?.schema === 'ai-studio-os/motion-event-taxonomy@1' ? {
+    schema: taxonomy.schema,
+    motionSystemId: taxonomy.motionSystemId,
+    fingerprint: hash({ events: taxonomy.events, operationalStates: taxonomy.operationalStates, motionRoles: taxonomy.motionRoles }),
+    runtimeTaxonomyResolved: taxonomy.truth?.motionRuntimeTaxonomyResolved === true
+  } : null;
+  if (system.eventTaxonomyRef?.runtimeTaxonomyResolved !== true) {
+    findings.push(finding('blocker', 'motion-system-runtime-taxonomy-unresolved', 'Motion production integration is blocked until operationalState and motionRole taxonomy is explicitly resolved.'));
+  }
+
+  const eventIds = system.eventVocabulary.map((event) => event.id);
   const primitives = Array.isArray(system.primitives) ? system.primitives : [];
   const primitiveIds = primitives.map((primitive) => clean(primitive?.id)).filter(Boolean);
   for (const id of REQUIRED_MOTION_PRIMITIVES) {
@@ -212,10 +317,12 @@ export function buildMotionSystem(input = {}, { selection = null, visualSystemId
       exactChromiumMotionProof: true,
       reducedMotionEquivalence: true,
       runtimeEventEvidence: true,
+      orthogonalRuntimeTaxonomy: true,
       productionRuntimeAdaptersRequiredBeforeRelease: true
     },
     truth: {
       humanMotionApproval: false,
+      motionRuntimeTaxonomyResolved: system.eventTaxonomyRef?.runtimeTaxonomyResolved === true,
       exactBrowserMotionProofComplete: false,
       reducedMotionProofComplete: false,
       runtimeEventAdaptersImplemented: false,
@@ -247,9 +354,22 @@ export function validateMotionPresentation(system, primitiveId, runtimeEvents = 
 export function deriveWorkingStatus(system, runtimeEvents = []) {
   const events = normalizeEvents(runtimeEvents).sort((a, b) => a.sequence - b.sequence);
   const vocabulary = new Map((system?.eventVocabulary ?? []).map((event) => [event.id, event]));
-  const visible = events.filter((event) => vocabulary.has(event.id));
-  const current = [...visible].reverse().find((event) => !event.completed) ?? visible.at(-1) ?? null;
-  if (!current) return { status: 'idle', current: null, completed: [] };
+  const operationalEvents = events.filter((event) => {
+    const spec = vocabulary.get(event.id);
+    return spec && spec.operationalState && spec.operationalState !== 'none';
+  });
+  const current = [...operationalEvents].reverse().find((event) => !event.completed) ?? null;
+  if (!current) {
+    return {
+      status: 'idle',
+      current: null,
+      completed: operationalEvents.filter((event) => event.completed).map((event) => ({
+        eventId: event.id,
+        copy: vocabulary.get(event.id)?.copy ?? event.id,
+        operationalState: vocabulary.get(event.id)?.operationalState ?? 'none'
+      }))
+    };
+  }
   const spec = vocabulary.get(current.id);
   const copy = current.label || spec.copy;
   return {
@@ -257,10 +377,40 @@ export function deriveWorkingStatus(system, runtimeEvents = []) {
     current: {
       eventId: current.id,
       copy,
-      stateClass: spec.class,
+      operationalState: spec.operationalState,
       participant: current.participant,
       operationId: current.operationId
     },
-    completed: visible.filter((event) => event.completed).map((event) => ({ eventId: event.id, copy: vocabulary.get(event.id)?.copy ?? event.id }))
+    completed: operationalEvents.filter((event) => event.completed).map((event) => ({
+      eventId: event.id,
+      copy: vocabulary.get(event.id)?.copy ?? event.id,
+      operationalState: vocabulary.get(event.id)?.operationalState ?? 'none'
+    }))
+  };
+}
+
+export function deriveMotionRole(system, runtimeEvents = []) {
+  const events = normalizeEvents(runtimeEvents).sort((a, b) => a.sequence - b.sequence);
+  const vocabulary = new Map((system?.eventVocabulary ?? []).map((event) => [event.id, event]));
+  const event = [...events].reverse().find((candidate) => {
+    const spec = vocabulary.get(candidate.id);
+    return spec && spec.motionRole && spec.motionRole !== 'none';
+  }) ?? null;
+  if (!event) return null;
+  const spec = vocabulary.get(event.id);
+  return {
+    eventId: event.id,
+    motionRole: spec.motionRole,
+    copy: event.label || spec.copy,
+    sequence: event.sequence,
+    participant: event.participant,
+    operationId: event.operationId
+  };
+}
+
+export function deriveMotionPresentationState(system, runtimeEvents = []) {
+  return {
+    operational: deriveWorkingStatus(system, runtimeEvents),
+    transition: deriveMotionRole(system, runtimeEvents)
   };
 }
