@@ -7,6 +7,47 @@
     "The site must represent real products and the real physical business truthfully.",
     "The digital experience should make visiting, understanding the offer, and reaching the shop easy."
   ],
+  "productUnderstanding": {
+    "sourceProject": "benchmark/du-bonheur",
+    "sourceRevision": "fixture-v1",
+    "productDefinition": "A real French pâtisserie and café in Berlin whose digital product must help people understand the craft, evaluate the offer, and confidently visit or buy without fabricating the physical business.",
+    "productCategory": "local premium hospitality / pâtisserie",
+    "productStage": "real operating business with digital experience redesign",
+    "problem": "The digital experience must communicate exceptional pâtisserie craft and practical visit value without collapsing into generic luxury-bakery conventions.",
+    "primaryUsers": ["people in Berlin deciding whether to visit the pâtisserie", "people evaluating products before a visit or purchase"],
+    "secondaryUsers": ["existing customers checking location, opening context, or product offer"],
+    "primaryJobs": ["understand why the pâtisserie is worth visiting", "see credible product/craft evidence", "reach practical visit or shop information quickly"],
+    "secondaryJobs": ["recognize the brand", "revisit signature products"],
+    "coreWorkflow": ["arrive and understand the proposition", "inspect real craft and product evidence", "understand the café/product offer", "choose visit or shop action"],
+    "coreObjects": ["pâtisserie products", "craft/process evidence", "physical café", "visit/shop information"],
+    "primaryActions": ["inspect products", "understand craft", "find location", "visit or shop"],
+    "importantStates": ["sensory discovery", "product consideration", "practical visit intent"],
+    "valueProposition": "Make Du Bonheur's real craft and products legible and desirable online while reducing friction between discovery and a real visit or purchase.",
+    "differentiators": ["real French pâtisserie craft interpreted through its Berlin context", "truthful sensory/product evidence rather than generic luxury signalling", "a digital experience that treats craft process as product value"],
+    "alternatives": ["generic bakery template", "luxury ecommerce gallery", "social-media-only discovery"],
+    "productMechanics": ["real product imagery carries documentary truth", "editorial sequencing explains craft and product value", "practical location/visit actions remain available", "missing signature-product evidence triggers capture instead of synthetic documentary generation"],
+    "intelligenceModel": "AI may help plan, edit, and generate supporting non-documentary assets, but it may not fabricate real products or business evidence.",
+    "trustModel": "Real products, place, and business claims must be tied to real sources; synthetic supporting imagery must never masquerade as documentary evidence.",
+    "riskModel": "The experience fails if visual ambition weakens appetite, misrepresents products, or hides practical visit information.",
+    "governanceModel": "Truth-sensitive imagery requires source evidence or new capture; creative approval does not override authenticity constraints.",
+    "desiredPerception": "high-craft, sensory, credible, contemporary, warm, and distinctly Berlin-aware rather than stereotypically Parisian",
+    "undesiredPerception": ["generic beige luxury pâtisserie", "decorative Paris fantasy", "cold design-object gallery", "synthetic food advertising"],
+    "nonNegotiables": ["represent real products truthfully", "preserve practical visit/shop clarity", "do not fabricate documentary product imagery", "let craft matter more than generic luxury signalling"],
+    "constraints": ["real asset availability may limit final product imagery", "commercial priority between shop conversion and in-store visits remains partly unresolved"],
+    "categoryConventions": ["serif-led luxury presentation", "polished food photography", "soft neutral palettes", "product grids"],
+    "categoryCliches": ["blush-pink Parisian styling", "generic centered serif hero", "three-card pastry grid", "floating CGI pastry"],
+    "opportunitiesToBreakConvention": ["make real pastry construction and texture drive the experience logic", "combine French craft with Berlin restraint instead of Paris nostalgia"],
+    "unknowns": ["which product photos are licensed and high resolution", "whether online shop conversion or in-store visits is the primary commercial goal"],
+    "assumptions": ["real product/café evidence can be sourced or captured before final production"],
+    "authorship": {"mode": "authored-from-evidence", "agent": "benchmark-curator", "reviewedByHuman": false},
+    "evidence": [
+      {"id":"db-e1","sourceType":"approved-brief","sourceRef":"benchmark:001:business-truth","claim":"Du Bonheur is a real French pâtisserie in Berlin and must be represented truthfully.","supports":["definition","problem","trust","perception"]},
+      {"id":"db-e2","sourceType":"approved-brief","sourceRef":"benchmark:001:intent","claim":"The digital experience should make the craft, offer, and visit action understandable.","supports":["users","jobs","workflow"]},
+      {"id":"db-e3","sourceType":"asset-policy","sourceRef":"benchmark:001:assets","claim":"Real signature products require real-source treatment; missing documentary assets require capture.","supports":["mechanics","trust","governance"]},
+      {"id":"db-e4","sourceType":"research-fixture","sourceRef":"benchmark:001:inspiration","claim":"The category is crowded with beige luxury, centered serif, Paris cliché, and generic product-grid treatments.","supports":["differentiation","perception"]},
+      {"id":"db-e5","sourceType":"experience-brief","sourceRef":"benchmark:001:design-preferences","claim":"The desired journey moves from identity/sensory hook through craft and products toward visit or shop action.","supports":["workflow","mechanics","jobs"]}
+    ]
+  },
   "creativeTraits": [
     "tactile",
     "editorial",
@@ -83,31 +124,21 @@
       "real": true,
       "usable": true,
       "representsRealProduct": false,
-      "needs": [
-        "crop",
-        "grade"
-      ]
+      "needs": ["crop", "grade"]
     },
     {
       "id": "signature-croissant",
       "real": true,
       "usable": true,
       "representsRealProduct": true,
-      "needs": [
-        "crop",
-        "cleanup",
-        "grade"
-      ]
+      "needs": ["crop", "cleanup", "grade"]
     },
     {
       "id": "cafe-interior",
       "real": true,
       "usable": true,
       "representsRealProduct": false,
-      "needs": [
-        "extend",
-        "remove-distraction"
-      ]
+      "needs": ["extend", "remove-distraction"]
     },
     {
       "id": "signature-eclair-missing",
@@ -125,12 +156,7 @@
     }
   ],
   "motion": {
-    "traits": [
-      "precise",
-      "tactile",
-      "restrained",
-      "sensory"
-    ],
+    "traits": ["precise", "tactile", "restrained", "sensory"],
     "intensity": 4,
     "signature": "laminated-layer-reveal"
   }
