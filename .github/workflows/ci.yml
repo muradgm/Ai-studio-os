@@ -29,6 +29,7 @@ jobs:
 
       - name: Check AI Council proof renderer syntax
         run: |
+          node --check scripts/ai-council-ux-wireframe-proof.mjs
           node --check scripts/ai-council-style-frame-proof.mjs
           node --check scripts/finalize-ai-council-style-frame-proof.mjs
 
@@ -70,6 +71,18 @@ jobs:
 
       - name: Install Playwright Chromium only
         run: npx playwright install chromium
+
+      - name: Render AI Council canonical UX wireframe proof
+        run: npm run proof:ai-council-ux
+
+      - name: Upload AI Council UX architecture evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-ux-wireframe-proof-v1
+          path: artifacts/ai-council/ux-wireframe-proof-v1
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Render AI Council Style Frame Proof V2
         run: npm run proof:ai-council
