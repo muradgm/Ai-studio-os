@@ -64,6 +64,7 @@ const SUPPORT = {
   inspect: `<g id="base"><path d="M4 8V4H8M16 4H20V8M20 16V20H16M8 20H4V16"/><circle cx="12" cy="12" r="3.5"/></g>`,
   back: `<g id="base"><path d="M19 12H5M10 6L4 12L10 18"/></g>`,
   action: `<g id="base"><rect x="3" y="8" width="6" height="8"/><path d="M9 12H20M16 8L20 12L16 16"/></g>`,
+  edit: `<g id="base"><path d="M5 17.5L6 13.5L15.8 3.7L20.3 8.2L10.5 18L6.5 19Z"/><path d="M13.8 5.7L18.3 10.2"/></g>`,
   conversation: `<g id="base"><path d="M4 5H20V16H10L6 20V16H4Z"/><path d="M8 9H16M8 12H14"/></g>`,
   'project-home': `<g id="base"><path d="M4 11L12 4L20 11V20H5V11"/><path d="M9 20V14H15V20"/></g>`
 };
