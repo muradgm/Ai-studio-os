@@ -29,14 +29,7 @@
   },
   "reviewedEvidence": {
     "proofRef": "artifacts/ai-council/motion-system-v1-human-review-proof/manifest.json",
-    "primaryMoments": [
-      "request submission",
-      "project context",
-      "evidence attachment",
-      "structured recommendation resolves",
-      "approval authority boundary",
-      "execution → validation → history"
-    ],
+    "primaryMoments": ["request submission","project context","evidence attachment","structured recommendation resolves","approval authority boundary","execution → validation → history"],
     "auxiliaryMoment": "mobile project/thread continuity",
     "humanFindings": [
       "Runtime event motion now changes the owning product surface and leaves useful structure behind.",
@@ -62,15 +55,7 @@
       "reduced-motion semantic equivalence"
     ],
     "productionRefinementOpen": [
-      "exact timing and easing polish",
-      "recommendation section stagger under real variable-length content",
-      "large and out-of-order evidence arrival",
-      "post-authorization execution color semantics",
-      "latency, interruption, cancellation, retry, rollback, and partial-failure states",
-      "component-level focus and reduced-motion behavior",
-      "icon motion where semantically justified",
-      "real runtime-event adapters",
-      "final production interaction proof"
+      "exact timing and easing polish","recommendation section stagger under real variable-length content","large and out-of-order evidence arrival","post-authorization execution color semantics","latency, interruption, cancellation, retry, rollback, and partial-failure states","component-level focus and reduced-motion behavior","icon motion where semantically justified","real runtime-event adapters","final production interaction proof"
     ]
   },
   "productionGuidance": {
