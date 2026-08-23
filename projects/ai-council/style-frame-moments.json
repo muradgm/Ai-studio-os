@@ -1,0 +1,51 @@
+{
+  "schema": "ai-studio-os/style-frame-moments@1",
+  "projectId": "ai-council",
+  "moments": [
+    {
+      "id": "opening",
+      "label": "Opening / Ambiguous Intent",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "purpose": "Prove how the world introduces AI Council without agent theater and makes uncertainty/product value legible immediately.",
+      "productState": "An ambiguous technical request has entered with project context, but no decision is yet justified."
+    },
+    {
+      "id": "formulation",
+      "label": "Problem / Strategy Comparison",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "purpose": "Prove how the world visualizes evidence, alternative formulations, hard constraints, candidate strategies, and disagreement without becoming a dashboard grid.",
+      "productState": "The real problem is being formulated and several strategies remain eligible or contested."
+    },
+    {
+      "id": "commitment",
+      "label": "Decision / Approval Boundary",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "purpose": "Prove the moment a decision earns governed commitment and show why approval is consequential rather than ceremonial.",
+      "productState": "A preferred strategy exists, but hard constraints, authority, evidence, and reversibility still govern whether it may become action."
+    },
+    {
+      "id": "verification",
+      "label": "Execution / Verification / Memory",
+      "viewport": "desktop",
+      "width": 1440,
+      "height": 900,
+      "purpose": "Prove that the world survives after the decision: execution consequence, verification, rollback, and evidence-backed memory remain part of the same lineage.",
+      "productState": "An approved action has executed and the system must distinguish attempted work, verified result, and remembered project truth."
+    },
+    {
+      "id": "mobile",
+      "label": "Mobile / Decision Continuity",
+      "viewport": "mobile",
+      "width": 390,
+      "height": 844,
+      "purpose": "Prove the world on a narrow screen without collapsing into chat, cards, or an unreadable miniature desktop.",
+      "productState": "The user resumes a consequential decision on mobile and must understand current state, blockers, authority, and next action."
+    }
+  ]
+}
