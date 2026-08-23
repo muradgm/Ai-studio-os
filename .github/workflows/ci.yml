@@ -37,6 +37,7 @@ jobs:
           node --check scripts/ai-council-hybrid-v1-proof.mjs
           node --check scripts/ai-council-visual-system-v1-proof.mjs
           node --check scripts/ai-council-motion-system-v1-proof.mjs
+          node --check scripts/ai-council-motion-system-v1-human-review-proof.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
         run: node ./bin/studio.mjs benchmark creative-engineering-v13
@@ -61,7 +62,7 @@ jobs:
 
   browser-release:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -146,6 +147,18 @@ jobs:
         with:
           name: ai-council-motion-system-v1-proof
           path: artifacts/ai-council/motion-system-v1-proof
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Render AI Council product-native Motion human-review proof
+        run: npm run proof:ai-council-motion-review
+
+      - name: Upload AI Council Motion human-review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-motion-system-v1-human-review-proof
+          path: artifacts/ai-council/motion-system-v1-human-review-proof
           if-no-files-found: error
           retention-days: 14
 
