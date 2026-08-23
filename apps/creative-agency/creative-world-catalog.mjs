@@ -2,6 +2,8 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildProductUXArchitecture } from '../../modules/product-ux-architecture/runtime.mjs';
+import { buildProductUXArchitectureReference, sameProductUXArchitectureReference } from '../../modules/product-ux-architecture/reference.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PROJECT_ID = /^[a-z0-9][a-z0-9_-]*$/i;
@@ -29,7 +31,12 @@ export function creativeWorldCatalogFile(projectId, { repoRoot = REPO_ROOT } = {
   return path.join(repoRoot, 'projects', id, 'creative-worlds.json');
 }
 
-function catalogHash(exploration) {
+export function productUXArchitectureFile(projectId, { repoRoot = REPO_ROOT } = {}) {
+  const id = normalizeProjectId(projectId);
+  return path.join(repoRoot, 'projects', id, 'product-ux-architecture.json');
+}
+
+function catalogHash(exploration, requiredInterfaceArchitectureRef = null) {
   const source = JSON.stringify({
     schema: exploration?.schema ?? null,
     projectId: exploration?.thesisRef?.projectId ?? exploration?.projectId ?? null,
@@ -53,28 +60,38 @@ function catalogHash(exploration) {
       categoryTransferTest: world?.categoryTransferTest,
       antiPatterns: world?.antiPatterns
     })),
-    visualProof: exploration?.visualProof ?? null
+    visualProof: exploration?.visualProof ?? null,
+    requiredInterfaceArchitectureRef
   });
   return crypto.createHash('sha256').update(source).digest('hex').slice(0, 20);
 }
 
-function proofForWorld(exploration, worldId) {
+function proofForWorld(exploration, worldId, requiredInterfaceArchitectureRef = null) {
   const proof = exploration?.visualProof;
   const entry = proof?.worlds?.find?.((item) => item?.worldId === worldId)
     ?? proof?.byWorld?.[worldId]
     ?? null;
   const evidenceRefs = cleanList(entry?.evidenceRefs ?? entry?.visualEvidenceRefs ?? []);
-  const reviewReady = proof?.reviewReady === true && entry?.reviewReady === true && evidenceRefs.length > 0;
+  const proofReviewed = proof?.reviewReady === true && entry?.reviewReady === true && evidenceRefs.length > 0;
+  const architectureMatch = !requiredInterfaceArchitectureRef
+    || sameProductUXArchitectureReference(proof?.interfaceArchitectureRef, requiredInterfaceArchitectureRef);
+  const reviewReady = proofReviewed && architectureMatch;
+  let status = 'proof-required';
+  if (reviewReady) status = 'review-ready';
+  else if (proofReviewed && !architectureMatch) status = 'architecture-proof-stale';
+  else if (evidenceRefs.length) status = 'proof-not-reviewed';
   return {
     reviewReady,
     evidenceRefs,
     comparisonRef: clean(proof?.comparisonRef) || null,
-    status: reviewReady ? 'review-ready' : evidenceRefs.length ? 'proof-not-reviewed' : 'proof-required'
+    interfaceArchitectureRef: structuredClone(proof?.interfaceArchitectureRef ?? null),
+    architectureMatch,
+    status
   };
 }
 
-function mapWorld(exploration, world) {
-  const proof = proofForWorld(exploration, world.id);
+function mapWorld(exploration, world, requiredInterfaceArchitectureRef = null) {
+  const proof = proofForWorld(exploration, world.id, requiredInterfaceArchitectureRef);
   return {
     id: clean(world.id),
     label: clean(world.label) || clean(world.id),
@@ -97,7 +114,7 @@ function mapWorld(exploration, world) {
   };
 }
 
-export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = null } = {}) {
+export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = null, requiredInterfaceArchitectureRef = null } = {}) {
   const id = normalizeProjectId(projectId);
   const findings = [];
 
@@ -126,12 +143,13 @@ export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = 
       findings.push(finding('blocker', 'creative-world-catalog-world-not-review-ready', 'Only structurally review-ready Creative World artifacts may enter the selection workspace.', { worldId }));
       continue;
     }
-    candidates.push(mapWorld(exploration, world));
+    candidates.push(mapWorld(exploration, world, requiredInterfaceArchitectureRef));
   }
 
-  const version = catalogHash(exploration);
+  const version = catalogHash(exploration, requiredInterfaceArchitectureRef);
   const pass = !findings.some((item) => item.severity === 'blocker');
   const lockableCount = candidates.filter((candidate) => candidate.canLock).length;
+  const staleArchitectureProof = requiredInterfaceArchitectureRef && candidates.some((candidate) => candidate.visualProof.status === 'architecture-proof-stale');
 
   return {
     schema: 'ai-studio-os/creative-world-catalog@1',
@@ -139,14 +157,38 @@ export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = 
     sourceRef: sourceRef ?? `projects/${id}/creative-worlds.json`,
     catalogVersion: version,
     thesisRef: structuredClone(exploration?.thesisRef ?? {}),
-    status: !pass ? 'blocked' : lockableCount ? 'visual-proof-ready' : 'awaiting-visual-proof',
+    requiredInterfaceArchitectureRef: structuredClone(requiredInterfaceArchitectureRef),
+    status: !pass ? 'blocked' : lockableCount ? 'visual-proof-ready' : staleArchitectureProof ? 'awaiting-current-interface-proof' : 'awaiting-visual-proof',
     pass,
     reviewReady: pass,
     candidates,
     lockableCount,
-    selectionRule: 'A Creative World can be locked only after comparable visual proof is reviewed and evidence refs exist.',
+    selectionRule: requiredInterfaceArchitectureRef
+      ? 'A Creative World can be locked only after comparable visual proof is reviewed against the current frozen Product UX Architecture.'
+      : 'A Creative World can be locked only after comparable visual proof is reviewed and evidence refs exist.',
     findings
   };
+}
+
+async function loadRequiredInterfaceArchitectureRef(projectId, { repoRoot = REPO_ROOT } = {}) {
+  const file = productUXArchitectureFile(projectId, { repoRoot });
+  try {
+    const input = JSON.parse(await fs.readFile(file, 'utf8'));
+    const architecture = buildProductUXArchitecture(input);
+    if (!architecture.reviewReady || architecture.truth?.informationArchitectureFrozen !== true) {
+      return {
+        ref: null,
+        finding: finding('blocker', 'creative-world-catalog-interface-architecture-not-ready', 'Project Product UX Architecture exists but is not review-ready; visual selection must remain blocked.', { sourceRef: path.relative(repoRoot, file).split(path.sep).join('/') })
+      };
+    }
+    return { ref: buildProductUXArchitectureReference(architecture), finding: null };
+  } catch (error) {
+    if (error?.code === 'ENOENT') return { ref: null, finding: null };
+    return {
+      ref: null,
+      finding: finding('blocker', 'creative-world-catalog-interface-architecture-read-failed', error instanceof Error ? error.message : String(error), { sourceRef: path.relative(repoRoot, file).split(path.sep).join('/') })
+    };
+  }
 }
 
 export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT } = {}) {
@@ -155,7 +197,21 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
   const sourceRef = path.relative(repoRoot, file).split(path.sep).join('/');
   try {
     const exploration = JSON.parse(await fs.readFile(file, 'utf8'));
-    return buildCreativeWorldCatalog(id, exploration, { sourceRef });
+    const architectureRequirement = await loadRequiredInterfaceArchitectureRef(id, { repoRoot });
+    const catalog = buildCreativeWorldCatalog(id, exploration, {
+      sourceRef,
+      requiredInterfaceArchitectureRef: architectureRequirement.ref
+    });
+    if (!architectureRequirement.finding) return catalog;
+    return {
+      ...catalog,
+      status: 'blocked',
+      pass: false,
+      reviewReady: false,
+      lockableCount: 0,
+      candidates: catalog.candidates.map((candidate) => ({ ...candidate, canLock: false })),
+      findings: [...catalog.findings, architectureRequirement.finding]
+    };
   } catch (error) {
     if (error?.code === 'ENOENT') {
       return {
@@ -164,6 +220,7 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
         sourceRef,
         catalogVersion: null,
         thesisRef: null,
+        requiredInterfaceArchitectureRef: null,
         status: 'not-generated',
         pass: false,
         reviewReady: false,
@@ -179,6 +236,7 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
       sourceRef,
       catalogVersion: null,
       thesisRef: null,
+      requiredInterfaceArchitectureRef: null,
       status: 'blocked',
       pass: false,
       reviewReady: false,
@@ -206,7 +264,7 @@ export function validateCreativeWorldSelection(catalog, { selectedWorldId, catal
   if (!selected) {
     findings.push(finding('blocker', 'creative-world-selection-id-invalid', 'Selected Creative World must exist in the current project catalog.', { selectedWorldId: id || null }));
   } else if (selected.canLock !== true) {
-    findings.push(finding('blocker', 'creative-world-selection-visual-proof-required', 'Creative World cannot be locked from prose. Reviewed visual proof is required first.', { selectedWorldId: id, proofStatus: selected.visualProof?.status ?? null }));
+    findings.push(finding('blocker', 'creative-world-selection-visual-proof-required', 'Creative World cannot be locked from prose or stale interface proof. Reviewed visual proof for the current product architecture is required first.', { selectedWorldId: id, proofStatus: selected.visualProof?.status ?? null }));
   }
 
   const pass = !findings.some((item) => item.severity === 'blocker');
@@ -220,6 +278,7 @@ export function validateCreativeWorldSelection(catalog, { selectedWorldId, catal
       catalogVersion: catalog.catalogVersion,
       sourceRef: catalog.sourceRef,
       thesisRef: structuredClone(catalog.thesisRef ?? {}),
+      requiredInterfaceArchitectureRef: structuredClone(catalog.requiredInterfaceArchitectureRef ?? null),
       visualEvidenceRefs: [...(selected.visualProof?.evidenceRefs ?? [])],
       comparisonRef: selected.visualProof?.comparisonRef ?? null,
       status: 'locked'
