@@ -27,8 +27,8 @@ await fs.writeFile(sourcePath, source);
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1500, height: 3200 }, deviceScaleFactor: 1 });
-  await page.setContent(source, { waitUntil: 'load' });
-  await page.waitForFunction(() => [...document.images].every((image) => image.complete && image.naturalWidth > 0));
+  await page.goto(pathToFileURL(sourcePath).href, { waitUntil: 'load' });
+  await page.waitForFunction(() => [...document.images].every((image) => image.complete && image.naturalWidth > 0), null, { timeout: 10_000 });
   await page.screenshot({ path: imagePath, fullPage: true });
   await page.close();
 } finally {
