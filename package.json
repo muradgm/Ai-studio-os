@@ -15,6 +15,7 @@
     "test:command-center": "node ./scripts/command-center-execution-smoke.mjs",
     "test:typography-browser": "node ./scripts/typography-browser-proof.mjs",
     "proof:ai-council": "node ./scripts/ai-council-style-frame-proof.mjs && node ./scripts/finalize-ai-council-style-frame-proof.mjs",
+    "proof:ai-council-ux": "node ./scripts/ai-council-ux-wireframe-proof.mjs",
     "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
     "fonts:analyze": "node ./scripts/analyze-google-fonts.mjs",
     "studio": "node ./bin/studio.mjs",
