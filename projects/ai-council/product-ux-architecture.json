@@ -1,0 +1,388 @@
+{
+  "projectId": "ai-council",
+  "productUnderstandingRef": {
+    "schema": "ai-studio-os/product-understanding@1",
+    "projectId": "ai-council",
+    "sourceProject": "muradgm/ai-council",
+    "sourceRevision": "07339ffe056767fd1c2c117cb0ab047de31285e0",
+    "reviewReady": true
+  },
+  "experiencePrinciple": "AI Council should initially feel as understandable as ChatGPT while progressively revealing that it is a project-aware decision and execution system. The conversation remains simple; deeper intelligence appears only when it helps the user understand context, evidence, decisions, memory, actions, or authority.",
+  "productDescription": "AI Council is a project-aware conversational workspace that helps people make, execute, and remember consequential technical decisions. Persistent projects contain multiple conversations that share project memory, decisions, tasks, files, state, evidence, and governed actions.",
+  "primaryInteractionModel": "A familiar conversational AI workspace centered on projects rather than isolated chats: the user asks naturally, Council uses project context, Council responds clearly, and deeper evidence, reasoning summaries, memory, decisions, specialists, or actions are available through progressive inspection.",
+  "shell": {
+    "centerDominant": true,
+    "regions": [
+      {
+        "id": "project-sidebar",
+        "label": "Projects and conversations",
+        "purpose": "Answer where the user is and what work can be resumed.",
+        "dominance": "supporting",
+        "collapsible": true,
+        "defaultVisibility": "visible-desktop"
+      },
+      {
+        "id": "conversation-workspace",
+        "label": "Conversation workspace",
+        "purpose": "Remain the dominant interaction surface for asking, continuing, deciding, and acting.",
+        "dominance": "primary",
+        "collapsible": false,
+        "defaultVisibility": "always"
+      },
+      {
+        "id": "context-panel",
+        "label": "Contextual project inspector",
+        "purpose": "Expose current context, project state, evidence, and proposed actions without competing with the conversation.",
+        "dominance": "supporting",
+        "collapsible": true,
+        "defaultVisibility": "contextual"
+      },
+      {
+        "id": "project-bar",
+        "label": "Project identity bar",
+        "purpose": "Make the active project/workspace and high-level state legible without exposing infrastructure telemetry.",
+        "dominance": "supporting",
+        "collapsible": false,
+        "defaultVisibility": "always"
+      }
+    ]
+  },
+  "globalNavigation": [
+    "Projects",
+    "Activity",
+    "Approvals",
+    "Library",
+    "Settings"
+  ],
+  "projectNavigation": [
+    "Overview",
+    "Conversations",
+    "Tasks",
+    "Decisions",
+    "Memory",
+    "Files"
+  ],
+  "screens": [
+    {
+      "id": "project-home",
+      "label": "Project Home",
+      "purpose": "Tell the user where the project stands, what changed, what matters now, and what should happen next before they open a thread.",
+      "primaryInformation": [
+        "current focus and project phase",
+        "changes since the last session",
+        "suggested next steps",
+        "active conversations",
+        "recent decisions",
+        "open tasks and unresolved questions"
+      ],
+      "secondaryInformation": [
+        "recent project activity",
+        "current branch or workspace when relevant",
+        "blocked work",
+        "related artifacts"
+      ],
+      "primaryActions": [
+        "continue current work",
+        "open an active conversation",
+        "start a new conversation with project context",
+        "open a suggested next step"
+      ],
+      "entryPoints": ["select a project from the sidebar", "return from a project conversation"],
+      "exitPaths": ["conversation", "tasks", "decision-detail", "project-memory"],
+      "alwaysVisible": ["project identity", "current focus", "continue current work"],
+      "progressiveDisclosure": ["full activity history", "detailed project metadata", "advanced inspector state"],
+      "antiPatterns": ["analytics dashboard grid", "runtime-module status wall", "agent roster as project summary"]
+    },
+    {
+      "id": "conversation",
+      "label": "Normal Conversation",
+      "purpose": "Provide a ChatGPT-familiar conversational surface where the user can ask naturally while project context is already available.",
+      "primaryInformation": ["user messages", "clear Council responses", "project identity", "composer"],
+      "secondaryInformation": ["response-level structured sections", "subtle Council participant summary", "source and action indicators"],
+      "primaryActions": ["send a natural-language message", "attach or reference context", "inspect a response", "continue the thread"],
+      "entryPoints": ["project home", "conversation list", "search result", "task or decision"],
+      "exitPaths": ["structured-response", "evidence-context", "approval", "project-home"],
+      "alwaysVisible": ["conversation history", "composer", "active project identity"],
+      "progressiveDisclosure": ["evidence", "Council participants", "reasoning summary", "tools and model details"],
+      "antiPatterns": ["engineering dashboard replacing chat", "every message becoming a card stack", "forcing commands for normal use"]
+    },
+    {
+      "id": "structured-response",
+      "label": "Structured Council Recommendation",
+      "purpose": "Keep the answer conversational while making recommendation, evidence, alternatives, risks, uncertainty, and next actions inspectable.",
+      "primaryInformation": ["direct recommendation or conclusion", "short rationale", "next action when useful"],
+      "secondaryInformation": ["evidence", "alternatives considered", "risks", "remaining uncertainty", "confidence", "Council participants"],
+      "primaryActions": ["expand why", "inspect evidence", "compare alternatives", "continue conversationally"],
+      "entryPoints": ["Council response inside conversation"],
+      "exitPaths": ["evidence-context", "decision-detail", "approval", "conversation"],
+      "alwaysVisible": ["answer", "recommendation state"],
+      "progressiveDisclosure": ["problem formulation", "strategy comparison", "critic summary", "confidence details", "intent verification"],
+      "antiPatterns": ["raw chain-of-thought dump", "dozens of always-open reasoning modules", "agent chat bubbles for every specialist"]
+    },
+    {
+      "id": "evidence-context",
+      "label": "Context and Evidence Inspection",
+      "purpose": "Show what Council is actively using and why a claim is trusted without overwhelming the main conversation.",
+      "primaryInformation": ["current context", "evidence sources", "relevant excerpts", "why each source was used"],
+      "secondaryInformation": ["referenced conversations", "active constraints", "source dates", "source provenance"],
+      "primaryActions": ["open a source", "inspect an excerpt", "remove or correct context", "return to response"],
+      "entryPoints": ["response evidence indicator", "right context panel", "decision detail"],
+      "exitPaths": ["conversation", "structured-response", "decision-detail"],
+      "alwaysVisible": ["source identity", "relevance", "current-use state"],
+      "progressiveDisclosure": ["full source metadata", "retrieval details", "provider/tool trace"],
+      "antiPatterns": ["citation count as trust score", "raw retrieval payloads in default view", "memory and current context shown as the same thing"]
+    },
+    {
+      "id": "approval",
+      "label": "Approval Request",
+      "purpose": "Make consequential external-state changes explicit by showing scope, reason, risk, affected resources, rollback, and authority before execution.",
+      "primaryInformation": ["proposed action", "why Council wants to do it", "affected resources", "risk", "rollback or reversibility", "approval state"],
+      "secondaryInformation": ["evidence supporting action", "execution plan", "tool/provider involvement", "validation plan"],
+      "primaryActions": ["review plan", "approve", "reject", "modify plan"],
+      "entryPoints": ["proposed action in conversation", "global Approvals", "project task"],
+      "exitPaths": ["conversation", "activity", "decision-detail"],
+      "alwaysVisible": ["what will change", "risk", "authority state", "approve/reject controls"],
+      "progressiveDisclosure": ["detailed tool calls", "provider telemetry", "low-level payloads"],
+      "antiPatterns": ["silent execution from prose", "approval as decorative confirmation", "risk hidden behind technical jargon"]
+    },
+    {
+      "id": "decision-detail",
+      "label": "Decision Detail",
+      "purpose": "Preserve a durable answer to what was decided, why, what alternatives existed, what evidence supported it, and whether it remains active.",
+      "primaryInformation": ["decision statement", "status", "decision date", "rationale", "alternatives", "evidence", "confidence or uncertainty"],
+      "secondaryInformation": ["superseded decisions", "related tasks", "execution consequences", "verification results", "memory linkage"],
+      "primaryActions": ["open evidence", "open related conversation", "supersede decision", "ask why this decision was made"],
+      "entryPoints": ["project home", "structured response", "search", "project memory"],
+      "exitPaths": ["conversation", "evidence-context", "project-memory", "tasks"],
+      "alwaysVisible": ["decision", "current status", "rationale"],
+      "progressiveDisclosure": ["full lineage", "specialist dissent", "execution trace"],
+      "antiPatterns": ["audit-log table as the decision", "decision reduced to confidence score", "hidden rejected alternatives"]
+    },
+    {
+      "id": "project-memory",
+      "label": "Project Memory",
+      "purpose": "Expose Council's persistent understanding as structured, correctable project knowledge rather than raw chat history.",
+      "primaryInformation": ["decisions", "facts", "constraints", "tasks", "open questions", "risks", "artifacts", "sessions"],
+      "secondaryInformation": ["source", "confirmation state", "supersession history", "last updated"],
+      "primaryActions": ["edit", "confirm", "supersede", "remove", "open source"],
+      "entryPoints": ["project navigation", "project home", "context panel", "decision detail"],
+      "exitPaths": ["conversation", "decision-detail", "tasks", "project-home"],
+      "alwaysVisible": ["memory category", "statement", "authority/confirmation state"],
+      "progressiveDisclosure": ["history", "source chain", "internal retrieval metadata"],
+      "antiPatterns": ["random chat transcript as memory", "memory user cannot correct", "current response context silently promoted to project truth"]
+    },
+    {
+      "id": "mobile-conversation",
+      "label": "Mobile Conversation Continuity",
+      "purpose": "Let the user resume consequential project work on a narrow screen while preserving current project, decision state, blockers, authority, and next action.",
+      "primaryInformation": ["active project and conversation", "current Council response", "current decision or blocker", "composer"],
+      "secondaryInformation": ["context drawer", "evidence", "actions", "project status"],
+      "primaryActions": ["continue conversation", "open context drawer", "review approval", "return to project home"],
+      "entryPoints": ["mobile app open", "notification/deep link", "project conversation list"],
+      "exitPaths": ["project-home", "evidence-context", "approval", "decision-detail"],
+      "alwaysVisible": ["project identity", "conversation", "composer"],
+      "progressiveDisclosure": ["context panel as drawer/sheet", "advanced inspector", "full project navigation"],
+      "antiPatterns": ["miniature three-column desktop", "generic card stack replacing conversation", "losing authority state on mobile"]
+    }
+  ],
+  "responseAnatomy": [
+    "natural-language answer",
+    "recommendation when applicable",
+    "expandable why",
+    "expandable evidence",
+    "alternatives considered",
+    "risks and remaining uncertainty",
+    "next actions",
+    "subtle Council participant summary"
+  ],
+  "composerCapabilities": [
+    "natural language always works",
+    "+ attaches file, image, repository, or project artifact",
+    "@ references agent, file, conversation, or project",
+    "/ offers optional capabilities such as review, plan, compare, debug, or research"
+  ],
+  "contextPanelTabs": [
+    "Context",
+    "Project",
+    "Evidence",
+    "Actions"
+  ],
+  "visibilityHierarchy": {
+    "level1": [
+      "Projects",
+      "Conversations",
+      "Chat",
+      "Composer",
+      "Project identity"
+    ],
+    "level2": [
+      "Project state",
+      "Sources",
+      "Tasks",
+      "Next actions",
+      "Memory"
+    ],
+    "level3": [
+      "Problem formulation",
+      "Strategy comparison",
+      "Critic",
+      "Confidence",
+      "Intent verification",
+      "Council composition",
+      "Routing"
+    ],
+    "level4": [
+      "Provider calls",
+      "Tokens",
+      "Raw traces",
+      "Tool payloads",
+      "Latency",
+      "Schemas",
+      "Internal IDs"
+    ]
+  },
+  "progressiveDisclosureContract": [
+    {"capability": "Project and conversation identity", "defaultVisibility": "always", "surface": "shell", "rationale": "Users must always know where they are."},
+    {"capability": "Evidence", "defaultVisibility": "when-used", "surface": "response indicator and context panel", "rationale": "Trust should be inspectable without crowding every answer."},
+    {"capability": "Project memory", "defaultVisibility": "contextual", "surface": "project home, context panel, dedicated memory", "rationale": "Persistent understanding matters but is not required in every message."},
+    {"capability": "Problem formulation and strategy comparison", "defaultVisibility": "inspect-on-demand", "surface": "response inspector", "rationale": "Expose structured conclusions when useful rather than internal process by default."},
+    {"capability": "Council participants", "defaultVisibility": "subtle", "surface": "response metadata", "rationale": "Multi-specialist work can build trust without forcing manual orchestration."},
+    {"capability": "Action governance", "defaultVisibility": "always-when-consequential", "surface": "approval request", "rationale": "Permission boundaries must be explicit at the moment they matter."},
+    {"capability": "Models, providers, routing, cost, latency", "defaultVisibility": "developer-inspector", "surface": "advanced inspector", "rationale": "Operational telemetry is useful to technical users but should not define normal navigation."},
+    {"capability": "Raw internal traces", "defaultVisibility": "developer-only", "surface": "advanced diagnostics where permitted", "rationale": "Normal UX should not expose hidden chain-of-thought or raw orchestration payloads."}
+  ],
+  "reasoningExposure": {
+    "defaultPolicy": "Expose structured conclusions, evidence, alternatives, uncertainty, confidence summaries, decision criteria, and action readiness when useful; never expose raw hidden chain-of-thought as the normal product experience.",
+    "rawChainOfThoughtAllowed": false,
+    "structuredConclusionExamples": [
+      "Problem identified",
+      "Alternatives considered",
+      "Why this option won",
+      "Remaining uncertainty",
+      "Confidence",
+      "Action readiness"
+    ]
+  },
+  "contextMemoryModel": {
+    "contextDefinition": "Context is the information AI Council is actively using for the current response or task, including relevant project state, conversations, files, evidence, and constraints.",
+    "memoryDefinition": "Memory is structured information AI Council believes remains true or relevant to the project over time, including decisions, facts, constraints, tasks, questions, risks, artifacts, and session outcomes.",
+    "userAuthorityActions": ["Edit", "Confirm", "Supersede", "Remove"]
+  },
+  "actionGovernance": {
+    "externalStateChangesRequireApproval": true,
+    "approvalInformation": [
+      "what Council wants to do",
+      "why",
+      "expected changes",
+      "risk",
+      "affected resources",
+      "rollback or reversibility",
+      "validation plan"
+    ],
+    "approvalActions": ["Review plan", "Approve", "Reject", "Modify plan"]
+  },
+  "primaryJourneys": [
+    {
+      "id": "resume-project",
+      "label": "Resume an existing project",
+      "goal": "Understand what changed and continue the most relevant work without rebuilding context manually.",
+      "steps": [
+        "open AI Council",
+        "select project or land on project home",
+        "review current focus, changes, and suggested next steps",
+        "continue current work",
+        "resume conversation with inherited project context"
+      ],
+      "successCondition": "The user can continue meaningful work without asking Council to reconstruct the project's current state."
+    },
+    {
+      "id": "fresh-project-conversation",
+      "label": "Start a fresh conversation inside a project",
+      "goal": "Create a new thread that already understands the project's relevant memory and state.",
+      "steps": [
+        "open project home",
+        "start new conversation",
+        "Council composes relevant project context",
+        "user asks naturally",
+        "Council answers with project-aware continuity and inspectable sources"
+      ],
+      "successCondition": "A new conversation feels informed by the project without dumping the entire project history into the chat."
+    },
+    {
+      "id": "governed-action",
+      "label": "Move from recommendation to governed action",
+      "goal": "Let Council propose consequential work while the user retains explicit authority over execution.",
+      "steps": [
+        "Council recommends an action",
+        "user inspects evidence and alternatives if needed",
+        "Council presents approval request with scope, risk, resources, and rollback",
+        "user approves, rejects, or modifies",
+        "permitted work executes",
+        "verification and project memory record the outcome"
+      ],
+      "successCondition": "The user can clearly distinguish advice, proposed action, approved action, executed work, and verified result."
+    }
+  ],
+  "nonNegotiables": [
+    "Conversation remains the dominant product surface.",
+    "Projects and conversations form the primary continuity model.",
+    "Project Home exists as a first-class screen rather than projects being folders only.",
+    "The right context panel is supporting and collapsible.",
+    "Internal Cognitive Core modules do not become primary navigation by default.",
+    "Agents, tools, models, providers, and routing are secondary or inspectable infrastructure concepts.",
+    "Structured conclusions replace raw hidden chain-of-thought exposure.",
+    "Context and persistent project memory remain visibly distinct concepts.",
+    "The user can edit, confirm, supersede, and remove project memory.",
+    "External-state changes surface explicit scope, risk, affected resources, rollback, and approval controls.",
+    "Natural language always works; commands are optional accelerators.",
+    "Mobile preserves project, decision, evidence, and authority continuity instead of shrinking desktop."
+  ],
+  "antiPatterns": [
+    "engineering dashboard as the default home",
+    "runtime modules mapped directly to navigation",
+    "agents/models/tools as mandatory primary navigation",
+    "every reasoning subsystem visible simultaneously",
+    "raw chain-of-thought transcript",
+    "agent portrait theater",
+    "project memory represented as unstructured chat history",
+    "silent external actions hidden inside conversational prose",
+    "permanent three-column density on narrow screens",
+    "confidence and provider telemetry treated as the main answer",
+    "Creative Worlds allowed to invent different product architecture",
+    "visual style chosen before the canonical screen and flow contract"
+  ],
+  "evidence": [
+    {
+      "id": "ux-brief-2026-08-23",
+      "sourceType": "authored-product-brief",
+      "sourceRef": "conversation:2026-08-23-ai-council-ui-ux-product-structure",
+      "claim": "The canonical UX should be a ChatGPT-like conversational workspace centered on projects, with progressive disclosure of Council internals and a first-class Project Home.",
+      "supports": ["shell", "navigation", "screens", "progressive-disclosure", "journeys"]
+    },
+    {
+      "id": "product-understanding-current",
+      "sourceType": "project-artifact",
+      "sourceRef": "projects/ai-council/product-understanding.json",
+      "claim": "AI Council's product value is project-aware decision quality, governance, execution verification, and memory rather than agent quantity or infrastructure visibility.",
+      "supports": ["primary-interaction", "decisions", "approvals", "memory"]
+    },
+    {
+      "id": "creative-thesis-current",
+      "sourceType": "project-artifact",
+      "sourceRef": "projects/ai-council/creative-thesis.json",
+      "claim": "The product should make the path from ambiguous intent to accountable action legible without making internal machinery the experience itself.",
+      "supports": ["structured-response", "evidence", "action-governance"]
+    },
+    {
+      "id": "creative-world-failure-learning",
+      "sourceType": "project-learning",
+      "sourceRef": "projects/ai-council/creative-worlds.json",
+      "claim": "Creative language must be downstream of a fixed product skeleton so worlds cannot accidentally become competing information architectures.",
+      "supports": ["creative-boundary", "screen-contract"]
+    }
+  ],
+  "authorship": {
+    "mode": "authored-from-product-truth",
+    "source": "AI Council UX product structure brief + current AI Council product artifacts"
+  }
+}
