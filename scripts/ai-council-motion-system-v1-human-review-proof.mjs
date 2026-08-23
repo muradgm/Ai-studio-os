@@ -31,7 +31,8 @@ const visualApproval = await readJson(path.join(projectRoot, 'visual-system-v1-h
 const approvalResolution = resolveVisualSystemHumanApproval(visualApproval, { visualSystem, selection });
 if (!approvalResolution.approved) throw new Error(`Visual System human approval is not authoritative: ${approvalResolution.findings.map((item) => item.code).join(', ')}`);
 const motionInput = await readJson(path.join(projectRoot, 'motion-system-v1.json'));
-const motion = buildMotionSystem(motionInput, { selection, visualSystemId: visualSystem.id, architectureRef, fixtureRef });
+const taxonomy = await readJson(path.join(projectRoot, 'motion-event-taxonomy-v1.json'));
+const motion = buildMotionSystem(motionInput, { selection, visualSystemId: visualSystem.id, architectureRef, fixtureRef, taxonomy });
 if (!motion.reviewReady) throw new Error(`Motion System is not review-ready: ${motion.findings.map((item) => item.code).join(', ')}`);
 
 await fs.rm(outputRoot, { recursive: true, force: true });
@@ -109,15 +110,16 @@ async function installWorkState(page, anchorSelector, position = 'beforebegin') 
 
 async function setWorkState(page, eventId, copy = null) {
   const spec = vocabulary.get(eventId);
-  await page.evaluate(({ eventId, stateClass, copy }) => {
+  await page.evaluate(({ eventId, operationalState, motionRole, copy }) => {
     const node = document.querySelector('.product-work-state');
     if (!node) throw new Error('Product work state is missing');
     node.dataset.event = eventId;
-    node.dataset.class = stateClass;
+    node.dataset.class = operationalState;
+    node.dataset.motionRole = motionRole;
     node.querySelector('.motion-copy').textContent = copy;
     node.animate([{opacity:.55,transform:'translateY(2px)'},{opacity:1,transform:'translateY(0)'}],{duration:180,easing:'ease-out',fill:'both'});
-  }, { eventId, stateClass: spec.class, copy: copy ?? spec.copy });
-  await animateTick(page);
+  }, { eventId, operationalState: spec.operationalState, motionRole: spec.motionRole, copy: copy ?? spec.copy });
+  if (spec.operationalState !== 'none') await animateTick(page);
 }
 
 async function prepMoment(page, moment) {
@@ -250,7 +252,7 @@ async function applyEvent(page, moment, eventId, index) {
   if (moment.id === 'mobile-project-thread-continuity' && eventId === 'ui-project-navigation-opened') {
     await page.evaluate(() => {const sheet=document.querySelector('.mobile-project-sheet');if(sheet)sheet.animate([{opacity:0,transform:'translateY(-8px)'},{opacity:1,transform:'translateY(0)'}],{duration:240,easing:'cubic-bezier(.2,.72,.2,1)',fill:'both'});});
   }
-  return { id:eventId, copy:spec.copy, stateClass:spec.class, shownAt:Date.now() };
+  return { id:eventId, copy:spec.copy, operationalState:spec.operationalState, motionRole:spec.motionRole, shownAt:Date.now() };
 }
 
 async function recordMoment(browser, moment, outputDir) {
@@ -300,13 +302,15 @@ const semanticChecks = {
   approvalBeginsAdvisoryThenCrossesAuthorityBoundary: true,
   completedExecutionLabelsUseCompletedLanguage: true,
   mobileNavigationSheetActuallyRendered: auxiliary.some((clip)=>clip.id==='mobile-project-thread-continuity'),
-  visualSystemHumanApprovalResolved: approvalResolution.approved
+  visualSystemHumanApprovalResolved: approvalResolution.approved,
+  orthogonalRuntimeTaxonomyResolved: motion.truth.motionRuntimeTaxonomyResolved === true
 };
 const pass = primaryComplete && Object.values(semanticChecks).every(Boolean);
 const manifest = {
   schema:'ai-studio-os/motion-system-human-review-proof@1',
   projectId:'ai-council',
   motionSystemRef:{id:motion.id,sourceRef:'projects/ai-council/motion-system-v1.json'},
+  eventTaxonomyRef:{sourceRef:'projects/ai-council/motion-event-taxonomy-v1.json',...motion.eventTaxonomyRef},
   visualSystemApprovalRef:{sourceRef:'projects/ai-council/visual-system-v1-human-approval.json',humanVisualApproval:approvalResolution.approved},
   status:pass?'ready-for-human-motion-review':'blocked',
   pass,
@@ -316,7 +320,7 @@ const manifest = {
   auxiliaryClips:auxiliary,
   semanticChecks,
   inheritedMechanicalProof:'artifacts/ai-council/motion-system-v1-proof/manifest.json',
-  truth:{humanVisualApproval:true,humanMotionApproval:false,runtimeEventAdaptersImplemented:false,finalVisualSystemApproved:false}
+  truth:{humanVisualApproval:true,humanMotionApproval:false,motionRuntimeTaxonomyResolved:true,runtimeEventAdaptersImplemented:false,finalVisualSystemApproved:false}
 };
 await fs.writeFile(path.join(outputRoot,'manifest.json'),JSON.stringify(manifest,null,2));
 if(!pass)throw new Error('Motion System human-review proof did not satisfy product-native review requirements.');
