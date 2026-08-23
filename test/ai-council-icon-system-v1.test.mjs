@@ -213,6 +213,7 @@ test('Committed AI Council independent review binds the hardened proof and stops
   assert.deepEqual(review.ranking, ['provenance-glyph','editorial-sign','quiver-construct']);
   assert.equal(review.recommendation.worldId, 'provenance-glyph');
   assert.equal(review.selectedWorld, null);
+  assert.equal(review.iconWorldHumanSelected, false);
   assert.equal(review.truth.independentIconWorldReviewComplete, true);
   assert.equal(review.truth.iconWorldHumanSelected, false);
   assert.equal(review.truth.iconSystemHumanApproved, false);
