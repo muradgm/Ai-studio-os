@@ -149,8 +149,9 @@ function jaccard(a, b) {
   return union ? intersection / union : 0;
 }
 
-export function buildConceptExploration({ concepts = [], designRead, creativeDials, referenceSystem } = {}) {
+export function buildConceptExploration({ concepts = [], designRead, creativeDials, referenceSystem, productUnderstanding } = {}) {
   const findings = [];
+  if (!productUnderstanding?.reviewReady) findings.push({ severity: 'blocker', code: 'product-understanding-not-ready' });
   if (!designRead?.pass) findings.push({ severity: 'blocker', code: 'design-read-not-ready' });
   if (!creativeDials?.pass) findings.push({ severity: 'blocker', code: 'creative-dials-not-ready' });
   if (!referenceSystem?.pass) findings.push({ severity: 'blocker', code: 'reference-system-not-ready' });
@@ -180,7 +181,8 @@ export function buildConceptExploration({ concepts = [], designRead, creativeDia
 
   return {
     stage: 'explore',
-    method: 'diverge-before-converge',
+    method: 'diverge-after-product-understanding',
+    productUnderstandingRef: productUnderstanding?.projectId ?? null,
     concepts: normalized,
     findings,
     pass: !findings.some((finding) => ['blocker', 'major'].includes(finding.severity))
