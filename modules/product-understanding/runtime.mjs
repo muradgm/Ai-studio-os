@@ -126,6 +126,7 @@ export function reviewProductUnderstanding(report = {}) {
 }
 
 export function buildProductUnderstanding(input = {}) {
+  const evidence = normalizeEvidence(input.evidence);
   const report = {
     schema: 'ai-studio-os/product-understanding@1',
     stage: 'product-understanding',
@@ -161,7 +162,7 @@ export function buildProductUnderstanding(input = {}) {
     opportunitiesToBreakConvention: cleanList(input.opportunitiesToBreakConvention),
     unknowns: cleanList(input.unknowns),
     assumptions: cleanList(input.assumptions),
-    evidence: normalizeEvidence(input.evidence),
+    evidence,
     authorship: {
       mode: clean(input.authorship?.mode) || 'deterministic-normalization',
       agent: clean(input.authorship?.agent) || null,
@@ -170,7 +171,7 @@ export function buildProductUnderstanding(input = {}) {
     truth: {
       humanProductApproval: input.truth?.humanProductApproval === true,
       creativeWorkAuthorized: false,
-      evidenceBacked: true
+      evidenceBacked: evidence.length > 0
     }
   };
 
