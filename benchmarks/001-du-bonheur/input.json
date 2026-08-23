@@ -48,116 +48,122 @@
       {"id":"db-e5","sourceType":"experience-brief","sourceRef":"benchmark:001:design-preferences","claim":"The desired journey moves from identity/sensory hook through craft and products toward visit or shop action.","supports":["workflow","mechanics","jobs"]}
     ]
   },
-  "creativeTraits": [
-    "tactile",
-    "editorial",
-    "precise",
-    "warm",
-    "Berlin-aware"
-  ],
+  "creativeTraits": ["tactile", "editorial", "precise", "warm", "Berlin-aware"],
   "antiPrinciples": [
     "Do not default to generic beige luxury.",
     "Do not use decorative Paris clichés.",
     "Do not fabricate signature products as documentary imagery.",
     "Do not add motion merely to signal premium quality."
   ],
+  "creativeThesisCandidate": {
+    "governingIdea": "Treat French pastry craft as a sequence of precise transformations whose evidence remains visible, while Berlin restraint prevents the experience from becoming nostalgic or ornamental.",
+    "creativeTension": "sensory transformation × urban restraint",
+    "whyThisProject": "Du Bonheur can own the contrast between highly worked pastry craft and a contemporary Berlin context because both are grounded in the real shop and product experience.",
+    "principles": [
+      "Reveal craft through transformation and evidence rather than decorative French symbolism.",
+      "Let product texture create sensory intensity while the surrounding interface stays restrained.",
+      "Use Berlin directness to sharpen rather than neutralize the pleasure of the pâtisserie.",
+      "Every medium should interpret transformation differently instead of repeating one pastry motif."
+    ],
+    "selectionRationale": "The idea joins the documented craft, sensory and Berlin truths into one behavior that can govern several different worlds without naming an implementation technology."
+  },
+  "creativeWorldCandidates": [
+    {
+      "id": "laminated-craft",
+      "label": "Laminated Craft",
+      "worldIdea": "The experience behaves like a pastry being built and revealed in precise layers: dense sensory evidence appears through controlled cuts, overlaps and releases inside a disciplined editorial field.",
+      "interpretationOfThesis": "Transformation is made visible as layering and reveal, while the surrounding structure remains restrained enough to keep the experience contemporary rather than nostalgic.",
+      "signatureBehavior": "Evidence is progressively exposed through layer boundaries: every reveal changes what the visitor understands, not just what they see.",
+      "worldClass": "tactile editorial construction",
+      "narrativeModel": "progressive reveal from raw craft evidence to finished product and visit action",
+      "compositionModel": "asymmetric editorial planes with deliberate crops, overlaps and cut-like transitions between dense and quiet zones",
+      "typographyIntent": {
+        "statement": "Display typography should feel sharply edited and compressed against calm, highly legible body text; hierarchy comes from contrast in scale, measure and rhythm rather than decorative French styling.",
+        "preferredCategories": {"display": ["serif", "sans-serif"], "body": ["sans-serif", "serif"]},
+        "pressures": {"expression": 72, "warmth": 62, "readingDensity": 58, "distinctiveness": 78},
+        "antiPatterns": ["generic luxury high-contrast serif", "monospace utility by default"]
+      },
+      "imageLanguage": "extreme truthful macro crops of real pastry structure alternating with contextual shop evidence; product texture carries the sensory drama",
+      "materialLanguage": "paper, flour, glaze, laminated layers and metal work surfaces translated into restrained surface contrast rather than literal skeuomorphism",
+      "motionLanguage": "movement exposes layers, seams and before-after states with measured consequence; nothing floats decoratively",
+      "interactionModel": "users reveal craft evidence through controlled sectional disclosure and compare process-to-product relationships",
+      "responsiveStrategy": "mobile turns overlaps into ordered layer reveals while preserving crop tension, sensory scale shifts and clear visit/shop actions",
+      "soundPolicy": "Default to silence; subtle material sound is permitted only if it strengthens a specific transformation moment.",
+      "categoryTransferTest": {"whyProjectSpecific": "The layer logic is tied to pastry construction evidence and Du Bonheur's real craft/process imagery, not generic French luxury styling.", "transferRisk": "medium if real process evidence is removed"},
+      "antiPatterns": ["floating pastry objects", "generic centered luxury hero", "decorative paper texture everywhere"]
+    },
+    {
+      "id": "counter-ritual",
+      "label": "Counter Ritual",
+      "worldIdea": "The site behaves like an intimate service ritual at the pâtisserie counter: arrival, attention, choice, preparation, handoff and return create the experience rhythm.",
+      "interpretationOfThesis": "Transformation becomes human sequence rather than visual layering, and Berlin restraint appears through direct service cues, uncluttered choices and practical clarity.",
+      "signatureBehavior": "Each meaningful action behaves like a service handoff: the interface receives intent, responds immediately, and advances the visitor without theatrical delay.",
+      "worldClass": "human hospitality ritual",
+      "narrativeModel": "service sequence moving from arrival and appetite through choosing, preparation, handoff and visiting",
+      "compositionModel": "horizontal and vertical service zones organized like a working counter, with objects and copy positioned by task rather than editorial collage",
+      "typographyIntent": {
+        "statement": "Typography should feel conversational but exact: a warm display voice for appetite and a highly functional supporting voice for ordering, timing, location and product detail.",
+        "preferredCategories": {"display": ["serif", "sans-serif"], "body": ["sans-serif"]},
+        "pressures": {"expression": 62, "warmth": 78, "readingDensity": 66, "accessibility": 76},
+        "antiPatterns": ["formal fashion-editorial distance", "technical metadata styling"]
+      },
+      "imageLanguage": "truthful human-scale product and shop photography framed as moments of service, handling, selection and handoff rather than isolated beauty shots",
+      "materialLanguage": "counter surfaces, wrapping, trays, hands and service objects create grounded tactility with minimal ornamental texture",
+      "motionLanguage": "short handoff-like movements, arrivals and state changes create rhythm; motion behaves like service rather than spectacle",
+      "interactionModel": "users make clear choices and receive immediate contextual response, with product, opening, route and shop information treated as service actions",
+      "responsiveStrategy": "mobile becomes the primary counter ritual: thumb-friendly choices, location/opening priority, immediate product context and short state transitions",
+      "soundPolicy": "Silence by default; ambient shop sound is allowed only as an optional contextual layer and never required for comprehension.",
+      "categoryTransferTest": {"whyProjectSpecific": "The sequence is built around Du Bonheur's real counter, products, visit actions and service moments rather than generic hospitality friendliness.", "transferRisk": "medium if the actual shop/service evidence is abstracted away"},
+      "antiPatterns": ["museum-like product distance", "long cinematic intro before useful information", "fashion-commerce interaction clichés"]
+    },
+    {
+      "id": "berlin-proof-sheet",
+      "label": "Berlin Proof Sheet",
+      "worldIdea": "The experience presents pastry craft as evidence: real products, process fragments, shop traces and precise notes are assembled like a contemporary proof sheet where sensory richness interrupts a disciplined Berlin record.",
+      "interpretationOfThesis": "Transformation is proven through accumulated evidence instead of staged luxury; restraint comes from documentary organization and direct language while macro sensory moments break the grid deliberately.",
+      "signatureBehavior": "Visitors move between evidence overview and sensory detail; every enlargement or annotation must reveal a concrete product, process or place relationship.",
+      "worldClass": "documentary evidence system",
+      "narrativeModel": "nonlinear evidence field that accumulates credibility before resolving into product, place and action",
+      "compositionModel": "strict modular evidence grid interrupted by occasional full-bleed sensory breaks and annotated details",
+      "typographyIntent": {
+        "statement": "Typography should behave like an authored publication system: one character-bearing editorial role, one neutral reading role and no automatic technical third voice; captions and annotations remain precise without becoming laboratory graphics.",
+        "preferredCategories": {"display": ["serif", "sans-serif"], "body": ["serif", "sans-serif"]},
+        "pressures": {"expression": 68, "technicality": 42, "readingDensity": 74, "distinctiveness": 82},
+        "antiPatterns": ["lab-report monospace aesthetic", "generic magazine serif plus grotesk pairing"]
+      },
+      "imageLanguage": "real product, storefront, process and material evidence shown with documentary crops, contact-sheet groupings and occasional extreme sensory enlargement",
+      "materialLanguage": "proof marks, paper edges, production notes and raw surfaces appear sparingly as evidence cues rather than nostalgic craft decoration",
+      "motionLanguage": "evidence assembles, aligns, annotates and occasionally breaks scale; transitions clarify relationships rather than simulate physical pastry",
+      "interactionModel": "users scan, open, compare and connect evidence fragments, moving between overview and detail instead of following a single linear reveal",
+      "responsiveStrategy": "mobile converts the proof field into a deliberate evidence stack with preserved annotation relationships, selective sensory interruptions and no loss of essential business actions",
+      "soundPolicy": "No sound by default; this world should remain convincing as a quiet documentary object.",
+      "categoryTransferTest": {"whyProjectSpecific": "The proof-sheet logic depends on Du Bonheur's real Berlin location, product/process evidence and direct shop information rather than generic editorial food styling.", "transferRisk": "low-to-medium if the evidence remains specific"},
+      "antiPatterns": ["fake archival nostalgia", "crypto-dashboard density", "decorative annotation noise"]
+    }
+  ],
   "inspiration": {
-    "directIndustry": [
-      "premium pâtisserie",
-      "artisan bakery",
-      "specialty café"
-    ],
-    "bestInClass": [
-      "editorial food commerce",
-      "high-craft hospitality websites"
-    ],
-    "adjacentIndustries": [
-      "fashion editorial",
-      "perfume",
-      "wine",
-      "independent magazines"
-    ],
-    "trends": [
-      "visible craft",
-      "human imperfection",
-      "sensory storytelling",
-      "reduced chrome"
-    ],
-    "antiReferences": [
-      "blush-pink patisserie template",
-      "generic centered serif hero",
-      "three-card pastry grid",
-      "floating CGI croissant"
-    ],
-    "opportunityGaps": [
-      "make pastry texture and process tactile online",
-      "combine French craft with Berlin restraint",
-      "use real-product editorial cropping instead of category clichés"
-    ],
-    "unresolvedUnknowns": [
-      "which existing product photos are licensed/high-resolution",
-      "whether online shop conversion or in-store visits are the primary commercial goal"
-    ]
+    "directIndustry": ["premium pâtisserie", "artisan bakery", "specialty café"],
+    "bestInClass": ["editorial food commerce", "high-craft hospitality websites"],
+    "adjacentIndustries": ["fashion editorial", "perfume", "wine", "independent magazines"],
+    "trends": ["visible craft", "human imperfection", "sensory storytelling", "reduced chrome"],
+    "antiReferences": ["blush-pink patisserie template", "generic centered serif hero", "three-card pastry grid", "floating CGI croissant"],
+    "opportunityGaps": ["make pastry texture and process tactile online", "combine French craft with Berlin restraint", "use real-product editorial cropping instead of category clichés"],
+    "unresolvedUnknowns": ["which existing product photos are licensed/high-resolution", "whether online shop conversion or in-store visits are the primary commercial goal"]
   },
   "designPreferences": {
     "primaryAction": "visit-or-shop",
-    "sequence": [
-      "identity-and-sensory-hook",
-      "craft-pedigree",
-      "signature-products",
-      "café-experience",
-      "visit-or-shop"
-    ],
+    "sequence": ["identity-and-sensory-hook", "craft-pedigree", "signature-products", "café-experience", "visit-or-shop"],
     "composition": "editorial-asymmetry-with-tactile-macro-anchors",
     "density": "restrained",
     "imageBehavior": "large-real-product-crops-as-layout",
-    "mobilePriority": [
-      "open-status",
-      "location",
-      "signature-products",
-      "shop-or-route"
-    ]
+    "mobilePriority": ["open-status", "location", "signature-products", "shop-or-route"]
   },
   "assets": [
-    {
-      "id": "storefront",
-      "real": true,
-      "usable": true,
-      "representsRealProduct": false,
-      "needs": ["crop", "grade"]
-    },
-    {
-      "id": "signature-croissant",
-      "real": true,
-      "usable": true,
-      "representsRealProduct": true,
-      "needs": ["crop", "cleanup", "grade"]
-    },
-    {
-      "id": "cafe-interior",
-      "real": true,
-      "usable": true,
-      "representsRealProduct": false,
-      "needs": ["extend", "remove-distraction"]
-    },
-    {
-      "id": "signature-eclair-missing",
-      "real": false,
-      "usable": false,
-      "representsRealProduct": true,
-      "needs": []
-    },
-    {
-      "id": "abstract-texture",
-      "real": false,
-      "usable": false,
-      "representsRealProduct": false,
-      "needs": []
-    }
+    {"id": "storefront", "real": true, "usable": true, "representsRealProduct": false, "needs": ["crop", "grade"]},
+    {"id": "signature-croissant", "real": true, "usable": true, "representsRealProduct": true, "needs": ["crop", "cleanup", "grade"]},
+    {"id": "cafe-interior", "real": true, "usable": true, "representsRealProduct": false, "needs": ["extend", "remove-distraction"]},
+    {"id": "signature-eclair-missing", "real": false, "usable": false, "representsRealProduct": true, "needs": []},
+    {"id": "abstract-texture", "real": false, "usable": false, "representsRealProduct": false, "needs": []}
   ],
-  "motion": {
-    "traits": ["precise", "tactile", "restrained", "sensory"],
-    "intensity": 4,
-    "signature": "laminated-layer-reveal"
-  }
+  "motion": {"traits": ["precise", "tactile", "restrained", "sensory"], "intensity": 4, "signature": "laminated-layer-reveal"}
 }

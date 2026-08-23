@@ -73,19 +73,27 @@ test('cross-project recurring evidence can be promoted', () => {
   assert.equal(result.promote, true);
 });
 
-test('creative runtime keeps design, image, and motion under one direction', () => {
+test('creative runtime keeps design, image, and motion under one provisional thesis direction before world selection', () => {
   const output = runCreativeRuntime(input);
   assert.equal(output.design.directionContext.statement, output.creativeDirection.directionStatement);
   assert.equal(output.image.directionContext.statement, output.creativeDirection.directionStatement);
   assert.equal(output.motion.directionContext.statement, output.creativeDirection.directionStatement);
-  assert.match(output.creativeDirection.directionStatement, /tactile × editorial/);
+  assert.equal(output.creativeDirection.thesisContext.governingIdea, output.creativeThesis.governingIdea.statement);
+  assert.equal(output.creativeDirection.worldContext, null);
+  assert.equal(output.creativeDirection.provisional, true);
 });
 
-test('Du Bonheur benchmark passes creative runtime invariants', () => {
+test('Du Bonheur benchmark reaches world visual-proof gate without fabricating a winner', () => {
   const output = runCreativeRuntime(input);
   const result = validateBenchmark(output, expected);
   assert.equal(result.pass, true, result.failures.join('\n'));
+  assert.equal(output.productUnderstanding.reviewReady, true);
+  assert.equal(output.creativeThesis.reviewReady, true);
+  assert.equal(output.creativeWorldExploration.reviewReady, true, JSON.stringify(output.creativeWorldExploration.findings));
+  assert.equal(output.creativeWorldExploration.worlds.length, 3);
+  assert.equal(output.selectedCreativeWorld, null);
+  assert.equal(output.creativeWorldExploration.truth.selectedAutomatically, false);
+  assert.equal(output.status, 'ready-for-style-frame-proof');
   assert.ok(output.creativeDirection.nonNegotiables.length >= 2);
   assert.equal(output.motion.signatureBehavior, 'laminated-layer-reveal');
-  assert.equal(output.status, 'provisional');
 });

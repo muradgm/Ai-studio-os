@@ -1,10 +1,12 @@
 import {
   getExecutionStatus,
+  getCreativeWorldCatalog,
   startExecution,
   getExecution,
   approveExecution
 } from './execution-client.js';
-import { renderCommandCenterView, renderArtifactQueue } from './command-center-view.js';
+import { renderCommandCenterView, renderArtifactQueue, renderDirectionCandidates } from './command-center-view.js';
+import { createDirectionSelectionState } from './direction-state.js';
 import { createExecutionCommandCenterState } from '../command-center-artifacts.mjs';
 
 const stages = [
@@ -16,9 +18,15 @@ const stages = [
   { id: 'deliver', label: 'Deliver' }
 ];
 
+const params = new URLSearchParams(window.location.search);
+const creativeProjectId = window.__CREATIVE_AGENCY_PROJECT_ID__ || params.get('project') || 'ai-council';
+const projectName = creativeProjectId.split(/[-_]/).filter(Boolean).map((part) => part[0]?.toUpperCase() + part.slice(1)).join(' ');
+
 let activeJob = null;
 let pollTimer = null;
 let runtimeOnline = false;
+let worldCatalog = null;
+let directionState = createDirectionSelectionState({ catalogStatus: 'loading' });
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[char]));
 
@@ -42,6 +50,14 @@ function toast(title, copy) {
   window.setTimeout(() => el.classList.remove('show'), 4200);
 }
 
+function stageStateCopy() {
+  if (directionState.status === 'execution-locked') return 'World locked to execution';
+  if (directionState.status === 'locked') return 'Reviewed world locked';
+  if (directionState.status === 'proof-required') return 'Visual proof required';
+  if (directionState.status === 'worlds-required') return 'Creative Worlds required';
+  return 'Direction selection required';
+}
+
 function setRuntimeStatus(online, label) {
   runtimeOnline = online;
   const pill = document.querySelector('#runtime-pill');
@@ -51,11 +67,126 @@ function setRuntimeStatus(online, label) {
   }
   const runtimeLabel = document.querySelector('#runtime-label');
   if (runtimeLabel) runtimeLabel.textContent = label;
-  const disabled = !online || ['queued','running'].includes(activeJob?.status);
+  const activeExecution = ['queued','running'].includes(activeJob?.status);
+  const disabled = !online || !directionState.canExecute || activeExecution;
   const run = document.querySelector('#run-execution');
   const review = document.querySelector('#run-review-execution');
   if (run) run.disabled = disabled;
   if (review) review.disabled = disabled;
+  const activeStageState = document.querySelector('#active-stage-state');
+  if (activeStageState) activeStageState.textContent = stageStateCopy();
+}
+
+function bindDirectionButtons() {
+  document.querySelectorAll('.direction-select').forEach((button) => button.addEventListener('click', () => {
+    if (directionState.immutable) return toast('World is execution-locked', `Execution ${directionState.lockedByExecutionId} already records its Creative World source.`);
+    const candidate = worldCatalog?.candidates?.find((item) => item.id === button.dataset.directionId);
+    if (!candidate) return toast('Selection unavailable', 'The Creative World is not present in the current project catalog.');
+
+    directionState = createDirectionSelectionState({
+      candidates: worldCatalog.candidates,
+      selectedId: candidate.id,
+      catalogVersion: worldCatalog.catalogVersion,
+      catalogStatus: worldCatalog.status
+    });
+    renderDirectionState();
+    setStage('explore');
+    if (!candidate.canLock) {
+      return toast('Visual proof required', `${candidate.label} is structurally valid, but prose cannot win. Generate and review comparable style-frame proof before locking it.`);
+    }
+    toast('Creative World locked', `${candidate.label} has reviewed visual proof and is the source world for the next execution.`);
+  }));
+}
+
+function renderDirectionState() {
+  renderDirectionCandidates({
+    candidates: directionState.candidates,
+    catalogStatus: directionState.catalogStatus,
+    immutable: directionState.immutable
+  });
+  const workspace = document.querySelector('#direction-workspace');
+  const lock = document.querySelector('#direction-lock');
+  const label = document.querySelector('#selected-direction-label');
+  const summary = document.querySelector('#selected-direction-summary');
+  const state = document.querySelector('#direction-state');
+  if (workspace) workspace.dataset.state = directionState.status;
+  if (lock) lock.dataset.state = directionState.status;
+  if (state) state.textContent = directionState.status.replaceAll('-', ' ').toUpperCase();
+  if (label) label.textContent = directionState.selected?.label ?? 'None selected';
+  if (summary) {
+    if (directionState.status === 'execution-locked') {
+      summary.textContent = `${directionState.selected?.premise ?? ''} Execution ${directionState.lockedByExecutionId} preserves this world and its proof provenance.`;
+    } else if (directionState.selected?.canLock) {
+      summary.textContent = `${directionState.selected.premise} Reviewed visual proof: ${(directionState.selected.visualProof?.evidenceRefs ?? []).length} evidence ref(s).`;
+    } else if (directionState.selected) {
+      summary.textContent = `${directionState.selected.premise} This world is not yet authoritative: comparable visual proof must be generated and reviewed first.`;
+    } else if (directionState.catalogStatus === 'not-generated') {
+      summary.textContent = 'No Creative World artifact exists yet. The studio must finish Product Understanding, research, Creative Thesis and authored world exploration before art direction can be selected.';
+    } else {
+      summary.textContent = worldCatalog?.selectionRule ?? 'A world becomes authoritative only after comparable visual proof is reviewed. Prose cannot authorize production.';
+    }
+  }
+  document.querySelectorAll('.direction-card').forEach((card) => {
+    const selected = card.dataset.directionId === directionState.selectedId;
+    card.classList.toggle('selected', selected);
+    card.setAttribute('aria-selected', selected ? 'true' : 'false');
+  });
+  document.querySelectorAll('.direction-select').forEach((button) => {
+    const selected = button.dataset.directionId === directionState.selectedId;
+    const candidate = directionState.candidates.find((item) => item.id === button.dataset.directionId);
+    button.disabled = directionState.immutable;
+    button.textContent = selected
+      ? (candidate?.canLock ? 'Selected' : 'Proof Required')
+      : (candidate?.canLock ? 'Lock Reviewed World' : 'Preview World');
+  });
+  bindDirectionButtons();
+  setRuntimeStatus(runtimeOnline, document.querySelector('#runtime-label')?.textContent ?? 'Execution server offline');
+}
+
+function lockDirectionFromExecution(job) {
+  const executionSelection = job?.directionSelection;
+  if (!executionSelection?.selectedCreativeWorldId) return;
+  const candidates = worldCatalog?.candidates ?? directionState.candidates;
+  const known = candidates.some((candidate) => candidate.id === executionSelection.selectedCreativeWorldId);
+  const executionCandidate = known ? candidates : [{
+    id: executionSelection.selectedCreativeWorldId,
+    label: executionSelection.selectedCreativeWorldLabel ?? executionSelection.selectedCreativeWorldId,
+    premise: 'Creative World recorded by the execution job.',
+    worldClass: 'execution-record',
+    spatialModel: '', typography: '', interaction: '', mobile: '', risk: '',
+    canLock: true,
+    visualProof: { reviewReady: true, status: 'review-ready', evidenceRefs: executionSelection.visualEvidenceRefs ?? [] }
+  }];
+  directionState = createDirectionSelectionState({
+    candidates: executionCandidate,
+    selectedId: executionSelection.selectedCreativeWorldId,
+    catalogVersion: executionSelection.creativeWorldCatalogVersion,
+    catalogStatus: 'visual-proof-ready',
+    lockedByExecutionId: job.id
+  });
+  renderDirectionState();
+}
+
+async function loadWorldCatalog() {
+  try {
+    const { catalog } = await getCreativeWorldCatalog(creativeProjectId);
+    worldCatalog = catalog;
+    directionState = createDirectionSelectionState({
+      candidates: catalog.candidates ?? [],
+      selectedId: directionState.selectedId,
+      catalogVersion: catalog.catalogVersion,
+      catalogStatus: catalog.status,
+      lockedByExecutionId: directionState.lockedByExecutionId
+    });
+    renderDirectionState();
+    if (catalog.status === 'not-generated') setStage('research');
+    else if (catalog.status === 'awaiting-visual-proof') setStage('explore');
+  } catch (error) {
+    worldCatalog = { status: 'blocked', candidates: [], catalogVersion: null, selectionRule: error.message };
+    directionState = createDirectionSelectionState({ candidates: [], catalogStatus: 'blocked' });
+    renderDirectionState();
+    toast('Creative World catalog unavailable', error.message);
+  }
 }
 
 function metricState(value) {
@@ -92,6 +223,7 @@ function renderArtifactState(job = activeJob) {
 function renderExecution(job) {
   if (!job) return;
   activeJob = job;
+  lockDirectionFromExecution(job);
   const jobId = document.querySelector('#job-id');
   if (jobId) jobId.textContent = job.id.toUpperCase();
 
@@ -187,11 +319,7 @@ function renderExecution(job) {
     approve.innerHTML = job.approval === 'iteration-approved' ? '<span class="action-icon">✓</span>Iteration Approved' : '<span class="action-icon">✓</span>Approve Iteration';
   }
 
-  const disableRun = !runtimeOnline || ['queued','running'].includes(job.status);
-  const run = document.querySelector('#run-execution');
-  const review = document.querySelector('#run-review-execution');
-  if (run) run.disabled = disableRun;
-  if (review) review.disabled = disableRun;
+  setRuntimeStatus(runtimeOnline, document.querySelector('#runtime-label')?.textContent ?? 'Execution server offline');
   renderArtifactState(job);
 }
 
@@ -206,13 +334,24 @@ async function checkRuntime() {
 
 async function startBuild() {
   if (!runtimeOnline) return toast('Execution unavailable', 'Run npm run dev so the local execution service starts with the Command Center.');
+  if (!directionState.canExecute || !directionState.selected) {
+    setStage('explore');
+    return toast('Reviewed Creative World required', 'Build is blocked until a project-specific world has comparable visual proof and you explicitly lock it.');
+  }
+  if (directionState.immutable) return toast('World already execution-locked', `Execution ${directionState.lockedByExecutionId} owns the current selection.`);
   try {
     setStage('make');
     const iteration = Number.isInteger(activeJob?.iteration) ? activeJob.iteration + 1 : 0;
-    const result = await startExecution({ projectId: 'creative-agency', iteration });
+    const result = await startExecution({
+      projectId: 'creative-agency',
+      creativeProjectId,
+      iteration,
+      selectedCreativeWorldId: directionState.selectedId,
+      creativeWorldCatalogVersion: directionState.catalogVersion
+    });
     activeJob = result.job;
     renderExecution(activeJob);
-    toast('Measured production started', `${activeJob.id} is building, capturing and reviewing the current artifact.`);
+    toast('Measured production started', `${activeJob.id} is building under ${activeJob.directionSelection.selectedCreativeWorldLabel}.`);
     startPolling();
   } catch (error) {
     if (error.status === 409 && error.body?.job) {
@@ -220,6 +359,10 @@ async function startBuild() {
       renderExecution(activeJob);
       startPolling();
       return toast('Execution already running', activeJob.id);
+    }
+    if (error.status === 422) {
+      await loadWorldCatalog();
+      return toast('Creative World gate blocked execution', error.body?.findings?.[0]?.message ?? error.message);
     }
     toast('Build failed to start', error.message);
   }
@@ -249,6 +392,7 @@ function startPolling() {
 
 async function refreshExecution() {
   await checkRuntime();
+  await loadWorldCatalog();
   if (!activeJob?.id) { renderArtifactState(null); return; }
   try { renderExecution((await getExecution(activeJob.id)).job); }
   catch (error) { toast('Refresh failed', error.message); }
@@ -273,6 +417,10 @@ async function approveIteration() {
 
 function bind() {
   document.querySelectorAll('.spine-step').forEach((el) => el.addEventListener('click', () => setStage(el.dataset.stage)));
+  document.querySelectorAll('.rail-button').forEach((el) => el.addEventListener('click', () => {
+    if (el.classList.contains('active')) return;
+    toast('Workspace not wired yet', 'Direction truth is wired first. Other sections unlock when their evidence surfaces land.');
+  }));
   document.querySelector('#run-execution')?.addEventListener('click', startBuild);
   document.querySelector('#run-review-execution')?.addEventListener('click', () => {
     toast('Measured review pipeline', 'The current local executor performs build, capture and independent review as one auditable job.');
@@ -286,9 +434,10 @@ function bind() {
   });
 }
 
-renderCommandCenterView({ stages, projectName: 'Project 001' });
+renderCommandCenterView({ stages, projectName, creativeProjectId });
 setStage('brief');
 renderArtifactState(null);
 bind();
-checkRuntime();
+renderDirectionState();
+Promise.all([checkRuntime(), loadWorldCatalog()]);
 window.setInterval(checkRuntime, 8000);
