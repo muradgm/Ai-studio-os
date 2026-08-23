@@ -1,5 +1,6 @@
 {
   "requiredStages": [
+    "product-understanding",
     "inspiration",
     "creative-thesis",
     "creative-direction",
@@ -15,29 +16,15 @@
     "trends",
     "antiReferences"
   ],
+  "requireProductUnderstanding": true,
   "requireCreativeThesis": true,
   "requireReducedMotion": true,
   "requireSharedCreativeDirection": true,
   "assetExpectations": [
-    {
-      "id": "storefront",
-      "action": "retouch"
-    },
-    {
-      "id": "signature-croissant",
-      "action": "retouch"
-    },
-    {
-      "id": "cafe-interior",
-      "action": "generative-edit"
-    },
-    {
-      "id": "signature-eclair-missing",
-      "action": "capture-required"
-    },
-    {
-      "id": "abstract-texture",
-      "action": "generate-supporting"
-    }
+    {"id": "storefront", "action": "retouch"},
+    {"id": "signature-croissant", "action": "retouch"},
+    {"id": "cafe-interior", "action": "generative-edit"},
+    {"id": "signature-eclair-missing", "action": "capture-required"},
+    {"id": "abstract-texture", "action": "generate-supporting"}
   ]
 }
