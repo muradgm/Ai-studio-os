@@ -1,0 +1,108 @@
+{
+  "schema": "ai-studio-os/creative-research@1",
+  "projectId": "ai-council",
+  "sourceRevision": "muradgm/ai-council@07339ffe056767fd1c2c117cb0ab047de31285e0",
+  "researchDate": "2026-08-23",
+  "directIndustry": [
+    "AI coding agents and agentic IDEs",
+    "developer copilots and code-review agents",
+    "AI technical orchestration and autonomous-development products"
+  ],
+  "bestInClass": [
+    "product experiences that make work reviewable before commitment",
+    "award-caliber B2B technical sites that use restraint instead of generic AI spectacle",
+    "software products that expose state and consequence without turning into control-room clutter"
+  ],
+  "adjacentIndustries": [
+    "technical RFC and architecture-decision records",
+    "legal and scholarly argumentation systems",
+    "version-control and change-lineage tools",
+    "preflight, approval, and release systems",
+    "editorial publishing and archival information design"
+  ],
+  "trends": [
+    "parallel AI agents and agent-centric workspaces",
+    "reviewable artifacts and pull-request-style handoff",
+    "human approval before consequential AI action",
+    "preview environments before production commitment",
+    "reversibility, checkpoints, and explicit rollback",
+    "high-craft B2B storytelling that avoids default SaaS card grids"
+  ],
+  "antiReferences": [
+    "mission-control dashboards where simultaneous agents become the visual hero",
+    "dark terminal skins used as proof of technical seriousness",
+    "glowing neural nodes, orbs, and AI sparkle systems",
+    "confidence gauges presented as epistemic authority",
+    "literal council rooms or AI portraits representing specialist judgment",
+    "enterprise compliance dashboards where governance feels bureaucratic rather than useful"
+  ],
+  "opportunityGaps": [
+    "Make the path from ambiguous intent to a defensible technical decision the central experience instead of the agents themselves.",
+    "Treat the decision as a durable artifact whose evidence, rejected alternatives, hard constraints, dissent, approval boundary, execution consequence, verification, and memory lineage remain inspectable.",
+    "Create technical seriousness without terminal aesthetics and governance without compliance chrome.",
+    "Turn uncertainty, invalidation conditions, and rejected strategies into meaningful information design rather than hiding them behind a final answer.",
+    "Make the moment a decision earns the right to become action visually and behaviorally distinct from ordinary reasoning."
+  ],
+  "unresolvedUnknowns": [
+    "Which audience segment should dominate the first public-facing experience?",
+    "Which cognitive stages should be directly manipulated by users versus summarized by the system?",
+    "What exact first sellable end-to-end loop will define the public product promise?",
+    "How much of the internal architecture should be exposed after the interaction model matures?"
+  ],
+  "referenceMatrix": [
+    {
+      "reference": "https://cursor.com/product",
+      "take": "Cursor proves that codebase context, parallel specialist work, plans, and review states can be made legible across one development lifecycle.",
+      "reject": "Do not inherit its agent-centric Mission Control framing; AI Council's differentiator is decision quality and governance, not parallel worker visibility.",
+      "evidence": "Cursor's current product page explicitly centers agents, parallel subagents, codebase understanding, planning, building, and review states."
+    },
+    {
+      "reference": "https://docs.github.com/en/copilot/how-tos/copilot-on-github/use-copilot-agents/review-copilot-output",
+      "take": "AI-produced work becomes a reviewable artifact and human review remains a real authority boundary rather than ceremonial UX.",
+      "reject": "Do not reduce AI Council to pull-request automation or copy GitHub's repository chrome.",
+      "evidence": "GitHub explicitly instructs users to review Copilot pull requests thoroughly before merge and preserves independent approval requirements."
+    },
+    {
+      "reference": "https://vercel.com/docs/deployments/environments",
+      "take": "A safe pre-commitment state can be concrete and useful: preview exists to inspect, test, and collaborate before production consequence.",
+      "reject": "Do not turn deployment environments or branch timelines into the literal AI Council metaphor.",
+      "evidence": "Vercel separates Local, Preview, and Production; Preview exists specifically for testing and collaboration without affecting the live product."
+    },
+    {
+      "reference": "https://www.awwwards.com/websites/%23F36B6C/",
+      "take": "Award-level B2B technical work can rely on disciplined typography, structure, motion, and product-specific storytelling instead of default neon AI spectacle.",
+      "reject": "Do not borrow Terminal Industries' logistics, yard, wireframe, or supply-chain metaphors.",
+      "evidence": "Awwwards lists Terminal Industries by REJOUICE as Site of the Day and Developer Award; REJOUICE documents the project as a product-specific Yard Operating System brand and digital experience."
+    },
+    {
+      "reference": "https://www.awwwards.com/websites/%23fff800/?page=3",
+      "take": "An AI developer product can reach award-caliber visual craft when the experience is tied to its actual workflow rather than generic AI iconography.",
+      "reject": "Do not copy an editor, terminal, or coding-workspace visual shell merely because AI Council serves builders.",
+      "evidence": "Awwwards lists Flowblock - AI Code Editor as Site of the Day and Developer Award on March 26, 2025."
+    },
+    {
+      "reference": "https://www.awwwards.com/websites/%23F6F3ED/?page=2",
+      "take": "Expressive spatial and motion systems are valid when they make a project-specific idea memorable and navigable.",
+      "reject": "Do not use WebGL, 3D, color, or kinetic interaction as the concept itself.",
+      "evidence": "Awwwards lists Altermind as Site of the Day and Developer Award in April 2025, demonstrating that expressive digital craft can coexist with usable product communication."
+    },
+    {
+      "reference": "muradgm/ai-council@07339ff:docs/architecture/13-problem-formulation-strategy-comparison.md",
+      "take": "Use problem alternatives, evidence gaps, hard constraints, strategy rejection reasons, prerequisites, and invalidation conditions as native visual and interaction material.",
+      "reject": "Do not flatten the cognitive chain into one confidence meter or a decorative reasoning animation.",
+      "evidence": "The current AI Council architecture makes these structures explicit, deterministic, provenance-bearing, and decision-relevant."
+    },
+    {
+      "reference": "muradgm/ai-council@07339ff:docs/brand/brand-system.md",
+      "take": "Preserve the brand's calm, evidence-backed, governed behavior and the visibility of context, evidence, uncertainty, approval, verification, ledger, and memory.",
+      "reject": "Do not interpret Orchestrated Intelligence as mandatory orbiting nodes, violet-blue-cyan dashboards, or continuous logo animation.",
+      "evidence": "The brand system defines the governing loop Context -> Coordinate -> Evaluate -> Approve -> Execute -> Verify -> Remember and explicitly rejects magical, theatrical, and swarm-like behavior."
+    }
+  ],
+  "creativeRead": {
+    "categoryDefault": "The market increasingly visualizes AI software through agents, parallel task panes, mission-control grids, terminal/editor shells, nodes, and autonomy language.",
+    "strategicOpening": "AI Council can own the opposite center of gravity: not who is thinking, but how uncertain technical work becomes justified, governed, reversible, verifiable action.",
+    "craftChallenge": "Make evidence, alternatives, dissent, thresholds, and decision lineage feel premium and emotionally legible without becoming a compliance dashboard or academic diagram.",
+    "antiTransferRule": "If a direction still works unchanged for a generic coding agent after removing problem formulation, hard constraints, strategy comparison, approval, verification, and decision memory, reject it."
+  }
+}
