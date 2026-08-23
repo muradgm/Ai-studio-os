@@ -11,7 +11,8 @@
   "motionSystemRef": {
     "schema": "ai-studio-os/motion-system@1",
     "id": "hybrid-v1-motion-system-v1",
-    "sourceRef": "projects/ai-council/motion-system-v1.json"
+    "sourceRef": "projects/ai-council/motion-system-v1.json",
+    "humanApprovalSourceRef": "projects/ai-council/motion-system-v1-human-approval.json"
   },
   "canonicalScreenIds": [
     "project-home",
@@ -222,9 +223,12 @@
   "motion": {
     "sourceOfTruth": "projects/ai-council/motion-system-v1.json",
     "systemId": "hybrid-v1-motion-system-v1",
+    "humanApprovalSourceRef": "projects/ai-council/motion-system-v1-human-approval.json",
+    "eventTaxonomySourceRef": "projects/ai-council/motion-event-taxonomy-v1.json",
     "personality": "quiet, directional, evidence-aware, and consequence-sensitive",
     "consumptionRule": "Visual components consume Motion System V1 primitives and runtime-event truth rules; they may not invent local loaders, thinking animations, authority transitions, or progress semantics that drift from the formal system.",
-    "humanApproved": false
+    "humanApproved": true,
+    "productionReady": false
   },
   "responsive": {
     "breakpoints": [
