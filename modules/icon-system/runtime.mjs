@@ -34,8 +34,22 @@ export const REQUIRED_CONFUSING_PAIRS = [
   ['history', 'provenance'],
   ['memory', 'activity'],
   ['authority', 'blocked'],
-  ['supersede', 'retry']
+  ['supersede', 'retry'],
+  ['council', 'decision'],
+  ['verification', 'approve'],
+  ['authority', 'action'],
+  ['projects', 'memory']
 ];
+export const REQUIRED_LABEL_BLIND_PAIRS = [
+  ['council', 'decision'],
+  ['evidence', 'verification'],
+  ['authority', 'action'],
+  ['supersede', 'retry'],
+  ['provenance', 'history'],
+  ['projects', 'memory']
+];
+export const DISPLAY_PRIORITIES = ['essential', 'conditional', 'optional'];
+export const REQUIRED_HARDENING_EVIDENCE = ['dense-system', 'mobile-composer', 'label-blind-recognition'];
 
 function inventoryFingerprint(inventory) {
   return hash({
@@ -47,8 +61,48 @@ function inventoryFingerprint(inventory) {
     icons: inventory.icons,
     calibrationSet: inventory.calibrationSet,
     semanticColorPolicy: inventory.semanticColorPolicy,
+    motionReadiness: inventory.motionReadiness,
+    displayPolicy: inventory.displayPolicy,
     truth: inventory.truth
   });
+}
+
+export function shouldDisplayIcon(icon = {}, opportunity = {}) {
+  const priority = icon?.displayPriority;
+  const iconOnlyControl = opportunity?.iconOnlyControl === true;
+  const semanticSafety = opportunity?.semanticSafety === true;
+  const addsInformation = opportunity?.addsInformation === true;
+  const repetitive = opportunity?.repetitive === true;
+
+  if (iconOnlyControl || semanticSafety) return true;
+  if (priority === 'essential') return true;
+  if (priority === 'conditional') return addsInformation;
+  if (priority === 'optional') return !repetitive && addsInformation;
+  return false;
+}
+
+export function auditIconDisplayPolicy({ inventory = null, opportunities = [] } = {}) {
+  const findings = [];
+  const byId = new Map((inventory?.icons ?? []).map((icon) => [icon.id, icon]));
+  const decisions = [];
+  for (const opportunity of Array.isArray(opportunities) ? opportunities : []) {
+    const icon = byId.get(opportunity?.iconId);
+    if (!icon) {
+      findings.push(finding('blocker', 'icon-display-policy-icon-unknown', 'Display opportunity references an unknown icon.', { opportunity }));
+      continue;
+    }
+    const expected = shouldDisplayIcon(icon, opportunity);
+    const actual = opportunity?.rendered === true;
+    decisions.push({ id: opportunity.id ?? null, iconId: icon.id, priority: icon.displayPriority, expected, actual });
+    if (expected !== actual) {
+      findings.push(finding('blocker', 'icon-display-policy-violation', 'Rendered icon presence violates declared displayPriority/suppression rules.', {
+        opportunity,
+        expected,
+        priority: icon.displayPriority
+      }));
+    }
+  }
+  return { pass: findings.length === 0, findings, decisions };
 }
 
 export function buildIconSemanticInventory(input = {}, { visualSystemApproval = null } = {}) {
@@ -87,6 +141,17 @@ export function buildIconSemanticInventory(input = {}, { visualSystemApproval = 
     if (!Array.isArray(icon?.contexts) || icon.contexts.length === 0) {
       findings.push(finding('major', 'icon-inventory-context-missing', 'Every icon requires at least one real product context.', { iconId: icon?.id ?? null }));
     }
+    if (!DISPLAY_PRIORITIES.includes(icon?.displayPriority)) {
+      findings.push(finding('major', 'icon-inventory-display-priority-invalid', 'Every icon must declare essential, conditional, or optional displayPriority.', { iconId: icon?.id ?? null }));
+    }
+    if (!clean(icon?.displayRule)) {
+      findings.push(finding('major', 'icon-inventory-display-rule-missing', 'Every icon must declare an enforceable displayRule.', { iconId: icon?.id ?? null }));
+    }
+  }
+
+  const displayPolicy = inventory.displayPolicy ?? {};
+  if (displayPolicy.suppressWhenRedundant !== true || displayPolicy.optionalDefaultsSuppressedInDenseSurfaces !== true) {
+    findings.push(finding('blocker', 'icon-inventory-display-policy-invalid', 'Icon inventory must govern absence: redundant icons are suppressed and optional icons default to suppressed in dense/repetitive surfaces.'));
   }
 
   const calibrationSet = cleanList(inventory.calibrationSet);
@@ -119,9 +184,15 @@ export function buildIconSemanticInventory(input = {}, { visualSystemApproval = 
       ...(inventory.truth ?? {}),
       iconSemanticInventoryAuthored: reviewReady,
       iconWorldExplorationComplete: false,
+      semanticCollisionReviewComplete: false,
+      denseIconProofComplete: false,
+      mobileIconProofComplete: false,
+      labelBlindRecognitionProofComplete: false,
+      independentIconWorldReviewComplete: false,
       iconWorldHumanSelected: false,
       iconSystemHumanApproved: false,
       productionIconMastersComplete: false,
+      appIconSystemAuthored: false,
       appIconHumanApproved: false,
       finalVisualSystemApproved: false
     }
@@ -196,6 +267,16 @@ export function buildIconWorldExploration(input = {}, { inventory = null } = {})
   for (const pair of REQUIRED_CONFUSING_PAIRS) {
     if (!pairKeys.includes(JSON.stringify(pair))) findings.push(finding('major', 'icon-world-confusing-pair-missing', 'Proof must test required confusing semantic pairs.', { pair }));
   }
+  const labelBlindKeys = (proof.labelBlindPairs ?? []).map((pair) => JSON.stringify(pair));
+  for (const pair of REQUIRED_LABEL_BLIND_PAIRS) {
+    if (!labelBlindKeys.includes(JSON.stringify(pair))) findings.push(finding('major', 'icon-world-label-blind-pair-missing', 'Proof must include required label-blind recognition pairs.', { pair }));
+  }
+  if (proof.denseSystemProof !== true || proof.mobileComposerProof !== true || proof.labelBlindRecognitionProof !== true) {
+    findings.push(finding('major', 'icon-world-hardening-proof-requirements-missing', 'Hardening requires dense-system, focused mobile/composer, and label-blind recognition proof.'));
+  }
+  if (proof.hybridRecommendationAllowed !== false) {
+    findings.push(finding('blocker', 'icon-world-hybrid-review-leak', 'First-pass Icon World review must forbid hybrid recommendation.'));
+  }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -213,24 +294,40 @@ export function buildIconWorldExploration(input = {}, { inventory = null } = {})
     ...exploration,
     inventoryRef: resolvedInventoryRef,
     explorationFingerprint,
-    status: reviewReady ? 'ready-for-calibration-browser-proof' : blockers.length ? 'blocked' : 'provisional',
+    status: reviewReady ? 'ready-for-calibration-hardening-browser-proof' : blockers.length ? 'blocked' : 'provisional',
     pass: blockers.length === 0,
     reviewReady,
     findings,
     truth: {
       iconSemanticInventoryAuthored: inventory?.truth?.iconSemanticInventoryAuthored === true,
       iconWorldExplorationComplete: false,
+      semanticCollisionReviewComplete: false,
+      denseIconProofComplete: false,
+      mobileIconProofComplete: false,
+      labelBlindRecognitionProofComplete: false,
+      independentIconWorldReviewComplete: false,
       iconWorldHumanSelected: false,
       quiverLineSelected: false,
       iconSystemHumanApproved: false,
       productionIconMastersComplete: false,
+      appIconSystemAuthored: false,
       appIconHumanApproved: false,
       finalVisualSystemApproved: false
     }
   };
 }
 
-export function buildIconCalibrationProofEvidence({ exploration = null, worldEvidence = [], semanticComparisons = [], interfaceEvidence = [] } = {}) {
+export function buildIconCalibrationProofEvidence({
+  exploration = null,
+  worldEvidence = [],
+  semanticComparisons = [],
+  interfaceEvidence = [],
+  denseEvidence = [],
+  mobileEvidence = [],
+  labelBlindEvidence = [],
+  displayPolicyAudit = null,
+  confusingPairsRef = null
+} = {}) {
   const findings = [];
   if (exploration?.reviewReady !== true) findings.push(finding('blocker', 'icon-proof-exploration-not-ready', 'Calibration proof requires a review-ready Icon World exploration.'));
 
@@ -255,8 +352,23 @@ export function buildIconCalibrationProofEvidence({ exploration = null, worldEvi
   if ((semanticComparisons ?? []).length !== REQUIRED_CALIBRATION_ICONS.length) {
     findings.push(finding('major', 'icon-proof-semantic-comparisons-incomplete', 'Proof requires one same-concept comparison board for each calibration glyph.'));
   }
-  if ((interfaceEvidence ?? []).length < 3) {
-    findings.push(finding('major', 'icon-proof-interface-evidence-thin', 'Proof requires real interface-context evidence for every world.'));
+  if ((interfaceEvidence ?? []).length !== REQUIRED_ICON_WORLDS.length) {
+    findings.push(finding('major', 'icon-proof-interface-evidence-thin', 'Proof requires normal interface-context evidence for every world.'));
+  }
+  for (const [kind, evidence] of [
+    ['dense-system', denseEvidence],
+    ['mobile-composer', mobileEvidence],
+    ['label-blind-recognition', labelBlindEvidence]
+  ]) {
+    if ((evidence ?? []).length !== REQUIRED_ICON_WORLDS.length || evidence.some((item) => !clean(item?.imageRef) || item?.exactBrowserProof !== true)) {
+      findings.push(finding('blocker', `icon-proof-${kind}-incomplete`, `Proof requires exact-browser ${kind} evidence for all three worlds.`));
+    }
+  }
+  if (!clean(confusingPairsRef?.imageRef) || confusingPairsRef?.exactBrowserProof !== true) {
+    findings.push(finding('blocker', 'icon-proof-confusing-pairs-incomplete', 'Expanded semantic collision board is required.'));
+  }
+  if (displayPolicyAudit?.pass !== true) {
+    findings.push(finding('blocker', 'icon-proof-display-policy-invalid', 'Dense/mobile fixtures must obey declared displayPriority and suppression rules.', { findings: displayPolicyAudit?.findings ?? [] }));
   }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -266,20 +378,80 @@ export function buildIconCalibrationProofEvidence({ exploration = null, worldEvi
     schema: 'ai-studio-os/icon-world-calibration-proof@1',
     projectId: exploration?.projectId ?? null,
     explorationFingerprint: exploration?.explorationFingerprint ?? null,
-    status: reviewReady ? 'ready-for-human-icon-world-review' : blockers.length ? 'blocked' : 'provisional',
+    status: reviewReady ? 'ready-for-independent-icon-world-review' : blockers.length ? 'blocked' : 'provisional',
     pass: blockers.length === 0,
     reviewReady,
     worldEvidence,
     semanticComparisons,
     interfaceEvidence,
+    denseEvidence,
+    mobileEvidence,
+    labelBlindEvidence,
+    confusingPairsRef,
+    displayPolicyAudit,
     findings,
     truth: {
       iconSemanticInventoryAuthored: true,
       iconWorldExplorationComplete: reviewReady,
+      semanticCollisionReviewComplete: reviewReady,
+      denseIconProofComplete: reviewReady,
+      mobileIconProofComplete: reviewReady,
+      labelBlindRecognitionProofComplete: reviewReady,
+      independentIconWorldReviewComplete: false,
       iconWorldHumanSelected: false,
       quiverLineSelected: false,
       iconSystemHumanApproved: false,
       productionIconMastersComplete: false,
+      appIconSystemAuthored: false,
+      appIconHumanApproved: false,
+      finalVisualSystemApproved: false
+    }
+  };
+}
+
+export function buildIndependentIconWorldReview(input = {}, { proof = null } = {}) {
+  const review = structuredClone(input ?? {});
+  const findings = [];
+  if (review.schema !== 'ai-studio-os/icon-world-independent-review@1') {
+    findings.push(finding('blocker', 'icon-independent-review-schema-invalid', 'Independent review must use ai-studio-os/icon-world-independent-review@1.'));
+  }
+  if (proof?.reviewReady !== true || proof?.status !== 'ready-for-independent-icon-world-review') {
+    findings.push(finding('blocker', 'icon-independent-review-proof-not-ready', 'Independent review requires the completed hardening proof.'));
+  }
+  if (review.proofRef?.explorationFingerprint !== proof?.explorationFingerprint) {
+    findings.push(finding('blocker', 'icon-independent-review-proof-stale', 'Independent review must bind to the exact hardening proof fingerprint.'));
+  }
+  if (review.hybridRecommendationAllowed !== false) {
+    findings.push(finding('blocker', 'icon-independent-review-hybrid-forbidden', 'First-pass independent review cannot recommend hybridization.'));
+  }
+  const assessments = Array.isArray(review.worldAssessments) ? review.worldAssessments : [];
+  if (assessments.length !== REQUIRED_ICON_WORLDS.length || JSON.stringify(assessments.map((item) => item.worldId)) !== JSON.stringify(REQUIRED_ICON_WORLDS)) {
+    findings.push(finding('major', 'icon-independent-review-worlds-incomplete', 'Independent review must assess all three Icon Worlds in stable order.'));
+  }
+  for (const assessment of assessments) {
+    if (!clean(assessment?.semanticAssessment) || !clean(assessment?.opticalAssessment) || !clean(assessment?.densityAssessment) || !clean(assessment?.mobileAssessment) || !clean(assessment?.verdict)) {
+      findings.push(finding('major', 'icon-independent-review-assessment-thin', 'Each world requires semantic, optical, density, mobile, and verdict notes.', { worldId: assessment?.worldId ?? null }));
+    }
+  }
+  if (review.selectedWorld !== null || review.iconWorldHumanSelected === true) {
+    findings.push(finding('blocker', 'icon-independent-review-selection-fabricated', 'Independent review may recommend/rank but cannot perform the human Icon World selection event.'));
+  }
+  const blockers = findings.filter((item) => item.severity === 'blocker');
+  const majors = findings.filter((item) => item.severity === 'major');
+  const reviewReady = blockers.length === 0 && majors.length === 0;
+  return {
+    ...review,
+    status: reviewReady ? 'ready-for-human-icon-world-selection' : blockers.length ? 'blocked' : 'provisional',
+    pass: blockers.length === 0,
+    reviewReady,
+    findings,
+    truth: {
+      ...(proof?.truth ?? {}),
+      independentIconWorldReviewComplete: reviewReady,
+      iconWorldHumanSelected: false,
+      iconSystemHumanApproved: false,
+      productionIconMastersComplete: false,
+      appIconSystemAuthored: false,
       appIconHumanApproved: false,
       finalVisualSystemApproved: false
     }
