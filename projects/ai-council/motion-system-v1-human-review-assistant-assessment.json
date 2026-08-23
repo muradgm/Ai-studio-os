@@ -14,7 +14,7 @@
     "exactBrowserProof": true,
     "visualSystemHumanApprovalResolved": true
   },
-  "result": "ready-for-human-motion-review",
+  "result": "human-motion-language-approved",
   "selectionAuthority": false,
   "review": {
     "closedFirstPassFindings": [
@@ -28,24 +28,27 @@
       "Mobile now demonstrates the actual project/thread continuity sheet instead of only animating its trigger."
     ],
     "qualitativeStrengths": [
-      "Motion is much more product-native and less like an observability/proof overlay.",
+      "Motion is product-native and no longer depends on an observability/proof overlay.",
       "The six-moment sequence tells AI Council's product story without introducing a separate motion aesthetic.",
       "Counterpoint remains the reading/conversation rhythm, Decision Spine owns provenance and settlement, and Threshold remains rare and consequential.",
       "The strongest motion remains the advice → approval boundary, which is appropriate because authority genuinely changes there.",
       "The execution sequence communicates progress without fake percentage completion or spectacle."
     ],
     "remainingProductionRisks": [
-      "Production runtime adapters still need to emit the event vocabulary; current browser telemetry is explicitly fixture evidence.",
-      "The Structured Recommendation proof should eventually cover a real multi-section production response with variable section lengths and asynchronous readiness.",
+      "Production runtime adapters still need to emit canonical domain events; current browser telemetry remains fixture evidence.",
+      "Structured Recommendation needs real variable-length multi-section responses and asynchronous readiness tests.",
       "Evidence acquisition needs production tests with large source counts and sources arriving out of order.",
-      "The mobile sheet needs focus trapping, escape/back behavior, touch target and reduced-motion accessibility proof in the implemented product.",
+      "The mobile sheet needs focus trapping, escape/back behavior, touch targets, and reduced-motion accessibility proof in the implemented product.",
       "Execution progress needs cancellation, partial failure, rollback and retry paths before final Visual System approval."
     ]
   },
+  "humanApprovalRef": "projects/ai-council/motion-system-v1-human-approval.json",
+  "taxonomyRef": "projects/ai-council/motion-event-taxonomy-v1.json",
   "truth": {
     "humanVisualApproval": true,
     "assistantMotionReviewComplete": true,
-    "humanMotionApproval": false,
+    "humanMotionApproval": true,
+    "motionRuntimeTaxonomyResolved": true,
     "runtimeEventAdaptersImplemented": false,
     "finalVisualSystemApproved": false
   }
