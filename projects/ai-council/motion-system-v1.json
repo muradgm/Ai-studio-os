@@ -11,6 +11,7 @@
     "id": "hybrid-v1-visual-system-v1",
     "sourceRef": "projects/ai-council/visual-system-v1.json"
   },
+  "eventTaxonomySourceRef": "projects/ai-council/motion-event-taxonomy-v1.json",
   "governingIdea": "State becoming structure: motion makes uncertainty, understanding, judgment, decision, consequence, and memory legible without simulating hidden thought.",
   "coreRule": "AI Council motion explains observable system state. It may not invent work, progress, reasoning, specialist activity, or completion that the runtime cannot prove.",
   "sourceResponsibilities": {
@@ -242,20 +243,20 @@
       "owner": "decision-spine",
       "kind": "result-transition",
       "screenBindings": ["decision-detail", "project-home"],
-      "runtimeEvidence": { "required": true, "eventIds": ["execution-completed", "validation-completed"] },
-      "behavior": "Completed work resolves into stable project history; checkmarks settle once and the resulting decision/outcome becomes durable. No confetti or celebratory burst.",
-      "durationMs": [180, 280],
-      "reducedMotion": "Immediate durable completed state."
+      "runtimeEvidence": { "required": true, "eventIds": ["execution-completed"] },
+      "behavior": "Completed work settles into durable decision/history state without celebration.",
+      "durationMs": [220, 360],
+      "reducedMotion": "Immediate durable result state."
     },
     {
       "id": "failure",
       "owner": "threshold",
-      "kind": "execution-progress",
+      "kind": "result-transition",
       "screenBindings": ["approval", "decision-detail"],
       "runtimeEvidence": { "required": true, "eventIds": ["action-failed"] },
-      "behavior": "Normal activity stops. The failed step becomes still, consequence copy explains what stopped and what did not happen, then recovery actions become available.",
-      "durationMs": [180, 260],
-      "reducedMotion": "Immediate stopped state and recovery controls."
+      "behavior": "Execution motion stops. Failure consequence, impact, and recovery become the stable current state; no shake or flashing escalation.",
+      "durationMs": [220, 360],
+      "reducedMotion": "Immediate failure anchor and stillness."
     },
     {
       "id": "decision-lineage",
