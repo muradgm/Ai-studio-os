@@ -1,0 +1,82 @@
+{
+  "schema": "ai-studio-os/visual-system-human-approval@1",
+  "projectId": "ai-council",
+  "visualSystemRef": {
+    "schema": "ai-studio-os/visual-system@1",
+    "id": "hybrid-v1-visual-system-v1",
+    "sourceRef": "projects/ai-council/visual-system-v1.json"
+  },
+  "selectedWorldRef": {
+    "id": "decision-spine-counterpoint-hybrid-v1",
+    "sourceRef": "projects/ai-council/hybrid-v1-selection.json"
+  },
+  "approvalEvent": {
+    "type": "human-visual-approval",
+    "recordedAt": "2026-08-23T19:48:10Z",
+    "source": "conversation",
+    "decision": "approve-visual-language-for-production-refinement",
+    "summary": "Approve Visual System V1 as the visual language AI Council will develop. This approval closes conceptual visual-system searching but does not claim that the fully interactive, responsive production system is finished."
+  },
+  "evidence": {
+    "authoritativeProof": {
+      "workflowRun": 179,
+      "artifact": "ai-council-visual-system-v1-proof",
+      "status": "ready-for-human-visual-system-review",
+      "exactBrowserProof": true,
+      "canonicalSemanticFixturePreserved": true,
+      "denseStressCoverageComplete": true
+    },
+    "humanReviewFindings": [
+      "Hybrid V1 reads as one coherent system rather than a mixture of three prior worlds.",
+      "Conversation remains the primary product surface.",
+      "Project Home remains a continuation surface rather than a dashboard.",
+      "Decision Detail expresses durable project judgment and semantic lineage clearly.",
+      "Threshold consequence language remains isolated to genuine authority boundaries.",
+      "Long, code-heavy, evidence-heavy, tool, error, streaming, and long-memory stress states remain usable.",
+      "Working-state language reflects observable lifecycle state rather than fake internal thought."
+    ],
+    "productionRefinementRisks": [
+      "Test metadata legibility on Windows, lower-density displays, zoom, Android tablets, and vision-accessibility settings.",
+      "Test intermediate conversation densities, not only sparse and deliberately dense extremes.",
+      "Prove right-inspector selected, hover, keyboard-focus, notification, loading, empty, long-content, tablet, and mobile-drawer states.",
+      "Complete iconography and production interaction proof before final visual-system approval."
+    ]
+  },
+  "freezeBoundary": {
+    "approved": [
+      "Hybrid V1 visual-system direction",
+      "Newsreader for considered judgment rather than continuous long-form body copy",
+      "Inter for working interface and dense reading",
+      "IBM Plex Mono for literal code and machine material only",
+      "semantic lineage/evidence/consequence color roles",
+      "low-chrome surface hierarchy",
+      "conversation-first product hierarchy",
+      "rare Threshold authority-state treatment",
+      "adaptive density behavior for evidence, code, tools, and memory"
+    ],
+    "notFinal": [
+      "exact typography metrics and every font weight",
+      "exact color values",
+      "exact spacing and shell proportions",
+      "icon system production masters",
+      "interactive component-state implementation",
+      "Motion System production implementation",
+      "dark-mode production proof",
+      "broader responsive behavior",
+      "accessibility interaction proof",
+      "production conversation-density behavior",
+      "final brand integration"
+    ]
+  },
+  "truth": {
+    "humanVisualApproval": true,
+    "visualSystemDirectionFrozen": true,
+    "conceptualVisualSearchClosed": true,
+    "motionHumanApproved": false,
+    "motionApprovalHandledBy": "projects/ai-council/motion-system-v1-human-approval.json",
+    "iconSystemHumanApproved": false,
+    "darkModeHumanApproved": false,
+    "productionInteractionProofComplete": false,
+    "finalVisualSystemApproved": false
+  }
+}

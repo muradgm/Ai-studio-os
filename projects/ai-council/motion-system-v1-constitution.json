@@ -1,0 +1,116 @@
+{
+  "schema": "ai-studio-os/motion-system-constitution@1",
+  "projectId": "ai-council",
+  "id": "hybrid-v1-motion-constitution-v1",
+  "motionSystemRef": {
+    "id": "hybrid-v1-motion-system-v1",
+    "sourceRef": "projects/ai-council/motion-system-v1.json"
+  },
+  "humanApprovalRef": {
+    "sourceRef": "projects/ai-council/motion-system-v1-human-approval.json",
+    "humanMotionApproval": true
+  },
+  "eventTaxonomyRef": {
+    "sourceRef": "projects/ai-council/motion-event-taxonomy-v1.json",
+    "motionRuntimeTaxonomyResolved": true
+  },
+  "governingPrinciple": "AI Council motion represents observable state becoming useful structure. Temporary activity should disappear when work resolves; evidence, decisions, authority, outcomes, and memory should remain as durable product state.",
+  "narrative": [
+    "request",
+    "understanding",
+    "context",
+    "evidence",
+    "judgment",
+    "decision",
+    "authority",
+    "action",
+    "verification",
+    "history"
+  ],
+  "hybridOwnership": {
+    "counterpoint": {
+      "owns": ["reading rhythm", "conversation", "structured answer reveal", "quiet navigation/content transitions"],
+      "guardrail": "Motion improves comprehension and does not turn answers into staged editorial presentations."
+    },
+    "decisionSpine": {
+      "owns": ["context registration", "evidence provenance", "progression", "decision lineage", "memory lineage", "durable settlement"],
+      "guardrail": "Directional lines or settlement appear only where a real relationship, chronology, or provenance chain exists."
+    },
+    "threshold": {
+      "owns": ["approval required", "authorization", "blocked or destructive actions", "risk", "security boundaries", "consequential failure"],
+      "guardrail": "Threshold never becomes ordinary loading, navigation, conversation, or post-authorization ambient styling."
+    }
+  },
+  "signatureBehaviors": [
+    {
+      "id": "state-becomes-structure",
+      "rule": "A temporary work-state indication should resolve into the durable information it produced whenever such information exists."
+    },
+    {
+      "id": "advice-to-authority",
+      "rule": "Approval begins in advisory calm. Consequence styling appears only when approval-required becomes true."
+    },
+    {
+      "id": "execution-to-history",
+      "rule": "Execution and validation progress disappear into a durable outcome/history record rather than ending in celebration."
+    },
+    {
+      "id": "failure-to-stillness",
+      "rule": "A real failure halts movement and establishes a clear recovery state rather than increasing visual noise."
+    },
+    {
+      "id": "mobile-extra-quiet",
+      "rule": "Mobile uses fewer simultaneous moving elements and focused sheet/state transitions rather than compressed desktop choreography."
+    }
+  ],
+  "semanticConstitution": {
+    "operationalStateAndMotionRoleAreOrthogonal": true,
+    "operationalStates": ["none", "loading", "working", "reasoning-status", "execution-progress"],
+    "rule": "Operational state describes what the system is actually doing. Motion role describes what product transition an event may visually cause. Neither may be inferred from the other.",
+    "authorityInvariant": "approval-required has operationalState none and motionRole authority-transition until actual execution begins.",
+    "navigationInvariant": "opening project/thread navigation is a navigation transition, not loading, unless a separate resource request is actually pending."
+  },
+  "timingPhilosophy": {
+    "microInteractionsMs": [100, 180],
+    "contentTransitionsMs": [180, 320],
+    "contextAndLineageMs": [300, 500],
+    "authorityTransitionsMs": [400, 700],
+    "rule": "Timing ranges are behavioral guidance, not pixel-level frozen choreography. Information becoming ready should feel responsive; consequence may be more deliberate because semantics changed."
+  },
+  "reducedMotion": {
+    "principle": "Remove nonessential translation, drawing, looping movement, and staged delay while preserving wording, hierarchy, authority, provenance, focus, and final state.",
+    "semanticEquivalenceRequired": true
+  },
+  "banned": [
+    "generic glowing AI orb",
+    "fake neural-network particles",
+    "animated agent avatars or imaginary specialist dialogue",
+    "fake percentage progress",
+    "hidden chain-of-thought visualization",
+    "typewriter animation as universal answer behavior",
+    "constant ambient gradient or border movement",
+    "celebratory execution effects",
+    "decorative provenance lines",
+    "Threshold consequence language in ordinary conversation or navigation"
+  ],
+  "notFrozen": [
+    "exact easing curves",
+    "exact per-component durations",
+    "production implementation technology",
+    "post-authorization active-state color treatment",
+    "icon motion details",
+    "latency and cancellation behavior",
+    "retry, rollback, partial-failure, and interruption choreography",
+    "final dark-mode motion tuning",
+    "final production interaction implementation"
+  ],
+  "truth": {
+    "humanMotionApproval": true,
+    "motionCreativeDirectionFrozen": true,
+    "motionRuntimeTaxonomyResolved": true,
+    "motionProductionReady": false,
+    "runtimeEventAdaptersImplemented": false,
+    "productionInteractionProofComplete": false,
+    "finalVisualSystemApproved": false
+  }
+}

@@ -1,0 +1,356 @@
+{
+  "schema": "ai-studio-os/motion-system@1",
+  "projectId": "ai-council",
+  "id": "hybrid-v1-motion-system-v1",
+  "selectedWorldRef": {
+    "id": "decision-spine-counterpoint-hybrid-v1",
+    "humanSelected": true,
+    "sourceRef": "projects/ai-council/hybrid-v1-selection.json"
+  },
+  "visualSystemCandidateRef": {
+    "id": "hybrid-v1-visual-system-v1",
+    "sourceRef": "projects/ai-council/visual-system-v1.json"
+  },
+  "eventTaxonomySourceRef": "projects/ai-council/motion-event-taxonomy-v1.json",
+  "governingIdea": "State becoming structure: motion makes uncertainty, understanding, judgment, decision, consequence, and memory legible without simulating hidden thought.",
+  "coreRule": "AI Council motion explains observable system state. It may not invent work, progress, reasoning, specialist activity, or completion that the runtime cannot prove.",
+  "sourceResponsibilities": {
+    "counterpoint": {
+      "owns": ["reading", "conversation", "content transitions", "structured-answer reveal"],
+      "rule": "Motion supports reading rhythm and human judgment without magazine pacing or decorative flourish."
+    },
+    "decisionSpine": {
+      "owns": ["provenance", "progression", "relationships", "decision history", "memory history"],
+      "rule": "Lines, directional travel, and staged settlement appear only where a real relationship, chronology, or provenance chain exists."
+    },
+    "threshold": {
+      "owns": ["approval", "authorization", "risk", "blocked operations", "external mutation", "irreversible consequence", "security boundary"],
+      "rule": "Threshold motion appears only when authority or consequence changes. It never becomes permanent navigation or ordinary conversation motion."
+    }
+  },
+  "stateClasses": {
+    "loading": {
+      "definition": "A technical resource or view is not yet ready.",
+      "visualRule": "Use a bounded loading treatment that does not claim semantic work is occurring.",
+      "claimRule": "May say Loading only when a real resource request is pending."
+    },
+    "working": {
+      "definition": "Council is performing a known runtime operation.",
+      "visualRule": "Current known stage may move gently; completed stages settle. No percentage unless the runtime exposes a deterministic total.",
+      "claimRule": "Every named work stage requires a matching active runtime event."
+    },
+    "reasoning-status": {
+      "definition": "A high-level inspectable reasoning lifecycle state such as task understanding, evidence planning, strategy comparison, or verification.",
+      "visualRule": "Expose structured status only, never hidden chain-of-thought or imagined internal dialogue.",
+      "claimRule": "Status text must map to an explicit lifecycle event or artifact state."
+    },
+    "execution-progress": {
+      "definition": "Council is modifying real external or repository state after authority has been granted.",
+      "visualRule": "Show actual operation steps and verification states; failure stops motion rather than escalating visual noise.",
+      "claimRule": "Each started/completed/failed step requires an execution or validation event with an operation identifier."
+    }
+  },
+  "speedHierarchy": {
+    "microInteractionMs": [100, 180],
+    "contentTransitionMs": [180, 320],
+    "contextLineageMs": [300, 500],
+    "authorityTransitionMs": [400, 700],
+    "workingMessageMinDwellMs": 1200,
+    "rule": "Consequence may be more deliberate than ordinary navigation; slowness is never used as a premium effect by itself."
+  },
+  "runtimeEvidencePolicy": {
+    "statusClaimsRequireRuntimeEvent": true,
+    "specialistNamesRequireParticipantEvent": true,
+    "completedMarksRequireCompletedEvent": true,
+    "futureStepsMayBeShownOnlyFromKnownPlan": true,
+    "unknownProgressUsesPercentage": false,
+    "percentAllowedOnlyWhenDeterministic": true,
+    "rawChainOfThoughtAllowed": false,
+    "simulatedAgentDialogueAllowed": false,
+    "simulatedInternalThoughtAllowed": false,
+    "proofFixturesMustBeLabeledAsFixtures": true,
+    "productionAdapterStatus": "contract-defined-awaiting-runtime-event-adapters"
+  },
+  "eventVocabulary": [
+    { "id": "user-message-submitted", "copy": "Request sent", "class": "loading" },
+    { "id": "task-understanding-started", "copy": "Understanding the task…", "class": "reasoning-status" },
+    { "id": "task-understanding-completed", "copy": "Task understood", "class": "reasoning-status" },
+    { "id": "project-context-load-started", "copy": "Checking project context…", "class": "working" },
+    { "id": "project-context-item-loaded", "copy": "Project context loaded", "class": "working" },
+    { "id": "project-context-load-completed", "copy": "Project context ready", "class": "working" },
+    { "id": "evidence-search-started", "copy": "Reviewing evidence…", "class": "working" },
+    { "id": "evidence-source-added", "copy": "Evidence added", "class": "working" },
+    { "id": "evidence-search-completed", "copy": "Evidence review complete", "class": "working" },
+    { "id": "council-review-started", "copy": "Council review", "class": "working" },
+    { "id": "specialist-review-active", "copy": "Specialist review in progress", "class": "working", "dynamicParticipant": true },
+    { "id": "specialist-review-completed", "copy": "Specialist review complete", "class": "working", "dynamicParticipant": true },
+    { "id": "council-review-completed", "copy": "Perspectives synthesized", "class": "working" },
+    { "id": "strategy-comparison-started", "copy": "Comparing implementation options…", "class": "reasoning-status" },
+    { "id": "strategy-comparison-completed", "copy": "Options compared", "class": "reasoning-status" },
+    { "id": "response-preparation-started", "copy": "Preparing the recommendation…", "class": "working" },
+    { "id": "response-section-ready", "copy": "Response section ready", "class": "working" },
+    { "id": "verification-started", "copy": "Verifying against project constraints…", "class": "reasoning-status" },
+    { "id": "verification-issue", "copy": "Verification issue", "class": "reasoning-status" },
+    { "id": "verification-completed", "copy": "Verified", "class": "reasoning-status" },
+    { "id": "approval-required", "copy": "Approval required", "class": "execution-progress" },
+    { "id": "action-authorized", "copy": "Action approved", "class": "execution-progress" },
+    { "id": "execution-step-started", "copy": "Executing", "class": "execution-progress", "dynamicOperation": true },
+    { "id": "execution-step-completed", "copy": "Step completed", "class": "execution-progress", "dynamicOperation": true },
+    { "id": "validation-started", "copy": "Running validation…", "class": "execution-progress" },
+    { "id": "validation-completed", "copy": "Validation passed", "class": "execution-progress" },
+    { "id": "execution-completed", "copy": "Changes applied", "class": "execution-progress" },
+    { "id": "action-failed", "copy": "Execution stopped", "class": "execution-progress" },
+    { "id": "decision-lineage-loaded", "copy": "Decision lineage available", "class": "reasoning-status" },
+    { "id": "memory-superseded", "copy": "Previous memory superseded", "class": "reasoning-status" },
+    { "id": "memory-activated", "copy": "Updated memory active", "class": "reasoning-status" },
+    { "id": "ui-panel-opened", "copy": "Panel opened", "class": "loading" },
+    { "id": "ui-project-navigation-opened", "copy": "Project navigation opened", "class": "loading" }
+  ],
+  "primitives": [
+    {
+      "id": "message-submission",
+      "owner": "counterpoint",
+      "kind": "content-transition",
+      "screenBindings": ["conversation", "mobile-conversation"],
+      "runtimeEvidence": { "required": true, "eventIds": ["user-message-submitted"] },
+      "behavior": "Submitted message settles 4–6px into the thread and becomes stable before any work status appears.",
+      "durationMs": [140, 220],
+      "reducedMotion": "Immediate placement plus short opacity settle."
+    },
+    {
+      "id": "task-understanding",
+      "owner": "counterpoint",
+      "kind": "reasoning-status",
+      "screenBindings": ["conversation", "mobile-conversation"],
+      "runtimeEvidence": { "required": true, "eventIds": ["task-understanding-started", "task-understanding-completed"] },
+      "behavior": "A quiet status line appears only while task-understanding is active; one directional tick may traverse once, then the state settles.",
+      "durationMs": [180, 260],
+      "reducedMotion": "Opacity-only status change."
+    },
+    {
+      "id": "project-context-loading",
+      "owner": "decision-spine",
+      "kind": "working",
+      "screenBindings": ["conversation", "evidence-context", "project-home"],
+      "runtimeEvidence": { "required": true, "eventIds": ["project-context-load-started", "project-context-item-loaded", "project-context-load-completed"] },
+      "behavior": "Real context items register quietly in the inspector; current context state moves once, completed context settles without repeated checkmark animation.",
+      "durationMs": [180, 320],
+      "reducedMotion": "Immediate item registration with opacity change."
+    },
+    {
+      "id": "evidence-acquisition",
+      "owner": "decision-spine",
+      "kind": "working",
+      "screenBindings": ["evidence-context", "structured-response"],
+      "runtimeEvidence": { "required": true, "eventIds": ["evidence-search-started", "evidence-source-added", "evidence-search-completed"] },
+      "behavior": "Evidence rows enter at their final location with a 4–6px registration movement; provenance becomes visible without flying cards or graph animation.",
+      "durationMs": [140, 220],
+      "reducedMotion": "Immediate row appearance plus border/opacity settle."
+    },
+    {
+      "id": "council-review",
+      "owner": "decision-spine",
+      "kind": "working",
+      "screenBindings": ["structured-response", "evidence-context"],
+      "runtimeEvidence": { "required": true, "eventIds": ["council-review-started", "specialist-review-active", "specialist-review-completed", "council-review-completed"] },
+      "behavior": "Specialist roles appear as factual coordination states—Reviewed, Reviewing, Waiting—without avatars, speech bubbles, or simulated dialogue.",
+      "durationMs": [180, 300],
+      "reducedMotion": "State labels update without translation."
+    },
+    {
+      "id": "strategy-comparison",
+      "owner": "counterpoint",
+      "kind": "reasoning-status",
+      "screenBindings": ["structured-response"],
+      "runtimeEvidence": { "required": true, "eventIds": ["strategy-comparison-started", "strategy-comparison-completed"] },
+      "behavior": "Options remain visually neutral while evaluation is active. After comparison completes, viable/recommended/rejected states reveal once; no racing scores or animated rankings.",
+      "durationMs": [180, 320],
+      "reducedMotion": "Immediate state labels and hierarchy change."
+    },
+    {
+      "id": "long-running-work",
+      "owner": "decision-spine",
+      "kind": "working",
+      "screenBindings": ["conversation", "mobile-conversation"],
+      "runtimeEvidence": { "required": true, "eventIds": ["task-understanding-started", "project-context-load-started", "evidence-search-started", "response-preparation-started"] },
+      "behavior": "Working copy evolves only when the active runtime stage changes. The current stage uses one restrained directional indicator; completed stages settle; unknown future stages are omitted.",
+      "durationMs": [180, 260],
+      "messageMinDwellMs": 1200,
+      "reducedMotion": "Text/state changes only."
+    },
+    {
+      "id": "structured-answer-reveal",
+      "owner": "counterpoint",
+      "kind": "content-transition",
+      "screenBindings": ["conversation", "structured-response", "mobile-conversation"],
+      "runtimeEvidence": { "required": true, "eventIds": ["response-section-ready"] },
+      "behavior": "Recommendation, rationale, risks, and next action reveal by completed section with small opacity/vertical transitions; text is not animated character-by-character by default.",
+      "durationMs": [180, 300],
+      "reducedMotion": "Sections appear immediately as ready."
+    },
+    {
+      "id": "verification",
+      "owner": "decision-spine",
+      "kind": "reasoning-status",
+      "screenBindings": ["structured-response", "decision-detail", "approval"],
+      "runtimeEvidence": { "required": true, "eventIds": ["verification-started", "verification-issue", "verification-completed"] },
+      "behavior": "Normal verification settles quietly. A real issue interrupts flow with a deliberate still state and explicit problem copy.",
+      "durationMs": [180, 300],
+      "reducedMotion": "Immediate status switch with emphasis change."
+    },
+    {
+      "id": "critic-interruption",
+      "owner": "counterpoint",
+      "kind": "reasoning-status",
+      "screenBindings": ["structured-response", "approval"],
+      "runtimeEvidence": { "required": true, "eventIds": ["verification-issue"] },
+      "behavior": "A meaningful conflict interrupts the normal reveal rhythm; surrounding motion stops and the issue becomes the current reading anchor.",
+      "durationMs": [220, 360],
+      "reducedMotion": "Immediate issue anchor and halted activity."
+    },
+    {
+      "id": "approval-boundary",
+      "owner": "threshold",
+      "kind": "authority-transition",
+      "screenBindings": ["approval"],
+      "runtimeEvidence": { "required": true, "eventIds": ["approval-required"] },
+      "behavior": "The quiet advisory surface yields to a single consequence boundary; consequence color appears, controls become explicit, and the interface pauses before authorization is available.",
+      "durationMs": [400, 650],
+      "reducedMotion": "Immediate boundary/state change; preserve consequence structure and wording."
+    },
+    {
+      "id": "execution",
+      "owner": "threshold",
+      "kind": "execution-progress",
+      "screenBindings": ["approval", "decision-detail"],
+      "runtimeEvidence": { "required": true, "eventIds": ["action-authorized", "execution-step-started", "execution-step-completed"] },
+      "behavior": "Actual operation steps advance from approved to executing to completed using event-driven state changes. No indefinite decorative spinner when a step state is known.",
+      "durationMs": [160, 260],
+      "reducedMotion": "State labels update without directional travel."
+    },
+    {
+      "id": "validation",
+      "owner": "threshold",
+      "kind": "execution-progress",
+      "screenBindings": ["approval", "decision-detail"],
+      "runtimeEvidence": { "required": true, "eventIds": ["validation-started", "validation-completed"] },
+      "behavior": "Validation appears as a real execution stage after modification; passed state settles rather than celebrating.",
+      "durationMs": [160, 240],
+      "reducedMotion": "Immediate validation state update."
+    },
+    {
+      "id": "success",
+      "owner": "decision-spine",
+      "kind": "result-transition",
+      "screenBindings": ["decision-detail", "project-home"],
+      "runtimeEvidence": { "required": true, "eventIds": ["execution-completed"] },
+      "behavior": "Completed work settles into durable decision/history state without celebration.",
+      "durationMs": [220, 360],
+      "reducedMotion": "Immediate durable result state."
+    },
+    {
+      "id": "failure",
+      "owner": "threshold",
+      "kind": "result-transition",
+      "screenBindings": ["approval", "decision-detail"],
+      "runtimeEvidence": { "required": true, "eventIds": ["action-failed"] },
+      "behavior": "Execution motion stops. Failure consequence, impact, and recovery become the stable current state; no shake or flashing escalation.",
+      "durationMs": [220, 360],
+      "reducedMotion": "Immediate failure anchor and stillness."
+    },
+    {
+      "id": "decision-lineage",
+      "owner": "decision-spine",
+      "kind": "structural-transition",
+      "screenBindings": ["decision-detail"],
+      "runtimeEvidence": { "required": true, "eventIds": ["decision-lineage-loaded"] },
+      "behavior": "Evidence → decision → action → outcome or previous → superseded → current lineage draws/reveals only where those relationships exist.",
+      "durationMs": [300, 500],
+      "reducedMotion": "Show complete lineage immediately with subtle opacity emphasis on current node."
+    },
+    {
+      "id": "memory-update",
+      "owner": "decision-spine",
+      "kind": "structural-transition",
+      "screenBindings": ["project-memory"],
+      "runtimeEvidence": { "required": true, "eventIds": ["memory-superseded", "memory-activated"] },
+      "behavior": "Superseded memory recedes into historical status while the replacement becomes active; removal from active truth never visually implies historical erasure.",
+      "durationMs": [300, 480],
+      "reducedMotion": "Immediate lifecycle/status update with both records visible."
+    },
+    {
+      "id": "panel-transition",
+      "owner": "counterpoint",
+      "kind": "content-transition",
+      "screenBindings": ["evidence-context", "conversation"],
+      "runtimeEvidence": { "required": true, "eventIds": ["ui-panel-opened"] },
+      "behavior": "Context/evidence panels use short opacity and 6–10px directional movement; the center conversation never shifts theatrically.",
+      "durationMs": [180, 260],
+      "reducedMotion": "Immediate panel visibility plus opacity transition."
+    },
+    {
+      "id": "mobile-navigation",
+      "owner": "counterpoint",
+      "kind": "content-transition",
+      "screenBindings": ["mobile-conversation"],
+      "runtimeEvidence": { "required": true, "eventIds": ["ui-project-navigation-opened"] },
+      "behavior": "Project/thread navigation opens as one focused sheet with restrained vertical movement. No stacked sliding panels or simultaneous transitions.",
+      "durationMs": [180, 280],
+      "reducedMotion": "Sheet appears without translation."
+    },
+    {
+      "id": "reduced-motion",
+      "owner": "counterpoint",
+      "kind": "accessibility",
+      "screenBindings": ["project-home", "conversation", "structured-response", "evidence-context", "approval", "decision-detail", "project-memory", "mobile-conversation"],
+      "runtimeEvidence": { "required": false, "eventIds": [] },
+      "behavior": "Remove nonessential translation, drawing, parallax, looping indicators, and staged delay. Preserve status wording, hierarchy, consequence boundaries, progress truth, focus, and final states.",
+      "durationMs": [0, 120],
+      "reducedMotion": "This primitive is the reduced-motion contract."
+    }
+  ],
+  "canonicalScreenBindings": [
+    { "screenId": "project-home", "primitiveIds": ["project-context-loading", "success", "reduced-motion"], "motionLevel": "minimal" },
+    { "screenId": "conversation", "primitiveIds": ["message-submission", "task-understanding", "project-context-loading", "long-running-work", "structured-answer-reveal", "panel-transition", "reduced-motion"], "motionLevel": "quiet" },
+    { "screenId": "structured-response", "primitiveIds": ["evidence-acquisition", "council-review", "strategy-comparison", "structured-answer-reveal", "verification", "critic-interruption", "reduced-motion"], "motionLevel": "reading-led" },
+    { "screenId": "evidence-context", "primitiveIds": ["project-context-loading", "evidence-acquisition", "council-review", "panel-transition", "reduced-motion"], "motionLevel": "provenance-led" },
+    { "screenId": "approval", "primitiveIds": ["verification", "critic-interruption", "approval-boundary", "execution", "validation", "failure", "reduced-motion"], "motionLevel": "consequence-led" },
+    { "screenId": "decision-detail", "primitiveIds": ["verification", "execution", "validation", "success", "failure", "decision-lineage", "reduced-motion"], "motionLevel": "lineage-led" },
+    { "screenId": "project-memory", "primitiveIds": ["memory-update", "reduced-motion"], "motionLevel": "lineage-led" },
+    { "screenId": "mobile-conversation", "primitiveIds": ["message-submission", "task-understanding", "long-running-work", "structured-answer-reveal", "mobile-navigation", "reduced-motion"], "motionLevel": "extra-quiet" }
+  ],
+  "proofScenarios": [
+    { "id": "conversation-work-cycle", "screenId": "conversation", "events": ["user-message-submitted", "task-understanding-started", "task-understanding-completed", "project-context-load-started", "project-context-load-completed", "evidence-search-started", "evidence-search-completed", "response-preparation-started", "response-section-ready"] },
+    { "id": "structured-council-review", "screenId": "structured-response", "events": ["council-review-started", "specialist-review-active", "specialist-review-completed", "strategy-comparison-started", "strategy-comparison-completed", "verification-started", "verification-completed", "response-section-ready"] },
+    { "id": "evidence-registration", "screenId": "evidence-context", "events": ["project-context-load-started", "project-context-item-loaded", "evidence-search-started", "evidence-source-added", "evidence-source-added", "evidence-search-completed"] },
+    { "id": "approval-to-execution", "screenId": "approval", "events": ["approval-required", "action-authorized", "execution-step-started", "execution-step-completed", "validation-started", "validation-completed", "execution-completed"] },
+    { "id": "execution-failure", "screenId": "approval", "events": ["approval-required", "action-authorized", "execution-step-started", "action-failed"] },
+    { "id": "decision-history", "screenId": "decision-detail", "events": ["decision-lineage-loaded", "verification-completed"] },
+    { "id": "memory-supersession", "screenId": "project-memory", "events": ["memory-superseded", "memory-activated"] },
+    { "id": "mobile-continuity", "screenId": "mobile-conversation", "events": ["ui-project-navigation-opened", "user-message-submitted", "task-understanding-started", "response-section-ready"] },
+    { "id": "verification-interrupt", "screenId": "structured-response", "events": ["verification-started", "verification-issue"] },
+    { "id": "reduced-motion-equivalence", "screenId": "conversation", "events": ["task-understanding-started", "project-context-load-started", "response-section-ready"], "reducedMotion": true }
+  ],
+  "antiPatterns": [
+    "endless glowing AI orb",
+    "fake neural-network particles",
+    "bouncing agent avatars",
+    "constantly moving gradient borders",
+    "typewriter animation everywhere",
+    "fake percentage completion",
+    "fake internal thoughts",
+    "simulated agent conversations",
+    "visual noise during long tasks",
+    "celebratory confetti",
+    "generic pulsing dots for every state",
+    "animated scores while strategy evaluation is still running",
+    "motion that suggests a step completed before a completed event exists"
+  ],
+  "truth": {
+    "humanMotionApproval": false,
+    "runtimeEventAdaptersImplemented": false,
+    "exactBrowserMotionProofComplete": false,
+    "reducedMotionProofComplete": false,
+    "finalVisualSystemApproved": false
+  }
+}

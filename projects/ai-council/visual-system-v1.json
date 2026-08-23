@@ -1,0 +1,301 @@
+{
+  "schema": "ai-studio-os/visual-system@1",
+  "projectId": "ai-council",
+  "id": "hybrid-v1-visual-system-v1",
+  "selectedWorldRef": {
+    "schema": "ai-studio-os/creative-world@1",
+    "id": "decision-spine-counterpoint-hybrid-v1",
+    "selectionSource": "projects/ai-council/hybrid-v1-selection.json",
+    "humanSelected": true
+  },
+  "motionSystemRef": {
+    "schema": "ai-studio-os/motion-system@1",
+    "id": "hybrid-v1-motion-system-v1",
+    "sourceRef": "projects/ai-council/motion-system-v1.json",
+    "humanApprovalSourceRef": "projects/ai-council/motion-system-v1-human-approval.json"
+  },
+  "canonicalScreenIds": [
+    "project-home",
+    "conversation",
+    "structured-response",
+    "evidence-context",
+    "approval",
+    "decision-detail",
+    "project-memory",
+    "mobile-conversation"
+  ],
+  "brandIntegration": {
+    "brandIdea": "Orchestrated Intelligence",
+    "role": "The product should feel like calm human-facing judgment backed by visible project intelligence, not a machine control room.",
+    "identityRules": [
+      "Use the AI Council identity as a quiet project/system signature rather than a decorative hero device.",
+      "Directional or quiver-like geometry may inform icon rhythm and motion, but may not become neural, swarm, sparkle, or agent imagery.",
+      "Decision lineage is a product behavior, not a repeating brand pattern.",
+      "The consequence state is intentionally more forceful than the ordinary brand surface."
+    ],
+    "antiPatterns": [
+      "generic AI violet gradient",
+      "glowing orb or neural network",
+      "agent portraits",
+      "command-center chrome",
+      "logo motif repeated behind every panel"
+    ]
+  },
+  "typography": {
+    "readingFamily": "Newsreader",
+    "interfaceFamily": "Inter",
+    "technicalFamily": "IBM Plex Mono",
+    "selectionRationale": "Newsreader gives considered judgment and editorial humanity without forcing magazine pacing; Inter keeps navigation, controls, dense evidence, and long technical responses fast to scan; IBM Plex Mono is restricted to code and literal machine text.",
+    "roles": {
+      "conversation": { "family": "Inter", "weight": 400, "size": "15.5px", "lineHeight": 1.58, "measure": "68ch" },
+      "recommendation": { "family": "Newsreader", "weight": 450, "size": "clamp(30px, 3vw, 44px)", "lineHeight": 1.04, "measure": "24ch" },
+      "judgmentHeading": { "family": "Newsreader", "weight": 500, "size": "24px", "lineHeight": 1.14 },
+      "body": { "family": "Inter", "weight": 400, "size": "14.5px", "lineHeight": 1.62, "measure": "72ch" },
+      "metadata": { "family": "Inter", "weight": 520, "size": "11px", "lineHeight": 1.35, "tracking": "0.02em" },
+      "navigation": { "family": "Inter", "weight": 500, "size": "13px", "lineHeight": 1.3 },
+      "code": { "family": "IBM Plex Mono", "weight": 400, "size": "13px", "lineHeight": 1.58 },
+      "authority": { "family": "Inter", "weight": 650, "size": "12px", "lineHeight": 1.3, "tracking": "0.055em" }
+    },
+    "densityRules": [
+      "Short recommendations may use the Newsreader recommendation role as the leading statement.",
+      "Responses over roughly 450 words switch continuous prose to Inter body; Newsreader remains only for section-level judgment and conclusion anchors.",
+      "Code-heavy responses, tables, source lists, tool output, and dense evidence use the interface/technical roles rather than expanded editorial pacing.",
+      "Mobile reduces recommendation size and whitespace before reducing body size; body text never drops below 14px in the canonical mobile proof."
+    ],
+    "rules": [
+      "Never use monospace as atmosphere or navigation identity.",
+      "Serif signals judgment/reading, not every AI-generated sentence.",
+      "Metadata stays quieter than prose but remains legible at 200% zoom.",
+      "Long responses optimize scan speed before editorial drama."
+    ]
+  },
+  "color": {
+    "mode": "light-primary-with-system-dark-support",
+    "tokens": {
+      "canvas": "#F2F4F1",
+      "surface": "#FAFBF9",
+      "surfaceRaised": "#FFFFFF",
+      "ink": "#151A16",
+      "mutedInk": "#667069",
+      "line": "#D4DAD4",
+      "lineage": "#2F684E",
+      "evidence": "#5D527B",
+      "consequence": "#D84A34",
+      "focus": "#245BDB",
+      "positive": "#317255",
+      "warning": "#A7651F"
+    },
+    "darkTokens": {
+      "canvas": "#111512",
+      "surface": "#171C18",
+      "surfaceRaised": "#1C221D",
+      "ink": "#EEF3EE",
+      "mutedInk": "#A2ADA5",
+      "line": "#303A32",
+      "lineage": "#70AA88",
+      "evidence": "#AAA0C8",
+      "consequence": "#FF765D",
+      "focus": "#82A7FF",
+      "positive": "#72B48E",
+      "warning": "#D6A15A"
+    },
+    "semanticRoles": {
+      "lineage": "real provenance, chronology, decision/memory relationships",
+      "evidence": "inspectable source/evidence emphasis without implying authority",
+      "consequence": "approval required, authorization, blocked/destructive/external mutation, high risk, or security boundary only",
+      "focus": "keyboard and accessibility focus, never a brand accent"
+    },
+    "consequencePolicy": {
+      "ordinaryConversationAllowed": false,
+      "permanentNavigationAllowed": false,
+      "approvalAllowed": true,
+      "destructiveActionAllowed": true,
+      "blockedActionAllowed": true,
+      "highRiskAllowed": true,
+      "verificationBoundaryAllowed": true
+    },
+    "rules": [
+      "Do not distribute accents evenly for visual balance; semantic frequency controls color frequency.",
+      "Ordinary conversation is mostly canvas, ink, muted ink, and line.",
+      "Evidence violet is informational, never a confidence or authority signal.",
+      "Consequence vermilion must feel unusual because consequence itself is unusual."
+    ]
+  },
+  "surfaces": {
+    "principle": "Low-chrome mineral surfaces for reading; hierarchy comes from spacing, type, and semantic boundaries before cards or shadows.",
+    "levels": [
+      { "id": "canvas", "use": "primary conversation/project field", "shadow": "none" },
+      { "id": "quiet-surface", "use": "inspector, source detail, memory metadata", "shadow": "none" },
+      { "id": "raised-surface", "use": "temporary popover, command palette, focused overlay", "shadow": "soft-single-elevation-only" },
+      { "id": "consequence-surface", "use": "approval, destructive or blocked action", "shadow": "none; authority comes from boundary and color, not elevation" }
+    ],
+    "lineageRule": "Lines, rails, nodes, or connectors may appear only when two pieces of information have an actual provenance, chronology, decision, supersession, execution, or verification relationship.",
+    "antiPatterns": [
+      "glassmorphism",
+      "card for every content group",
+      "decorative lineage connectors",
+      "soft shadow hierarchy everywhere",
+      "paper skeuomorphism"
+    ]
+  },
+  "spacingDensity": {
+    "baseUnit": 4,
+    "scale": [4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80],
+    "modes": {
+      "reading": "generous vertical rhythm around recommendations and prose, restrained horizontal chrome",
+      "working": "moderate density for normal conversation and project navigation",
+      "evidence": "compact rows and grouped source metadata; no luxury whitespace inside long source sets",
+      "consequence": "higher operational density with explicit grouping of risk, scope, rollback, validation, and action controls"
+    },
+    "rule": "Density changes with task semantics, not viewport alone. Dense evidence and operational states stay efficient even in an editorial system."
+  },
+  "iconography": {
+    "system": "Quiver Line",
+    "construction": "16/20/24px optical grid, 1.5px primary stroke, open endpoints, restrained directional cuts, minimal rounded joins",
+    "brandRelationship": "Subtle directional/quiver logic may echo AI Council identity without reproducing the logo as every icon.",
+    "semanticFamilies": [
+      "navigation",
+      "evidence/source",
+      "decision/lineage",
+      "memory/supersession",
+      "approval/authority",
+      "execution/verification",
+      "files/tools"
+    ],
+    "antiPatterns": [
+      "sparkle/star AI iconography",
+      "robot heads",
+      "neural nodes",
+      "filled colorful icon tiles",
+      "icon-only consequential actions without labels"
+    ]
+  },
+  "componentGrammar": {
+    "principle": "Components express information role and authority state; they do not all share one card template.",
+    "components": [
+      { "id": "app-shell", "rule": "conversation-first three-region desktop shell; right inspector collapsible" },
+      { "id": "project-navigation", "rule": "project/thread continuity with low visual weight" },
+      { "id": "conversation-thread", "rule": "reading field dominates available width" },
+      { "id": "council-message", "rule": "natural prose first; structure appears only when useful" },
+      { "id": "structured-recommendation", "rule": "recommendation → reason → next move → inspect material" },
+      { "id": "context-inspector", "rule": "subordinate context/project/evidence/actions surface" },
+      { "id": "evidence-item", "rule": "source + excerpt + date + why used; compact at scale" },
+      { "id": "approval-request", "rule": "distinct consequence state with scope, risk, rollback, validation and explicit authority controls" },
+      { "id": "decision-record", "rule": "durable statement with rationale, alternatives, evidence, lifecycle, confidence, authority and sparse lineage" },
+      { "id": "memory-record", "rule": "editable knowledge with verification and lifecycle separated" },
+      { "id": "composer", "rule": "familiar natural-language composer; + @ / remain optional accelerators" },
+      { "id": "code-block", "rule": "high-density technical surface with copy/file context and horizontal overflow handling" },
+      { "id": "data-table", "rule": "compact technical comparison; sticky headings only when needed" },
+      { "id": "tool-execution", "rule": "explicit started/running/completed/failed state without exposing raw tool payloads by default" },
+      { "id": "error-message", "rule": "specific failure + consequence + recovery action; no generic red toast as sole explanation" }
+    ]
+  },
+  "interactionStates": {
+    "global": [
+      "default",
+      "hover",
+      "focus-visible",
+      "pressed",
+      "selected",
+      "disabled",
+      "loading"
+    ],
+    "council": [
+      "reading-context",
+      "working",
+      "streaming",
+      "waiting-for-tool",
+      "waiting-for-approval",
+      "executing",
+      "verifying",
+      "complete",
+      "failed"
+    ],
+    "authority": [
+      "advisory",
+      "approval-required",
+      "authorized",
+      "blocked",
+      "rejected"
+    ],
+    "rule": "Authority state must be distinguishable by wording, structure, iconography, and control availability; color alone is insufficient."
+  },
+  "motion": {
+    "sourceOfTruth": "projects/ai-council/motion-system-v1.json",
+    "systemId": "hybrid-v1-motion-system-v1",
+    "humanApprovalSourceRef": "projects/ai-council/motion-system-v1-human-approval.json",
+    "eventTaxonomySourceRef": "projects/ai-council/motion-event-taxonomy-v1.json",
+    "personality": "quiet, directional, evidence-aware, and consequence-sensitive",
+    "consumptionRule": "Visual components consume Motion System V1 primitives and runtime-event truth rules; they may not invent local loaders, thinking animations, authority transitions, or progress semantics that drift from the formal system.",
+    "humanApproved": true,
+    "productionReady": false
+  },
+  "responsive": {
+    "breakpoints": [
+      { "id": "compact", "min": 0 },
+      { "id": "medium", "min": 640 },
+      { "id": "workspace", "min": 960 },
+      { "id": "wide", "min": 1280 }
+    ],
+    "desktopRule": "Center conversation remains dominant; left navigation and right inspector have maximum widths and may never squeeze the reading field below its minimum measure.",
+    "tabletRule": "Right inspector becomes an overlay/drawer before conversation width is compromised; project navigation may collapse to a rail or drawer.",
+    "mobileRules": [
+      "Render one primary conversation column; do not reproduce the three-region desktop shell.",
+      "Project/thread continuity lives behind the project/thread trigger and remains one tap away.",
+      "Context, evidence, and actions open as focused sheets or in-flow expansions rather than permanent side panels.",
+      "Recommendation hierarchy compresses whitespace and type scale before removing content.",
+      "Code, tables, and source lists prioritize readable overflow and progressive disclosure over miniaturization.",
+      "Approval remains visibly consequential but uses vertical grouping and full-width labeled actions."
+    ]
+  },
+  "themeBehavior": {
+    "default": "system",
+    "light": "primary authored reference for V1 proof",
+    "dark": "semantic parity required; not a simple inversion",
+    "rule": "Lineage, evidence, focus, and consequence roles must preserve relative meaning and accessible contrast in both themes."
+  },
+  "stressTests": [
+    { "id": "short-answer", "target": "Normal conversation with a 2–4 sentence response; editorial system must not over-design it." },
+    { "id": "long-answer", "target": "900–1400 word Council response with headings, bullets and conclusion; body switches to scan-efficient interface typography." },
+    { "id": "code-heavy-answer", "target": "Response with three code blocks, inline code, file paths and prose; technical content stays dense and readable." },
+    { "id": "dense-evidence", "target": "Evidence inspector with mixed repository, conversation, file and web sources plus excerpts and why-used metadata." },
+    { "id": "ten-plus-sources", "target": "At least 12 source rows; source treatment must compact rather than become 12 large cards." },
+    { "id": "multi-stage-recommendation", "target": "Recommendation containing decision, reasons, alternatives, risks, constraints, next actions and remaining uncertainty." },
+    { "id": "tool-execution", "target": "Realistic tool lifecycle: proposed → approved → running → validation → complete, with logs inspectable on demand." },
+    { "id": "error-state", "target": "Failed tool or provider operation with specific impact, retry/recovery and provenance preserved." },
+    { "id": "streaming-state", "target": "Council is reading context/using tools/streaming response without exposing chain-of-thought or fake module telemetry." },
+    { "id": "very-long-project-memory", "target": "30+ memory records across decisions, constraints, assumptions and superseded items; density and state-aware controls remain usable." }
+  ],
+  "reviewCriteria": [
+    "conversation-dominance",
+    "reading-speed",
+    "semantic-lineage",
+    "authority-boundary-clarity",
+    "dense-state-scalability",
+    "mobile-calmness",
+    "accessibility",
+    "brand-distinctiveness",
+    "implementation-coherence",
+    "motion-state-truthfulness"
+  ],
+  "antiPatterns": [
+    "beautiful sparse proof that fails dense real content",
+    "serif on every AI response",
+    "cardification of all information",
+    "decorative decision graph",
+    "consequence red as general accent",
+    "right inspector competing with conversation",
+    "mobile desktop miniaturization",
+    "generic premium productivity UI",
+    "agent-dashboard or command-center visual language",
+    "component-local motion that contradicts Motion System V1"
+  ],
+  "truth": {
+    "humanVisualApproval": false,
+    "finalVisualSystemApproved": false,
+    "typographyHumanApproved": false,
+    "colorHumanApproved": false,
+    "motionHumanApproved": false,
+    "runtimeMotionAdaptersImplemented": false
+  }
+}

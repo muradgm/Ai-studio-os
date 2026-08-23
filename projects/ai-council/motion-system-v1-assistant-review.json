@@ -1,0 +1,93 @@
+{
+  "schema": "ai-studio-os/motion-system-review@1",
+  "projectId": "ai-council",
+  "motionSystemId": "hybrid-v1-motion-system-v1",
+  "reviewMode": "assistant-exact-browser-webm-inspection",
+  "selectionAuthority": false,
+  "proof": {
+    "workflowRun": 32661582877,
+    "artifactName": "ai-council-motion-system-v1-proof",
+    "artifactDigest": "sha256:6a5373df55f7e778328f085547c93027942a545740cb8f8c4078290ab73443e3",
+    "canonicalCoverage": "8/8",
+    "runtimeScenarioCoverage": "10/10",
+    "primitiveCoverage": "20/20",
+    "exactBrowserMotionProof": true,
+    "reducedMotionProof": true,
+    "runtimeEventAdaptersImplemented": false
+  },
+  "passes": [
+    "Motion status claims are event-gated and fail closed without matching runtime evidence.",
+    "Loading, working, reasoning-status, and execution-progress are formally separate state classes.",
+    "No glowing AI orb, neural particles, agent-avatar dialogue, fake percentage progress, chain-of-thought, celebratory confetti, or universal pulsing-dot language appears.",
+    "Mobile motion remains materially quieter than desktop.",
+    "Execution failure stops activity rather than escalating spectacle.",
+    "Decision lineage and memory supersession are reserved for real temporal relationships.",
+    "Reduced-motion mode completes with zero running animations while preserving status information.",
+    "Proof fixtures are explicitly labeled and are not misrepresented as production telemetry."
+  ],
+  "refinementFindings": [
+    {
+      "severity": "major",
+      "id": "status-overlay-too-proof-like",
+      "finding": "Canonical product clips depend too heavily on a floating top-center runtime-status pill. It proves state copy but does not yet make working state feel native to the conversation, inspector, or action surfaces.",
+      "requiredChange": "Move status expression into the relevant product surface: conversation work state near the response origin, evidence state in the inspector, and execution state inside the action surface. A global compact status may remain only when cross-surface work genuinely needs it."
+    },
+    {
+      "severity": "major",
+      "id": "state-does-not-yet-become-structure",
+      "finding": "Structured Recommendation and Evidence clips mostly animate already-visible content. They do not yet prove the signature thesis that information moves from temporary work state into durable recommendation/provenance structure.",
+      "requiredChange": "Stage canonical proof so recommendation sections become visible only when section-ready events arrive and evidence rows register into provenance only when evidence-source-added events arrive. Preserve identical semantic DOM; presentation state may begin visually unresolved."
+    },
+    {
+      "severity": "major",
+      "id": "approval-transition-under-proven",
+      "finding": "The Approval screen starts in its consequence styling, so the exact-browser clip does not sufficiently demonstrate the product's strongest motion event: advice yielding to an authority boundary.",
+      "requiredChange": "Begin the proof in neutral/advisory presentation and introduce the consequence boundary, authority label, and actionable controls only when approval-required fires."
+    },
+    {
+      "severity": "major",
+      "id": "mobile-navigation-not-demonstrated",
+      "finding": "Mobile continuity remains calm, but the proof animates the trigger rather than demonstrating the project/thread navigation sheet that the canonical UX contract requires.",
+      "requiredChange": "Inject a proof-only sheet derived from the canonical mobile navigation contract and demonstrate one restrained sheet transition plus reduced-motion equivalent."
+    },
+    {
+      "severity": "major",
+      "id": "historical-event-copy-state-contradiction",
+      "finding": "Runtime-state scenario boards can visually settle a previous row as completed while its copy still says Checking…, Reviewing…, or Running…. That mixes event history and current-state language.",
+      "requiredChange": "Past start/active events become neutral historical entries with settled wording; only explicit completed/passed/ready events receive completed styling."
+    },
+    {
+      "severity": "minor",
+      "id": "council-review-proof-order-is-fixture-like",
+      "finding": "The Council review scenario validates participant truth but reads as a test ledger rather than a native coordination surface.",
+      "requiredChange": "Keep the event truth, but demonstrate the same states in a compact Council participant region attached to Structured Recommendation rather than relying on the standalone proof list as the primary visual evidence."
+    }
+  ],
+  "assessment": {
+    "result": "refine-before-human-motion-review",
+    "why": "The truth architecture and accessibility contract are ready. The first exact-browser choreography is not yet expressive enough to establish state becoming structure as an AI Council signature behavior on the real product surfaces.",
+    "nextProofMustDemonstrate": [
+      "product-native working state rather than proof-overlay dependence",
+      "actual section-by-section structured answer resolution",
+      "evidence registering into provenance",
+      "neutral advice changing into an approval authority boundary",
+      "real mobile project/thread sheet transition",
+      "truthful historical versus completed work-state semantics",
+      "failure-to-stillness",
+      "decision lineage and memory supersession",
+      "reduced-motion equivalence"
+    ],
+    "supersedingProof": {
+      "script": "scripts/ai-council-motion-system-v1-human-review-proof.mjs",
+      "artifact": "ai-council-motion-system-v1-human-review-proof",
+      "status": "pending-ci-and-human-inspection"
+    }
+  },
+  "truth": {
+    "assistantReviewOnly": true,
+    "humanMotionApproval": false,
+    "humanVisualApproval": true,
+    "finalVisualSystemApproved": false,
+    "runtimeEventAdaptersImplemented": false
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "schema": "ai-studio-os/motion-event-taxonomy@1",
+  "projectId": "ai-council",
+  "motionSystemId": "hybrid-v1-motion-system-v1",
+  "purpose": "Separate operational runtime state from the visual/structural role a runtime event may trigger. Motion roles are orthogonal to operational state and may be present when no operation is active.",
+  "operationalStates": [
+    "none",
+    "loading",
+    "working",
+    "reasoning-status",
+    "execution-progress"
+  ],
+  "motionRoles": [
+    "none",
+    "content-transition",
+    "context-registration",
+    "evidence-registration",
+    "coordination-transition",
+    "comparison-transition",
+    "authority-transition",
+    "verification-transition",
+    "result-transition",
+    "failure-transition",
+    "lineage-transition",
+    "memory-transition",
+    "navigation-transition"
+  ],
+  "events": [
+    { "id": "user-message-submitted", "operationalState": "none", "motionRole": "content-transition" },
+    { "id": "task-understanding-started", "operationalState": "reasoning-status", "motionRole": "none" },
+    { "id": "task-understanding-completed", "operationalState": "none", "motionRole": "result-transition" },
+    { "id": "project-context-load-started", "operationalState": "working", "motionRole": "none" },
+    { "id": "project-context-item-loaded", "operationalState": "working", "motionRole": "context-registration" },
+    { "id": "project-context-load-completed", "operationalState": "none", "motionRole": "context-registration" },
+    { "id": "evidence-search-started", "operationalState": "working", "motionRole": "none" },
+    { "id": "evidence-source-added", "operationalState": "working", "motionRole": "evidence-registration" },
+    { "id": "evidence-search-completed", "operationalState": "none", "motionRole": "evidence-registration" },
+    { "id": "council-review-started", "operationalState": "working", "motionRole": "none" },
+    { "id": "specialist-review-active", "operationalState": "working", "motionRole": "coordination-transition" },
+    { "id": "specialist-review-completed", "operationalState": "none", "motionRole": "coordination-transition" },
+    { "id": "council-review-completed", "operationalState": "none", "motionRole": "coordination-transition" },
+    { "id": "strategy-comparison-started", "operationalState": "reasoning-status", "motionRole": "none" },
+    { "id": "strategy-comparison-completed", "operationalState": "none", "motionRole": "comparison-transition" },
+    { "id": "response-preparation-started", "operationalState": "working", "motionRole": "none" },
+    { "id": "response-section-ready", "operationalState": "working", "motionRole": "content-transition" },
+    { "id": "verification-started", "operationalState": "reasoning-status", "motionRole": "none" },
+    { "id": "verification-issue", "operationalState": "none", "motionRole": "failure-transition" },
+    { "id": "verification-completed", "operationalState": "none", "motionRole": "verification-transition" },
+    { "id": "approval-required", "operationalState": "none", "motionRole": "authority-transition" },
+    { "id": "action-authorized", "operationalState": "none", "motionRole": "authority-transition" },
+    { "id": "execution-step-started", "operationalState": "execution-progress", "motionRole": "none" },
+    { "id": "execution-step-completed", "operationalState": "none", "motionRole": "result-transition" },
+    { "id": "validation-started", "operationalState": "execution-progress", "motionRole": "none" },
+    { "id": "validation-completed", "operationalState": "none", "motionRole": "verification-transition" },
+    { "id": "execution-completed", "operationalState": "none", "motionRole": "lineage-transition" },
+    { "id": "action-failed", "operationalState": "none", "motionRole": "failure-transition" },
+    { "id": "decision-lineage-loaded", "operationalState": "none", "motionRole": "lineage-transition" },
+    { "id": "memory-superseded", "operationalState": "none", "motionRole": "memory-transition" },
+    { "id": "memory-activated", "operationalState": "none", "motionRole": "memory-transition" },
+    { "id": "ui-panel-opened", "operationalState": "none", "motionRole": "navigation-transition" },
+    { "id": "ui-project-navigation-opened", "operationalState": "none", "motionRole": "navigation-transition" }
+  ],
+  "semanticAssertions": [
+    "approval-required is an authority transition and is never execution progress",
+    "navigation transitions are not loading unless a separate real resource request is pending",
+    "evidence registration may occur during working state without becoming a progress metric",
+    "validation-started is execution progress but does not require a decorative motion role",
+    "completed or durable events may transition structure without claiming an operation is still active"
+  ],
+  "legacyCompatibility": {
+    "legacyField": "eventVocabulary[].class",
+    "status": "ignored-by-canonical-runtime",
+    "rule": "The legacy class field may remain in authored V1 source for provenance, but canonical runtime output must remove it and attach operationalState + motionRole from this taxonomy."
+  },
+  "truth": {
+    "motionRuntimeTaxonomyResolved": true,
+    "runtimeEventAdaptersImplemented": false,
+    "finalVisualSystemApproved": false
+  }
+}
