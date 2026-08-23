@@ -27,6 +27,9 @@ jobs:
       - name: Run AI Studio OS tests
         run: npm test
 
+      - name: Check AI Council proof renderer syntax
+        run: node --check scripts/ai-council-style-frame-proof.mjs
+
       - name: Run v1.3 Creative Engineering benchmark
         run: node ./bin/studio.mjs benchmark creative-engineering-v13
 
