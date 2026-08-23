@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildProductUXArchitecture } from '../../modules/product-ux-architecture/runtime.mjs';
 import { buildProductUXArchitectureReference, sameProductUXArchitectureReference } from '../../modules/product-ux-architecture/reference.mjs';
+import { buildCanonicalInterfaceFixture, buildCanonicalInterfaceFixtureReference, sameCanonicalInterfaceFixtureReference } from '../../modules/interface-world-proof/fixture.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PROJECT_ID = /^[a-z0-9][a-z0-9_-]*$/i;
@@ -36,7 +37,12 @@ export function productUXArchitectureFile(projectId, { repoRoot = REPO_ROOT } = 
   return path.join(repoRoot, 'projects', id, 'product-ux-architecture.json');
 }
 
-function catalogHash(exploration, requiredInterfaceArchitectureRef = null) {
+export function canonicalInterfaceFixtureFile(projectId, { repoRoot = REPO_ROOT } = {}) {
+  const id = normalizeProjectId(projectId);
+  return path.join(repoRoot, 'projects', id, 'canonical-ux-fixture.json');
+}
+
+function catalogHash(exploration, requiredInterfaceArchitectureRef = null, requiredCanonicalFixtureRef = null) {
   const source = JSON.stringify({
     schema: exploration?.schema ?? null,
     projectId: exploration?.thesisRef?.projectId ?? exploration?.projectId ?? null,
@@ -61,12 +67,13 @@ function catalogHash(exploration, requiredInterfaceArchitectureRef = null) {
       antiPatterns: world?.antiPatterns
     })),
     visualProof: exploration?.visualProof ?? null,
-    requiredInterfaceArchitectureRef
+    requiredInterfaceArchitectureRef,
+    requiredCanonicalFixtureRef
   });
   return crypto.createHash('sha256').update(source).digest('hex').slice(0, 20);
 }
 
-function proofForWorld(exploration, worldId, requiredInterfaceArchitectureRef = null) {
+function proofForWorld(exploration, worldId, requiredInterfaceArchitectureRef = null, requiredCanonicalFixtureRef = null) {
   const proof = exploration?.visualProof;
   const entry = proof?.worlds?.find?.((item) => item?.worldId === worldId)
     ?? proof?.byWorld?.[worldId]
@@ -75,23 +82,28 @@ function proofForWorld(exploration, worldId, requiredInterfaceArchitectureRef = 
   const proofReviewed = proof?.reviewReady === true && entry?.reviewReady === true && evidenceRefs.length > 0;
   const architectureMatch = !requiredInterfaceArchitectureRef
     || sameProductUXArchitectureReference(proof?.interfaceArchitectureRef, requiredInterfaceArchitectureRef);
-  const reviewReady = proofReviewed && architectureMatch;
+  const fixtureMatch = !requiredCanonicalFixtureRef
+    || sameCanonicalInterfaceFixtureReference(proof?.canonicalFixtureRef, requiredCanonicalFixtureRef);
+  const reviewReady = proofReviewed && architectureMatch && fixtureMatch;
   let status = 'proof-required';
   if (reviewReady) status = 'review-ready';
   else if (proofReviewed && !architectureMatch) status = 'architecture-proof-stale';
+  else if (proofReviewed && architectureMatch && !fixtureMatch) status = 'fixture-proof-stale';
   else if (evidenceRefs.length) status = 'proof-not-reviewed';
   return {
     reviewReady,
     evidenceRefs,
     comparisonRef: clean(proof?.comparisonRef) || null,
     interfaceArchitectureRef: structuredClone(proof?.interfaceArchitectureRef ?? null),
+    canonicalFixtureRef: structuredClone(proof?.canonicalFixtureRef ?? null),
     architectureMatch,
+    fixtureMatch,
     status
   };
 }
 
-function mapWorld(exploration, world, requiredInterfaceArchitectureRef = null) {
-  const proof = proofForWorld(exploration, world.id, requiredInterfaceArchitectureRef);
+function mapWorld(exploration, world, requiredInterfaceArchitectureRef = null, requiredCanonicalFixtureRef = null) {
+  const proof = proofForWorld(exploration, world.id, requiredInterfaceArchitectureRef, requiredCanonicalFixtureRef);
   return {
     id: clean(world.id),
     label: clean(world.label) || clean(world.id),
@@ -114,7 +126,7 @@ function mapWorld(exploration, world, requiredInterfaceArchitectureRef = null) {
   };
 }
 
-export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = null, requiredInterfaceArchitectureRef = null } = {}) {
+export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = null, requiredInterfaceArchitectureRef = null, requiredCanonicalFixtureRef = null } = {}) {
   const id = normalizeProjectId(projectId);
   const findings = [];
 
@@ -143,13 +155,14 @@ export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = 
       findings.push(finding('blocker', 'creative-world-catalog-world-not-review-ready', 'Only structurally review-ready Creative World artifacts may enter the selection workspace.', { worldId }));
       continue;
     }
-    candidates.push(mapWorld(exploration, world, requiredInterfaceArchitectureRef));
+    candidates.push(mapWorld(exploration, world, requiredInterfaceArchitectureRef, requiredCanonicalFixtureRef));
   }
 
-  const version = catalogHash(exploration, requiredInterfaceArchitectureRef);
+  const version = catalogHash(exploration, requiredInterfaceArchitectureRef, requiredCanonicalFixtureRef);
   const pass = !findings.some((item) => item.severity === 'blocker');
   const lockableCount = candidates.filter((candidate) => candidate.canLock).length;
-  const staleArchitectureProof = requiredInterfaceArchitectureRef && candidates.some((candidate) => candidate.visualProof.status === 'architecture-proof-stale');
+  const staleCanonicalProof = (requiredInterfaceArchitectureRef || requiredCanonicalFixtureRef)
+    && candidates.some((candidate) => ['architecture-proof-stale', 'fixture-proof-stale'].includes(candidate.visualProof.status));
 
   return {
     schema: 'ai-studio-os/creative-world-catalog@1',
@@ -158,37 +171,57 @@ export function buildCreativeWorldCatalog(projectId, exploration, { sourceRef = 
     catalogVersion: version,
     thesisRef: structuredClone(exploration?.thesisRef ?? {}),
     requiredInterfaceArchitectureRef: structuredClone(requiredInterfaceArchitectureRef),
-    status: !pass ? 'blocked' : lockableCount ? 'visual-proof-ready' : staleArchitectureProof ? 'awaiting-current-interface-proof' : 'awaiting-visual-proof',
+    requiredCanonicalFixtureRef: structuredClone(requiredCanonicalFixtureRef),
+    status: !pass ? 'blocked' : lockableCount ? 'visual-proof-ready' : staleCanonicalProof ? 'awaiting-current-interface-proof' : 'awaiting-visual-proof',
     pass,
     reviewReady: pass,
     candidates,
     lockableCount,
-    selectionRule: requiredInterfaceArchitectureRef
-      ? 'A Creative World can be locked only after comparable visual proof is reviewed against the current frozen Product UX Architecture.'
-      : 'A Creative World can be locked only after comparable visual proof is reviewed and evidence refs exist.',
+    selectionRule: requiredCanonicalFixtureRef
+      ? 'A Creative World can be locked only after comparable visual proof is reviewed against both the current frozen Product UX Architecture and the current canonical fixture.'
+      : requiredInterfaceArchitectureRef
+        ? 'A Creative World can be locked only after comparable visual proof is reviewed against the current frozen Product UX Architecture.'
+        : 'A Creative World can be locked only after comparable visual proof is reviewed and evidence refs exist.',
     findings
   };
 }
 
-async function loadRequiredInterfaceArchitectureRef(projectId, { repoRoot = REPO_ROOT } = {}) {
-  const file = productUXArchitectureFile(projectId, { repoRoot });
+async function loadRequiredInterfaceProofRefs(projectId, { repoRoot = REPO_ROOT } = {}) {
+  const architectureFile = productUXArchitectureFile(projectId, { repoRoot });
+  const fixtureFile = canonicalInterfaceFixtureFile(projectId, { repoRoot });
+  let architectureRef = null;
+  let fixtureRef = null;
+  const findings = [];
+
   try {
-    const input = JSON.parse(await fs.readFile(file, 'utf8'));
+    const input = JSON.parse(await fs.readFile(architectureFile, 'utf8'));
     const architecture = buildProductUXArchitecture(input);
     if (!architecture.reviewReady || architecture.truth?.informationArchitectureFrozen !== true) {
-      return {
-        ref: null,
-        finding: finding('blocker', 'creative-world-catalog-interface-architecture-not-ready', 'Project Product UX Architecture exists but is not review-ready; visual selection must remain blocked.', { sourceRef: path.relative(repoRoot, file).split(path.sep).join('/') })
-      };
+      findings.push(finding('blocker', 'creative-world-catalog-interface-architecture-not-ready', 'Project Product UX Architecture exists but is not review-ready; visual selection must remain blocked.', { sourceRef: path.relative(repoRoot, architectureFile).split(path.sep).join('/') }));
+    } else {
+      architectureRef = buildProductUXArchitectureReference(architecture);
     }
-    return { ref: buildProductUXArchitectureReference(architecture), finding: null };
   } catch (error) {
-    if (error?.code === 'ENOENT') return { ref: null, finding: null };
-    return {
-      ref: null,
-      finding: finding('blocker', 'creative-world-catalog-interface-architecture-read-failed', error instanceof Error ? error.message : String(error), { sourceRef: path.relative(repoRoot, file).split(path.sep).join('/') })
-    };
+    if (error?.code !== 'ENOENT') findings.push(finding('blocker', 'creative-world-catalog-interface-architecture-read-failed', error instanceof Error ? error.message : String(error), { sourceRef: path.relative(repoRoot, architectureFile).split(path.sep).join('/') }));
   }
+
+  try {
+    const input = JSON.parse(await fs.readFile(fixtureFile, 'utf8'));
+    if (!architectureRef) {
+      findings.push(finding('blocker', 'creative-world-catalog-canonical-fixture-without-architecture', 'Canonical interface fixture exists without a review-ready Product UX Architecture; selection must remain blocked.', { sourceRef: path.relative(repoRoot, fixtureFile).split(path.sep).join('/') }));
+    } else {
+      const fixture = buildCanonicalInterfaceFixture(input, { architectureRef });
+      if (!fixture.reviewReady) {
+        findings.push(finding('blocker', 'creative-world-catalog-canonical-fixture-not-ready', 'Canonical interface fixture exists but is not review-ready; visual selection must remain blocked.', { sourceRef: path.relative(repoRoot, fixtureFile).split(path.sep).join('/'), fixtureFindings: fixture.findings }));
+      } else {
+        fixtureRef = buildCanonicalInterfaceFixtureReference(fixture, { architectureRef });
+      }
+    }
+  } catch (error) {
+    if (error?.code !== 'ENOENT') findings.push(finding('blocker', 'creative-world-catalog-canonical-fixture-read-failed', error instanceof Error ? error.message : String(error), { sourceRef: path.relative(repoRoot, fixtureFile).split(path.sep).join('/') }));
+  }
+
+  return { architectureRef, fixtureRef, findings };
 }
 
 export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT } = {}) {
@@ -197,12 +230,13 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
   const sourceRef = path.relative(repoRoot, file).split(path.sep).join('/');
   try {
     const exploration = JSON.parse(await fs.readFile(file, 'utf8'));
-    const architectureRequirement = await loadRequiredInterfaceArchitectureRef(id, { repoRoot });
+    const requirements = await loadRequiredInterfaceProofRefs(id, { repoRoot });
     const catalog = buildCreativeWorldCatalog(id, exploration, {
       sourceRef,
-      requiredInterfaceArchitectureRef: architectureRequirement.ref
+      requiredInterfaceArchitectureRef: requirements.architectureRef,
+      requiredCanonicalFixtureRef: requirements.fixtureRef
     });
-    if (!architectureRequirement.finding) return catalog;
+    if (!requirements.findings.length) return catalog;
     return {
       ...catalog,
       status: 'blocked',
@@ -210,7 +244,7 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
       reviewReady: false,
       lockableCount: 0,
       candidates: catalog.candidates.map((candidate) => ({ ...candidate, canLock: false })),
-      findings: [...catalog.findings, architectureRequirement.finding]
+      findings: [...catalog.findings, ...requirements.findings]
     };
   } catch (error) {
     if (error?.code === 'ENOENT') {
@@ -221,6 +255,7 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
         catalogVersion: null,
         thesisRef: null,
         requiredInterfaceArchitectureRef: null,
+        requiredCanonicalFixtureRef: null,
         status: 'not-generated',
         pass: false,
         reviewReady: false,
@@ -237,6 +272,7 @@ export async function loadCreativeWorldCatalog(projectId, { repoRoot = REPO_ROOT
       catalogVersion: null,
       thesisRef: null,
       requiredInterfaceArchitectureRef: null,
+      requiredCanonicalFixtureRef: null,
       status: 'blocked',
       pass: false,
       reviewReady: false,
@@ -264,7 +300,7 @@ export function validateCreativeWorldSelection(catalog, { selectedWorldId, catal
   if (!selected) {
     findings.push(finding('blocker', 'creative-world-selection-id-invalid', 'Selected Creative World must exist in the current project catalog.', { selectedWorldId: id || null }));
   } else if (selected.canLock !== true) {
-    findings.push(finding('blocker', 'creative-world-selection-visual-proof-required', 'Creative World cannot be locked from prose or stale interface proof. Reviewed visual proof for the current product architecture is required first.', { selectedWorldId: id, proofStatus: selected.visualProof?.status ?? null }));
+    findings.push(finding('blocker', 'creative-world-selection-visual-proof-required', 'Creative World cannot be locked from prose or stale interface proof. Reviewed visual proof for the current product architecture and canonical fixture is required first.', { selectedWorldId: id, proofStatus: selected.visualProof?.status ?? null }));
   }
 
   const pass = !findings.some((item) => item.severity === 'blocker');
@@ -279,6 +315,7 @@ export function validateCreativeWorldSelection(catalog, { selectedWorldId, catal
       sourceRef: catalog.sourceRef,
       thesisRef: structuredClone(catalog.thesisRef ?? {}),
       requiredInterfaceArchitectureRef: structuredClone(catalog.requiredInterfaceArchitectureRef ?? null),
+      requiredCanonicalFixtureRef: structuredClone(catalog.requiredCanonicalFixtureRef ?? null),
       visualEvidenceRefs: [...(selected.visualProof?.evidenceRefs ?? [])],
       comparisonRef: selected.visualProof?.comparisonRef ?? null,
       status: 'locked'
