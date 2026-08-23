@@ -1,4 +1,5 @@
 import { buildProductUXArchitectureReference, sameProductUXArchitectureReference } from '../product-ux-architecture/reference.mjs';
+import { buildCanonicalInterfaceFixture, buildCanonicalInterfaceFixtureReference, sameCanonicalInterfaceFixtureReference } from './fixture.mjs';
 
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -12,20 +13,28 @@ function finding(severity, code, message, evidence = {}) {
   return { severity, code, message, evidence };
 }
 
-export function buildInterfaceWorldProofPlan({ architecture = null, exploration = null } = {}) {
+export function buildInterfaceWorldProofPlan({ architecture = null, exploration = null, fixture = null } = {}) {
   const findings = [];
   const architectureRef = buildProductUXArchitectureReference(architecture ?? {});
+  const canonicalFixture = buildCanonicalInterfaceFixture(fixture ?? {}, { architectureRef });
+  const canonicalFixtureRef = buildCanonicalInterfaceFixtureReference(canonicalFixture, { architectureRef });
   const worlds = Array.isArray(exploration?.worlds) ? exploration.worlds : [];
   const screens = Array.isArray(architecture?.screens) ? architecture.screens : [];
 
   if (architecture?.schema !== 'ai-studio-os/product-ux-architecture@1' || architecture?.reviewReady !== true || architecture?.truth?.informationArchitectureFrozen !== true) {
     findings.push(finding('blocker', 'interface-world-proof-architecture-not-ready', 'Canonical interface Creative World proof requires a review-ready frozen Product UX Architecture.'));
   }
+  if (canonicalFixture.reviewReady !== true) {
+    findings.push(finding('blocker', 'interface-world-proof-fixture-not-ready', 'Canonical interface Creative World proof requires a review-ready canonical fixture with coherent context, state-aware memory, status taxonomy, and mobile navigation.', { fixtureFindings: canonicalFixture.findings }));
+  }
   if (exploration?.schema !== 'ai-studio-os/creative-world-exploration@1' || exploration?.reviewReady !== true) {
     findings.push(finding('blocker', 'interface-world-proof-worlds-not-ready', 'Canonical interface proof requires review-ready Creative Worlds.'));
   }
   if (worlds.length < 3 || worlds.length > 5) findings.push(finding('blocker', 'interface-world-proof-world-count-invalid', 'Canonical interface proof requires 3–5 Creative Worlds.', { count: worlds.length }));
   if (screens.length < 4) findings.push(finding('blocker', 'interface-world-proof-screen-count-thin', 'Canonical interface proof requires a meaningful frozen screen set.', { count: screens.length }));
+  if (canonicalFixture.canonicalScreenIds && JSON.stringify(canonicalFixture.canonicalScreenIds) !== JSON.stringify(screens.map((screen) => screen.id))) {
+    findings.push(finding('blocker', 'interface-world-proof-fixture-screen-drift', 'Canonical fixture screen order must exactly match the frozen Product UX Architecture.', { fixtureScreenIds: canonicalFixture.canonicalScreenIds, architectureScreenIds: screens.map((screen) => screen.id) }));
+  }
 
   const frames = worlds.flatMap((world) => screens.map((screen) => ({
     schema: 'ai-studio-os/interface-world-proof-frame@1',
@@ -51,8 +60,12 @@ export function buildInterfaceWorldProofPlan({ architecture = null, exploration 
     interactionModel: world.interactionModel,
     responsiveStrategy: world.responsiveStrategy,
     interfaceArchitectureRef: structuredClone(architectureRef),
+    canonicalFixtureRef: structuredClone(canonicalFixtureRef),
+    comparisonInvariants: structuredClone(canonicalFixture.comparisonInvariants ?? []),
+    worldVariationAllowed: structuredClone(canonicalFixture.worldVariationAllowed ?? []),
     truth: {
       sameCanonicalProductSkeleton: true,
+      sameCanonicalFixture: true,
       humanVisualApproval: false,
       worldSelected: false,
       finalUIApproved: false
@@ -78,6 +91,11 @@ export function buildInterfaceWorldProofPlan({ architecture = null, exploration 
     pass: blockers.length === 0,
     reviewReady,
     interfaceArchitectureRef: architectureRef,
+    canonicalFixtureRef,
+    fixtureTruth: structuredClone(canonicalFixture.truth ?? {}),
+    screenModel: structuredClone(canonicalFixture.screenModel ?? {}),
+    statusTaxonomy: structuredClone(canonicalFixture.statusTaxonomy ?? {}),
+    mobileNavigation: structuredClone(canonicalFixture.mobileNavigation ?? {}),
     explorationRef: {
       schema: exploration?.schema ?? null,
       projectId: exploration?.projectId ?? exploration?.thesisRef?.projectId ?? null,
@@ -91,13 +109,15 @@ export function buildInterfaceWorldProofPlan({ architecture = null, exploration 
       screenId: screen.id,
       screenLabel: screen.label,
       worldIds: worlds.map((world) => world.id),
-      purpose: 'compare-the-same-canonical-product-screen-across-all-creative-worlds'
+      purpose: 'compare-the-same-canonical-product-screen-and-fixture-across-all-creative-worlds'
     })),
     selection: null,
     findings,
     truth: {
       informationArchitectureFrozen: architecture?.truth?.informationArchitectureFrozen === true,
+      canonicalFixtureFrozen: canonicalFixture.reviewReady === true,
       sameCanonicalProductSkeleton: true,
+      sameCanonicalFixture: true,
       humanVisualApproval: false,
       humanWorldSelectionConfirmed: false,
       selectedAutomatically: false
@@ -118,6 +138,8 @@ export function buildInterfaceWorldProofEvidence({ plan = null, renderedFrames =
   for (const frame of expected) {
     const rendered = frames.find((item) => item.frameId === frame.id);
     if (!rendered?.imageRef || !rendered?.sourceRef) findings.push(finding('major', 'interface-world-proof-frame-evidence-missing', 'Every world/screen pair requires an exact browser image and matching source reference.', { frameId: frame.id }));
+    if (rendered?.interfaceArchitectureFingerprint && rendered.interfaceArchitectureFingerprint !== plan?.interfaceArchitectureRef?.fingerprint) findings.push(finding('blocker', 'interface-world-proof-render-architecture-drift', 'Rendered frame architecture fingerprint differs from the proof plan.', { frameId: frame.id }));
+    if (rendered?.canonicalFixtureFingerprint && rendered.canonicalFixtureFingerprint !== plan?.canonicalFixtureRef?.fingerprint) findings.push(finding('blocker', 'interface-world-proof-render-fixture-drift', 'Rendered frame fixture fingerprint differs from the proof plan.', { frameId: frame.id }));
   }
   if (comparisons.length !== screenIds.length) findings.push(finding('major', 'interface-world-proof-comparison-coverage-thin', 'Every canonical screen requires a same-screen cross-world comparison board.', { expected: screenIds.length, actual: comparisons.length }));
   if (overviews.length !== worldIds.length) findings.push(finding('major', 'interface-world-proof-overview-coverage-thin', 'Every Creative World requires a full canonical-screen overview board.', { expected: worldIds.length, actual: overviews.length }));
@@ -133,6 +155,10 @@ export function buildInterfaceWorldProofEvidence({ plan = null, renderedFrames =
     pass: blockers.length === 0,
     reviewReady,
     interfaceArchitectureRef: structuredClone(plan?.interfaceArchitectureRef ?? null),
+    canonicalFixtureRef: structuredClone(plan?.canonicalFixtureRef ?? null),
+    screenModel: structuredClone(plan?.screenModel ?? {}),
+    statusTaxonomy: structuredClone(plan?.statusTaxonomy ?? {}),
+    mobileNavigation: structuredClone(plan?.mobileNavigation ?? {}),
     comparisonRef: comparisons[0] ?? null,
     comparisonRefs: comparisons,
     overviewRefs: overviews,
@@ -150,6 +176,7 @@ export function buildInterfaceWorldProofEvidence({ plan = null, renderedFrames =
     truth: {
       exactBrowserRaster: true,
       sameCanonicalProductSkeleton: true,
+      sameCanonicalFixture: true,
       humanVisualApproval: false,
       humanWorldSelectionConfirmed: false,
       selectedAutomatically: false,
@@ -160,4 +187,8 @@ export function buildInterfaceWorldProofEvidence({ plan = null, renderedFrames =
 
 export function proofMatchesInterfaceArchitecture(proof, requiredRef) {
   return sameProductUXArchitectureReference(proof?.interfaceArchitectureRef, requiredRef);
+}
+
+export function proofMatchesCanonicalInterfaceFixture(proof, requiredRef) {
+  return sameCanonicalInterfaceFixtureReference(proof?.canonicalFixtureRef, requiredRef);
 }
