@@ -1,4 +1,4 @@
-# AI Studio OS — Specialist Skill Architecture v1.1
+# AI Studio OS — Specialist Skill Architecture v1.2
 
 ## Purpose
 
@@ -41,7 +41,7 @@ Answers: **How should this specialist reason?**
 
 Role skills own professional judgment and tradeoffs. They should not prescribe a whole project workflow and should not self-approve their own output.
 
-Examples: art direction, brand strategy, logo design, motion design, copywriting, product design, vector geometry.
+Examples: art direction, brand strategy, logo design, motion design, copywriting, product design, Drawing Intelligence, vector geometry.
 
 `creative-skeptic` remains a role skill, but the router invokes it in a separate **challenger lane**. This prevents adversarial review from consuming a required maker slot.
 
@@ -81,6 +81,42 @@ Examples: brand identity, landing page, scroll cinematic, logo system, icon syst
 - Never use a reviewer as evidence that its own maker output is correct.
 - Never resolve disagreement by averaging aesthetics. Record the tradeoff and choose deliberately.
 
+## Drawing Intelligence subsystem
+
+Drawing Intelligence was added after a separate recurring gap became clear during AI Council icon work: the system could construct precise vector geometry, but it could still spend too much effort polishing the **wrong metaphor**.
+
+Examples that exposed the gap included:
+
+- Council / Decision forms drifting into Git branch/merge vocabulary for a developer audience;
+- Provenance drifting into crop/scan/focus vocabulary;
+- Authority drifting into crosshair, split-pane, docking, security, or generic route semantics.
+
+These are not geometry defects. They are **pre-geometry design-judgment defects**.
+
+`drawing-intelligence` therefore owns:
+
+- semantic decomposition;
+- convention-first versus brand-original decisions;
+- learned visual-vocabulary collision checks;
+- evidence-backed drawing memory of rejected/accepted metaphors;
+- metaphor hypothesis generation;
+- semantic primitive planning;
+- size-specific information budgets;
+- rendered-review requirements;
+- structured geometry-intent handoff.
+
+It does **not** own exact SVG coordinates and cannot self-approve its output.
+
+### Brain / hand source of truth
+
+For difficult semantic drawing:
+
+`APPROVED PRODUCT / BRAND INTENT → DRAWING INTELLIGENCE PLAN → GEOMETRY INTENT → VECTOR GEOMETRY SPEC → NORMALIZED SVG → INDEPENDENT REVIEW → ARTIFACT INTEGRITY`
+
+For already-settled conventional controls, the Drawing Intelligence stage may be skipped rather than manufacturing unnecessary novelty.
+
+The executable Drawing Intelligence contract lives in `modules/drawing-intelligence/runtime.mjs`.
+
 ## Vector Geometry subsystem
 
 The vector subsystem was added after a real recurring gap became clear: existing logo/icon skills could decide **what** a symbol should be, but no specialist owned exact mathematical construction across SVG coordinates, complex corners, Bézier handles, layers, overlaps, and multi-size icon families.
@@ -92,9 +128,11 @@ It adds:
 - `vector-geometry-review` — review
 - `icon-system-recipe` — recipe
 
+Drawing Intelligence now sits upstream when semantic intent is unresolved or collision-prone; Vector Geometry remains the deterministic execution authority.
+
 ### Geometry source of truth
 
-`APPROVED VISUAL INTENT → GEOMETRY SPEC → NORMALIZED SVG → VECTOR REVIEW → SVG INTEGRITY`
+`DRAWING INTELLIGENCE HANDOFF (when needed) → GEOMETRY SPEC → NORMALIZED SVG → VECTOR REVIEW → SVG INTEGRITY`
 
 The geometry spec sits above SVG and should record:
 
@@ -129,45 +167,15 @@ Before adding a skill, answer:
 4. What failure modes does it catch?
 5. Which real project demonstrated the need?
 
-If those answers are weak, improve an existing skill instead.
+Drawing Intelligence meets this bar because AI Council exposed repeated semantic-metaphor failures that neither Product Design nor Vector Geometry owned cleanly: Product Design knew what Authority meant; Vector Geometry could draw it precisely; neither layer owned systematic learned-symbol collision reasoning and pre-geometry drawing plans.
 
-## Core catalog v1.1
+If those answers are weak for future candidates, improve an existing skill instead.
 
-### Role
-- art-direction
-- brand-strategist
-- logo-designer
-- motion-designer
-- copywriter
-- product-designer
-- image-director
-- vector-geometry-engineer
-- creative-skeptic
+## Core catalog notes
 
-### Task
-- logo-exploration
-- motion-choreography
-- landing-page-layout
-- headline-writing
-- hero-section-design
-- icon-system-construction
+Drawing Intelligence is an active **role** skill and should be routed only for drawings where semantic invention or collision risk materially changes the outcome. It should not consume a maker slot for settled conventional controls.
 
-### Review
-- creative-critic
-- logo-review
-- motion-review
-- copy-review
-- brand-fit-review
-- vector-geometry-review
-
-### Recipe
-- brand-identity-recipe
-- landing-page-recipe
-- scroll-cinematic-recipe
-- logo-system-recipe
-- icon-system-recipe
-
-Total active core catalog: **26 skills**.
+The machine-readable current catalog is authoritative in `kernel/skill-registry.json`.
 
 ## Future specialist candidates
 
@@ -176,3 +184,5 @@ Video direction, sound design, voice direction, retouch specialization, typograp
 ## Learning
 
 Skill files are living operational knowledge. Update them only from validated evidence: repeated project failures, Council findings, benchmark regressions, user corrections, or proven production constraints. Do not promote one subjective preference into a global rule without recurrence.
+
+Drawing Memory follows the same rule: rejected or accepted visual cues should be stored only when backed by real review evidence, not one unvalidated aesthetic preference.
