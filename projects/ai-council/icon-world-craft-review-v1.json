@@ -1,0 +1,92 @@
+{
+  "schema": "ai-studio-os/icon-world-craft-review@1",
+  "projectId": "ai-council",
+  "id": "ai-council-icon-world-craft-review-v1",
+  "reviewedAt": "2026-08-24T13:36:23+02:00",
+  "reviewSource": "human-provided-review-after-run-260-with-external-system-benchmarking",
+  "proofRef": {
+    "runNumber": 260,
+    "head": "bd0176a939e2b949cffc8238dabe7e15bfe4a47b",
+    "artifactId": 9501756201,
+    "artifactName": "ai-council-icon-world-craft-calibration-v1",
+    "artifactDigest": "sha256:f2b112602dcc59e018fd1bcbbda41a4d66bc73bbf119d8c2db139aedf104bf0c",
+    "status": "ready-for-human-icon-world-selection",
+    "exactBrowserProof": true,
+    "craftGatePass": true
+  },
+  "interpretation": {
+    "engineeringSelectionEvidenceReady": true,
+    "aiIconCraftReview": "finalist-semantic-refinement-recommended",
+    "humanSelectionRecommendedNow": false,
+    "reason": "The proof architecture, optical variants, conventional-control firewall, node budget and weight normalization are sufficient, but several signature metaphors remain semantically under-resolved against the learned visual vocabulary of developer tools and mature icon systems."
+  },
+  "governingCorrection": "Brand semantics should own the relationship, not necessarily the entire silhouette. Use established metaphors where they exist; create original signs only where AI Council's product concept genuinely requires one.",
+  "labelBlindPolicy": {
+    "conventionDominant": "near-instant learned recognition",
+    "abstractBrandSemantic": "distinctive, internally discriminable, contextually sensible and consistently labeled; exact concept naming from an unlabeled 16px glyph is not required"
+  },
+  "worldAssessments": [
+    {
+      "worldId": "provenance-glyph",
+      "status": "active-finalist",
+      "assessment": "Still the strongest foundation and the best product-semantic fit, but Council, Decision, Evidence, Provenance and Authority have unresolved external-metaphor collisions. The world has earned finalist refinement, not selection authority.",
+      "mustRevisit": ["council", "decision", "evidence", "provenance", "authority"],
+      "refine": ["supersede"],
+      "likelyPreserve": ["verification", "memory", "projects"],
+      "freeze": ["search", "back", "attach", "send", "edit"]
+    },
+    {
+      "worldId": "editorial-sign",
+      "status": "active-finalist",
+      "assessment": "Remains the serious challenger and the strongest optical/human benchmark. Its risk is insufficient semantic ownership rather than usability. Give it the same bounded metaphor-refinement opportunity inside its own constitution.",
+      "mustRevisit": ["council", "decision", "evidence", "provenance", "authority"],
+      "refine": ["supersede"],
+      "likelyPreserve": ["verification", "memory", "projects"],
+      "freeze": ["search", "back", "attach", "send", "edit"]
+    },
+    {
+      "worldId": "quiver-construct",
+      "status": "retired-from-active-refinement",
+      "assessment": "Stop active investment as a full-system finalist. Its branch/fork/direction grammar collides too strongly with deeply learned Git and developer-tool semantics for AI Council's target audience. Preserve it as historical/reference material only unless explicitly reopened.",
+      "worldViableForSelectionRecommendation": false
+    }
+  ],
+  "externalMetaphorCollisionFocus": {
+    "council": ["git-branch", "git-merge", "fork", "version-control-graph"],
+    "decision": ["git-branch", "git-merge", "route", "workflow"],
+    "evidence": ["properties", "metadata", "settings", "connector"],
+    "provenance": ["crop", "scan", "focus", "expand", "lineage-mini-graph"],
+    "authority": ["split-pane", "alignment", "docking", "resize-divider", "security-lock"],
+    "supersede": ["delete", "disable", "remove", "prohibit", "retry", "refresh"]
+  },
+  "nextSlice": {
+    "id": "icon-finalist-semantic-refinement-v1",
+    "activeWorlds": ["provenance-glyph", "editorial-sign"],
+    "hypothesesPerDifficultConcept": "2-3",
+    "hypothesisSizes": [14, 16, 24],
+    "requiresDeveloperSemanticCollisionReview": true,
+    "requiresRealTypographyPairing": true,
+    "typographySizesPx": [13, 14.5, 15.5],
+    "requiresActualUiContext": true,
+    "requiresMobileTargetProof": true,
+    "mobileGlyphSizePx": 16,
+    "mobileTargetSizesPx": [44, 48],
+    "newWorldsAllowed": false,
+    "hybridizationAllowed": false,
+    "automaticWorldWinnerAllowed": false
+  },
+  "selectedWorld": null,
+  "truth": {
+    "iconCraftCalibrationComplete": true,
+    "engineeringSelectionEvidenceReady": true,
+    "finalistSemanticRefinementRecommended": true,
+    "humanSelectionRecommendedNow": false,
+    "quiverActiveRefinement": false,
+    "iconWorldHumanSelected": false,
+    "iconSystemHumanApproved": false,
+    "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
+    "appIconHumanApproved": false,
+    "finalVisualSystemApproved": false
+  }
+}
