@@ -1,0 +1,11 @@
+{
+  "schema": "ai-studio-os/icon-style-constitution@1",
+  "id": "standard-icon-style-v1",
+  "authorship": "drawing-intelligence",
+  "brief": {
+    "objective": "Create one coherent, distinctive standard UI icon family.",
+    "mustPreserve": ["immediate recognition", "small-size clarity", "family coherence", "interface usability"],
+    "mustAvoid": ["generic library imitation", "novelty that damages recognition", "repeated decorative gimmicks", "unnecessary semantic reinvention"]
+  },
+  "constitutionAuthored": false
+}

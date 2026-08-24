@@ -1,0 +1,31 @@
+{
+  "schema": "ai-studio-os/standard-icon-benchmark@1",
+  "id": "standard-icon-logic-v1",
+  "purpose": "Evaluate whether AI Studio OS can independently design a coherent, recognizable and artistically authored standard UI icon family.",
+  "styleAuthority": "ai-studio-os-self-authored",
+  "drawingIntelligenceRequired": true,
+  "vectorGeometryRequired": true,
+  "exactBrowserProofRequired": true,
+  "targetSizes": [14, 16, 20, 24],
+  "benchmarkCandidateId": "studio-authored",
+  "concepts": [
+    "home",
+    "menu",
+    "search",
+    "edit",
+    "like",
+    "favorite",
+    "bookmark",
+    "share",
+    "download",
+    "settings",
+    "lock",
+    "upload",
+    "close",
+    "filter",
+    "link",
+    "logout"
+  ],
+  "humanStandardIconReviewComplete": false,
+  "standardIconSystemApproved": false
+}
