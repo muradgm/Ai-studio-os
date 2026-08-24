@@ -11,7 +11,8 @@ import {
 } from '../modules/drawing-intelligence/runtime.mjs';
 import {
   AUTHORITY_PRODUCTION_CANDIDATES,
-  buildAuthorityVectorArtifact
+  buildAuthorityVectorArtifact,
+  inspectAuthoritySvgIntegrity
 } from '../modules/drawing-intelligence/authority-production-test.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -48,22 +49,38 @@ test('Authority production geometry receives less semantic machinery at smaller 
     assert.equal(master.retainedSemanticDevices.length, 3, candidateId);
     assert.ok(micro.primitivePlan.primitives.length < small.primitivePlan.primitives.length, candidateId);
     assert.ok(small.primitivePlan.primitives.length < master.primitivePlan.primitives.length, candidateId);
+    assert.ok(micro.primitivePlan.relationships.every((relationship) => relationship.semanticDeviceId === 'boundary'), candidateId);
   }
 });
 
-test('Vector Geometry handoff validates and renders every Authority candidate at 14/16/24', () => {
+test('Vector Geometry spec and emitted SVG integrity pass for every Authority candidate at 14/16/24', () => {
   const memory = buildDrawingMemory(memoryInput);
   const plan = buildDrawingIntelligencePlan(input, { memory });
   for (const candidateId of AUTHORITY_PRODUCTION_CANDIDATES) {
     for (const size of plan.targetSizes) {
       const intent = buildGeometryIntent(plan, candidateId, { size });
       const artifact = buildAuthorityVectorArtifact(intent);
-      assert.equal(artifact.vectorValidation.status, 'ready', `${candidateId}@${size}`);
+      assert.equal(artifact.vectorSpecValidation.status, 'ready', `${candidateId}@${size}`);
+      assert.equal(artifact.emittedSvgIntegrity.status, 'ready', `${candidateId}@${size}`);
+      assert.equal(artifact.emittedSvgIntegrity.surfaceNeutral, true, `${candidateId}@${size}`);
       assert.match(artifact.svg, /^<svg /, `${candidateId}@${size}`);
+      assert.ok(!artifact.svg.includes('fill="white"'), `${candidateId}@${size}`);
       assert.ok(!artifact.svg.includes('Approval required'));
       assert.ok(!artifact.svg.includes('Authorized'));
     }
   }
+});
+
+test('emitted SVG integrity catches surface coupling and out-of-bounds geometry', () => {
+  const coupled = '<svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor"><g id="authority-opposed-domains-16"><circle cx="12" cy="12" r="3" fill="white"/></g></svg>';
+  const coupledResult = inspectAuthoritySvgIntegrity(coupled, { candidateId: 'opposed-domains', targetSize: 16 });
+  assert.equal(coupledResult.status, 'blocked');
+  assert.ok(coupledResult.findings.some((item) => item.code === 'authority-svg-raw-fill-forbidden'));
+
+  const outside = '<svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor"><g id="authority-opposed-domains-16"><line x1="2" y1="12" x2="30" y2="12"/></g></svg>';
+  const outsideResult = inspectAuthoritySvgIntegrity(outside, { candidateId: 'opposed-domains', targetSize: 16 });
+  assert.equal(outsideResult.status, 'blocked');
+  assert.ok(outsideResult.findings.some((item) => item.code === 'authority-svg-line-bounds-invalid'));
 });
 
 test('Authority master geometry remains identical across later product-state labels', () => {
