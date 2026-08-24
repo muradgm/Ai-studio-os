@@ -1,0 +1,46 @@
+{
+  "schema": "ai-studio-os/drawing-memory@1",
+  "projectId": "ai-council",
+  "records": [
+    {
+      "id": "authority-crosshair-rejected",
+      "conceptId": "authority",
+      "status": "rejected",
+      "avoidCues": ["crosshair", "alignment-axis", "vertical-divider", "split-pane", "docking"],
+      "reason": "Authority must communicate a human permission boundary, not alignment, docking, resize, or split-pane manipulation.",
+      "evidenceRefs": ["AI Council Icon Finalist Semantic Refinement V1 visual review"]
+    },
+    {
+      "id": "authority-security-rejected",
+      "conceptId": "authority",
+      "status": "rejected",
+      "avoidCues": ["lock", "shield", "key", "security-boundary"],
+      "reason": "Authority is permission to cross from advice into consequence, not security/authentication/access control.",
+      "evidenceRefs": ["AI Council icon semantic review"]
+    },
+    {
+      "id": "authority-route-rejected",
+      "conceptId": "authority",
+      "status": "rejected",
+      "avoidCues": ["arrow", "route", "forward-direction", "connected-path"],
+      "reason": "A continuous route through the boundary reads as navigation or execution rather than withheld/granted authority.",
+      "evidenceRefs": ["AI Council Icon Finalist Semantic Refinement V1 visual review"]
+    },
+    {
+      "id": "council-decision-git-rejected",
+      "conceptId": "*",
+      "status": "rejected",
+      "avoidCues": ["branch", "fork", "merge", "bifurcation", "commit-graph"],
+      "reason": "Developer audiences already read branch/merge/fork topology as Git/version-control semantics; do not reuse it for unrelated Council judgment concepts.",
+      "evidenceRefs": ["AI Council Icon World Craft Review V1"]
+    },
+    {
+      "id": "provenance-crop-rejected",
+      "conceptId": "provenance",
+      "status": "rejected",
+      "avoidCues": ["crop-corners", "corner-brackets", "focus-frame", "scan-frame"],
+      "reason": "Crop/focus/scan corners are learned image and viewport controls; provenance should symbolize traceability rather than borrow that vocabulary.",
+      "evidenceRefs": ["AI Council Icon World Craft Review V1"]
+    }
+  ]
+}
