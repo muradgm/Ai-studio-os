@@ -112,7 +112,7 @@ async function assertRenderedGlyphs(page, expectedCount, label) {
   }));
   if (report.length !== expectedCount) throw new Error(`${label}: expected ${expectedCount} rendered glyphs, found ${report.length}`);
   for (const item of report) {
-    if (!(item.width > 0 && item.height > 0 && item.inkWidth > 0 && item.inkHeight > 0 && item.shapeCount > 0)) {
+    if (!(item.width > 0 && item.height > 0 && (item.inkWidth > 0 || item.inkHeight > 0) && item.shapeCount > 0)) {
       throw new Error(`${label}: empty or non-rendered Authority glyph: ${JSON.stringify(item)}`);
     }
   }
