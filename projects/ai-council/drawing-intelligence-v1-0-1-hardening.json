@@ -1,0 +1,20 @@
+{
+  "schema": "ai-studio-os/drawing-intelligence-contract-hardening@1",
+  "projectId": "ai-council",
+  "version": "1.0.1",
+  "scope": "Drawing Intelligence V1 correctness only",
+  "changes": {
+    "authoritySemanticMasterStateNeutral": true,
+    "drawingMemoryConceptScoped": true,
+    "semanticPlanExactGeometryForbidden": true,
+    "sizeBudgetFiltersGeometryIntent": true
+  },
+  "nonGoals": [
+    "automated vision critique",
+    "primitive synthesis",
+    "family-wide optimization",
+    "cross-project drawing learning",
+    "autonomous design selection"
+  ],
+  "authorityProductionTestReadyAfterMerge": true
+}
