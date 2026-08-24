@@ -1,0 +1,130 @@
+{
+  "schema": "ai-studio-os/icon-world-craft-calibration@1",
+  "projectId": "ai-council",
+  "id": "ai-council-icon-world-craft-calibration-v1",
+  "baseline": {
+    "explorationRef": "projects/ai-council/icon-world-exploration-v1.json",
+    "hardeningReviewRef": "projects/ai-council/icon-world-independent-review-v1.json",
+    "baselineRun": 248,
+    "baselineHead": "f5818933a0d160abdc385ca9146e06b733133303",
+    "preserveBaselineGlyphs": true
+  },
+  "purpose": "Raise each existing Icon World to a selection-worthy craft level without changing its constitution, adding worlds, hybridizing geometry, expanding the family, or creating app icons.",
+  "opticalVariants": {
+    "sizes": [14, 16, 18, 24],
+    "masterSize": 24,
+    "allowIntentionalCorrections": true,
+    "allowedCorrections": [
+      "remove secondary nodes",
+      "enlarge critical gaps",
+      "shorten subordinate lines",
+      "simplify intersections",
+      "adjust optical center",
+      "adjust terminal length",
+      "increase negative space",
+      "collapse redundant layers"
+    ],
+    "semanticConstructionMustRemainStable": true
+  },
+  "registrationNodeBudget": {
+    "worldId": "provenance-glyph",
+    "limits": {"24": 3, "18": 2, "16": 1, "14": 1},
+    "rule": "A registration node may exist only when removing it changes semantic meaning. Nodes are permitted vocabulary, not mandatory family decoration."
+  },
+  "conventionalControlFirewall": {
+    "controls": ["search", "back", "attach", "send", "edit"],
+    "rule": "Brand grammar must not reduce immediate recognition. Family relationship should come from proportion, stroke, terminal treatment, radius, angle, and bounding-box rhythm rather than semantic lineage machinery.",
+    "forbidSignatureNodesOnControls": true,
+    "closeNotAddedBecauseNotInInventory": true
+  },
+  "opticalWeight": {
+    "measureInkBounds": true,
+    "measureInkCoverage": true,
+    "criticalSizes": [14, 16, 18],
+    "maxBoundsOccupancySpread": 0.42,
+    "maxInkCoverageCoefficientOfVariation": 0.58,
+    "principle": "Icons should feel equally present rather than mathematically equally sized."
+  },
+  "targetedCorrections": {
+    "provenance-glyph": {
+      "focus": ["authority", "verification", "memory", "provenance", "council", "decision", "projects", "supersede", "search"],
+      "requirements": [
+        "Authority reads as advice-to-consequence boundary before it reads as connection/crosshair.",
+        "Verification moves away from generic square-plus-check confirmation.",
+        "Project Memory gains a fundamentally different primary silhouette from Projects.",
+        "Provenance becomes a traceability symbol rather than tiny topology notation.",
+        "Council and Decision remain related but separate at silhouette level; Decision has a more final destination.",
+        "Search loses provenance interruption/node embellishment and preserves conventional magnifier recognition."
+      ]
+    },
+    "editorial-sign": {
+      "focus": ["council", "decision", "provenance", "verification", "authority"],
+      "requirements": [
+        "Separate Council and Decision without losing editorial quietness.",
+        "Move Provenance away from generic activity/signal waveform semantics.",
+        "Move Verification away from generic success confirmation.",
+        "Preserve density restraint and human optical calm."
+      ]
+    },
+    "quiver-construct": {
+      "focus": ["council", "decision", "authority", "action", "supersede", "provenance"],
+      "requirements": [
+        "Council and Decision must no longer resolve through effectively the same fork/arrow silhouette.",
+        "Authority must read as permission boundary rather than directed action.",
+        "Supersede must express retained old state plus replacement rather than generic directional action.",
+        "Provenance must remain meaningful at 14-16px instead of collapsing into a small line."
+      ],
+      "viabilityQuestion": "Can Quiver carry AI Council's semantic range without relying predominantly on fork, arrow, and direction motifs?"
+    }
+  },
+  "beforeAfterProof": {
+    "iconIds": ["council", "decision", "evidence", "provenance", "memory", "supersede", "authority", "verification", "projects", "search"],
+    "sizes": [14, 16, 18, 24],
+    "sameViewport": true,
+    "sameLabels": true,
+    "baselineMustRemainVisible": true,
+    "exactBrowserProof": true
+  },
+  "similarityWarnings": {
+    "pairs": [
+      ["council", "decision"],
+      ["evidence", "verification"],
+      ["authority", "action"],
+      ["supersede", "retry"],
+      ["provenance", "history"],
+      ["projects", "memory"]
+    ],
+    "sizes": [14, 16, 18],
+    "metric": "alpha-mask-jaccard",
+    "alphaThreshold": 20,
+    "warningThreshold": 0.55,
+    "machineMaySelect": false,
+    "semanticScoreAllowed": false,
+    "rule": "High ink-overlap similarity is a human-inspection warning only; low similarity is not evidence of semantic quality. Empty canvas pixels are excluded from the comparison."
+  },
+  "forbidden": {
+    "newWorlds": true,
+    "hybridization": true,
+    "newSemanticConcepts": true,
+    "productionFamilyExpansion": true,
+    "appIconWork": true,
+    "darkIconVariants": true,
+    "iconAnimation": true,
+    "automaticWinner": true
+  },
+  "selection": null,
+  "selectedWorld": null,
+  "truth": {
+    "iconCraftCalibrationComplete": false,
+    "opticalVariantsReviewed": false,
+    "conventionalControlPurityReviewed": false,
+    "registrationBudgetValidated": false,
+    "opticalWeightNormalized": false,
+    "iconWorldHumanSelected": false,
+    "iconSystemHumanApproved": false,
+    "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
+    "appIconHumanApproved": false,
+    "finalVisualSystemApproved": false
+  }
+}

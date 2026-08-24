@@ -1,0 +1,95 @@
+{
+  "schema": "ai-studio-os/icon-semantic-inventory@1",
+  "projectId": "ai-council",
+  "id": "ai-council-icon-semantic-inventory-v1",
+  "selectedWorldRef": {
+    "id": "decision-spine-counterpoint-hybrid-v1",
+    "sourceRef": "projects/ai-council/hybrid-v1-selection.json",
+    "humanSelected": true
+  },
+  "visualSystemApprovalRef": {
+    "sourceRef": "projects/ai-council/visual-system-v1-human-approval.json",
+    "humanVisualApproval": true
+  },
+  "motionSystemApprovalRef": {
+    "sourceRef": "projects/ai-council/motion-system-v1-human-approval.json",
+    "humanMotionApproval": true
+  },
+  "purpose": "Define AI Council's canonical V1 icon meanings before any icon-world geometry is selected. Signature concepts may receive original semantic construction; familiar controls preserve convention and inherit family geometry.",
+  "iconClasses": {
+    "brand-semantic": "AI Council-specific concepts where original semantic construction can improve recognition and brand ownership.",
+    "convention-dominant": "Familiar product controls whose established semantic silhouette should remain immediately recognizable while inheriting AI Council geometry."
+  },
+  "displayPolicy": {
+    "priorities": ["essential", "conditional", "optional"],
+    "suppressWhenRedundant": true,
+    "optionalDefaultsSuppressedInDenseSurfaces": true,
+    "essentialRule": "Render when semantic safety, icon-only control recognition, or consequential state depends on the symbol.",
+    "conditionalRule": "Render only when the icon contributes information not already obvious from adjacent text/state.",
+    "optionalRule": "Default to suppressed in repetitive or dense surfaces; render only when the icon adds a distinct navigational or semantic cue.",
+    "governingPrinciple": "Having an icon available does not imply displaying it. Icon absence is part of the system."
+  },
+  "icons": [
+    {"id":"project-home","label":"Project Home","semanticClass":"convention-dominant","meaning":"Return to the selected project's continuation surface.","recognitionRule":"Read as project/home destination before branded geometry.","contexts":["project navigation","mobile continuity sheet"],"displayPriority":"conditional","displayRule":"Show in navigation when destination recognition benefits; suppress when a labeled Project Home row is already unambiguous."},
+    {"id":"projects","label":"Projects","semanticClass":"convention-dominant","meaning":"Open the project collection or switch project context.","recognitionRule":"Multiple related containers/frames; do not resemble Project Memory, files, database cylinders, or flowcharts.","contexts":["left navigation","project switcher","mobile continuity"],"displayPriority":"conditional","displayRule":"Show for project switching/navigation; suppress in repeated content rows."},
+    {"id":"conversation","label":"Conversation","semanticClass":"convention-dominant","meaning":"Open or identify a conversation/thread.","recognitionRule":"Preserve conversational recognition without robot heads, sparkles, or anthropomorphic AI imagery.","contexts":["thread navigation","project home","search results"],"displayPriority":"conditional","displayRule":"Use for thread destinations when it improves scanability; suppress repetitive row decoration."},
+    {"id":"search","label":"Search","semanticClass":"convention-dominant","meaning":"Search projects, conversations, decisions, memory, files, and actions.","recognitionRule":"Preserve the magnifier silhouette; meaning should remain immediate without a label.","contexts":["global navigation","command palette","mobile"],"displayPriority":"essential","displayRule":"Required for icon-only search controls; labeled rows may use text alone when space/density requires."},
+    {"id":"settings","label":"Settings","semanticClass":"convention-dominant","meaning":"Open configuration and preferences.","recognitionRule":"Familiar settings symbol; do not over-brand into an abstract Council concept.","contexts":["global navigation"],"displayPriority":"conditional","displayRule":"Use in navigation/control surfaces; suppress if a full labeled settings destination already carries sufficient recognition."},
+    {"id":"activity","label":"Activity","semanticClass":"convention-dominant","meaning":"Open chronological project or global activity.","recognitionRule":"Read as recent activity/history feed, not provenance lineage.","contexts":["global navigation","project overview"],"displayPriority":"optional","displayRule":"Suppress in dense metadata where Activity is already labeled; use mainly for destination recognition."},
+    {"id":"attach","label":"Attach","semanticClass":"convention-dominant","meaning":"Attach a file, image, repository item, or project artifact.","recognitionRule":"Keep conventional attachment recognition; no signature abstraction required.","contexts":["composer"],"displayPriority":"essential","displayRule":"Required for icon-only composer attachment control."},
+    {"id":"send","label":"Send","semanticClass":"convention-dominant","meaning":"Submit the current request to Council.","recognitionRule":"Directional submission must remain obvious at 14–18px and must not be confused with Action/Execute.","contexts":["composer","mobile composer"],"displayPriority":"essential","displayRule":"Required for icon-only send control; text remains primary on consequential Action controls."},
+    {"id":"back","label":"Back","semanticClass":"convention-dominant","meaning":"Return to the previous navigation context or close a nested mobile sheet.","recognitionRule":"Preserve immediate back/navigation recognition without branded semantic embellishment.","contexts":["mobile navigation","nested inspector"],"displayPriority":"essential","displayRule":"Required for icon-only back controls and mobile continuity sheets."},
+    {"id":"inspect","label":"Inspect","semanticClass":"convention-dominant","meaning":"Open deeper evidence, reasoning summary, traces, or object detail.","recognitionRule":"Communicate inspect/reveal rather than search or surveillance.","contexts":["Council response","evidence rows","decision detail"],"displayPriority":"conditional","displayRule":"Render when deeper inspectability is not already explicit from the surrounding control label."},
+    {"id":"edit","label":"Edit / Correct","semanticClass":"convention-dominant","meaning":"Modify or correct user-controlled project state.","recognitionRule":"Use a familiar edit metaphor; semantic specificity comes from context.","contexts":["Project Memory","decision annotations","tasks"],"displayPriority":"conditional","displayRule":"Use on actionable objects; suppress in read-only rows."},
+    {"id":"council","label":"Council","semanticClass":"brand-semantic","meaning":"Multiple relevant perspectives coordinated into one accountable Council judgment.","recognitionRule":"Express independent inputs resolving toward judgment without people, robot heads, brains, sparkles, or miniature agent diagrams; remain distinct from Decision.","contexts":["Council participants","structured recommendation","advanced inspector"],"displayPriority":"conditional","displayRule":"Use when Council composition or synthesis is semantically relevant; suppress on ordinary responses simply branded AI Council."},
+    {"id":"evidence","label":"Evidence","semanticClass":"brand-semantic","meaning":"A source or fact registered as support for a claim or decision.","recognitionRule":"Express source plus registration/inspection; must not read as Verification or generic document.","contexts":["evidence panel","structured recommendation","decision detail"],"displayPriority":"conditional","displayRule":"Render when identifying source/evidence type adds information; suppress repeated evidence-row decoration."},
+    {"id":"decision","label":"Decision","semanticClass":"brand-semantic","meaning":"A durable project judgment selected from alternatives and available for future reference.","recognitionRule":"Express alternatives resolving into one chosen direction; not merely a checkmark, Council, or Approval.","contexts":["decision detail","project home","search","memory"],"displayPriority":"conditional","displayRule":"Use for durable Decision objects and lineage; suppress if the object is already unmistakably labeled as a decision."},
+    {"id":"memory","label":"Project Memory","semanticClass":"brand-semantic","meaning":"Durable project knowledge that remains inspectable, correctable, and provenance-aware.","recognitionRule":"Avoid brain, database, archive box, or cloud clichés; remain distinct from Projects at 14–18px.","contexts":["project navigation","Project Memory","context inspector"],"displayPriority":"optional","displayRule":"Default to suppressed on repetitive memory rows; use for Memory destination/context identity or exceptional object cues."},
+    {"id":"provenance","label":"Provenance / Lineage","semanticClass":"brand-semantic","meaning":"The traceable relationship showing where a claim, decision, action, or memory came from.","recognitionRule":"Express a small number of meaningful connected states; do not become a network, activity signal, or node graph.","contexts":["evidence","decision lineage","memory lineage","execution history"],"displayPriority":"conditional","displayRule":"Render only when an actual traceable relationship is available; never decorate unrelated rows."},
+    {"id":"supersede","label":"Supersede","semanticClass":"brand-semantic","meaning":"Replace an active truth/decision while retaining the old state in history.","recognitionRule":"Communicate old retained plus new active; must not read as Refresh, Retry, Sync, or Delete.","contexts":["Project Memory","Decision Detail"],"displayPriority":"conditional","displayRule":"Render on actual supersession actions/states; suppress on ordinary memory items."},
+    {"id":"authority","label":"Authority Boundary","semanticClass":"brand-semantic","meaning":"The boundary between Council advice and permission to cause consequential action.","recognitionRule":"Express a boundary/gate to action without padlock cliché and remain distinct from Action.","contexts":["Approval Request","authority status","advanced inspector"],"displayPriority":"essential","displayRule":"Render when approval/authorization boundary must be unmistakable; ordinary advisory surfaces do not display it."},
+    {"id":"verification","label":"Verification","semanticClass":"brand-semantic","meaning":"A claim, action, or result has been checked against relevant conditions/evidence.","recognitionRule":"Express checked/registered result without collapsing into Evidence, Approve, or generic success.","contexts":["decision detail","execution validation","Council response"],"displayPriority":"conditional","displayRule":"Render when verification state adds information beyond adjacent status text; failures may become semantically essential through state context."},
+    {"id":"history","label":"History","semanticClass":"brand-semantic","meaning":"A durable earlier state or sequence that remains accessible after resolution.","recognitionRule":"Read as temporal history, distinct from source provenance and current activity.","contexts":["decision detail","memory","activity"],"displayPriority":"optional","displayRule":"Suppress repeated history decoration; use for explicit history destination/lineage controls."},
+    {"id":"action","label":"Action","semanticClass":"brand-semantic","meaning":"A proposed or executed change to repository/system/external state.","recognitionRule":"Communicate consequential directed change, distinct from Send, Authority, and ordinary navigation arrows.","contexts":["Actions panel","Approval Request","execution history"],"displayPriority":"conditional","displayRule":"Render when mutation/execution identity adds information; suppress if a labeled action control is already explicit."},
+    {"id":"approve","label":"Approve","semanticClass":"convention-dominant","meaning":"Grant permission for the currently proposed action.","recognitionRule":"Use familiar confirmation logic but remain distinct from Verification; explicit text remains primary on consequential controls.","contexts":["Approval Request"],"displayPriority":"essential","displayRule":"Render on icon-plus-label approval controls; never use as a generic verified-state badge."},
+    {"id":"reject","label":"Reject","semanticClass":"convention-dominant","meaning":"Decline the current proposal or state transition.","recognitionRule":"Read as reject/decline, not merely close/dismiss; consequential controls retain labels.","contexts":["Approval Request","proposed memory"],"displayPriority":"essential","displayRule":"Render on explicit rejection controls; labels remain required for consequential actions."},
+    {"id":"retry","label":"Retry","semanticClass":"convention-dominant","meaning":"Attempt the same permitted operation again after a failure or transient issue.","recognitionRule":"Preserve familiar retry semantics and remain clearly distinct from Supersede.","contexts":["error state","tool execution"],"displayPriority":"conditional","displayRule":"Render only when retry is available as an action."},
+    {"id":"blocked","label":"Blocked","semanticClass":"convention-dominant","meaning":"A requirement prevents the operation or decision from proceeding.","recognitionRule":"Communicate stopped/not permitted without becoming the Authority glyph itself.","contexts":["Approval Request","task status","execution"],"displayPriority":"essential","displayRule":"Render when a blocker must interrupt normal flow or when icon-only status recognition is needed."},
+    {"id":"authorized","label":"Authorized","semanticClass":"convention-dominant","meaning":"Required permission has been granted for a defined scope.","recognitionRule":"Read as authorization state rather than generic success; text/state remains primary.","contexts":["Approval Request","execution progress"],"displayPriority":"conditional","displayRule":"Render when granted authority is a meaningful state change; suppress during routine post-authorization execution."}
+  ],
+  "calibrationSet": ["council","decision","evidence","provenance","memory","supersede","authority","verification","projects","search"],
+  "semanticColorPolicy": {
+    "canonicalMastersMonochrome": true,
+    "geometryEncodesSemanticColor": false,
+    "visualSystemOwnsColor": true,
+    "roles": {
+      "neutral": "ordinary product glyphs",
+      "evidence": "evidence violet when the use state represents inspectable evidence",
+      "lineage": "lineage green only for real provenance/chronology relationships",
+      "consequence": "vermilion only for approval required, blocked/destructive/high-risk/failure/security boundaries",
+      "focus": "accessibility focus only"
+    }
+  },
+  "motionReadiness": {
+    "staticFirst": true,
+    "preserveStableLayerIdsWhenUseful": true,
+    "preserveAnchorsAndPivotsWhenUseful": true,
+    "candidateStateRelationships": ["advisory → approval required → authorized","validating → verified","memory current → superseded"]
+  },
+  "truth": {
+    "iconSemanticInventoryAuthored": false,
+    "iconWorldExplorationComplete": false,
+    "semanticCollisionReviewComplete": false,
+    "denseIconProofComplete": false,
+    "mobileIconProofComplete": false,
+    "labelBlindRecognitionProofComplete": false,
+    "independentIconWorldReviewComplete": false,
+    "quiverLineSelected": false,
+    "iconWorldHumanSelected": false,
+    "iconSystemHumanApproved": false,
+    "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
+    "appIconHumanApproved": false,
+    "finalVisualSystemApproved": false
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "schema": "ai-studio-os/icon-world-exploration@1",
+  "projectId": "ai-council",
+  "id": "ai-council-icon-world-exploration-v1",
+  "inventoryRef": {
+    "sourceRef": "projects/ai-council/icon-semantic-inventory-v1.json"
+  },
+  "selectedHybridRef": {
+    "id": "decision-spine-counterpoint-hybrid-v1",
+    "sourceRef": "projects/ai-council/hybrid-v1-selection.json",
+    "humanSelected": true
+  },
+  "visualSystemApprovalRef": {
+    "sourceRef": "projects/ai-council/visual-system-v1-human-approval.json",
+    "humanVisualApproval": true
+  },
+  "quiverLineAuthority": "hypothesis-only",
+  "principles": [
+    "Original semantic construction for AI Council signature concepts; familiar controls preserve convention.",
+    "Static semantic recognition outranks clever geometry.",
+    "Monochrome geometry first; semantic color belongs to the Visual System state.",
+    "Nodes, lines, cuts, and relationships appear only when they carry meaning.",
+    "Icon absence is part of the system: having a glyph available does not imply displaying it.",
+    "No icon world may remove or simplify away a difficult calibration concept to look cleaner.",
+    "The selected world must survive 14–18px use and dense repetition before the family can scale.",
+    "The first independent review may rank or reject worlds but may not recommend hybridization."
+  ],
+  "worlds": [
+    {
+      "id": "quiver-construct",
+      "label": "Quiver Construct",
+      "origin": "Evolves the Visual System's Quiver Line hypothesis but has no selection authority.",
+      "idea": "Quiet directional tension: open constructions, precise cuts, and controlled vector convergence communicate decisions and movement without becoming arrow decoration.",
+      "signatureBehavior": "A limited 45°/90° directional family and open terminals create forward intent; nodes appear only at real registrations or convergence points.",
+      "hybridInheritance": {
+        "decisionSpine": "direction, continuity, and semantic connection",
+        "counterpoint": "restraint and low ornament",
+        "threshold": "harder cuts only for authority/consequence semantics"
+      },
+      "geometrySpec": {
+        "canvas": {"width": 24, "height": 24, "viewBox": [0, 0, 24, 24]},
+        "safeArea": {"x": 2, "y": 2, "width": 20, "height": 20},
+        "grid": {"unit": 1, "subdivision": 0.5},
+        "opticalCenter": {"x": 12, "y": 12},
+        "stroke": {"width": 1.5, "cap": "butt", "join": "miter"},
+        "targetSizes": [12, 14, 16, 18, 20, 24, 32],
+        "layers": [{"id":"base","z":0},{"id":"structure","z":10},{"id":"registration","z":20}],
+        "geometry": {
+          "minimumGap": 1.5,
+          "angleFamilyDegrees": [0, 45, 90, 135],
+          "cornerFamily": ["sharp", "cut"],
+          "terminalFamily": ["open-butt", "directional-cut"],
+          "nodeRule": "3px or smaller registration nodes only when semantic"
+        }
+      },
+      "risk": "Can drift into developer-tool arrows, miniature flowcharts, or repeated directional motifs if every concept receives a quiver treatment.",
+      "selected": false,
+      "humanSelected": false
+    },
+    {
+      "id": "editorial-sign",
+      "label": "Editorial Sign",
+      "origin": "Counterpoint-dominant challenger focused on human recognition and quiet symbolic form.",
+      "idea": "Reduced, human-facing signs use optical asymmetry and calm silhouette to make AI Council feel considered rather than machine-obsessed.",
+      "signatureBehavior": "Fewer strokes, selectively curved constructions, and asymmetric optical balance create readable signs; technology is implied by precision, not by nodes or networks.",
+      "hybridInheritance": {
+        "decisionSpine": "relationships appear only in signature semantics that require lineage",
+        "counterpoint": "primary owner of proportion, quietness, and human judgment",
+        "threshold": "authority glyph may become more rigid without changing the whole family"
+      },
+      "geometrySpec": {
+        "canvas": {"width": 24, "height": 24, "viewBox": [0, 0, 24, 24]},
+        "safeArea": {"x": 2, "y": 2, "width": 20, "height": 20},
+        "grid": {"unit": 1, "subdivision": 0.5},
+        "opticalCenter": {"x": 12, "y": 12},
+        "stroke": {"width": 1.5, "cap": "round", "join": "round"},
+        "targetSizes": [12, 14, 16, 18, 20, 24, 32],
+        "layers": [{"id":"base","z":0},{"id":"gesture","z":10},{"id":"semantic-mark","z":20}],
+        "geometry": {
+          "minimumGap": 1.75,
+          "angleFamilyDegrees": [0, 30, 60, 90],
+          "cornerFamily": ["circular radius", "intentionally asymmetric optical correction"],
+          "terminalFamily": ["round-open", "soft-taper"],
+          "nodeRule": "avoid nodes unless they are the only clean way to express registration"
+        }
+      },
+      "risk": "Can become beautiful but generic editorial signage and lose enough structural specificity that provenance, supersession, or authority semantics blur together.",
+      "selected": false,
+      "humanSelected": false
+    },
+    {
+      "id": "provenance-glyph",
+      "label": "Provenance Glyph",
+      "origin": "AI-Council-specific challenger derived from lineage, registration, state replacement, and durable project truth.",
+      "idea": "Small structural marks encode registration, continuity, replacement, and boundary semantics so the family feels native to evidence-backed decisions and durable project memory.",
+      "signatureBehavior": "Interrupted lines, restrained registration nodes, open frames, and state handoffs reveal just enough relationship to make provenance and supersession distinctive without becoming a network diagram.",
+      "hybridInheritance": {
+        "decisionSpine": "primary owner of relationship and state transformation grammar",
+        "counterpoint": "forces simplification and quiet optical weight",
+        "threshold": "boundary semantics become explicit only for authority/risk concepts"
+      },
+      "geometrySpec": {
+        "canvas": {"width": 24, "height": 24, "viewBox": [0, 0, 24, 24]},
+        "safeArea": {"x": 2, "y": 2, "width": 20, "height": 20},
+        "grid": {"unit": 1, "subdivision": 0.5},
+        "opticalCenter": {"x": 12, "y": 12},
+        "stroke": {"width": 1.5, "cap": "square", "join": "bevel"},
+        "targetSizes": [12, 14, 16, 18, 20, 24, 32],
+        "layers": [{"id":"state","z":0},{"id":"lineage","z":10},{"id":"registration","z":20}],
+        "geometry": {
+          "minimumGap": 1.75,
+          "angleFamilyDegrees": [0, 45, 90],
+          "cornerFamily": ["sharp", "chamfered", "cut"],
+          "terminalFamily": ["interrupted-square", "registration-stop"],
+          "nodeRule": "small circular or diamond registration only at semantically meaningful state junctions"
+        }
+      },
+      "risk": "Can become self-referential technical glyphs or tiny topology diagrams, especially below 18px, if relationship grammar is used where simple recognition would be better.",
+      "selected": false,
+      "humanSelected": false
+    }
+  ],
+  "proofRequirements": {
+    "calibrationIconIds": ["council","decision","evidence","provenance","memory","supersede","authority","verification","projects","search"],
+    "sizeMatrix": [12, 14, 16, 18, 20, 24, 32],
+    "criticalSizeRange": [14, 16, 18],
+    "sameWordsSameSemantics": true,
+    "sameDataSameIconOpportunities": true,
+    "monochromeMasters": true,
+    "exactBrowserProof": true,
+    "svgIntegrityRequired": true,
+    "displayPolicyEnforced": true,
+    "denseSystemProof": true,
+    "mobileComposerProof": true,
+    "labelBlindRecognitionProof": true,
+    "hybridRecommendationAllowed": false,
+    "interfaceContexts": [
+      "left navigation",
+      "conversation composer",
+      "evidence rows",
+      "structured recommendation",
+      "approval authority boundary",
+      "decision lineage",
+      "Project Memory",
+      "mobile navigation"
+    ],
+    "confusingPairs": [
+      ["evidence","verification"],
+      ["decision","approve"],
+      ["history","provenance"],
+      ["memory","activity"],
+      ["authority","blocked"],
+      ["supersede","retry"],
+      ["council","decision"],
+      ["verification","approve"],
+      ["authority","action"],
+      ["projects","memory"]
+    ],
+    "labelBlindPairs": [
+      ["council","decision"],
+      ["evidence","verification"],
+      ["authority","action"],
+      ["supersede","retry"],
+      ["provenance","history"],
+      ["projects","memory"]
+    ]
+  },
+  "selection": null,
+  "selectedWorld": null,
+  "truth": {
+    "iconSemanticInventoryAuthored": true,
+    "iconWorldExplorationComplete": false,
+    "semanticCollisionReviewComplete": false,
+    "denseIconProofComplete": false,
+    "mobileIconProofComplete": false,
+    "labelBlindRecognitionProofComplete": false,
+    "independentIconWorldReviewComplete": false,
+    "quiverLineSelected": false,
+    "iconWorldHumanSelected": false,
+    "iconSystemHumanApproved": false,
+    "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
+    "appIconHumanApproved": false,
+    "finalVisualSystemApproved": false
+  }
+}

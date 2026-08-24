@@ -1,0 +1,87 @@
+{
+  "schema": "ai-studio-os/icon-world-independent-review@1",
+  "projectId": "ai-council",
+  "id": "ai-council-icon-world-independent-review-v1",
+  "reviewedAt": "2026-08-24T00:27:00+02:00",
+  "proofRef": {
+    "runNumber": 245,
+    "artifactId": 9501210585,
+    "artifactName": "ai-council-icon-system-v1-calibration",
+    "artifactDigest": "sha256:eac94e0bc012fe3a6e4d827d29091c5bfb59f6f338ccfd14335ef2bfc38adc53",
+    "explorationFingerprint": "c1c812ec0fcf924613b7ce7e",
+    "status": "ready-for-independent-icon-world-review",
+    "exactBrowserProof": true,
+    "svgIntegrityPass": true
+  },
+  "reviewScope": {
+    "semanticCollisionPairs": 10,
+    "criticalSizes": [14, 16, 18],
+    "denseSystemProof": true,
+    "mobileComposerProof": true,
+    "labelBlindRecognitionProof": true,
+    "displayPriorityEnforced": true,
+    "sameContentSameIconOpportunities": true
+  },
+  "hybridRecommendationAllowed": false,
+  "selectedWorld": null,
+  "iconWorldHumanSelected": false,
+  "worldAssessments": [
+    {
+      "worldId": "quiver-construct",
+      "semanticAssessment": "The family is crisp and internally coherent, but the hardening boards confirm semantic over-reuse of fork/direction/arrow grammar. Council and Decision remain near-neighbors at 14–18px; Supersede and Authority also lean on directional resolution. Provenance collapses too aggressively into a short interrupted line and loses enough semantic content to depend on labels/context.",
+      "opticalAssessment": "Very clean at 14–18px with predictable stroke behavior and excellent conventional Search recognition. The same directional consistency that gives optical clarity also makes multiple brand-semantic glyphs look like variants of one operation.",
+      "densityAssessment": "The displayPriority policy prevents a Christmas-tree failure, so the dense surface stays usable. However, the few signature glyphs that remain visible repeatedly introduce directional cues, making the family feel more operational than judgment/provenance-oriented.",
+      "mobileAssessment": "Conventional Back, Attach and Send remain immediate. Evidence and Authority survive at mobile size, but Authority can read as directional/crossing mechanics rather than a distinctive permission boundary, and the broader family still over-signals movement.",
+      "verdict": "Reject as the full-system Icon World. Preserve useful construction techniques only after a world is selected; do not preserve Quiver Construct as an independent authority."
+    },
+    {
+      "worldId": "editorial-sign",
+      "semanticAssessment": "The hardening pass confirms the original semantic weakness. Council and Decision remain too closely related in label-blind and 14–18px comparison; Provenance reads more naturally as signal/continuity/activity than source lineage; Verification remains close to generic success/approval language. Projects and Project Memory are calmer but still share overlapping-container ancestry.",
+      "opticalAssessment": "Best optical calm of the three. It integrates into the approved Hybrid interface with the least visual fatigue, handles 14–18px cleanly, and keeps conventional controls familiar without decorative machinery.",
+      "densityAssessment": "Strongest dense-system restraint. With displayPriority suppression, Editorial Sign recedes appropriately and supports scanning rather than competing with data. No evidence of icon-driven visual noise in the 30-memory/12-source stress fixture.",
+      "mobileAssessment": "Strongest conventional mobile behavior and least intrusive semantic glyph treatment. Back, Attach, Send and Inspect feel normal. The problem is not usability but insufficient AI Council-specific semantic ownership in the signature glyphs.",
+      "verdict": "Do not select unchanged. It is the strongest optical/human benchmark but does not yet provide enough distinct semantic ownership for Council, Decision, Provenance and Verification to carry the product identity."
+    },
+    {
+      "worldId": "provenance-glyph",
+      "semanticAssessment": "Strongest AI Council-specific semantic system after hardening. Council and Decision remain related by family but are meaningfully differentiated: Council shows multiple registered inputs resolving toward judgment, while Decision shows alternatives resolving into a chosen output. Evidence versus Verification, Authority versus Action, Supersede versus Retry, and Provenance versus History remain visibly distinct. Projects versus Project Memory is still the closest unresolved pair, but the contextual board preserves collection versus durable-truth distinction better than the initial calibration suggested.",
+      "opticalAssessment": "More technical than Editorial Sign and closest to the complexity ceiling at 14px. Registration nodes remain legible at 14–18px in the proof, but should be treated as a budget rather than a mandatory family mark during production expansion. Conventional Search remains immediate; generic controls should not inherit unnecessary registration decoration merely to advertise family membership.",
+      "densityAssessment": "Passes the dense-system test. The feared topology wall does not materialize because displayPriority suppresses optional Memory glyphs and redundant Evidence glyphs. Remaining semantic nodes are sparse and meaningful. This demonstrates that provenance grammar can survive real density when absence rules are enforced.",
+      "mobileAssessment": "Passes the 390px proof. Back, Attach and Send remain recognizable, Evidence is compact, and Authority is visibly different without turning mobile into a topology diagram. Small family registration marks on convention-dominant controls should be reconsidered during production calibration if they do not add recognition.",
+      "verdict": "Recommend for human Icon World selection. It has the strongest strategic fit and survives semantic, optical, dense, mobile and label-blind hardening. Selection should freeze the grammar, not every current node or pixel; production expansion should simplify registration detail where it does not carry meaning."
+    }
+  ],
+  "ranking": [
+    "provenance-glyph",
+    "editorial-sign",
+    "quiver-construct"
+  ],
+  "recommendation": {
+    "worldId": "provenance-glyph",
+    "action": "recommend-human-selection",
+    "reason": "It is the only single world that combines AI Council-specific semantic ownership with acceptable 14–18px legibility and calm dense/mobile behavior once displayPriority suppression is enforced.",
+    "productionCalibrationConstraints": [
+      "Treat registration nodes as a semantic budget, not a mandatory decorative family mark.",
+      "Preserve the Council versus Decision distinction during every small-size optical variant.",
+      "Further separate Projects from Project Memory during the selected-world family expansion without changing their underlying semantic definitions.",
+      "Keep convention-dominant controls immediately familiar; remove provenance-specific registration detail when it does not improve recognition.",
+      "Do not import Editorial Sign or Quiver geometry into the selected family during first-pass expansion; first correct weaknesses inside Provenance Glyph's own constitution."
+    ]
+  },
+  "truth": {
+    "iconSemanticInventoryAuthored": true,
+    "iconWorldExplorationComplete": true,
+    "semanticCollisionReviewComplete": true,
+    "denseIconProofComplete": true,
+    "mobileIconProofComplete": true,
+    "labelBlindRecognitionProofComplete": true,
+    "independentIconWorldReviewComplete": true,
+    "hybridRecommendationAllowed": false,
+    "iconWorldHumanSelected": false,
+    "iconSystemHumanApproved": false,
+    "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
+    "appIconHumanApproved": false,
+    "finalVisualSystemApproved": false
+  }
+}
