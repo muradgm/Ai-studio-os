@@ -1,0 +1,90 @@
+{
+  "schema": "ai-studio-os/drawing-intelligence@1",
+  "projectId": "ai-council",
+  "id": "ai-council-authority-drawing-intelligence-v1",
+  "assetType": "icon",
+  "conceptId": "authority",
+  "semanticIntent": {
+    "meaning": "Human permission boundary between Council advice and consequential action.",
+    "mustCommunicate": [
+      "advice exists before the boundary",
+      "crossing is withheld until human authority is granted",
+      "the state beyond the boundary is consequential"
+    ],
+    "mustNotMean": [
+      "security or authentication",
+      "navigation or forward action",
+      "split pane, alignment, docking or resize",
+      "generic success or completion"
+    ],
+    "contexts": [
+      "approval request",
+      "decision authority",
+      "external mutation",
+      "destructive or high-risk action"
+    ]
+  },
+  "familiarityDecision": {
+    "mode": "brand-original-required",
+    "rationale": "No single established UI glyph expresses the boundary between advisory intelligence and granted human authority without collapsing into security, navigation, or completion semantics."
+  },
+  "targetSizes": [14, 16, 24],
+  "sizeBudgets": {
+    "14": {"maxSemanticDevices": 1},
+    "16": {"maxSemanticDevices": 2},
+    "24": {"maxSemanticDevices": 3}
+  },
+  "candidates": [
+    {
+      "id": "crossing-divider",
+      "metaphor": "A controlled crossing through a vertical authority divider.",
+      "metaphorCues": ["vertical-divider", "alignment-axis", "crosshair"],
+      "geometryCues": ["divider", "continuous-crossing"],
+      "primitivePlan": {
+        "semanticDevices": ["authority boundary", "crossing point", "before/after state"],
+        "primitives": [
+          {"id": "boundary", "kind": "threshold", "role": "authority-boundary"},
+          {"id": "crossing", "kind": "aperture", "role": "permission-crossing"}
+        ],
+        "relationships": [
+          {"from": "advisory-state", "to": "crossing", "type": "approaches"},
+          {"from": "crossing", "to": "consequence-state", "type": "continues"}
+        ]
+      }
+    },
+    {
+      "id": "locked-threshold",
+      "metaphor": "A threshold secured until permission is granted.",
+      "metaphorCues": ["lock", "security-boundary"],
+      "geometryCues": ["vertical-divider", "padlock"],
+      "primitivePlan": {
+        "semanticDevices": ["authority boundary", "locked state"],
+        "primitives": [
+          {"id": "boundary", "kind": "threshold", "role": "authority-boundary"},
+          {"id": "lock", "kind": "security-mark", "role": "withheld-permission"}
+        ],
+        "relationships": [
+          {"from": "advisory-state", "to": "boundary", "type": "stops-before"}
+        ]
+      }
+    },
+    {
+      "id": "asymmetric-threshold",
+      "metaphor": "Two unequal states separated by a threshold; advisory state remains open while the consequential state is denser and unavailable until authority changes.",
+      "metaphorCues": ["boundary", "open-state", "consequence-state", "withheld-transition"],
+      "geometryCues": ["asymmetric-fields", "negative-space-threshold", "no-continuous-crossing"],
+      "primitivePlan": {
+        "semanticDevices": ["authority threshold", "state contrast", "withheld crossing"],
+        "primitives": [
+          {"id": "advisory", "kind": "open-state", "role": "advice-before-authority"},
+          {"id": "threshold", "kind": "negative-space-boundary", "role": "human-authority-boundary"},
+          {"id": "consequence", "kind": "durable-state", "role": "action-after-authority"}
+        ],
+        "relationships": [
+          {"from": "advisory", "to": "threshold", "type": "stops-before"},
+          {"from": "threshold", "to": "consequence", "type": "withheld-until-authorized"}
+        ]
+      }
+    }
+  ]
+}
