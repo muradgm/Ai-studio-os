@@ -1,0 +1,114 @@
+{
+  "schema": "ai-studio-os/drawing-intelligence@1",
+  "projectId": "ai-council",
+  "id": "ai-council-authority-production-v1",
+  "assetType": "icon",
+  "conceptId": "authority",
+  "semanticIntent": {
+    "meaning": "Boundary between advisory judgment and consequential action whose transition requires explicit human authority.",
+    "mustCommunicate": [
+      "advisory judgment and consequential action occupy different authority domains",
+      "transition between those domains requires explicit human authority",
+      "the authority boundary carries consequence"
+    ],
+    "mustNotMean": [
+      "security or authentication",
+      "navigation or forward action",
+      "split pane, alignment, docking or resize",
+      "generic success or completion",
+      "a transient approval or execution status"
+    ],
+    "mustNotEncode": ["approval-required", "authorized", "withheld", "granted", "executing", "execution-state"],
+    "contexts": ["approval request", "decision authority", "external mutation", "destructive or high-risk action"]
+  },
+  "familiarityDecision": {
+    "mode": "brand-original-required",
+    "rationale": "Authority needs an original but restrained boundary metaphor because familiar security, navigation and split-pane symbols carry stronger learned meanings than the intended AI Council concept."
+  },
+  "targetSizes": [14, 16, 24],
+  "sizeBudgets": {
+    "14": {"maxSemanticDevices": 1},
+    "16": {"maxSemanticDevices": 2},
+    "24": {"maxSemanticDevices": 3}
+  },
+  "candidates": [
+    {
+      "id": "opposed-domains",
+      "metaphor": "Two independent domain edges face one another across a deliberate unoccupied interval; the interval is the authority boundary.",
+      "metaphorCues": ["opposed-domains", "unoccupied-interval", "domain-separation"],
+      "geometryCues": ["facing-marks", "negative-space-gap", "no-connector"],
+      "primitivePlan": {
+        "semanticDevices": [
+          {"id": "boundary", "label": "unoccupied authority interval", "priority": 1},
+          {"id": "domain-contrast", "label": "advice versus consequence", "priority": 2},
+          {"id": "consequence-emphasis", "label": "consequence carries greater durability", "priority": 3}
+        ],
+        "primitives": [
+          {"id": "advisory-edge", "kind": "boundary-edge", "role": "advisory-side", "semanticDeviceId": "boundary"},
+          {"id": "consequence-edge", "kind": "boundary-edge", "role": "consequence-side", "semanticDeviceId": "boundary"},
+          {"id": "advisory-mark", "kind": "open-mark", "role": "advisory-domain", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-mark", "kind": "durable-mark", "role": "consequence-domain", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-weight", "kind": "weight-mark", "role": "consequence-emphasis", "semanticDeviceId": "consequence-emphasis"}
+        ],
+        "relationships": [
+          {"from": "advisory-edge", "to": "consequence-edge", "type": "separated-by-authority", "semanticDeviceId": "boundary"},
+          {"from": "advisory-mark", "to": "advisory-edge", "type": "belongs-to", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-mark", "to": "consequence-edge", "type": "belongs-to", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-mark", "to": "consequence-weight", "type": "reinforced-by", "semanticDeviceId": "consequence-emphasis"}
+        ]
+      }
+    },
+    {
+      "id": "material-seam",
+      "metaphor": "A light trace terminates before a blank seam and a more durable trace begins after it; the material transition makes the authority boundary consequential without drawing a gate.",
+      "metaphorCues": ["material-transition", "blank-seam", "trace-discontinuity"],
+      "geometryCues": ["separated-traces", "open-gap", "no-divider"],
+      "primitivePlan": {
+        "semanticDevices": [
+          {"id": "boundary", "label": "blank authority seam", "priority": 1},
+          {"id": "domain-contrast", "label": "light versus durable domain", "priority": 2},
+          {"id": "consequence-emphasis", "label": "durable consequence material", "priority": 3}
+        ],
+        "primitives": [
+          {"id": "advisory-trace", "kind": "light-trace", "role": "advisory-side", "semanticDeviceId": "boundary"},
+          {"id": "consequence-trace", "kind": "durable-trace", "role": "consequence-side", "semanticDeviceId": "boundary"},
+          {"id": "advisory-mark", "kind": "open-mark", "role": "advisory-domain", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-mark", "kind": "durable-mark", "role": "consequence-domain", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-weight", "kind": "weight-mark", "role": "consequence-emphasis", "semanticDeviceId": "consequence-emphasis"}
+        ],
+        "relationships": [
+          {"from": "advisory-trace", "to": "consequence-trace", "type": "interrupted-by-authority", "semanticDeviceId": "boundary"},
+          {"from": "advisory-mark", "to": "advisory-trace", "type": "belongs-to", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-mark", "to": "consequence-trace", "type": "belongs-to", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-trace", "to": "consequence-weight", "type": "reinforced-by", "semanticDeviceId": "consequence-emphasis"}
+        ]
+      }
+    },
+    {
+      "id": "offset-threshold",
+      "metaphor": "Two independent fields terminate on opposite sides of one empty threshold at different vertical positions, making the authority boundary visible through discontinuity rather than a divider or route.",
+      "metaphorCues": ["offset-fields", "empty-threshold", "independent-termination"],
+      "geometryCues": ["staggered-fields", "negative-space-seam", "no-crossing"],
+      "primitivePlan": {
+        "semanticDevices": [
+          {"id": "boundary", "label": "empty authority threshold", "priority": 1},
+          {"id": "domain-contrast", "label": "advice versus consequence", "priority": 2},
+          {"id": "consequence-emphasis", "label": "consequential field settles more durably", "priority": 3}
+        ],
+        "primitives": [
+          {"id": "advisory-field", "kind": "upper-field", "role": "advisory-side", "semanticDeviceId": "boundary"},
+          {"id": "consequence-field", "kind": "lower-field", "role": "consequence-side", "semanticDeviceId": "boundary"},
+          {"id": "advisory-mark", "kind": "open-mark", "role": "advisory-domain", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-mark", "kind": "durable-mark", "role": "consequence-domain", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-weight", "kind": "weight-mark", "role": "consequence-emphasis", "semanticDeviceId": "consequence-emphasis"}
+        ],
+        "relationships": [
+          {"from": "advisory-field", "to": "consequence-field", "type": "separated-by-authority", "semanticDeviceId": "boundary"},
+          {"from": "advisory-mark", "to": "advisory-field", "type": "belongs-to", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-mark", "to": "consequence-field", "type": "belongs-to", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-field", "to": "consequence-weight", "type": "reinforced-by", "semanticDeviceId": "consequence-emphasis"}
+        ]
+      }
+    }
+  ]
+}
