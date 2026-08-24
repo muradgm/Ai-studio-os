@@ -41,12 +41,16 @@ jobs:
           node --check scripts/ai-council-motion-system-v1-human-review-proof.mjs
           node --check scripts/ai-council-icon-system-v1-proof.mjs
           node --check scripts/ai-council-icon-craft-calibration-v1-proof.mjs
+          node --check scripts/finalize-ai-council-icon-craft-calibration-v1-proof.mjs
+          node --check scripts/ai-council-icon-finalist-semantic-refinement-v1-proof.mjs
           node --check modules/motion-system/runtime.mjs
           node --check modules/motion-system/approval.mjs
           node --check modules/icon-system/runtime.mjs
           node --check modules/icon-system/calibration-glyphs.mjs
           node --check modules/icon-system/craft-calibration.mjs
           node --check modules/icon-system/craft-glyphs.mjs
+          node --check modules/icon-system/finalist-semantic-refinement.mjs
+          node --check modules/icon-system/finalist-glyphs.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
         run: node ./bin/studio.mjs benchmark creative-engineering-v13
@@ -168,6 +172,18 @@ jobs:
         with:
           name: ai-council-icon-world-craft-calibration-v1
           path: artifacts/ai-council/icon-world-craft-calibration-v1
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Render AI Council Icon Finalist Semantic Refinement V1 proof
+        run: npm run proof:ai-council-icon-finalists
+
+      - name: Upload AI Council Icon Finalist Semantic Refinement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-council-icon-finalist-semantic-refinement-v1
+          path: artifacts/ai-council/icon-finalist-semantic-refinement-v1
           if-no-files-found: error
           retention-days: 14
 
