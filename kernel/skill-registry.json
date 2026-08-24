@@ -1,5 +1,5 @@
 {
-  "version": "1.3",
+  "version": "1.4",
   "categories": {
     "role": "Specialist judgment and accountability",
     "task": "Repeatable operation with defined inputs and outputs",
@@ -26,12 +26,13 @@
     {"id":"copywriter","category":"role","domains":["copy","landing-page","brand","campaign"],"phases":["direction","create","refine"],"path":".agents/skills/copywriter/SKILL.md","status":"active"},
     {"id":"product-designer","category":"role","domains":["product","landing-page","interface","command-center"],"phases":["direction","create","refine"],"path":".agents/skills/product-designer/SKILL.md","status":"active"},
     {"id":"image-director","category":"role","domains":["image","brand","landing-page","campaign"],"phases":["direction","create","refine"],"path":".agents/skills/image-director/SKILL.md","status":"active"},
+    {"id":"drawing-intelligence","category":"role","domains":["drawing","vector","svg","icon-system","logo","identity","interface","diagram"],"phases":["direction","create","refine"],"path":".agents/skills/drawing-intelligence/SKILL.md","status":"active"},
     {"id":"vector-geometry-engineer","category":"role","domains":["vector","svg","icon-system","logo","identity","interface"],"phases":["direction","create","refine"],"path":".agents/skills/vector-geometry-engineer/SKILL.md","status":"active"},
     {"id":"creative-developer","category":"role","domains":["creative-engineering","web","landing-page","immersive-web","cinematic-product-page","interactive-world"],"phases":["create","refine"],"path":".agents/skills/creative-developer/SKILL.md","status":"active"},
     {"id":"realtime-webgl-engineer","category":"role","domains":["creative-engineering","webgl","webgpu","3d","immersive-web","cinematic-product-page","interactive-world"],"phases":["create","refine"],"path":".agents/skills/realtime-webgl-engineer/SKILL.md","status":"active"},
     {"id":"motion-engineer","category":"role","domains":["creative-engineering","web","motion","immersive-web","cinematic-product-page","interactive-world"],"phases":["create","refine"],"path":".agents/skills/motion-engineer/SKILL.md","status":"active"},
     {"id":"three-d-technical-artist","category":"role","domains":["creative-engineering","3d","immersive-web","interactive-world"],"phases":["create","refine"],"path":".agents/skills/three-d-technical-artist/SKILL.md","status":"active"},
-    {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign","vector","icon-system","creative-engineering","immersive-web","cinematic-product-page","interactive-world","webgl","3d"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
+    {"id":"creative-skeptic","category":"role","domains":["brand","identity","logo","landing-page","motion","copy","product","image","campaign","vector","icon-system","drawing","creative-engineering","immersive-web","cinematic-product-page","interactive-world","webgl","3d"],"phases":["direction","review"],"path":".agents/skills/creative-skeptic/SKILL.md","status":"active"},
 
     {"id":"product-understanding","category":"task","domains":["product","brand","identity","logo","landing-page","campaign","creative-engineering","immersive-web","cinematic-product-page","interface"],"phases":["research","direction"],"path":".agents/skills/product-understanding/SKILL.md","status":"active"},
     {"id":"product-ux-architecture","category":"task","domains":["product","interface","command-center","saas-feature","creative-engineering"],"phases":["research","direction"],"path":".agents/skills/product-ux-architecture/SKILL.md","status":"active"},
