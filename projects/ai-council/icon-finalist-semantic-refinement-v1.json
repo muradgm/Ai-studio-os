@@ -1,0 +1,123 @@
+{
+  "schema": "ai-studio-os/icon-finalist-semantic-refinement@1",
+  "projectId": "ai-council",
+  "id": "ai-council-icon-finalist-semantic-refinement-v1",
+  "sourceRef": "projects/ai-council/icon-world-craft-review-v1.json",
+  "purpose": "Resolve the remaining signature-metaphor problems in the two surviving Icon Worlds before any human world selection, without reopening broad exploration or production expansion.",
+  "activeWorlds": ["provenance-glyph", "editorial-sign"],
+  "retiredFromActiveRefinement": ["quiver-construct"],
+  "mustRevisit": ["council", "decision", "evidence", "provenance", "authority"],
+  "refine": ["supersede"],
+  "tuningControl": ["verification"],
+  "preserve": ["memory", "projects"],
+  "freeze": ["search", "back", "attach", "send", "edit"],
+  "hypothesisSizes": [14, 16, 24],
+  "hypothesisCount": {
+    "mustRevisit": 3,
+    "refine": 2,
+    "tuningControl": 1
+  },
+  "semanticRules": [
+    "Use established metaphors when the concept has a strong learned visual convention.",
+    "Brand semantics may own the relationship and optical grammar without owning every base silhouette.",
+    "Do not miniaturize a lineage graph to represent provenance.",
+    "Do not use Git branch, merge, fork or commit topology to represent Council or Decision.",
+    "Do not use lock, key or shield as the primary Authority metaphor.",
+    "Do not visually delete the superseded state; it remains retained history.",
+    "Do not force abstract icons to pass an exact-name label-blind test; require discrimination, contextual sense and stable labels instead."
+  ],
+  "externalCollisionVocabulary": [
+    "git-branch",
+    "git-merge",
+    "fork",
+    "version-control-graph",
+    "route",
+    "workflow",
+    "properties",
+    "metadata",
+    "settings",
+    "connector",
+    "crop",
+    "scan",
+    "focus",
+    "expand",
+    "split-pane",
+    "alignment",
+    "docking",
+    "resize-divider",
+    "security-lock",
+    "delete",
+    "disable",
+    "remove",
+    "prohibit",
+    "retry",
+    "refresh"
+  ],
+  "externalCollisionByConcept": {
+    "council": ["git-branch", "git-merge", "fork", "version-control-graph"],
+    "decision": ["git-branch", "git-merge", "route", "workflow"],
+    "evidence": ["properties", "metadata", "settings", "connector"],
+    "provenance": ["crop", "scan", "focus", "expand", "version-control-graph"],
+    "authority": ["split-pane", "alignment", "docking", "resize-divider", "security-lock"],
+    "supersede": ["delete", "disable", "remove", "prohibit", "retry", "refresh"]
+  },
+  "textPairingProof": {
+    "fontFamily": "Inter",
+    "rows": [
+      {"iconId":"council","label":"Council review","textSizePx":13,"textWeight":500,"candidateGlyphSizesPx":[14,16]},
+      {"iconId":"evidence","label":"12 sources","textSizePx":14.5,"textWeight":400,"candidateGlyphSizesPx":[14,16]},
+      {"iconId":"memory","label":"Project Memory","textSizePx":13,"textWeight":500,"candidateGlyphSizesPx":[14,16]},
+      {"iconId":"decision","label":"Active decision","textSizePx":15.5,"textWeight":400,"candidateGlyphSizesPx":[16,18]},
+      {"iconId":"authority","label":"Approval required","textSizePx":14.5,"textWeight":650,"candidateGlyphSizesPx":[16,18]}
+    ],
+    "review": ["cap-height relationship", "perceived baseline", "optical margins", "icon-to-label gap", "relative icon/text weight", "best optical glyph size for each text role"]
+  },
+  "mobileTargetProof": {
+    "glyphSizePx": 16,
+    "targetSizesPx": [44,48],
+    "controls": ["back", "search", "attach", "send"],
+    "semanticAction": "authority",
+    "rule": "Interaction target size must grow without scaling the glyph itself into an oversized symbol."
+  },
+  "actualUiContexts": [
+    "project-navigation",
+    "evidence-row",
+    "decision-state",
+    "approval-boundary",
+    "project-memory",
+    "mobile-composer"
+  ],
+  "reviewPolicy": {
+    "externalCollisionCheckIsHumanEvidence": true,
+    "externalCollisionCheckMayAutoReject": false,
+    "candidateRecommendationMayBeAuthoredByIndependentDesignReview": true,
+    "candidateRecommendationIsNotWorldSelection": true,
+    "automaticWorldWinnerAllowed": false,
+    "humanWorldSelectionRequiredDownstream": true
+  },
+  "forbidden": {
+    "newWorlds": true,
+    "hybridization": true,
+    "newSemanticConcepts": true,
+    "productionFamilyExpansion": true,
+    "appIconWork": true,
+    "darkIconVariants": true,
+    "iconAnimation": true,
+    "automaticWorldWinner": true,
+    "reopenFrozenControls": true
+  },
+  "selectedWorld": null,
+  "truth": {
+    "engineeringSelectionEvidenceReady": true,
+    "finalistSemanticRefinementComplete": false,
+    "externalMetaphorCollisionReviewComplete": false,
+    "textPairOpticalProofComplete": false,
+    "mobileInteractionTargetProofComplete": false,
+    "humanSelectionRecommendedNow": false,
+    "iconWorldHumanSelected": false,
+    "iconSystemHumanApproved": false,
+    "productionIconMastersComplete": false,
+    "appIconSystemAuthored": false,
+    "finalVisualSystemApproved": false
+  }
+}
