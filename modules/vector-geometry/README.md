@@ -13,11 +13,21 @@ The subsystem adds four specialist skills:
 
 and an executable math/validation layer in `lib/vector-geometry.mjs`.
 
+For brand-semantic or otherwise ambiguous drawings, **Drawing Intelligence** now sits immediately upstream. Drawing Intelligence owns semantic decomposition, learned-metaphor collision reasoning, structured primitive planning, and size-specific information budgets. Vector Geometry remains the deterministic construction authority.
+
 ## Source-of-truth rule
 
-`APPROVED VISUAL INTENT → GEOMETRY SPEC → NORMALIZED SVG → VECTOR REVIEW → ARTIFACT INTEGRITY`
+For difficult semantic drawings:
+
+`APPROVED PRODUCT / BRAND INTENT → DRAWING INTELLIGENCE PLAN → GEOMETRY INTENT → GEOMETRY SPEC → NORMALIZED SVG → VECTOR REVIEW → ARTIFACT INTEGRITY`
+
+For already-settled conventional geometry, the Drawing Intelligence step may be unnecessary:
+
+`APPROVED CONVENTIONAL INTENT → GEOMETRY SPEC → NORMALIZED SVG → VECTOR REVIEW → ARTIFACT INTEGRITY`
 
 SVG path data alone is not sufficient as a source of truth. A canonical vector asset should record the construction decisions needed to regenerate and audit it.
+
+Drawing Intelligence may not replace the geometry spec with raw SVG/path output. It hands semantic primitives and constraints to this subsystem; exact coordinates remain here.
 
 ## Coordinate contract
 
@@ -105,7 +115,7 @@ At smaller sizes the system may intentionally:
 - move coordinates onto a stronger pixel rhythm;
 - substitute a small-size optical variant.
 
-Variants are allowed when they preserve semantic identity and family grammar.
+Variants are allowed when they preserve semantic identity and family grammar. When a Drawing Intelligence handoff exists, the geometry variant must also respect its size-specific semantic-device budget.
 
 ## Icon-family consistency
 
@@ -138,7 +148,7 @@ This subsystem owns **construction quality**. Existing Logo Integrity owns final
 
 The intended order is:
 
-`VECTOR CONSTRUCTION → VECTOR REVIEW → SVG ARTIFACT INTEGRITY`.
+`DRAWING INTELLIGENCE (when needed) → VECTOR CONSTRUCTION → VECTOR REVIEW → SVG ARTIFACT INTEGRITY`.
 
 ## Physics boundary
 
