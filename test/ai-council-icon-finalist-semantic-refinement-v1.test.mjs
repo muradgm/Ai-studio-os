@@ -50,7 +50,8 @@ test('must-revisit concepts have three in-world hypotheses without new worlds', 
     for (const iconId of ICON_FINALIST_REFINE) assert.equal(listFinalistCandidates(worldId, iconId).length, 2, `${worldId}:${iconId}`);
     for (const iconId of ICON_FINALIST_TUNING) assert.equal(listFinalistCandidates(worldId, iconId).length, 1, `${worldId}:${iconId}`);
   }
-  assert.throws(() => listFinalistCandidates('quiver-construct', 'council').length && renderFinalistGlyphSvg('quiver-construct','council','x'));
+  assert.deepEqual(listFinalistCandidates('quiver-construct', 'council'), []);
+  assert.throws(() => renderFinalistGlyphSvg('quiver-construct', 'council', 'x'), /Unknown finalist Icon World/);
 });
 
 test('all finalist candidate SVG hypotheses are valid at 14, 16 and 24px', () => {
