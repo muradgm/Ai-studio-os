@@ -121,6 +121,7 @@ export function buildIconFinalistSemanticEvidence({
   uiContextEvidence = [],
   mobileTargetEvidence = [],
   finalistWorldEvidence = [],
+  contextFixtureCandidates = [],
   candidateRecommendations = []
 } = {}) {
   const findings = [];
@@ -136,16 +137,18 @@ export function buildIconFinalistSemanticEvidence({
   if ((uiContextEvidence ?? []).length !== ICON_FINALIST_WORLDS.length) findings.push(finding('blocker', 'icon-finalist-ui-context-proof-incomplete', 'Each finalist world requires actual AI Council interface-context proof.'));
   if ((mobileTargetEvidence ?? []).length !== ICON_FINALIST_WORLDS.length) findings.push(finding('blocker', 'icon-finalist-mobile-target-proof-incomplete', 'Each finalist world requires a 16px glyph inside 44/48px interaction targets.'));
   if ((finalistWorldEvidence ?? []).length !== ICON_FINALIST_WORLDS.length) findings.push(finding('blocker', 'icon-finalist-world-overview-incomplete', 'Each finalist world requires a final candidate overview.'));
+  if ((contextFixtureCandidates ?? []).length !== ICON_FINALIST_WORLDS.length) findings.push(finding('blocker', 'icon-finalist-context-fixture-candidates-incomplete', 'Each world needs a clearly non-authoritative context fixture candidate set for integration proof.'));
 
-  const recommendationByWorld = new Map((candidateRecommendations ?? []).map((item) => [item.worldId, item]));
-  for (const worldId of ICON_FINALIST_WORLDS) {
-    const recommendation = recommendationByWorld.get(worldId);
-    if (!recommendation || recommendation.worldSelection !== false || recommendation.recommendationAuthority !== 'independent-design-review') {
-      findings.push(finding('blocker', 'icon-finalist-candidate-recommendation-invalid', 'Each finalist requires in-world candidate recommendations explicitly separated from world selection.', { worldId }));
+  for (const candidateSet of contextFixtureCandidates ?? []) {
+    if (candidateSet.recommendationAuthority || candidateSet.humanSelected === true || candidateSet.worldSelection === true) {
+      findings.push(finding('blocker', 'icon-finalist-context-fixture-authority-overclaimed', 'Context fixture candidates exist only to render typography/UI integration and may not claim recommendation or selection authority.', { worldId: candidateSet.worldId }));
     }
   }
-  if ((candidateRecommendations ?? []).some((item) => item.selectedWorld || item.humanSelected === true || item.automaticWinner === true)) {
-    findings.push(finding('blocker', 'icon-finalist-world-authority-overclaimed', 'Candidate-level design recommendations may not become Icon World selection authority.'));
+
+  for (const recommendation of candidateRecommendations ?? []) {
+    if (recommendation.worldSelection !== false || recommendation.recommendationAuthority !== 'independent-design-review' || recommendation.humanSelected === true || recommendation.automaticWinner === true) {
+      findings.push(finding('blocker', 'icon-finalist-candidate-recommendation-authority-invalid', 'Post-proof candidate recommendations must remain in-world independent design review and may not select the Icon World.', { worldId: recommendation.worldId }));
+    }
   }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -156,7 +159,7 @@ export function buildIconFinalistSemanticEvidence({
     schema: ICON_FINALIST_PROOF_SCHEMA,
     projectId: plan?.projectId ?? null,
     refinementFingerprint: plan?.refinementFingerprint ?? null,
-    status: reviewReady ? 'ready-for-finalist-human-review' : blockers.length ? 'blocked' : 'provisional',
+    status: reviewReady ? 'ready-for-independent-finalist-review' : blockers.length ? 'blocked' : 'provisional',
     pass: blockers.length === 0,
     reviewReady,
     hypothesisEvidence,
@@ -165,6 +168,7 @@ export function buildIconFinalistSemanticEvidence({
     uiContextEvidence,
     mobileTargetEvidence,
     finalistWorldEvidence,
+    contextFixtureCandidates,
     candidateRecommendations,
     findings,
     selectedWorld: null,
@@ -174,6 +178,7 @@ export function buildIconFinalistSemanticEvidence({
       externalMetaphorCollisionReviewComplete: reviewReady,
       textPairOpticalProofComplete: reviewReady,
       mobileInteractionTargetProofComplete: reviewReady,
+      independentFinalistDesignReviewComplete: candidateRecommendations.length > 0,
       humanSelectionRecommendedNow: false,
       iconWorldHumanSelected: false,
       iconSystemHumanApproved: false,
