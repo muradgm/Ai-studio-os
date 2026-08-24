@@ -15,7 +15,7 @@
       "conceptId": "authority",
       "status": "rejected",
       "avoidCues": ["lock", "shield", "key", "security-boundary"],
-      "reason": "Authority is permission to cross from advice into consequence, not security/authentication/access control.",
+      "reason": "Authority is a consequential permission boundary, not security/authentication/access control.",
       "evidenceRefs": ["AI Council icon semantic review"]
     },
     {
@@ -23,15 +23,23 @@
       "conceptId": "authority",
       "status": "rejected",
       "avoidCues": ["arrow", "route", "forward-direction", "connected-path"],
-      "reason": "A continuous route through the boundary reads as navigation or execution rather than withheld/granted authority.",
+      "reason": "A continuous route through the boundary reads as navigation or execution rather than authority semantics.",
       "evidenceRefs": ["AI Council Icon Finalist Semantic Refinement V1 visual review"]
     },
     {
-      "id": "council-decision-git-rejected",
-      "conceptId": "*",
+      "id": "council-git-topology-rejected",
+      "conceptId": "council",
       "status": "rejected",
       "avoidCues": ["branch", "fork", "merge", "bifurcation", "commit-graph"],
-      "reason": "Developer audiences already read branch/merge/fork topology as Git/version-control semantics; do not reuse it for unrelated Council judgment concepts.",
+      "reason": "Developer audiences already read branch/merge/fork topology as Git/version-control semantics; do not reuse it for Council judgment.",
+      "evidenceRefs": ["AI Council Icon World Craft Review V1"]
+    },
+    {
+      "id": "decision-git-topology-rejected",
+      "conceptId": "decision",
+      "status": "rejected",
+      "avoidCues": ["branch", "fork", "merge", "bifurcation", "commit-graph"],
+      "reason": "Developer audiences already read branch/merge/fork topology as Git/version-control semantics; do not reuse it for Decision judgment.",
       "evidenceRefs": ["AI Council Icon World Craft Review V1"]
     },
     {

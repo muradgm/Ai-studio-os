@@ -1,0 +1,15 @@
+{
+  "schema": "ai-studio-os/drawing-intelligence-production-test-plan@1",
+  "projectId": "ai-council",
+  "conceptId": "authority",
+  "status": "blocked-until-v1-0-1-merge",
+  "successCriteria": [
+    "reject crosshair, divider, security and route metaphors before geometry polishing",
+    "produce meaningfully different state-neutral metaphor plans",
+    "retain only target-size semantic information in Geometry Intent",
+    "revise the semantic plan rather than nudging SVG coordinates after criticism",
+    "reuse Drawing Memory only for concept-specific proven failures"
+  ],
+  "targetSizes": [14, 16, 24],
+  "humanSelectionAuthority": false
+}
