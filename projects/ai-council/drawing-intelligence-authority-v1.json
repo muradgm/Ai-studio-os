@@ -5,17 +5,26 @@
   "assetType": "icon",
   "conceptId": "authority",
   "semanticIntent": {
-    "meaning": "Human permission boundary between Council advice and consequential action.",
+    "meaning": "Boundary between advisory judgment and consequential action whose transition requires explicit human authority.",
     "mustCommunicate": [
-      "advice exists before the boundary",
-      "crossing is withheld until human authority is granted",
-      "the state beyond the boundary is consequential"
+      "advisory judgment and consequential action occupy different authority domains",
+      "transition between those domains requires explicit human authority",
+      "the authority boundary carries consequence"
     ],
     "mustNotMean": [
       "security or authentication",
       "navigation or forward action",
       "split pane, alignment, docking or resize",
-      "generic success or completion"
+      "generic success or completion",
+      "a transient approval or execution status"
+    ],
+    "mustNotEncode": [
+      "approval-required",
+      "authorized",
+      "withheld",
+      "granted",
+      "executing",
+      "execution-state"
     ],
     "contexts": [
       "approval request",
@@ -26,7 +35,7 @@
   },
   "familiarityDecision": {
     "mode": "brand-original-required",
-    "rationale": "No single established UI glyph expresses the boundary between advisory intelligence and granted human authority without collapsing into security, navigation, or completion semantics."
+    "rationale": "No single established UI glyph expresses the stable boundary between advisory intelligence and consequential human authority without collapsing into security, navigation, completion or transient approval-state semantics."
   },
   "targetSizes": [14, 16, 24],
   "sizeBudgets": {
@@ -37,52 +46,73 @@
   "candidates": [
     {
       "id": "crossing-divider",
-      "metaphor": "A controlled crossing through a vertical authority divider.",
+      "metaphor": "Two authority domains separated by a continuous divider with a crossing cue.",
       "metaphorCues": ["vertical-divider", "alignment-axis", "crosshair"],
       "geometryCues": ["divider", "continuous-crossing"],
       "primitivePlan": {
-        "semanticDevices": ["authority boundary", "crossing point", "before/after state"],
+        "semanticDevices": [
+          {"id": "boundary", "label": "authority boundary", "priority": 1},
+          {"id": "domain-contrast", "label": "advice versus consequence", "priority": 2},
+          {"id": "crossing-relation", "label": "relation across boundary", "priority": 3}
+        ],
         "primitives": [
-          {"id": "boundary", "kind": "threshold", "role": "authority-boundary"},
-          {"id": "crossing", "kind": "aperture", "role": "permission-crossing"}
+          {"id": "boundary-mark", "kind": "threshold", "role": "authority-boundary", "semanticDeviceId": "boundary"},
+          {"id": "advisory-domain", "kind": "open-domain", "role": "advisory-judgment", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-domain", "kind": "durable-domain", "role": "consequential-action", "semanticDeviceId": "domain-contrast"},
+          {"id": "crossing-mark", "kind": "relation-mark", "role": "boundary-crossing", "semanticDeviceId": "crossing-relation"}
         ],
         "relationships": [
-          {"from": "advisory-state", "to": "crossing", "type": "approaches"},
-          {"from": "crossing", "to": "consequence-state", "type": "continues"}
+          {"from": "advisory-domain", "to": "boundary-mark", "type": "bounded-by", "semanticDeviceId": "domain-contrast"},
+          {"from": "boundary-mark", "to": "consequence-domain", "type": "bounded-by", "semanticDeviceId": "domain-contrast"},
+          {"from": "boundary-mark", "to": "crossing-mark", "type": "crossing-indicated-by", "semanticDeviceId": "crossing-relation"}
         ]
       }
     },
     {
-      "id": "locked-threshold",
-      "metaphor": "A threshold secured until permission is granted.",
+      "id": "security-threshold",
+      "metaphor": "Two authority domains separated by a threshold whose importance is expressed with a security enclosure.",
       "metaphorCues": ["lock", "security-boundary"],
       "geometryCues": ["vertical-divider", "padlock"],
       "primitivePlan": {
-        "semanticDevices": ["authority boundary", "locked state"],
+        "semanticDevices": [
+          {"id": "boundary", "label": "authority boundary", "priority": 1},
+          {"id": "domain-contrast", "label": "advice versus consequence", "priority": 2},
+          {"id": "security-emphasis", "label": "security enclosure", "priority": 3}
+        ],
         "primitives": [
-          {"id": "boundary", "kind": "threshold", "role": "authority-boundary"},
-          {"id": "lock", "kind": "security-mark", "role": "withheld-permission"}
+          {"id": "boundary-mark", "kind": "threshold", "role": "authority-boundary", "semanticDeviceId": "boundary"},
+          {"id": "advisory-domain", "kind": "open-domain", "role": "advisory-judgment", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-domain", "kind": "durable-domain", "role": "consequential-action", "semanticDeviceId": "domain-contrast"},
+          {"id": "security-mark", "kind": "security-mark", "role": "authority-emphasis", "semanticDeviceId": "security-emphasis"}
         ],
         "relationships": [
-          {"from": "advisory-state", "to": "boundary", "type": "stops-before"}
+          {"from": "advisory-domain", "to": "boundary-mark", "type": "bounded-by", "semanticDeviceId": "domain-contrast"},
+          {"from": "boundary-mark", "to": "consequence-domain", "type": "bounded-by", "semanticDeviceId": "domain-contrast"},
+          {"from": "security-mark", "to": "boundary-mark", "type": "emphasizes", "semanticDeviceId": "security-emphasis"}
         ]
       }
     },
     {
-      "id": "asymmetric-threshold",
-      "metaphor": "Two unequal states separated by a threshold; advisory state remains open while the consequential state is denser and unavailable until authority changes.",
-      "metaphorCues": ["boundary", "open-state", "consequence-state", "withheld-transition"],
+      "id": "asymmetric-domain-boundary",
+      "metaphor": "Two unequal authority domains separated by a consequential threshold, with advisory judgment remaining visually open and consequential action reading as more durable.",
+      "metaphorCues": ["boundary", "open-domain", "consequence-domain"],
       "geometryCues": ["asymmetric-fields", "negative-space-threshold", "no-continuous-crossing"],
       "primitivePlan": {
-        "semanticDevices": ["authority threshold", "state contrast", "withheld crossing"],
+        "semanticDevices": [
+          {"id": "boundary", "label": "authority boundary", "priority": 1},
+          {"id": "domain-contrast", "label": "advice versus consequence", "priority": 2},
+          {"id": "consequence-emphasis", "label": "consequential weight", "priority": 3}
+        ],
         "primitives": [
-          {"id": "advisory", "kind": "open-state", "role": "advice-before-authority"},
-          {"id": "threshold", "kind": "negative-space-boundary", "role": "human-authority-boundary"},
-          {"id": "consequence", "kind": "durable-state", "role": "action-after-authority"}
+          {"id": "threshold", "kind": "negative-space-boundary", "role": "human-authority-boundary", "semanticDeviceId": "boundary"},
+          {"id": "advisory-domain", "kind": "open-domain", "role": "advisory-judgment", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-domain", "kind": "durable-domain", "role": "consequential-action", "semanticDeviceId": "domain-contrast"},
+          {"id": "consequence-weight", "kind": "durability-mark", "role": "consequence-emphasis", "semanticDeviceId": "consequence-emphasis"}
         ],
         "relationships": [
-          {"from": "advisory", "to": "threshold", "type": "stops-before"},
-          {"from": "threshold", "to": "consequence", "type": "withheld-until-authorized"}
+          {"from": "advisory-domain", "to": "threshold", "type": "bounded-by", "semanticDeviceId": "domain-contrast"},
+          {"from": "threshold", "to": "consequence-domain", "type": "bounded-by", "semanticDeviceId": "domain-contrast"},
+          {"from": "consequence-domain", "to": "consequence-weight", "type": "reinforced-by", "semanticDeviceId": "consequence-emphasis"}
         ]
       }
     }
