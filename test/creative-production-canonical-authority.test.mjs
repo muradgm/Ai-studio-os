@@ -7,6 +7,7 @@ import {
   authoredCandidateFromDeliberation,
   buildCreativeThesisDeliberation
 } from '../modules/creative-thesis/intelligence.mjs';
+import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 
 const baseInput = JSON.parse(fs.readFileSync(new URL('../benchmarks/005-du-bonheur-creative-production/input.json', import.meta.url)));
 
@@ -68,18 +69,22 @@ function canonicalInput(overrides = {}) {
   const legacy = runCreativeProductionRuntime(baseInput);
   const deliberation = buildDeliberation();
   const authored = authoredCandidateFromDeliberation(deliberation);
-  const thesisStatement = authored.governingIdea;
-  const thesis = {
-    schema: 'ai-studio-os/creative-thesis@1',
-    id: 'du-bonheur-thesis',
+  const builtThesis = buildCreativeThesis({
     projectId: baseInput.id,
-    statement: thesisStatement,
-    governingIdea: { statement: thesisStatement },
-    creativeTension: { label: authored.creativeTension },
-    reviewReady: true,
-    pass: true,
-    truth: { humanCreativeApproval: true }
+    intent: 'Create a contemporary Du Bonheur digital experience rooted in real pastry craft and counter service.',
+    businessTruths: deliberation.sourceTruths,
+    inspiration: { opportunityGaps: deliberation.sourceOpportunities },
+    antiPrinciples: ['nostalgic Parisian luxury staging', 'generic premium cafe storytelling'],
+    audience: 'Customers choosing and ordering pastries in Berlin',
+    commercialObjective: 'Increase product understanding and ordering confidence',
+    authoredCandidate: authored
+  });
+  const thesis = {
+    ...builtThesis,
+    id: 'du-bonheur-thesis',
+    truth: { ...(builtThesis.truth ?? {}), humanCreativeApproval: true }
   };
+  const thesisStatement = thesis.governingIdea.statement;
   const world = {
     schema: 'ai-studio-os/creative-world@1',
     id: 'counter-ritual',
@@ -95,6 +100,10 @@ function canonicalInput(overrides = {}) {
     motionLanguage: 'measured threshold transitions with object continuity',
     interactionModel: 'direct contextual reveals tied to service actions',
     responsiveStrategy: 'preserve ritual sequence while recomposing hierarchy per viewport',
+    categoryTransferTest: {
+      whyProjectSpecific: 'The world is structured around Du Bonheur’s physical counter-service ritual and pastry evidence rather than generic hospitality styling.',
+      transferRisk: 'Without those service and product truths it becomes a generic editorial café experience.'
+    },
     antiPatterns: ['Parisian nostalgia', 'generic luxury card grid'],
     thesisRef: {
       schema: thesis.schema,
@@ -154,6 +163,7 @@ test('canonical Creative World is the sole world-level production authority', ()
   assert.equal(output.canonicalHandoff?.truth.creativeThesisHumanApproved, true);
   assert.equal(output.canonicalHandoff?.truth.creativeSelectionProvenanceValid, true);
   assert.equal(output.canonicalHandoff?.truth.creativeWorldProductionContractComplete, true);
+  assert.equal(output.canonicalHandoff?.truth.creativeWorldStructuralReviewReady, true);
   assert.equal(output.selectionAuthority, 'canonical-creative-world');
   assert.equal(output.exploration, undefined);
   assert.equal(output.selection, undefined);
@@ -165,9 +175,7 @@ test('canonical Creative World is the sole world-level production authority', ()
   assert.equal(output.creativeDirection.calibration.selectedConceptId, null);
   assert.equal(output.creativeDirection.calibration.legacyConceptSelectionAuthority, 'retired');
 
-  for (const entry of output.registry.entries ?? []) {
-    assert.equal(entry.directionRef, 'Canonical Counter Ritual direction');
-  }
+  for (const entry of output.registry.entries ?? []) assert.equal(entry.directionRef, 'Canonical Counter Ritual direction');
 });
 
 test('canonical production fails closed when thesis deliberation provenance is absent', () => {
@@ -183,9 +191,7 @@ test('canonical production fails closed before tool routing when selected world 
   const input = canonicalInput();
   input.selectedCreativeWorld.truth.humanCreativeSelectionConfirmed = false;
   input.creativeWorldExploration.selectedWorld = input.selectedCreativeWorld;
-
   const output = runCreativeProductionRuntime(input);
-
   assert.equal(output.status, 'blocked');
   assert.equal(output.canonicalHandoff?.pass, false);
   assert.equal(output.selectionAuthority, 'canonical-creative-world');
@@ -199,9 +205,7 @@ test('canonical production fails closed when selected world is incomplete even i
   const input = canonicalInput();
   input.selectedCreativeWorld.interactionModel = '';
   input.creativeWorldExploration.selectedWorld = input.selectedCreativeWorld;
-
   const output = runCreativeProductionRuntime(input);
-
   assert.equal(output.status, 'blocked');
   assert.equal(output.exploration, undefined);
   assert.equal(output.selection, undefined);
