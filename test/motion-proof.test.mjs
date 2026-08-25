@@ -4,24 +4,70 @@ import assert from 'node:assert/strict';
 import { reviewMotionCreativeExploration, selectedMotionDirection } from '../modules/motion-creative-intelligence/runtime.mjs';
 import { buildMotionProofPlan, buildMotionProofEvidence } from '../modules/motion-creative-intelligence/proof.mjs';
 
+const HYPOTHESIS_VARIANTS = {
+  continuity: {
+    interpretation: 'Persistent object continuity bridges related product states while the surrounding composition reforms around one semantic anchor.',
+    motionThesis: 'Continuity carries one meaningful object through state changes; stillness frames the handoff before and after it.',
+    signatureMotionBehavior: 'A persistent object crosses a threshold while adjacent layers reorganize around it without a camera flourish.',
+    temporalRhythm: 'Extended holds surround one concise continuity move and a quiet recovery.',
+    spatialBehavior: 'Spatial change follows the persistent object and avoids unrelated depth movement.',
+    transitionGrammar: 'Related states preserve object continuity; unrelated chapters cut cleanly.',
+    interactionCharacter: 'Interaction feels precise and continuous rather than elastic.',
+    easingLanguage: 'Controlled acceleration supports one legible handoff with restrained settling.',
+    energyCurve: 'Low baseline energy rises briefly during the continuity event and returns fully to calm.',
+    depthModel: 'A shallow plane gives the persistent object just enough separation to survive recomposition.',
+    stillnessPolicy: 'Navigation and reading regions remain fixed while the semantic anchor carries the change.',
+    reducedMotionInterpretation: 'Keep the same state sequence with direct cuts and object persistence but remove simulated travel.'
+  },
+  editorial: {
+    interpretation: 'Editorial chaptering uses decisive temporal cuts, typographic pacing and silence to mark changes in conceptual hierarchy.',
+    motionThesis: 'Chapter rhythm separates ideas with hard cuts, delayed type and long unmoving reading intervals.',
+    signatureMotionBehavior: 'A clean chapter cut resets composition, followed by a measured text reveal instead of continuous object travel.',
+    temporalRhythm: 'Long silent holds are interrupted by short chapter cuts and staggered editorial reveals.',
+    spatialBehavior: 'The composition stays planar; hierarchy changes through replacement and pacing rather than depth.',
+    transitionGrammar: 'Conceptual chapters cut; supporting text enters only after the new hierarchy is established.',
+    interactionCharacter: 'Controls respond immediately and quietly so editorial pacing remains dominant.',
+    easingLanguage: 'Short controlled reveals stop decisively with no ornamental rebound.',
+    energyCurve: 'Energy arrives in discrete chapter pulses separated by extended stillness.',
+    depthModel: 'Depth remains nearly flat so typography and temporal contrast carry the experience.',
+    stillnessPolicy: 'Reading intervals are intentionally motionless until a chapter boundary is crossed.',
+    reducedMotionInterpretation: 'Preserve chapter order and hierarchy through cuts and opacity without staged travel.'
+  },
+  tactile: {
+    interpretation: 'Tactile material response makes direct manipulation expose friction, resistance and damped recovery only at contact points.',
+    motionThesis: 'Perceived weight emerges during manipulation while resting interface regions stay inert and functional.',
+    signatureMotionBehavior: 'A manipulated surface yields slightly under input, then returns with restrained damping and no ambient bounce.',
+    temporalRhythm: 'Motion is event-driven: immediate resistance, brief deformation, then a short damped recovery.',
+    spatialBehavior: 'Local displacement stays near the touched element instead of moving the entire scene.',
+    transitionGrammar: 'State transitions remain direct; physical response is reserved for manipulation moments.',
+    interactionCharacter: 'Touch feels weighted and material, with clear resistance and recovery.',
+    easingLanguage: 'High damping and low elasticity imply mass without playful spring behavior.',
+    energyCurve: 'Energy appears only under direct input and dissipates rapidly after release.',
+    depthModel: 'Selective local depth supports contact and compression while the wider interface stays flat.',
+    stillnessPolicy: 'Nothing moves autonomously; material response exists only when input or state change earns it.',
+    reducedMotionInterpretation: 'Replace deformation and travel with immediate state feedback while preserving cause and hierarchy.'
+  }
+};
+
 function hypothesis(id, label) {
+  const variant = HYPOTHESIS_VARIANTS[id];
   return {
     id,
     title: label,
-    interpretation: `${label} interprets the selected Creative World through a distinct temporal structure.`,
+    interpretation: variant.interpretation,
     creativeWorldRefs: ['world-a:motionIntent', 'world-a:interactionCharacter'],
     language: {
-      motionThesis: `${label} motion thesis`,
-      signatureMotionBehavior: `${label} signature behavior`,
-      temporalRhythm: `${label} temporal rhythm`,
-      spatialBehavior: `${label} spatial behavior`,
-      transitionGrammar: `${label} transition grammar`,
-      interactionCharacter: `${label} interaction character`,
-      easingLanguage: `${label} easing language`,
-      energyCurve: `${label} energy curve`,
-      depthModel: `${label} depth model`,
-      stillnessPolicy: `${label} deliberate stillness policy`,
-      reducedMotionInterpretation: `${label} preserves hierarchy with reduced travel and no decorative deformation.`
+      motionThesis: variant.motionThesis,
+      signatureMotionBehavior: variant.signatureMotionBehavior,
+      temporalRhythm: variant.temporalRhythm,
+      spatialBehavior: variant.spatialBehavior,
+      transitionGrammar: variant.transitionGrammar,
+      interactionCharacter: variant.interactionCharacter,
+      easingLanguage: variant.easingLanguage,
+      energyCurve: variant.energyCurve,
+      depthModel: variant.depthModel,
+      stillnessPolicy: variant.stillnessPolicy,
+      reducedMotionInterpretation: variant.reducedMotionInterpretation
     },
     motionMoments: [`${label} primary reveal earns movement.`],
     stillMoments: [`${label} navigation remains still until state changes.`],
