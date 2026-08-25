@@ -6,12 +6,72 @@ function hasBlocker(findings = []) {
   return findings.some((item) => item?.severity === 'blocker');
 }
 
+function clean(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+const REQUIRED_WORLD_STRING_FIELDS = [
+  'worldIdea',
+  'interpretationOfThesis',
+  'signatureBehavior',
+  'worldClass',
+  'narrativeModel',
+  'compositionModel',
+  'imageLanguage',
+  'materialLanguage',
+  'motionLanguage',
+  'interactionModel',
+  'responsiveStrategy'
+];
+
 function selectedWorldIsAuthoritative(world = {}) {
   return world.schema === 'ai-studio-os/creative-world@1'
     && world.reviewReady === true
     && world.selected === true
     && world.truth?.humanCreativeSelectionConfirmed === true
     && world.truth?.visualWorldProofReviewed === true;
+}
+
+function selectionProvenance(exploration = {}, world = {}, styleFrameProof = {}) {
+  const selection = exploration?.selection ?? {};
+  const evidenceRefs = Array.isArray(selection.visualEvidenceRefs)
+    ? selection.visualEvidenceRefs.filter((value) => clean(value))
+    : [];
+  const frameIds = new Set((styleFrameProof?.frames ?? []).map((frame) => clean(frame?.id)).filter(Boolean));
+  const referencedRenderedEvidence = evidenceRefs.some((ref) => frameIds.has(ref));
+  const valid = exploration?.selectedWorld?.id === world?.id
+    && exploration?.truth?.humanWorldSelectionConfirmed === true
+    && selection.worldId === world?.id
+    && selection.humanConfirmed === true
+    && selection.visualReviewConfirmed === true
+    && evidenceRefs.length > 0
+    && referencedRenderedEvidence;
+  return { valid, evidenceRefs, referencedRenderedEvidence };
+}
+
+function worldProductionCompleteness(world = {}, thesis = {}, projectId = null) {
+  const missingFields = REQUIRED_WORLD_STRING_FIELDS.filter((field) => !clean(world?.[field]));
+  if (!clean(world?.typographyIntent?.statement)) missingFields.push('typographyIntent.statement');
+  if (!Array.isArray(world?.antiPatterns) || world.antiPatterns.filter((value) => clean(value)).length < 2) missingFields.push('antiPatterns>=2');
+
+  const thesisStatement = clean(thesis?.governingIdea?.statement || thesis?.statement);
+  const worldThesisStatement = clean(world?.thesisRef?.governingIdea);
+  const expectedProjectId = projectId ?? thesis?.projectId ?? null;
+  const thesisProjectBindingValid = thesis?.schema === 'ai-studio-os/creative-thesis@1'
+    && world?.thesisRef?.schema === thesis?.schema
+    && Boolean(expectedProjectId)
+    && thesis?.projectId === expectedProjectId
+    && world?.thesisRef?.projectId === expectedProjectId
+    && Boolean(thesisStatement)
+    && worldThesisStatement === thesisStatement;
+
+  const worldFindingsClear = !(world?.findings ?? []).some((item) => item?.severity === 'blocker' || item?.severity === 'major');
+  return {
+    complete: missingFields.length === 0 && thesisProjectBindingValid && worldFindingsClear,
+    missingFields,
+    thesisProjectBindingValid,
+    worldFindingsClear
+  };
 }
 
 function typographyIsAuthoritative(typography = {}) {
@@ -28,9 +88,8 @@ function typographyIsAuthoritative(typography = {}) {
  * exploration/review into production planning.
  *
  * This module deliberately does not generate, rank, select, or mutate creative
- * work. It only verifies that upstream human-governed decisions are coherent
- * before production is allowed to consume them. In canonical mode, legacy
- * calibration may remain as diagnostic evidence but never as creative authority.
+ * work. It verifies three separate truths before production can proceed:
+ * authority validity, authority provenance, and production-contract completeness.
  */
 export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const findings = [];
@@ -41,18 +100,42 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const styleFrameProof = input.styleFrameProof ?? creative.styleFrameProof ?? {};
   const direction = input.creativeDirection ?? creative.creativeDirection ?? {};
   const typography = input.typography ?? null;
+  const projectId = input.projectId ?? creative.id ?? thesis?.projectId ?? null;
 
-  if (thesis.schema !== 'ai-studio-os/creative-thesis@1' || thesis.reviewReady !== true || thesis.pass !== true) {
+  const thesisReady = thesis.schema === 'ai-studio-os/creative-thesis@1'
+    && thesis.reviewReady === true
+    && thesis.pass === true;
+  if (!thesisReady) {
     findings.push(finding('blocker', 'canonical-thesis-not-ready', 'Canonical production requires a passing, review-ready Creative Thesis.'));
   }
 
-  if (!selectedWorldIsAuthoritative(world ?? {})) {
+  const authorityValid = selectedWorldIsAuthoritative(world ?? {});
+  if (!authorityValid) {
     findings.push(finding('blocker', 'canonical-world-not-authoritative', 'Canonical production requires an explicitly selected, reviewed Creative World with human selection and visual-proof truth.', {
       worldId: world?.id ?? null
     }));
   }
 
   const selectedWorldId = world?.id ?? null;
+  const provenance = selectionProvenance(exploration, world ?? {}, styleFrameProof);
+  if (!provenance.valid) {
+    findings.push(finding('blocker', 'canonical-world-selection-provenance-invalid', 'Selected Creative World authority must be traceable to the current exploration selection record and referenced rendered visual evidence.', {
+      worldId: selectedWorldId,
+      evidenceRefs: provenance.evidenceRefs,
+      referencedRenderedEvidence: provenance.referencedRenderedEvidence
+    }));
+  }
+
+  const completeness = worldProductionCompleteness(world ?? {}, thesis, projectId);
+  if (!completeness.complete) {
+    findings.push(finding('blocker', 'canonical-world-production-contract-incomplete', 'Selected Creative World is human-selected but does not contain a complete production-authority contract.', {
+      worldId: selectedWorldId,
+      missingFields: completeness.missingFields,
+      thesisProjectBindingValid: completeness.thesisProjectBindingValid,
+      worldFindingsClear: completeness.worldFindingsClear
+    }));
+  }
+
   const proofCoversWorld = styleFrameProof?.reviewReady === true
     && (styleFrameProof?.frames ?? []).some((frame) => frame.worldId === selectedWorldId);
   if (!proofCoversWorld) {
@@ -91,14 +174,17 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     pass,
     status: pass ? 'ready-for-production-planning' : 'blocked',
     authority: {
-      projectId: input.projectId ?? creative.id ?? null,
+      projectId,
       creativeThesisId: thesis.id ?? thesis.projectId ?? null,
       selectedWorldId,
       creativeDirectionStatement: direction?.directionStatement ?? null,
       typographySystemId: typography?.systemId ?? typography?.id ?? null
     },
     truth: {
-      creativeSelectionHumanGoverned: selectedWorldIsAuthoritative(world ?? {}),
+      creativeSelectionHumanGoverned: authorityValid,
+      creativeSelectionProvenanceValid: provenance.valid,
+      creativeWorldProductionContractComplete: completeness.complete,
+      creativeWorldThesisProjectBindingValid: completeness.thesisProjectBindingValid,
       styleFrameProofReviewed: proofCoversWorld && world?.truth?.visualWorldProofReviewed === true,
       typographyHumanApproved: typography ? typographyIsAuthoritative(typography) : null,
       productionApprovalFabricated: false
@@ -118,6 +204,8 @@ export function validateCanonicalCreativeProductionHandoff(output = {}, expected
   for (const code of expected.forbiddenFindingCodes ?? []) {
     if (output.findings?.some((item) => item.code === code)) failures.push(`forbidden finding ${code}`);
   }
+  if (expected.requireProductionContractComplete && output.truth?.creativeWorldProductionContractComplete !== true) failures.push('creative world production contract is incomplete');
+  if (expected.requireSelectionProvenance && output.truth?.creativeSelectionProvenanceValid !== true) failures.push('creative world selection provenance is invalid');
   if (expected.requireNoFabricatedProductionApproval && output.truth?.productionApprovalFabricated !== false) failures.push('production approval truth must remain false');
   return { pass: failures.length === 0, failures };
 }
