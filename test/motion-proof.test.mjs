@@ -66,6 +66,15 @@ test('post-exploration mutation of a proof hypothesis is rejected before browser
   const review = reviewMotionProofPlan(drifted);
   assert.equal(review.reviewReady, false);
   assert.ok(review.findings.some((item) => item.code === 'motion-proof-hypothesis-contract-drift'));
+});
+
+test('post-plan mutation of a study creative intent is rejected before browser rendering', () => {
+  const { plan } = buildMotionProofFixture();
+  const drifted = structuredClone(plan);
+  drifted.studies[0].creativeIntent.motionThesis = 'A replacement study intent that does not match the authoritative hypothesis.';
+
+  const review = reviewMotionProofPlan(drifted);
+  assert.equal(review.reviewReady, false);
   assert.ok(review.findings.some((item) => item.code === 'motion-proof-study-contract-drift'));
 });
 
