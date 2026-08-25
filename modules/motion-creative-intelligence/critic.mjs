@@ -62,11 +62,12 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
   });
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
-  const brief = {
+  return {
     schema: 'ai-studio-os/motion-critic-brief@1',
     stage: 'motion-critic-brief',
     projectId: exploration?.projectId ?? null,
     creativeWorldId: exploration?.creativeWorldId ?? null,
+    authorityInputs: { exploration: exploration ?? null, proofEvidence: proofEvidence ?? null },
     explorationRef: { schema: exploration?.schema ?? null, hypothesisIds: explorationIds },
     proofRef: {
       schema: proofEvidence?.schema ?? null,
@@ -93,6 +94,7 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
     status: blockers.length ? 'blocked' : 'ready-for-authored-motion-critique',
     truth: {
       renderedProofIsEvidenceNotCritique: true,
+      criticBriefAuthorityRecomputedFromInputs: true,
       criticMustJudgeComparatively: true,
       criticRecommendationIsAdvisory: true,
       humanMotionSelectionRequired: true,
@@ -100,7 +102,6 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
       productionApproved: false
     }
   };
-  return brief;
 }
 
 function normalizeDimension(value = {}) {
@@ -122,20 +123,30 @@ function normalizeHypothesisReview(value = {}) {
   };
 }
 
+function recomputeBrief(claimedBrief = {}) {
+  return buildMotionCriticBrief({
+    exploration: claimedBrief?.authorityInputs?.exploration,
+    proofEvidence: claimedBrief?.authorityInputs?.proofEvidence
+  });
+}
+
 export function reviewMotionCritique(critique = {}) {
   const findings = [];
-  const brief = critique?.brief ?? {};
+  const claimedBrief = critique?.brief ?? {};
+  const brief = recomputeBrief(claimedBrief);
   if (critique?.schema !== 'ai-studio-os/motion-critic-review@1') findings.push(finding('blocker', 'motion-critic-schema-invalid', 'Motion Critic review requires motion-critic-review@1.'));
-  if (brief?.schema !== 'ai-studio-os/motion-critic-brief@1' || brief?.reviewReady !== true) findings.push(finding('blocker', 'motion-critic-brief-invalid', 'Motion Critic requires a review-ready critic brief.'));
+  if (claimedBrief?.schema !== 'ai-studio-os/motion-critic-brief@1') findings.push(finding('blocker', 'motion-critic-brief-schema-invalid', 'Motion Critic requires motion-critic-brief@1.'));
+  if (!brief.reviewReady) findings.push(finding('blocker', 'motion-critic-brief-invalid', 'Motion Critic brief authority failed recomputation from its underlying exploration and rendered proof.', { findingCodes: brief.findings.map((item) => item.code) }));
+  if (claimedBrief?.projectId !== brief.projectId || claimedBrief?.creativeWorldId !== brief.creativeWorldId || !sameIds(claimedBrief?.hypotheses?.map((item) => item.id) ?? [], brief.hypotheses.map((item) => item.id))) findings.push(finding('blocker', 'motion-critic-brief-drift', 'Claimed critic brief identity or hypothesis set drifted from recomputed authority.'));
 
-  const expectedIds = (brief?.hypotheses ?? []).map((item) => item.id);
+  const expectedIds = brief.hypotheses.map((item) => item.id);
   const hypothesisReviews = Array.isArray(critique?.hypothesisReviews) ? critique.hypothesisReviews : [];
   const normalizedReviews = hypothesisReviews.map(normalizeHypothesisReview);
   const reviewIds = normalizedReviews.map((item) => item.hypothesisId);
   if (!sameIds(expectedIds, reviewIds)) findings.push(finding('blocker', 'motion-critic-review-coverage-invalid', 'Critic must review every rendered hypothesis exactly once.', { expectedIds, reviewIds }));
 
   for (const review of normalizedReviews) {
-    const hypothesis = (brief?.hypotheses ?? []).find((item) => item.id === review.hypothesisId);
+    const hypothesis = brief.hypotheses.find((item) => item.id === review.hypothesisId);
     if (!hypothesis) continue;
     const allowedRefs = new Set(hypothesis.evidenceRefs ?? []);
     for (const key of MOTION_CRITIC_DIMENSIONS) {
@@ -173,7 +184,9 @@ export function reviewMotionCritique(critique = {}) {
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-human-motion-selection',
     findings,
     normalizedReviews,
+    authoritativeBrief: brief,
     truth: {
+      criticBriefAuthorityRecomputed: true,
       renderedEvidenceReviewed: blockers.length === 0 && majors.length === 0,
       criticRecommendationIsAdvisory: true,
       humanMotionSelectionConfirmed: false,
@@ -210,12 +223,14 @@ export function buildMotionCritique({ brief, hypothesisReviews = [], comparative
 export function buildProvenMotionDirection({ exploration, critique, hypothesisId, humanConfirmed = false, rationale = '', reviewedEvidenceRefs = [] } = {}) {
   const criticReview = reviewMotionCritique(critique ?? {});
   if (!criticReview.reviewReady) return null;
+  const authoritativeBrief = criticReview.authoritativeBrief;
   const id = text(hypothesisId);
   const selectedHypothesis = (exploration?.hypotheses ?? []).find((item) => item.id === id);
   if (!selectedHypothesis || humanConfirmed !== true || !text(rationale)) return null;
   if (critique?.projectId !== exploration?.projectId || critique?.creativeWorldId !== exploration?.creativeWorldId) return null;
+  if (authoritativeBrief.projectId !== exploration?.projectId || authoritativeBrief.creativeWorldId !== exploration?.creativeWorldId) return null;
 
-  const criticHypothesis = (critique?.brief?.hypotheses ?? []).find((item) => item.id === id);
+  const criticHypothesis = authoritativeBrief.hypotheses.find((item) => item.id === id);
   if (!criticHypothesis) return null;
   const reviewedRefs = list(reviewedEvidenceRefs);
   const allowedRefs = new Set(criticHypothesis.evidenceRefs ?? []);
