@@ -42,6 +42,7 @@ export function reviewCreativeThesisDeliberation(deliberation = {}) {
   const findings = [];
   const hypotheses = Array.isArray(deliberation.hypotheses) ? deliberation.hypotheses : [];
   const contradictions = cleanList(deliberation.contradictions);
+  const sourceTruths = cleanList(deliberation.sourceTruths);
   const selectedId = clean(deliberation.selection?.hypothesisId);
   const selected = hypotheses.find((item) => item.id === selectedId);
 
@@ -59,9 +60,17 @@ export function reviewCreativeThesisDeliberation(deliberation = {}) {
     }
     if (!hypothesis.truthRefs.length) {
       findings.push(finding('major', 'creative-thesis-hypothesis-ungrounded', 'Each thesis hypothesis must cite project truth.', { hypothesisId: hypothesis.id }));
+    } else if (hypothesis.truthRefs.some((ref) => !sourceTruths.includes(ref))) {
+      findings.push(finding('blocker', 'creative-thesis-hypothesis-truth-ref-invalid', 'A thesis hypothesis cites truth that is not present in the deliberation source truth set.', { hypothesisId: hypothesis.id, truthRefs: hypothesis.truthRefs }));
+    }
+    if (!hypothesis.crossDomainConnections.length) {
+      findings.push(finding('major', 'creative-thesis-cross-domain-reasoning-missing', 'Each thesis hypothesis should test at least one relevant cross-domain connection or structural analogy.', { hypothesisId: hypothesis.id }));
     }
     if (!hypothesis.experientialConsequences.length) {
       findings.push(finding('major', 'creative-thesis-hypothesis-not-experiential', 'Each thesis hypothesis must state how it changes the experience, not only the visual treatment.', { hypothesisId: hypothesis.id }));
+    }
+    if (!hypothesis.antiGenericClaims.length) {
+      findings.push(finding('major', 'creative-thesis-hypothesis-anti-generic-missing', 'Each thesis hypothesis must identify at least one category/default behavior it resists.', { hypothesisId: hypothesis.id }));
     }
     if (!hypothesis.critique.length) {
       findings.push(finding('major', 'creative-thesis-hypothesis-uncriticized', 'Each thesis hypothesis must survive explicit adversarial critique.', { hypothesisId: hypothesis.id }));
@@ -93,6 +102,19 @@ export function reviewCreativeThesisDeliberation(deliberation = {}) {
   }
   if (selected && !clean(deliberation.selection?.experientialPotentialJudgment)) {
     findings.push(finding('major', 'creative-thesis-experiential-potential-missing', 'The selected hypothesis requires an explicit experiential potential judgment.'));
+  }
+
+  if (deliberation.synthesis?.statement) {
+    const synthesisRefs = cleanList(deliberation.synthesis.sourceHypothesisIds);
+    if (synthesisRefs.length < 2) {
+      findings.push(finding('major', 'creative-thesis-synthesis-source-thin', 'A synthesis thesis must name at least two source hypotheses so synthesis is distinguishable from an untraceable rewrite.'));
+    }
+    if (synthesisRefs.some((id) => !hypotheses.some((item) => item.id === id))) {
+      findings.push(finding('blocker', 'creative-thesis-synthesis-source-invalid', 'A synthesis thesis references a hypothesis that is not part of the deliberation.', { sourceHypothesisIds: synthesisRefs }));
+    }
+    if (!clean(deliberation.synthesis.rationale)) {
+      findings.push(finding('major', 'creative-thesis-synthesis-rationale-missing', 'A synthesis thesis requires a rationale explaining what each source hypothesis contributes.'));
+    }
   }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
