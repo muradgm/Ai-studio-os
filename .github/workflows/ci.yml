@@ -47,7 +47,10 @@ jobs:
           node --check modules/motion-creative-intelligence/world-authority.mjs
           node --check modules/motion-creative-intelligence/proof.mjs
           node --check modules/motion-creative-intelligence/critic.mjs
+          node --check modules/motion-creative-intelligence/direction-authority.mjs
+          node --check modules/motion-creative-intelligence/technical-planning.mjs
           node --check fixtures/motion-creative-authority-fixture.mjs
+          node --check fixtures/motion-critic-authority-fixture.mjs
           node --check modules/drawing-intelligence/authority-production-test.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
