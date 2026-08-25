@@ -63,9 +63,10 @@ function thesisFrom(delib, overrides = {}) {
   return {
     schema: 'ai-studio-os/creative-thesis@1',
     projectId: delib.projectId,
+    pass: true,
     reviewReady: true,
-    governingIdea: candidate.governingIdea,
-    creativeTension: candidate.creativeTension,
+    governingIdea: { statement: candidate.governingIdea, singular: true },
+    creativeTension: { label: candidate.creativeTension, traits: [] },
     truth: { humanCreativeApproval: true },
     ...overrides
   };
@@ -78,16 +79,27 @@ test('canonical thesis authority requires deliberation provenance plus human app
   assert.equal(result.pass, true);
   assert.equal(result.status, 'authoritative');
   assert.equal(result.authority.kind, 'canonical-creative-thesis');
+  assert.equal(result.authority.governingIdea, 'Make service thresholds the architecture of the experience.');
 });
 
 test('canonical thesis authority fails on governing-idea drift', () => {
   const delib = deliberation();
   const result = reviewCreativeThesisAuthority({
     deliberation: delib,
-    thesis: thesisFrom(delib, { governingIdea: 'A convenient but unrelated idea.' })
+    thesis: thesisFrom(delib, { governingIdea: { statement: 'A convenient but unrelated idea.' } })
   });
   assert.equal(result.pass, false);
   assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-governing-idea-drift'));
+});
+
+test('canonical thesis authority fails on creative-tension drift', () => {
+  const delib = deliberation();
+  const result = reviewCreativeThesisAuthority({
+    deliberation: delib,
+    thesis: thesisFrom(delib, { creativeTension: { label: 'unrelated × tension' } })
+  });
+  assert.equal(result.pass, false);
+  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-tension-drift'));
 });
 
 test('canonical thesis authority cannot be self-approved by deliberation', () => {
