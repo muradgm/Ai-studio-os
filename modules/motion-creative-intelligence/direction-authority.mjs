@@ -86,6 +86,8 @@ export function buildAuthoritativeMotionDirection({
 
   return {
     ...direction,
+    schema: 'ai-studio-os/motion-direction@1',
+    status: 'proven-awaiting-technical-planning',
     authorityInputs: {
       critique,
       hypothesisId: id,
@@ -98,7 +100,10 @@ export function buildAuthoritativeMotionDirection({
       directionBuiltFromCriticAuthoritativeExploration: true,
       exactProvenHypothesisContractRequired: true,
       directionAuthorityRecomputable: true,
+      finalMotionDirectionAuthorityRequired: false,
+      finalMotionDirectionAuthoritySatisfied: true,
       shallowTechnicalPlanningFlagAccepted: false,
+      technicalPlanningAuthorized: true,
       productionApproved: false
     }
   };
