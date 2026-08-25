@@ -119,3 +119,39 @@ test('Creative Thesis deliberation fails closed without a selected hypothesis', 
   assert.ok(output.findings.some((item) => item.code === 'creative-thesis-deliberation-selection-missing'));
   assert.equal(authoredCandidateFromDeliberation(output), null);
 });
+
+test('Creative Thesis deliberation rejects invented truth references', () => {
+  const base = strongDeliberation();
+  const hypotheses = structuredClone(base.hypotheses);
+  hypotheses[0].truthRefs = ['Invented brand heritage'];
+  const output = buildCreativeThesisDeliberation({
+    projectId: base.projectId,
+    businessTruths: base.sourceTruths,
+    opportunityGaps: base.sourceOpportunities,
+    contradictions: base.contradictions,
+    hypotheses,
+    selection: base.selection,
+    synthesis: base.synthesis
+  });
+  assert.equal(output.pass, false);
+  assert.ok(output.findings.some((item) => item.code === 'creative-thesis-hypothesis-truth-ref-invalid'));
+});
+
+test('Creative Thesis synthesis requires traceable source hypotheses', () => {
+  const base = strongDeliberation();
+  const output = buildCreativeThesisDeliberation({
+    projectId: base.projectId,
+    businessTruths: base.sourceTruths,
+    opportunityGaps: base.sourceOpportunities,
+    contradictions: base.contradictions,
+    hypotheses: base.hypotheses,
+    selection: base.selection,
+    synthesis: {
+      statement: 'Untraceable synthesis.',
+      sourceHypothesisIds: ['counter-theatre', 'ghost-hypothesis'],
+      rationale: 'Attempted synthesis.'
+    }
+  });
+  assert.equal(output.pass, false);
+  assert.ok(output.findings.some((item) => item.code === 'creative-thesis-synthesis-source-invalid'));
+});
