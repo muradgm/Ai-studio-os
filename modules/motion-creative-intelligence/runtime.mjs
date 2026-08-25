@@ -63,15 +63,31 @@ function overlap(a, b) {
   return [...left].filter((token) => right.has(token)).length / Math.min(left.size, right.size);
 }
 
+function recomputeWorldAuthority(exploration = {}) {
+  const inputs = exploration.authorityInputs && typeof exploration.authorityInputs === 'object' ? exploration.authorityInputs : {};
+  return reviewMotionCreativeWorldAuthority({
+    projectId: inputs.projectId,
+    creativeWorldExploration: inputs.creativeWorldExploration,
+    creativeWorld: inputs.creativeWorld
+  });
+}
+
 export function reviewMotionCreativeExploration(exploration = {}) {
   const findings = [];
-  const hypotheses = Array.isArray(exploration.hypotheses) ? exploration.hypotheses : [];
+  const hypotheses = (Array.isArray(exploration.hypotheses) ? exploration.hypotheses : []).map(normalizeHypothesis);
   const worldId = text(exploration.creativeWorldId);
+  const worldAuthority = recomputeWorldAuthority(exploration);
 
   if (!worldId) findings.push(finding('blocker', 'motion-creative-world-binding-missing', 'Motion exploration must be bound to a selected Creative World.'));
-  if (exploration.worldAuthority?.pass !== true) {
+  if (worldAuthority.pass !== true) {
     findings.push(finding('blocker', 'motion-creative-world-not-authoritative', 'Motion may interpret only a Creative World that remains canonical when authority is re-reviewed at the Motion boundary.', {
-      authorityFindingCodes: exploration.worldAuthority?.findings?.map((item) => item.code) ?? []
+      authorityFindingCodes: worldAuthority.findings.map((item) => item.code)
+    }));
+  }
+  if (worldAuthority.pass === true && worldAuthority.authority?.creativeWorldId !== worldId) {
+    findings.push(finding('blocker', 'motion-creative-world-authority-drift', 'Motion exploration Creative World identity drifted from recomputed canonical authority.', {
+      explorationWorldId: worldId || null,
+      authorityWorldId: worldAuthority.authority?.creativeWorldId ?? null
     }));
   }
   if (hypotheses.length < 3) findings.push(finding('major', 'motion-creative-divergence-thin', 'Explore at least three materially different motion interpretations before convergence.', { count: hypotheses.length }));
@@ -111,10 +127,14 @@ export function reviewMotionCreativeExploration(exploration = {}) {
     reviewReady: blockers.length === 0 && majors.length === 0,
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-motion-proof',
     findings,
+    worldAuthority,
+    normalizedHypotheses: hypotheses,
     truth: {
       technicalFeasibilityIsNotCreativeApproval: true,
       renderedMotionProofRequired: true,
       canonicalCreativeWorldAuthorityRequired: true,
+      canonicalCreativeWorldAuthorityRecomputed: true,
+      shallowWorldAuthorityFlagsAccepted: false,
       proofPrecedesAuthoritativeHumanMotionSelection: true,
       humanMotionSelectionRequiredAfterCritic: true
     }
@@ -122,19 +142,22 @@ export function reviewMotionCreativeExploration(exploration = {}) {
 }
 
 export function buildMotionCreativeExploration({ projectId, creativeWorldExploration, creativeWorld, hypotheses = [], selection = null } = {}) {
-  const worldAuthority = reviewMotionCreativeWorldAuthority({ projectId, creativeWorldExploration, creativeWorld });
   const authoritativeWorld = creativeWorld ?? creativeWorldExploration?.selectedWorld ?? null;
   const exploration = {
     schema: 'ai-studio-os/motion-creative-exploration@1',
     stage: 'motion-creative-exploration',
     projectId: text(projectId) || null,
     creativeWorldId: text(authoritativeWorld?.id) || null,
+    authorityInputs: {
+      projectId: text(projectId) || null,
+      creativeWorldExploration: creativeWorldExploration ?? null,
+      creativeWorld: authoritativeWorld
+    },
     creativeWorldExplorationRef: creativeWorldExploration ? {
       schema: creativeWorldExploration.schema ?? null,
       selectedWorldId: creativeWorldExploration.selectedWorld?.id ?? null,
       candidateWorldIds: (creativeWorldExploration.worlds ?? []).map((world) => world.id)
     } : null,
-    worldAuthority,
     hypotheses: (Array.isArray(hypotheses) ? hypotheses : []).map(normalizeHypothesis),
     selection: selection && typeof selection === 'object' ? {
       hypothesisId: text(selection.hypothesisId),
@@ -155,6 +178,8 @@ export function buildMotionCreativeExploration({ projectId, creativeWorldExplora
   return {
     ...exploration,
     ...review,
+    hypotheses: review.normalizedHypotheses,
+    worldAuthority: review.worldAuthority,
     truth: {
       ...(exploration.truth ?? {}),
       ...(review.truth ?? {})
@@ -166,7 +191,7 @@ export function selectedMotionDirection(exploration = {}) {
   const review = reviewMotionCreativeExploration(exploration);
   if (!review.reviewReady) return null;
   if (!exploration.selection || exploration.selection.humanConfirmed !== true || !text(exploration.selection.rationale)) return null;
-  const selected = exploration.hypotheses.find((item) => item.id === exploration.selection?.hypothesisId);
+  const selected = review.normalizedHypotheses.find((item) => item.id === exploration.selection?.hypothesisId);
   if (!selected) return null;
   const specialistIntent = normalizeSpecialistIntent(selected.specialistIntent);
   return {
@@ -174,7 +199,7 @@ export function selectedMotionDirection(exploration = {}) {
     status: 'preference-recorded-awaiting-proof-and-critic',
     projectId: exploration.projectId,
     creativeWorldId: exploration.creativeWorldId,
-    creativeWorldAuthority: exploration.worldAuthority?.authority ?? null,
+    creativeWorldAuthority: review.worldAuthority.authority ?? null,
     hypothesisId: selected.id,
     title: selected.title,
     interpretation: selected.interpretation,
