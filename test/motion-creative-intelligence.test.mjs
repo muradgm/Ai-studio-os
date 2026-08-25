@@ -111,17 +111,20 @@ function strong() {
   });
 }
 
-test('motion creative exploration requires canonical Creative World authority, taste, stillness and human selection', () => {
+test('motion creative exploration requires canonical Creative World authority, taste and stillness while a pre-proof preference remains provisional', () => {
   const output = strong();
   assert.equal(output.worldAuthority.pass, true);
   assert.equal(output.reviewReady, true);
   assert.equal(output.truth.canonicalCreativeWorldAuthorityRecomputed, true);
-  const direction = selectedMotionDirection(output);
-  assert.equal(direction.hypothesisId, 'editorial');
-  assert.equal(direction.creativeWorldAuthority.creativeWorldId, 'world-a');
-  assert.equal(direction.truth.renderedMotionProofStillRequired, true);
-  assert.equal(direction.truth.productionApproved, false);
-  assert.equal(direction.truth.spatialTechnologySelected, false);
+  const candidate = selectedMotionDirection(output);
+  assert.equal(candidate.schema, 'ai-studio-os/motion-direction-candidate@1');
+  assert.equal(candidate.hypothesisId, 'editorial');
+  assert.equal(candidate.creativeWorldAuthority.creativeWorldId, 'world-a');
+  assert.equal(candidate.truth.renderedMotionProofStillRequired, true);
+  assert.equal(candidate.truth.motionCriticStillRequired, true);
+  assert.equal(candidate.truth.technicalPlanningAuthorized, false);
+  assert.equal(candidate.truth.productionApproved, false);
+  assert.equal(candidate.truth.spatialTechnologySelected, false);
 });
 
 test('technical motion cannot substitute for creative motion language', () => {
