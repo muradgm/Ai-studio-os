@@ -118,9 +118,7 @@ export function reviewMotionCreativeExploration(exploration = {}) {
 
 export function buildMotionCreativeExploration({ projectId, creativeWorldExploration, creativeWorld, hypotheses = [], selection = null } = {}) {
   const worldAuthority = reviewMotionCreativeWorldAuthority({ projectId, creativeWorldExploration, creativeWorld });
-  const authoritativeWorld = worldAuthority.pass === true
-    ? (creativeWorld ?? creativeWorldExploration?.selectedWorld ?? null)
-    : (creativeWorld ?? creativeWorldExploration?.selectedWorld ?? null);
+  const authoritativeWorld = creativeWorld ?? creativeWorldExploration?.selectedWorld ?? null;
   const exploration = {
     schema: 'ai-studio-os/motion-creative-exploration@1',
     stage: 'motion-creative-exploration',
@@ -148,7 +146,14 @@ export function buildMotionCreativeExploration({ projectId, creativeWorldExplora
     }
   };
   const review = reviewMotionCreativeExploration(exploration);
-  return { ...exploration, ...review };
+  return {
+    ...exploration,
+    ...review,
+    truth: {
+      ...(exploration.truth ?? {}),
+      ...(review.truth ?? {})
+    }
+  };
 }
 
 export function selectedMotionDirection(exploration = {}) {
