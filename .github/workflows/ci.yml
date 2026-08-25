@@ -39,9 +39,12 @@ jobs:
           node --check scripts/finalize-ai-council-visual-system-v1-proof.mjs
           node --check scripts/ai-council-motion-system-v1-proof.mjs
           node --check scripts/ai-council-motion-system-v1-human-review-proof.mjs
+          node --check scripts/motion-creative-intelligence-proof.mjs
           node --check scripts/ai-council-drawing-intelligence-authority-proof.mjs
           node --check modules/motion-system/runtime.mjs
           node --check modules/motion-system/approval.mjs
+          node --check modules/motion-creative-intelligence/runtime.mjs
+          node --check modules/motion-creative-intelligence/proof.mjs
           node --check modules/drawing-intelligence/authority-production-test.mjs
 
       - name: Run v1.3 Creative Engineering benchmark
@@ -176,6 +179,18 @@ jobs:
         with:
           name: ai-council-motion-system-v1-human-review-proof
           path: artifacts/ai-council/motion-system-v1-human-review-proof
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Render Motion Creative Intelligence temporal proof
+        run: npm run proof:motion-creative
+
+      - name: Upload Motion Creative Intelligence temporal evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: motion-creative-intelligence-proof-v1
+          path: artifacts/motion-creative-intelligence/proof-v1
           if-no-files-found: error
           retention-days: 14
 
