@@ -1,3 +1,5 @@
+import { reviewCreativeThesisAuthority } from '../creative-thesis/authority.mjs';
+
 function finding(severity, code, message, evidence = {}) {
   return { severity, code, message, evidence };
 }
@@ -88,12 +90,13 @@ function typographyIsAuthoritative(typography = {}) {
  * exploration/review into production planning.
  *
  * This module deliberately does not generate, rank, select, or mutate creative
- * work. It verifies three separate truths before production can proceed:
- * authority validity, authority provenance, and production-contract completeness.
+ * work. It verifies thesis authority, world authority validity, selection
+ * provenance, and production-contract completeness before production proceeds.
  */
 export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const findings = [];
   const creative = input.creativeRuntime ?? input.creative ?? {};
+  const deliberation = input.creativeThesisDeliberation ?? creative.creativeThesisDeliberation ?? {};
   const thesis = input.creativeThesis ?? creative.creativeThesis ?? {};
   const exploration = input.creativeWorldExploration ?? creative.creativeWorldExploration ?? {};
   const world = input.selectedCreativeWorld ?? creative.selectedCreativeWorld ?? exploration.selectedWorld ?? null;
@@ -107,6 +110,13 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     && thesis.pass === true;
   if (!thesisReady) {
     findings.push(finding('blocker', 'canonical-thesis-not-ready', 'Canonical production requires a passing, review-ready Creative Thesis.'));
+  }
+
+  const thesisAuthorityReview = reviewCreativeThesisAuthority({ deliberation, thesis });
+  if (thesisAuthorityReview.pass !== true) {
+    findings.push(finding('blocker', 'canonical-thesis-authority-invalid', 'Canonical production requires a Creative Thesis whose authority is traceable to reviewed deliberation and explicit human creative approval.', {
+      authorityFindingCodes: thesisAuthorityReview.findings.map((item) => item.code)
+    }));
   }
 
   const authorityValid = selectedWorldIsAuthoritative(world ?? {});
@@ -161,7 +171,7 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     findings.push(finding('blocker', 'canonical-typography-not-approved', 'Production handoff requires a passing human-approved typography system when typography authority is required.'));
   }
 
-  for (const upstream of [creative.findings, exploration.findings, styleFrameProof.findings, direction.findings]) {
+  for (const upstream of [creative.findings, deliberation.findings, thesisAuthorityReview.findings, exploration.findings, styleFrameProof.findings, direction.findings]) {
     if (hasBlocker(upstream)) {
       findings.push(finding('blocker', 'canonical-upstream-blocker-present', 'Production handoff cannot cross an unresolved upstream blocker.'));
       break;
@@ -176,11 +186,14 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     authority: {
       projectId,
       creativeThesisId: thesis.id ?? thesis.projectId ?? null,
+      creativeThesisAuthority: thesisAuthorityReview.authority,
       selectedWorldId,
       creativeDirectionStatement: direction?.directionStatement ?? null,
       typographySystemId: typography?.systemId ?? typography?.id ?? null
     },
     truth: {
+      creativeThesisAuthorityValid: thesisAuthorityReview.pass === true,
+      creativeThesisHumanApproved: thesisAuthorityReview.authority?.humanApproved === true,
       creativeSelectionHumanGoverned: authorityValid,
       creativeSelectionProvenanceValid: provenance.valid,
       creativeWorldProductionContractComplete: completeness.complete,
@@ -204,6 +217,7 @@ export function validateCanonicalCreativeProductionHandoff(output = {}, expected
   for (const code of expected.forbiddenFindingCodes ?? []) {
     if (output.findings?.some((item) => item.code === code)) failures.push(`forbidden finding ${code}`);
   }
+  if (expected.requireThesisAuthority && output.truth?.creativeThesisAuthorityValid !== true) failures.push('creative thesis authority is invalid');
   if (expected.requireProductionContractComplete && output.truth?.creativeWorldProductionContractComplete !== true) failures.push('creative world production contract is incomplete');
   if (expected.requireSelectionProvenance && output.truth?.creativeSelectionProvenanceValid !== true) failures.push('creative world selection provenance is invalid');
   if (expected.requireNoFabricatedProductionApproval && output.truth?.productionApprovalFabricated !== false) failures.push('production approval truth must remain false');
