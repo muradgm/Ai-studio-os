@@ -29,8 +29,11 @@ test('authoritative Motion Direction is reconstructed from the exact Critic expl
   const review = reviewMotionDirectionAuthority(direction);
 
   assert.equal(direction.schema, 'ai-studio-os/motion-direction@1');
+  assert.equal(direction.status, 'proven-awaiting-technical-planning');
   assert.equal(direction.truth.directionBuiltFromCriticAuthoritativeExploration, true);
   assert.equal(direction.truth.directionAuthorityRecomputable, true);
+  assert.equal(direction.truth.finalMotionDirectionAuthoritySatisfied, true);
+  assert.equal(direction.truth.technicalPlanningAuthorized, true);
   assert.equal(review.reviewReady, true);
   assert.equal(review.status, 'authoritative-for-technical-planning');
   assert.equal(review.truth.renderedMotionProofReviewed, true);
@@ -76,7 +79,7 @@ test('the lower-level motion-direction producer also rejects post-Critic explora
   assert.equal(direction, null);
 });
 
-test('raw motion-direction@1 with a true authorization flag is not sufficient for technical planning', () => {
+test('lower-level proven candidate cannot claim final Motion Direction or technical-planning authority', () => {
   const fixture = buildMotionCritiqueFixture();
   const editorial = fixture.brief.hypotheses.find((item) => item.id === 'editorial');
   const rawDirection = buildProvenMotionDirection({
@@ -88,11 +91,15 @@ test('raw motion-direction@1 with a true authorization flag is not sufficient fo
     reviewedEvidenceRefs: editorial.requiredSelectionEvidenceRefs
   });
   assert.ok(rawDirection);
-  assert.equal(rawDirection.truth.technicalPlanningAuthorized, true);
+  assert.equal(rawDirection.schema, 'ai-studio-os/motion-direction-proven-candidate@1');
+  assert.equal(rawDirection.status, 'proven-awaiting-authority-wrap');
+  assert.equal(rawDirection.truth.technicalPlanningAuthorized, false);
+  assert.equal(rawDirection.truth.finalMotionDirectionAuthorityRequired, true);
 
   const review = reviewMotionDirectionAuthority(rawDirection);
   const handoff = buildMotionTechnicalPlanningHandoff({ motionDirection: rawDirection });
   assert.equal(review.reviewReady, false);
+  assert.ok(review.findings.some((item) => item.code === 'motion-direction-schema-invalid'));
   assert.ok(review.findings.some((item) => item.code === 'motion-direction-authority-recompute-failed'));
   assert.equal(handoff.reviewReady, false);
 });
