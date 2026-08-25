@@ -19,6 +19,18 @@ const GENERIC_PATTERNS = [
   /smooth scroll.*premium/i
 ];
 
+function normalizeSpecialistIntent(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    spatialComposition: text(source.spatialComposition),
+    cameraBehavior: text(source.cameraBehavior),
+    physicalBehavior: text(source.physicalBehavior),
+    shaderMaterialBehavior: text(source.shaderMaterialBehavior),
+    spatialNecessity: text(source.spatialNecessity),
+    implementationNotes: list(source.implementationNotes)
+  };
+}
+
 function normalizeHypothesis(candidate = {}, index = 0) {
   const language = candidate.language && typeof candidate.language === 'object' ? candidate.language : {};
   return {
@@ -33,7 +45,8 @@ function normalizeHypothesis(candidate = {}, index = 0) {
     responsiveConsequences: list(candidate.responsiveConsequences),
     antiPatterns: list(candidate.antiPatterns),
     critique: list(candidate.critique),
-    technicalOptions: list(candidate.technicalOptions)
+    technicalOptions: list(candidate.technicalOptions),
+    specialistIntent: normalizeSpecialistIntent(candidate.specialistIntent)
   };
 }
 
@@ -124,6 +137,7 @@ export function selectedMotionDirection(exploration = {}) {
   const review = reviewMotionCreativeExploration(exploration);
   if (!review.reviewReady) return null;
   const selected = exploration.hypotheses.find((item) => item.id === exploration.selection?.hypothesisId);
+  const specialistIntent = normalizeSpecialistIntent(selected.specialistIntent);
   return {
     schema: 'ai-studio-os/motion-direction@1',
     projectId: exploration.projectId,
@@ -138,6 +152,35 @@ export function selectedMotionDirection(exploration = {}) {
     responsiveConsequences: selected.responsiveConsequences,
     antiPatterns: selected.antiPatterns,
     technicalOptions: selected.technicalOptions,
-    truth: { creativeDirectionSelectedByHuman: true, renderedMotionProofStillRequired: true, productionApproved: false }
+    specialistHandoffs: {
+      spatialCreativeIntent: specialistIntent.spatialComposition || specialistIntent.spatialNecessity ? {
+        spatialComposition: specialistIntent.spatialComposition || selected.language.spatialBehavior,
+        spatialNecessity: specialistIntent.spatialNecessity || 'Motion direction requests spatial interpretation only where it strengthens the selected Creative World.',
+        authority: 'creative-intent-only'
+      } : null,
+      cameraCreativeIntent: specialistIntent.cameraBehavior ? {
+        cameraBehavior: specialistIntent.cameraBehavior,
+        authority: 'creative-intent-only'
+      } : null,
+      physicalBehaviorIntent: specialistIntent.physicalBehavior ? {
+        physicalBehavior: specialistIntent.physicalBehavior,
+        authority: 'perceptual-behavior-only'
+      } : null,
+      shaderMaterialIntent: specialistIntent.shaderMaterialBehavior ? {
+        shaderMaterialBehavior: specialistIntent.shaderMaterialBehavior,
+        authority: 'creative-material-intent-only'
+      } : null,
+      implementationNotes: specialistIntent.implementationNotes
+    },
+    truth: {
+      creativeDirectionSelectedByHuman: true,
+      renderedMotionProofStillRequired: true,
+      productionApproved: false,
+      spatialTechnologySelected: false,
+      physicsEngineSelected: false,
+      shaderImplementationSelected: false,
+      blenderPipelineSelected: false,
+      specialistHandoffsAreCreativeIntentOnly: true
+    }
   };
 }
