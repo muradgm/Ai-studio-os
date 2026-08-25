@@ -4,16 +4,78 @@ import {
   buildCanonicalCreativeProductionHandoff,
   validateCanonicalCreativeProductionHandoff
 } from '../modules/canonical-creative-pipeline/runtime.mjs';
+import {
+  authoredCandidateFromDeliberation,
+  buildCreativeThesisDeliberation
+} from '../modules/creative-thesis/intelligence.mjs';
+
+function buildDeliberation() {
+  return buildCreativeThesisDeliberation({
+    projectId: 'project-1',
+    businessTruths: ['Product truth organizes the experience', 'Service behavior is project-specific'],
+    opportunityGaps: ['Turn product truth into the experience structure'],
+    contradictions: ['clarity × character', 'utility × ceremony'],
+    hypotheses: [
+      {
+        id: 'truth-architecture',
+        statement: 'Make the product truth the organizing experience idea.',
+        tension: 'clarity × character',
+        truthRefs: ['Product truth organizes the experience'],
+        opportunityRefs: ['Turn product truth into the experience structure'],
+        crossDomainConnections: ['product truth × editorial architecture'],
+        experientialConsequences: ['Hierarchy and sequence follow product truth.'],
+        commercialConsequences: ['Conversion evidence stays central to the experience.'],
+        antiGenericClaims: ['Reject generic premium styling.'],
+        critique: ['Must remain specific enough that competitors cannot reuse it unchanged.']
+      },
+      {
+        id: 'service-ritual',
+        statement: 'Make service thresholds the rhythm of the experience.',
+        tension: 'utility × ceremony',
+        truthRefs: ['Service behavior is project-specific'],
+        opportunityRefs: ['Turn product truth into the experience structure'],
+        crossDomainConnections: ['service × choreography'],
+        experientialConsequences: ['Interaction follows meaningful service thresholds.'],
+        commercialConsequences: ['Task completion remains part of the concept.'],
+        antiGenericClaims: ['Reject decorative storytelling detached from use.'],
+        critique: ['Could over-theatricalize ordinary actions.']
+      },
+      {
+        id: 'evidence-rhythm',
+        statement: 'Let evidence accumulate through controlled editorial pacing.',
+        tension: 'proof × anticipation',
+        truthRefs: ['Product truth organizes the experience'],
+        opportunityRefs: ['Turn product truth into the experience structure'],
+        crossDomainConnections: ['evidence × editorial sequencing'],
+        experientialConsequences: ['Proof arrives in deliberate stages.'],
+        commercialConsequences: ['Claims remain supported by visible evidence.'],
+        antiGenericClaims: ['Reject empty atmospheric sections.'],
+        critique: ['Could become overly editorial without enough interaction.']
+      }
+    ],
+    selection: {
+      hypothesisId: 'truth-architecture',
+      rationale: 'It most directly converts the project-specific product truth into a durable experience structure.',
+      competitorTransferJudgment: 'A competitor with different product truth cannot reuse it unchanged without losing meaning.',
+      strategicRelevanceJudgment: 'It keeps differentiation tied to actual product evidence.',
+      experientialPotentialJudgment: 'It can govern hierarchy, composition, motion, interaction, image sequencing and responsive behavior.'
+    }
+  });
+}
 
 function fixture() {
+  const deliberation = buildDeliberation();
+  const authored = authoredCandidateFromDeliberation(deliberation);
   const thesis = {
     schema: 'ai-studio-os/creative-thesis@1',
     id: 'thesis-1',
     projectId: 'project-1',
-    statement: 'Make the product truth the organizing experience idea.',
-    governingIdea: { statement: 'Make the product truth the organizing experience idea.' },
+    statement: authored.governingIdea,
+    governingIdea: { statement: authored.governingIdea },
+    creativeTension: { label: authored.creativeTension },
     reviewReady: true,
-    pass: true
+    pass: true,
+    truth: { humanCreativeApproval: true }
   };
   const world = {
     schema: 'ai-studio-os/creative-world@1',
@@ -68,12 +130,13 @@ function fixture() {
     worldContext: { id: 'world-a' },
     findings: []
   };
-  return { thesis, world, exploration, styleFrameProof, direction };
+  return { deliberation, thesis, world, exploration, styleFrameProof, direction };
 }
 
 function handoffInput(parts) {
   return {
     projectId: 'project-1',
+    creativeThesisDeliberation: parts.deliberation,
     creativeThesis: parts.thesis,
     selectedCreativeWorld: parts.world,
     creativeWorldExploration: parts.exploration,
@@ -88,11 +151,31 @@ test('canonical handoff passes only valid, traceable, production-complete creati
   assert.equal(output.pass, true);
   assert.equal(output.status, 'ready-for-production-planning');
   assert.equal(output.authority.selectedWorldId, 'world-a');
+  assert.equal(output.truth.creativeThesisAuthorityValid, true);
+  assert.equal(output.truth.creativeThesisHumanApproved, true);
   assert.equal(output.truth.creativeSelectionHumanGoverned, true);
   assert.equal(output.truth.creativeSelectionProvenanceValid, true);
   assert.equal(output.truth.creativeWorldProductionContractComplete, true);
   assert.equal(output.truth.creativeWorldThesisProjectBindingValid, true);
   assert.equal(output.truth.productionApprovalFabricated, false);
+});
+
+test('arbitrary review-ready thesis without deliberation authority cannot cross production boundary', () => {
+  const parts = fixture();
+  parts.deliberation = null;
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeThesisAuthorityValid, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-thesis-authority-invalid'));
+});
+
+test('thesis without explicit human creative approval cannot cross production boundary', () => {
+  const parts = fixture();
+  parts.thesis.truth.humanCreativeApproval = false;
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeThesisHumanApproved, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-thesis-authority-invalid'));
 });
 
 test('truthful human visual approval does not invalidate otherwise valid style-frame proof', () => {
@@ -179,6 +262,7 @@ test('validator preserves authority completeness expectations', () => {
     pass: true,
     status: 'ready-for-production-planning',
     selectedWorldId: 'world-a',
+    requireThesisAuthority: true,
     requireProductionContractComplete: true,
     requireSelectionProvenance: true,
     requireNoFabricatedProductionApproval: true,
