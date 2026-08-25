@@ -20,6 +20,10 @@ test('motion creative exploration requires the full canonical creative handoff w
   assert.equal(exploration.worldAuthority.pass, true);
   assert.equal(exploration.reviewReady, true);
   assert.equal(exploration.truth.fullCanonicalCreativeHandoffRecomputed, true);
+  assert.equal(exploration.truth.creativeWorldRefsResolved, true);
+  assert.equal(exploration.truth.duplicateHypothesisIdsRejected, true);
+  assert.equal(exploration.truth.technologyCannotBecomeMotionConcept, true);
+  assert.equal(exploration.truth.rejectionRulesRequired, true);
   assert.equal(exploration.worldAuthority.truth.canonicalCreativeProductionHandoffReused, true);
   assert.equal(exploration.worldAuthority.truth.exactRenderedVisualProofRequired, true);
 
@@ -46,7 +50,108 @@ test('technical motion cannot substitute for creative motion language even with 
   assert.equal(output.worldAuthority.pass, true);
   assert.equal(output.reviewReady, false);
   assert.ok(output.findings.some((item) => item.code === 'motion-language-motionThesis-missing'));
+  assert.ok(output.findings.some((item) => item.code === 'motion-technology-became-concept'));
   assert.equal(selectedMotionDirection(output), null);
+});
+
+test('duplicate hypothesis IDs are blockers before proof can make evidence identity ambiguous', () => {
+  const canonical = buildCanonicalMotionAuthorityFixture();
+  const hypotheses = buildMotionHypotheses(canonical.selectedCreativeWorld.id);
+  hypotheses[1].id = hypotheses[0].id;
+
+  const output = buildMotionCreativeExploration({
+    projectId: canonical.projectId,
+    canonicalCreativeAuthority: canonical,
+    hypotheses
+  });
+
+  assert.equal(output.pass, false);
+  assert.equal(output.reviewReady, false);
+  assert.ok(output.findings.some((item) => item.code === 'motion-hypothesis-id-duplicate'));
+});
+
+test('Creative World evidence refs must resolve to supported decisions on the exact selected world', () => {
+  const canonical = buildCanonicalMotionAuthorityFixture();
+  const hypotheses = buildMotionHypotheses(canonical.selectedCreativeWorld.id);
+  hypotheses[0].creativeWorldRefs = [
+    `other-world:motionLanguage`,
+    `${canonical.selectedCreativeWorld.id}:inventedMotionField`
+  ];
+
+  const output = buildMotionCreativeExploration({
+    projectId: canonical.projectId,
+    canonicalCreativeAuthority: canonical,
+    hypotheses
+  });
+
+  assert.equal(output.pass, false);
+  assert.equal(output.reviewReady, false);
+  assert.ok(output.findings.some((item) => item.code === 'motion-world-evidence-ref-invalid'));
+  assert.equal(output.truth.creativeWorldRefsResolved, false);
+});
+
+test('a serious Motion hypothesis must ground itself in more than one selected-world decision', () => {
+  const canonical = buildCanonicalMotionAuthorityFixture();
+  const hypotheses = buildMotionHypotheses(canonical.selectedCreativeWorld.id);
+  hypotheses[0].creativeWorldRefs = [`${canonical.selectedCreativeWorld.id}:motionLanguage`];
+
+  const output = buildMotionCreativeExploration({
+    projectId: canonical.projectId,
+    canonicalCreativeAuthority: canonical,
+    hypotheses
+  });
+
+  assert.equal(output.pass, true);
+  assert.equal(output.reviewReady, false);
+  assert.ok(output.findings.some((item) => item.code === 'motion-world-evidence-thin'));
+});
+
+test('Motion taste must include explicit rejection logic rather than only positive effects', () => {
+  const canonical = buildCanonicalMotionAuthorityFixture();
+  const hypotheses = buildMotionHypotheses(canonical.selectedCreativeWorld.id);
+  hypotheses[0].antiPatterns = ['No perpetual decorative drift.'];
+
+  const output = buildMotionCreativeExploration({
+    projectId: canonical.projectId,
+    canonicalCreativeAuthority: canonical,
+    hypotheses
+  });
+
+  assert.equal(output.pass, true);
+  assert.equal(output.reviewReady, false);
+  assert.ok(output.findings.some((item) => item.code === 'motion-anti-patterns-thin'));
+});
+
+test('implementation technology cannot become the Motion concept or creative justification', () => {
+  const canonical = buildCanonicalMotionAuthorityFixture();
+  const hypotheses = buildMotionHypotheses(canonical.selectedCreativeWorld.id);
+  hypotheses[0].language.motionThesis = 'GSAP and WebGL create the premium motion identity for consequential transitions.';
+
+  const output = buildMotionCreativeExploration({
+    projectId: canonical.projectId,
+    canonicalCreativeAuthority: canonical,
+    hypotheses
+  });
+
+  assert.equal(output.pass, false);
+  assert.equal(output.reviewReady, false);
+  assert.ok(output.findings.some((item) => item.code === 'motion-technology-became-concept'));
+});
+
+test('implementation candidates may remain technicalOptions when the creative motion concept is technology-neutral', () => {
+  const canonical = buildCanonicalMotionAuthorityFixture();
+  const hypotheses = buildMotionHypotheses(canonical.selectedCreativeWorld.id);
+  hypotheses[0].technicalOptions = ['GSAP', 'Three.js', 'WebGL'];
+
+  const output = buildMotionCreativeExploration({
+    projectId: canonical.projectId,
+    canonicalCreativeAuthority: canonical,
+    hypotheses
+  });
+
+  assert.equal(output.pass, true);
+  assert.equal(output.reviewReady, true);
+  assert.ok(!output.findings.some((item) => item.code === 'motion-technology-became-concept'));
 });
 
 test('forged selected/reviewReady flags cannot replace the canonical creative handoff', () => {
