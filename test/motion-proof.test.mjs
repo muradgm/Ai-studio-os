@@ -2,7 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { reviewMotionCreativeExploration, selectedMotionDirection } from '../modules/motion-creative-intelligence/runtime.mjs';
-import { buildMotionProofPlan, buildMotionProofEvidence } from '../modules/motion-creative-intelligence/proof.mjs';
+import {
+  buildMotionProofPlan,
+  buildMotionProofEvidence,
+  reviewMotionProofPlan,
+  reviewMotionProofEvidence
+} from '../modules/motion-creative-intelligence/proof.mjs';
 import {
   buildMotionExplorationFixture,
   buildMotionProofFixture,
@@ -36,6 +41,32 @@ test('motion proof plan covers every hypothesis against every temporal proof mom
   assert.ok(plan.moments.some((moment) => moment.input === 'reduced-motion'));
   assert.equal(plan.studies.length, plan.hypotheses.length * plan.moments.length);
   assert.equal(plan.truth.proofPlanIsNotRenderedEvidence, true);
+  assert.equal(plan.review.truth.explorationAuthorityRecomputed, true);
+  assert.equal(plan.review.truth.cachedExplorationReviewTrusted, false);
+});
+
+test('cached exploration review flags cannot authorize a hand-shaped proof plan', () => {
+  const { plan } = buildMotionProofFixture();
+  const forged = structuredClone(plan);
+  forged.reviewReady = true;
+  forged.explorationReview = { reviewReady: true, status: 'ready-for-motion-proof' };
+  forged.authorityInputs = {};
+
+  const review = reviewMotionProofPlan(forged);
+  assert.equal(review.reviewReady, false);
+  assert.ok(review.findings.some((item) => item.code === 'motion-proof-exploration-not-ready'));
+  assert.equal(review.truth.cachedExplorationReviewTrusted, false);
+});
+
+test('post-exploration mutation of a proof hypothesis is rejected before browser rendering', () => {
+  const { plan } = buildMotionProofFixture();
+  const drifted = structuredClone(plan);
+  drifted.hypotheses[0].motionThesis = 'A replacement thesis that was never authored in the authoritative Motion exploration.';
+
+  const review = reviewMotionProofPlan(drifted);
+  assert.equal(review.reviewReady, false);
+  assert.ok(review.findings.some((item) => item.code === 'motion-proof-hypothesis-contract-drift'));
+  assert.ok(review.findings.some((item) => item.code === 'motion-proof-study-contract-drift'));
 });
 
 test('complete exact browser temporal evidence becomes ready for Motion Critic but selects no winner', () => {
@@ -45,9 +76,24 @@ test('complete exact browser temporal evidence becomes ready for Motion Critic b
   assert.equal(evidence.status, 'ready-for-motion-critic');
   assert.equal(evidence.truth.exactBrowserTemporalEvidence, true);
   assert.equal(evidence.truth.sourceAndTimelineDigestsRequired, true);
+  assert.equal(evidence.truth.proofPlanAuthorityRecomputed, true);
+  assert.equal(evidence.truth.cachedPlanReviewTrusted, false);
   assert.equal(evidence.truth.proofDoesNotSelectWinner, true);
   assert.equal(evidence.truth.humanMotionSelectionConfirmed, false);
   assert.equal(evidence.truth.productionApproved, false);
+});
+
+test('rendered evidence re-reviews the proof plan instead of trusting plan reviewReady', () => {
+  const { evidence } = buildMotionProofFixture();
+  const forged = structuredClone(evidence);
+  forged.plan.reviewReady = true;
+  forged.plan.review = { reviewReady: true };
+  forged.plan.authorityInputs = {};
+
+  const review = reviewMotionProofEvidence(forged);
+  assert.equal(review.reviewReady, false);
+  assert.ok(review.findings.some((item) => item.code === 'motion-proof-plan-not-ready'));
+  assert.equal(review.truth.cachedPlanReviewTrusted, false);
 });
 
 test('proof plan or static-only references cannot masquerade as rendered motion evidence', () => {
