@@ -55,6 +55,19 @@ test('canonical handoff passes only reviewed human-governed creative authority',
   assert.equal(output.truth.productionApprovalFabricated, false);
 });
 
+test('truthful human visual approval does not invalidate otherwise valid style-frame proof', () => {
+  const { thesis, world, styleFrameProof, direction } = fixture();
+  styleFrameProof.truth.humanVisualApproval = true;
+  const output = buildCanonicalCreativeProductionHandoff({
+    creativeThesis: thesis,
+    selectedCreativeWorld: world,
+    styleFrameProof,
+    creativeDirection: direction
+  });
+  assert.equal(output.pass, true);
+  assert.equal(output.truth.styleFrameProofReviewed, true);
+});
+
 test('world candidate cannot cross the production authority boundary', () => {
   const { thesis, world, styleFrameProof, direction } = fixture();
   world.selected = false;
