@@ -4,9 +4,8 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
-import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
-import { buildMotionCreativeExploration } from '../modules/motion-creative-intelligence/runtime.mjs';
 import { buildMotionProofPlan, buildMotionProofEvidence } from '../modules/motion-creative-intelligence/proof.mjs';
+import { buildMotionExplorationFixture } from '../fixtures/motion-creative-authority-fixture.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
@@ -19,181 +18,6 @@ const tempVideoRoot = path.join(outputRoot, '.video-temp');
 const rel = (file) => path.relative(repoRoot, file).split(path.sep).join('/');
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const digest = (value) => crypto.createHash('sha256').update(value).digest('hex');
-
-const creativeThesis = {
-  schema: 'ai-studio-os/creative-thesis@1',
-  projectId: 'motion-creative-intelligence-proof-fixture',
-  status: 'review-ready-proof-fixture',
-  reviewReady: true,
-  governingIdea: { statement: 'Meaningful change should feel earned: stillness carries confidence, while motion reveals consequence, hierarchy and response.' },
-  creativeTension: { label: 'calm authority versus consequential change' },
-  categoryRejections: ['constant decorative animation', 'motion as generic premium styling']
-};
-
-const authoredWorlds = [
-  {
-    id: 'consequential-continuity',
-    label: 'Consequential Continuity',
-    worldIdea: 'A calm continuous field in which important decisions visibly reshape one persistent spatial system.',
-    interpretationOfThesis: 'Stillness dominates until a meaningful state change earns a continuous spatial transition.',
-    signatureBehavior: 'One persistent anchor survives transitions and changes role rather than being replaced by unrelated effects.',
-    worldClass: 'persistent spatial field',
-    narrativeModel: 'continuity through consequence',
-    compositionModel: 'anchored asymmetrical field with one persistent focal object',
-    typographyIntent: { statement: 'Typography remains quiet and stable while spatial consequence carries the transition.' },
-    imageLanguage: 'restrained depth with one persistent focal layer',
-    materialLanguage: 'matte surfaces with selective luminous state changes',
-    motionLanguage: 'continuous interpolation, measured inertia and long-settling consequence',
-    interactionModel: 'direct manipulation with visible continuity between pre- and post-action states',
-    responsiveStrategy: 'preserve the anchor and hierarchy while reducing travel and depth on smaller screens',
-    categoryTransferTest: { whyProjectSpecific: 'The world is tied to an intelligence product where decisions and authority change the working state, not to a generic marketing page.' },
-    antiPatterns: ['ambient motion with no state meaning', 'independent section animations that destroy continuity']
-  },
-  {
-    id: 'editorial-consequence',
-    label: 'Editorial Consequence',
-    worldIdea: 'An editorial decision journal where hierarchy changes through decisive chapter cuts and controlled reveal order.',
-    interpretationOfThesis: 'Stillness holds each chapter; motion appears as a precise editorial cut when the information hierarchy changes.',
-    signatureBehavior: 'State changes arrive as chapter boundaries with disciplined masking and typographic re-ordering.',
-    worldClass: 'editorial decision journal',
-    narrativeModel: 'chaptered argument and resolution',
-    compositionModel: 'modular columns with hard hierarchy shifts',
-    typographyIntent: { statement: 'Typographic scale and sequence carry authority; motion only sharpens chapter transitions.' },
-    imageLanguage: 'flat editorial crops and evidence panels',
-    materialLanguage: 'paper-like fields, rules and clipped windows',
-    motionLanguage: 'short decisive cuts, masks and staggered hierarchy reveals',
-    interactionModel: 'explicit chapter changes and direct state swaps',
-    responsiveStrategy: 'collapse columns into a single reading order while preserving decisive chapter boundaries',
-    categoryTransferTest: { whyProjectSpecific: 'The world maps to comparison, review and decision-making rather than generic editorial branding.' },
-    antiPatterns: ['soft cinematic drift between every section', 'decorative text splitting without hierarchy change']
-  },
-  {
-    id: 'tactile-consequence',
-    label: 'Tactile Consequence',
-    worldIdea: 'A tactile decision surface where interactions have perceptual weight and the interface physically settles after consequence.',
-    interpretationOfThesis: 'Stillness is the resting state; motion communicates resistance, commitment and recovery after direct action.',
-    signatureBehavior: 'Primary actions compress, displace and settle with controlled spring character that reflects consequence.',
-    worldClass: 'tactile decision surface',
-    narrativeModel: 'action, resistance, commitment, settle',
-    compositionModel: 'dense centered surfaces with reactive depth bands',
-    typographyIntent: { statement: 'Typography remains structurally fixed while containers express pressure and release.' },
-    imageLanguage: 'close tactile surfaces and constrained depth cues',
-    materialLanguage: 'soft rigid panels with compressed edges and restrained highlights',
-    motionLanguage: 'weighted response, damping, compression and short recovery arcs',
-    interactionModel: 'press, drag and commit behaviors with perceptual resistance',
-    responsiveStrategy: 'replace wide displacement with compact compression and opacity changes on touch devices',
-    categoryTransferTest: { whyProjectSpecific: 'The physical behavior maps to commitment and approval actions in an intelligence workflow rather than decorative skeuomorphism.' },
-    antiPatterns: ['bouncy spring on every element', 'physics spectacle unrelated to interaction consequence']
-  }
-];
-
-function motionHypotheses(worldId) {
-  return [
-    {
-      id: 'continuity',
-      title: 'Persistent Continuity',
-      interpretation: 'Treat meaningful state changes as transformations of one persistent spatial relationship; the eye should never need to reacquire the primary object.',
-      creativeWorldRefs: [`${worldId}:motionLanguage`, `${worldId}:signatureBehavior`],
-      language: {
-        motionThesis: 'Continuity is the reward for attention: one anchor persists while context reorganizes around it.',
-        signatureMotionBehavior: 'A persistent focal object crosses state boundaries with measured travel and depth interpolation.',
-        temporalRhythm: 'Long still holds followed by one continuous consequential transition and a calm settle.',
-        spatialBehavior: 'The focal object remains spatially legible while surrounding layers reposition around it.',
-        transitionGrammar: 'Transform existing relationships before introducing new elements.',
-        interactionCharacter: 'Deliberate, low-latency response followed by visible inertia only when consequence is significant.',
-        easingLanguage: 'Controlled ease-in-out with restrained settling; no decorative overshoot.',
-        energyCurve: 'Quiet baseline, one sustained rise through consequence, then a long controlled decay.',
-        depthModel: 'Depth is persistent and functional; foreground/background changes explain hierarchy rather than add spectacle.',
-        stillnessPolicy: 'Navigation, labels and secondary evidence remain still until the primary state actually changes.',
-        reducedMotionInterpretation: 'Preserve continuity through opacity, hierarchy and immediate position changes without simulated travel.'
-      },
-      motionMoments: ['Primary object earns movement when a state transition changes its role or authority.'],
-      stillMoments: ['Reading and comparison states remain still while the user evaluates evidence.'],
-      hierarchyConsequences: ['Secondary context waits until the persistent focal object has established the new state.'],
-      responsiveConsequences: ['Mobile reduces travel distance and depth while preserving focal continuity.'],
-      antiPatterns: ['No perpetual drift.', 'No unrelated parallax layers.'],
-      critique: ['Continuity can become slow or self-important if minor changes inherit the same transition weight.'],
-      technicalOptions: [],
-      specialistIntent: {}
-    },
-    {
-      id: 'editorial',
-      title: 'Editorial Rhythm',
-      interpretation: 'Treat motion as punctuation: still compositions hold until hierarchy changes, then decisive cuts, masks and ordered reveals establish a new chapter.',
-      creativeWorldRefs: [`${worldId}:motionLanguage`, `${worldId}:narrativeModel`],
-      language: {
-        motionThesis: 'Motion behaves like editorial punctuation, not continuous ambience.',
-        signatureMotionBehavior: 'A chapter cut changes hierarchy through clipping, replacement and a short ordered reveal.',
-        temporalRhythm: 'Long static reading beats interrupted by brief decisive transitions.',
-        spatialBehavior: 'Elements mostly hold their positions; hierarchy changes through masking, scale steps and replacement.',
-        transitionGrammar: 'Cut, mask, reveal, hold.',
-        interactionCharacter: 'Immediate and precise with minimal inertial tail.',
-        easingLanguage: 'Fast asymmetric easing with crisp completion and no bounce.',
-        energyCurve: 'Flat reading plateau, sharp pulse at chapter change, immediate return to stillness.',
-        depthModel: 'Mostly planar; depth is reserved for modal or evidence-priority changes.',
-        stillnessPolicy: 'The interface remains motionless during reading, scanning and decision comparison.',
-        reducedMotionInterpretation: 'Use instantaneous chapter replacement plus contrast and focus changes; preserve reveal order without travel.'
-      },
-      motionMoments: ['Motion appears only when the information chapter or decision hierarchy changes.'],
-      stillMoments: ['All ordinary reading and navigation states remain static.'],
-      hierarchyConsequences: ['Primary information appears first; supporting detail follows only after the chapter boundary is clear.'],
-      responsiveConsequences: ['Mobile turns multi-column cuts into ordered vertical replacement with shorter timing.'],
-      antiPatterns: ['No soft cinematic transition between every section.', 'No decorative text splitting.'],
-      critique: ['Editorial cuts can feel cold or abrupt if overused for low-consequence interactions.'],
-      technicalOptions: [],
-      specialistIntent: {}
-    },
-    {
-      id: 'tactile',
-      title: 'Tactile Materiality',
-      interpretation: 'Treat direct interaction as pressure on a material system: meaningful actions compress, resist, release and settle so consequence has perceptual weight.',
-      creativeWorldRefs: [`${worldId}:motionLanguage`, `${worldId}:interactionModel`],
-      language: {
-        motionThesis: 'Physical response communicates commitment: the interface should feel resistant enough to make consequential action legible.',
-        signatureMotionBehavior: 'A focused surface compresses under input, displaces supporting layers and settles with controlled damping.',
-        temporalRhythm: 'Short anticipation, immediate pressure response, brief release and finite settle.',
-        spatialBehavior: 'Local deformation and depth shifts stay attached to the interacted surface rather than moving the whole page.',
-        transitionGrammar: 'Press, commit, release, settle.',
-        interactionCharacter: 'Responsive and weighted, with stronger resistance reserved for higher-consequence actions.',
-        easingLanguage: 'Critically damped spring character with tightly limited overshoot.',
-        energyCurve: 'Fast input spike, constrained rebound, quick dissipation.',
-        depthModel: 'Local layered depth communicates pressure; the global composition stays stable.',
-        stillnessPolicy: 'Unengaged surfaces remain completely still; tactile response exists only around direct action or state commitment.',
-        reducedMotionInterpretation: 'Replace compression and displacement with immediate contrast, border and opacity state changes.'
-      },
-      motionMoments: ['Direct commitment actions earn tactile compression and settling.'],
-      stillMoments: ['Unfocused surfaces and background composition remain fixed.'],
-      hierarchyConsequences: ['Only the acted-on surface and its immediate consequence move; background context stays stable.'],
-      responsiveConsequences: ['Touch uses compact compression and shorter settle distances instead of pointer-scale displacement.'],
-      antiPatterns: ['No bouncy response on passive content.', 'No whole-page physics simulation.'],
-      critique: ['Tactile behavior can become toy-like if spring energy exceeds the seriousness of the action.'],
-      technicalOptions: [],
-      specialistIntent: {}
-    }
-  ];
-}
-
-function buildCanonicalFixture() {
-  const exploration = buildCreativeWorldExploration({ creativeThesis, authoredWorlds });
-  if (!exploration.reviewReady) throw new Error(`Creative World fixture is not review-ready: ${exploration.findings.map((item) => item.code).join(', ')}`);
-  const selected = selectCreativeWorld(exploration, {
-    worldId: 'consequential-continuity',
-    humanConfirmed: true,
-    visualReviewConfirmed: true,
-    visualEvidenceRefs: ['fixture://motion-creative/world-comparison-01', 'fixture://motion-creative/world-comparison-02'],
-    rationale: 'Proof fixture selects the continuity world solely to exercise downstream Motion authority and browser evidence.'
-  });
-  if (!selected.selectedWorld) throw new Error(`Creative World fixture selection failed: ${selected.findings.map((item) => item.code).join(', ')}`);
-  const motionExploration = buildMotionCreativeExploration({
-    projectId: creativeThesis.projectId,
-    creativeWorldExploration: selected,
-    creativeWorld: selected.selectedWorld,
-    hypotheses: motionHypotheses(selected.selectedWorld.id),
-    selection: null
-  });
-  if (!motionExploration.reviewReady) throw new Error(`Motion Creative exploration is not proof-ready: ${motionExploration.findings.map((item) => item.code).join(', ')}`);
-  return { selected, motionExploration };
-}
 
 function studyHtml(study) {
   const reduced = study.input === 'reduced-motion';
@@ -240,6 +64,7 @@ async function recordStudy(browser, study, sourcePath, videoPath, endFramePath, 
   if (study.input === 'touch') await page.tap('[data-interaction-target]');
   await page.waitForFunction(() => window.__motionCreativeProof?.done === true, null, { timeout: 15_000 });
   const state = await page.evaluate(() => structuredClone(window.__motionCreativeProof));
+  const renderedUrl = page.url();
   await page.screenshot({ path: endFramePath });
   const video = page.video();
   await page.close();
@@ -275,7 +100,7 @@ async function recordStudy(browser, study, sourcePath, videoPath, endFramePath, 
     durationMs: Math.max(1, Math.round(timeline.durationMs)),
     frameCount: Math.max(2, timeline.animationFrameCount),
     browserRendered: true,
-    exactSourceRendered: page.url() === sourceUrl || state.sourceStudyId === study.id,
+    exactSourceRendered: renderedUrl === sourceUrl && state.sourceStudyId === study.id,
     sourceSha256: digest(sourceText),
     timelineSha256: digest(JSON.stringify(timeline))
   };
@@ -288,7 +113,8 @@ function comparisonBoard(plan, renderedStudies) {
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;background:#0f1210;color:#edf1ed;font-family:Arial,sans-serif;padding:40px}h1{font:400 48px/1 Georgia,serif}h2{margin:0 0 8px;font-size:22px}p{color:#9ca89f;max-width:70ch}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:18px 0 44px}article{border:1px solid #303a33;background:#171c18;padding:12px}.k,.refs{font:600 9px/1.4 monospace;color:#849087;word-break:break-all}.k{text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}video{width:100%;aspect-ratio:16/10;background:#0b0d0b;object-fit:cover;margin-bottom:8px}</style></head><body><h1>Motion Creative Intelligence · Temporal Proof V1</h1><p>Side-by-side CI evidence for competing motion hypotheses. This board supports critique; it does not select or approve a winner.</p>${sections}</body></html>`;
 }
 
-const { selected, motionExploration } = buildCanonicalFixture();
+const { canonical, exploration: motionExploration } = buildMotionExplorationFixture();
+if (!motionExploration.reviewReady) throw new Error(`Motion Creative exploration is not proof-ready: ${motionExploration.findings.map((item) => item.code).join(', ')}`);
 const plan = buildMotionProofPlan({ exploration: motionExploration });
 if (!plan.reviewReady) throw new Error(`Motion proof plan is not browser-ready: ${plan.findings.map((item) => item.code).join(', ')}`);
 
@@ -320,14 +146,18 @@ const manifest = {
   fixture: {
     mode: 'ci-proof-fixture',
     productionAuthority: false,
-    canonicalCreativeWorldExplorationSchema: selected.schema,
-    selectedCreativeWorldId: selected.selectedWorld?.id ?? null,
-    canonicalHumanWorldSelectionConfirmed: selected.truth?.humanWorldSelectionConfirmed === true,
+    canonicalCreativeHandoffSchema: motionExploration.worldAuthority?.canonicalHandoff?.schema ?? null,
+    canonicalCreativeHandoffPassed: motionExploration.worldAuthority?.canonicalHandoff?.pass === true,
+    creativeThesisAuthorityValid: motionExploration.worldAuthority?.canonicalHandoff?.truth?.creativeThesisAuthorityValid === true,
+    renderedVisualProofEvidenceValid: motionExploration.worldAuthority?.canonicalHandoff?.truth?.renderedVisualProofEvidenceValid === true,
+    canonicalCreativeWorldExplorationSchema: canonical.creativeWorldExploration?.schema ?? null,
+    selectedCreativeWorldId: canonical.selectedCreativeWorld?.id ?? null,
+    canonicalHumanWorldSelectionConfirmed: canonical.creativeWorldExploration?.truth?.humanWorldSelectionConfirmed === true,
     motionHypothesisSelectionConfirmed: false
   },
   truth: {
     ...evidence.truth,
-    canonicalCreativeWorldAuthorityExercisedByFixture: true,
+    fullCanonicalCreativeAuthorityExercisedByFixture: true,
     actualPlaywrightTemporalArtifactsProduced: true,
     motionCriticStillRequired: true,
     humanMotionSelectionConfirmed: false,
