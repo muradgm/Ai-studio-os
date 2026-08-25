@@ -10,6 +10,22 @@ const REQUIRED_LANGUAGE = [
   'depthModel', 'stillnessPolicy', 'reducedMotionInterpretation'
 ];
 
+const MOTION_WORLD_REF_PATHS = new Set([
+  'worldIdea',
+  'signatureBehavior',
+  'narrativeModel',
+  'compositionModel',
+  'imageLanguage',
+  'materialLanguage',
+  'motionLanguage',
+  'interactionModel',
+  'responsiveStrategy',
+  'typographyIntent.statement',
+  'categoryTransferTest.whyProjectSpecific'
+]);
+
+const TECHNOLOGY_TERMS = /\b(three\.?js|webgl|webgpu|gsap|scrolltrigger|rive|blender|houdini|lottie|waapi|web animations api|css animation|shader implementation|physics engine)\b/i;
+
 const GENERIC_PATTERNS = [
   /fade[- ]?up every/i,
   /parallax everywhere/i,
@@ -88,11 +104,52 @@ function recomputeWorldAuthority(exploration = {}) {
   });
 }
 
+function selectedCreativeWorldFromAuthority(exploration = {}) {
+  const canonical = exploration?.authorityInputs?.canonicalCreativeAuthority ?? {};
+  return canonical.selectedCreativeWorld ?? canonical.creativeWorldExploration?.selectedWorld ?? null;
+}
+
+function valueAtPath(object, path) {
+  return path.split('.').reduce((value, key) => value && typeof value === 'object' ? value[key] : undefined, object);
+}
+
+function reviewCreativeWorldRefs(refs = [], world = null) {
+  const worldId = text(world?.id);
+  const validRefs = [];
+  const invalidRefs = [];
+  for (const ref of refs) {
+    const separator = ref.indexOf(':');
+    const refWorldId = separator > 0 ? ref.slice(0, separator) : '';
+    const path = separator > 0 ? ref.slice(separator + 1) : '';
+    const supportedPath = MOTION_WORLD_REF_PATHS.has(path);
+    const value = supportedPath ? valueAtPath(world, path) : null;
+    const resolves = Boolean(worldId)
+      && refWorldId === worldId
+      && supportedPath
+      && (typeof value === 'string' ? Boolean(text(value)) : value != null);
+    if (resolves) validRefs.push(ref);
+    else invalidRefs.push(ref);
+  }
+  return { validRefs, invalidRefs };
+}
+
+function conceptualMotionText(hypothesis = {}) {
+  return [
+    hypothesis.interpretation,
+    ...REQUIRED_LANGUAGE.map((key) => hypothesis.language?.[key]),
+    ...(hypothesis.motionMoments ?? []),
+    ...(hypothesis.stillMoments ?? []),
+    ...(hypothesis.hierarchyConsequences ?? []),
+    ...(hypothesis.responsiveConsequences ?? [])
+  ].map(text).filter(Boolean).join(' ');
+}
+
 export function reviewMotionCreativeExploration(exploration = {}) {
   const findings = [];
   const hypotheses = (Array.isArray(exploration.hypotheses) ? exploration.hypotheses : []).map(normalizeHypothesis);
   const worldId = text(exploration.creativeWorldId);
   const worldAuthority = recomputeWorldAuthority(exploration);
+  const selectedWorld = selectedCreativeWorldFromAuthority(exploration);
 
   if (!worldId) findings.push(finding('blocker', 'motion-creative-world-binding-missing', 'Motion exploration must be bound to a selected Creative World.'));
   if (worldAuthority.pass !== true) {
@@ -108,19 +165,29 @@ export function reviewMotionCreativeExploration(exploration = {}) {
     }));
   }
   if (hypotheses.length < 3) findings.push(finding('major', 'motion-creative-divergence-thin', 'Explore at least three materially different motion interpretations before convergence.', { count: hypotheses.length }));
+  const hypothesisIds = hypotheses.map((item) => item.id);
+  if (new Set(hypothesisIds).size !== hypothesisIds.length) findings.push(finding('blocker', 'motion-hypothesis-id-duplicate', 'Motion hypotheses require unique IDs so proof, Critic evidence and human selection cannot become ambiguous.', { hypothesisIds }));
 
   hypotheses.forEach((hypothesis, index) => {
     if (!hypothesis.interpretation) findings.push(finding('major', 'motion-interpretation-missing', 'Each motion hypothesis needs a creative interpretation, not only implementation notes.', { hypothesisId: hypothesis.id }));
-    if (!hypothesis.creativeWorldRefs.length) findings.push(finding('major', 'motion-world-evidence-missing', 'Each motion hypothesis must cite Creative World decisions it interprets.', { hypothesisId: hypothesis.id }));
+    if (!hypothesis.creativeWorldRefs.length) {
+      findings.push(finding('major', 'motion-world-evidence-missing', 'Each motion hypothesis must cite Creative World decisions it interprets.', { hypothesisId: hypothesis.id }));
+    } else {
+      const refReview = reviewCreativeWorldRefs(hypothesis.creativeWorldRefs, selectedWorld);
+      if (refReview.invalidRefs.length) findings.push(finding('blocker', 'motion-world-evidence-ref-invalid', 'Motion hypothesis Creative World references must resolve to supported decisions on the exact selected Creative World.', { hypothesisId: hypothesis.id, invalidRefs: refReview.invalidRefs, creativeWorldId: worldId || null }));
+      if (refReview.validRefs.length < 2) findings.push(finding('major', 'motion-world-evidence-thin', 'A serious motion hypothesis should ground itself in at least two distinct selected Creative World decisions.', { hypothesisId: hypothesis.id, validRefs: refReview.validRefs }));
+    }
     for (const key of REQUIRED_LANGUAGE) {
       if (!hypothesis.language[key]) findings.push(finding('major', `motion-language-${key}-missing`, `Motion hypothesis is missing ${key}.`, { hypothesisId: hypothesis.id }));
     }
     if (!hypothesis.motionMoments.length || !hypothesis.stillMoments.length) findings.push(finding('major', 'motion-stillness-balance-unproven', 'Each hypothesis must say both what earns movement and what deliberately remains still.', { hypothesisId: hypothesis.id }));
     if (!hypothesis.hierarchyConsequences.length) findings.push(finding('major', 'motion-hierarchy-unproven', 'Motion must state how it supports information hierarchy.', { hypothesisId: hypothesis.id }));
     if (!hypothesis.responsiveConsequences.length) findings.push(finding('major', 'motion-responsive-interpretation-missing', 'Motion must reinterpret across viewport/input constraints rather than merely scale down.', { hypothesisId: hypothesis.id }));
+    if (hypothesis.antiPatterns.length < 2) findings.push(finding('major', 'motion-anti-patterns-thin', 'Each motion hypothesis needs at least two explicit rejection rules so taste includes what the system refuses to animate.', { hypothesisId: hypothesis.id, count: hypothesis.antiPatterns.length }));
     if (!hypothesis.critique.length) findings.push(finding('major', 'motion-hypothesis-uncriticized', 'Each hypothesis requires adversarial creative critique.', { hypothesisId: hypothesis.id }));
-    const genericText = `${hypothesis.interpretation} ${Object.values(hypothesis.language).join(' ')} ${hypothesis.motionMoments.join(' ')}`;
-    if (GENERIC_PATTERNS.some((pattern) => pattern.test(genericText))) findings.push(finding('major', 'motion-generic-premium-pattern', 'Motion hypothesis relies on a generic premium-web pattern without project-specific justification.', { hypothesisId: hypothesis.id }));
+    const creativeText = conceptualMotionText(hypothesis);
+    if (TECHNOLOGY_TERMS.test(creativeText)) findings.push(finding('blocker', 'motion-technology-became-concept', 'Motion creative language may describe behavior and perceptual character, but implementation technology cannot become the concept or creative justification.', { hypothesisId: hypothesis.id }));
+    if (GENERIC_PATTERNS.some((pattern) => pattern.test(creativeText))) findings.push(finding('major', 'motion-generic-premium-pattern', 'Motion hypothesis relies on a generic premium-web pattern without project-specific justification.', { hypothesisId: hypothesis.id }));
     for (let j = index + 1; j < hypotheses.length; j += 1) {
       const score = overlap(hypothesis, hypotheses[j]);
       if (score > 0.72) findings.push(finding('major', 'motion-hypotheses-too-similar', 'Motion hypotheses are variants rather than genuinely different interpretations.', { left: hypothesis.id, right: hypotheses[j].id, overlap: score }));
@@ -151,6 +218,10 @@ export function reviewMotionCreativeExploration(exploration = {}) {
       renderedMotionProofRequired: true,
       canonicalCreativeWorldAuthorityRequired: true,
       fullCanonicalCreativeHandoffRecomputed: true,
+      creativeWorldRefsResolved: blockers.every((item) => item.code !== 'motion-world-evidence-ref-invalid'),
+      duplicateHypothesisIdsRejected: true,
+      technologyCannotBecomeMotionConcept: true,
+      rejectionRulesRequired: true,
       shallowWorldAuthorityFlagsAccepted: false,
       proofPrecedesAuthoritativeHumanMotionSelection: true,
       humanMotionSelectionRequiredAfterCritic: true
@@ -253,3 +324,5 @@ export function selectedMotionDirection(exploration = {}) {
     }
   };
 }
+
+export { MOTION_WORLD_REF_PATHS as motionCreativeWorldRefPaths };
