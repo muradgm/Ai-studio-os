@@ -8,6 +8,14 @@ function finding(severity, code, message, evidence = {}) {
   return { severity, code, message, evidence };
 }
 
+function thesisGoverningIdea(thesis = {}) {
+  return clean(thesis?.governingIdea?.statement ?? thesis?.governingIdea);
+}
+
+function thesisCreativeTension(thesis = {}) {
+  return clean(thesis?.creativeTension?.label ?? thesis?.creativeTension);
+}
+
 export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
   const findings = [];
 
@@ -20,24 +28,26 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
   if (thesis?.schema !== 'ai-studio-os/creative-thesis@1') {
     findings.push(finding('blocker', 'creative-thesis-authority-thesis-schema-invalid', 'Canonical Creative Thesis authority requires creative-thesis@1.'));
   }
-  if (thesis?.reviewReady !== true) {
-    findings.push(finding('blocker', 'creative-thesis-authority-thesis-not-ready', 'Canonical Creative Thesis authority requires a review-ready thesis.'));
+  if (thesis?.reviewReady !== true || thesis?.pass !== true) {
+    findings.push(finding('blocker', 'creative-thesis-authority-thesis-not-ready', 'Canonical Creative Thesis authority requires a passing, review-ready thesis.'));
   }
 
   const candidate = authoredCandidateFromDeliberation(deliberation);
   if (!candidate) {
     findings.push(finding('blocker', 'creative-thesis-authority-candidate-unavailable', 'The deliberation must produce a traceable authored thesis candidate.'));
   } else {
-    if (clean(thesis?.governingIdea) !== clean(candidate.governingIdea)) {
+    const actualIdea = thesisGoverningIdea(thesis);
+    const actualTension = thesisCreativeTension(thesis);
+    if (actualIdea !== clean(candidate.governingIdea)) {
       findings.push(finding('blocker', 'creative-thesis-authority-governing-idea-drift', 'The authoritative thesis governing idea does not match the deliberation-authored candidate.', {
         expected: candidate.governingIdea,
-        actual: thesis?.governingIdea ?? null
+        actual: actualIdea || null
       }));
     }
-    if (clean(thesis?.creativeTension) !== clean(candidate.creativeTension)) {
+    if (actualTension !== clean(candidate.creativeTension)) {
       findings.push(finding('blocker', 'creative-thesis-authority-tension-drift', 'The authoritative thesis creative tension does not match the deliberation-authored candidate.', {
         expected: candidate.creativeTension,
-        actual: thesis?.creativeTension ?? null
+        actual: actualTension || null
       }));
     }
   }
@@ -66,8 +76,8 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
     authority: blockers.length ? null : {
       kind: 'canonical-creative-thesis',
       projectId: thesis.projectId ?? deliberation.projectId ?? null,
-      governingIdea: thesis.governingIdea,
-      creativeTension: thesis.creativeTension,
+      governingIdea: thesisGoverningIdea(thesis),
+      creativeTension: thesisCreativeTension(thesis),
       deliberationSchema: deliberation.schema,
       thesisSchema: thesis.schema,
       humanApproved: true
