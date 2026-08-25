@@ -53,7 +53,6 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
 
   const selectedWorldId = world?.id ?? null;
   const proofCoversWorld = styleFrameProof?.reviewReady === true
-    && styleFrameProof?.truth?.humanVisualApproval !== true
     && (styleFrameProof?.frames ?? []).some((frame) => frame.worldId === selectedWorldId);
   if (!proofCoversWorld) {
     findings.push(finding('blocker', 'canonical-style-frame-proof-missing', 'Selected Creative World must be covered by review-ready rendered style-frame proof before production handoff.', {
@@ -99,7 +98,7 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     },
     truth: {
       creativeSelectionHumanGoverned: selectedWorldIsAuthoritative(world ?? {}),
-      styleFrameProofReviewed: world?.truth?.visualWorldProofReviewed === true,
+      styleFrameProofReviewed: proofCoversWorld && world?.truth?.visualWorldProofReviewed === true,
       typographyHumanApproved: typography ? typographyIsAuthoritative(typography) : null,
       productionApprovalFabricated: false
     },
