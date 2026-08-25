@@ -85,8 +85,17 @@ async function recordStudy(browser, study, sourcePath, videoPath, endFramePath, 
     animationFrameCount: state.frameCount,
     runningAnimationsAtCompletion: state.runningAnimations
   };
-  await fs.writeFile(timelinePath, JSON.stringify(timeline, null, 2));
-  const sourceText = await fs.readFile(sourcePath, 'utf8');
+  const timelineText = JSON.stringify(timeline, null, 2);
+  await fs.writeFile(timelinePath, timelineText);
+  const [sourceText, emittedTimelineText, videoStat, captureStat] = await Promise.all([
+    fs.readFile(sourcePath, 'utf8'),
+    fs.readFile(timelinePath, 'utf8'),
+    fs.stat(videoPath),
+    fs.stat(endFramePath)
+  ]);
+  if (!videoStat.isFile() || videoStat.size <= 0 || !captureStat.isFile() || captureStat.size <= 0) {
+    throw new Error(`Motion proof capture files are missing or empty for ${study.id}`);
+  }
   return {
     studyId: study.id,
     hypothesisId: study.hypothesisId,
@@ -102,7 +111,7 @@ async function recordStudy(browser, study, sourcePath, videoPath, endFramePath, 
     browserRendered: true,
     exactSourceRendered: renderedUrl === sourceUrl && state.sourceStudyId === study.id,
     sourceSha256: digest(sourceText),
-    timelineSha256: digest(JSON.stringify(timeline))
+    timelineSha256: digest(emittedTimelineText)
   };
 }
 
