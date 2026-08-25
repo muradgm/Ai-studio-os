@@ -97,13 +97,15 @@ function proofReadyExploration(selection = null) {
 }
 
 function renderedFromPlan(plan) {
-  return plan.studies.map((study) => ({
+  return plan.studies.map((study, index) => ({
     studyId: study.id,
     hypothesisId: study.hypothesisId,
     momentId: study.momentId,
     videoRef: `artifact://motion/${study.id}.webm`,
     sourceRef: `source://motion/${study.id}.mjs`,
     timelineRef: `trace://motion/${study.id}.json`,
+    sourceSha256: String(index + 1).padStart(64, 'a').slice(-64),
+    timelineSha256: String(index + 1).padStart(64, 'b').slice(-64),
     viewport: study.viewport,
     input: study.input,
     durationMs: 1600,
@@ -142,6 +144,7 @@ test('complete exact browser temporal evidence becomes ready for Motion Critic b
   assert.equal(evidence.reviewReady, true);
   assert.equal(evidence.status, 'ready-for-motion-critic');
   assert.equal(evidence.truth.exactBrowserTemporalEvidence, true);
+  assert.equal(evidence.truth.sourceAndTimelineDigestsRequired, true);
   assert.equal(evidence.truth.proofDoesNotSelectWinner, true);
   assert.equal(evidence.truth.humanMotionSelectionConfirmed, false);
   assert.equal(evidence.truth.productionApproved, false);
@@ -161,6 +164,15 @@ test('proof plan or static-only references cannot masquerade as rendered motion 
   assert.equal(evidence.reviewReady, false);
   assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-temporal-capture-missing'));
   assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-temporal-metrics-invalid'));
+});
+
+test('source and timeline provenance must carry valid SHA-256 digests', () => {
+  const plan = buildMotionProofPlan({ exploration: proofReadyExploration() });
+  const rendered = renderedFromPlan(plan);
+  rendered[0].sourceSha256 = 'claimed';
+  const evidence = buildMotionProofEvidence({ plan, renderedStudies: rendered, comparisonRefs: ['artifact://motion/compare.html'] });
+  assert.equal(evidence.reviewReady, false);
+  assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-provenance-digest-missing'));
 });
 
 test('one missing hypothesis/moment render keeps the proof blocked', () => {
