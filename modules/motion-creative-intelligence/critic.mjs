@@ -25,6 +25,18 @@ function sameIds(left = [], right = []) {
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
+function canonicalValue(value) {
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalValue(value[key])]));
+  }
+  return value;
+}
+
+function sameContract(left, right) {
+  return JSON.stringify(canonicalValue(left)) === JSON.stringify(canonicalValue(right));
+}
+
 function uniqueRefsForStudies(studies = []) {
   return list(studies.flatMap((study) => [study.videoRef, study.captureRef, study.sourceRef, study.timelineRef]));
 }
@@ -224,11 +236,14 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
   const criticReview = reviewMotionCritique(critique ?? {});
   if (!criticReview.reviewReady) return null;
   const authoritativeBrief = criticReview.authoritativeBrief;
+  const authoritativeExploration = authoritativeBrief?.authorityInputs?.exploration ?? null;
+  if (!authoritativeExploration || !sameContract(exploration, authoritativeExploration)) return null;
+
   const id = text(hypothesisId);
-  const selectedHypothesis = (exploration?.hypotheses ?? []).find((item) => item.id === id);
+  const selectedHypothesis = (authoritativeExploration?.hypotheses ?? []).find((item) => item.id === id);
   if (!selectedHypothesis || humanConfirmed !== true || !text(rationale)) return null;
-  if (critique?.projectId !== exploration?.projectId || critique?.creativeWorldId !== exploration?.creativeWorldId) return null;
-  if (authoritativeBrief.projectId !== exploration?.projectId || authoritativeBrief.creativeWorldId !== exploration?.creativeWorldId) return null;
+  if (critique?.projectId !== authoritativeExploration?.projectId || critique?.creativeWorldId !== authoritativeExploration?.creativeWorldId) return null;
+  if (authoritativeBrief.projectId !== authoritativeExploration?.projectId || authoritativeBrief.creativeWorldId !== authoritativeExploration?.creativeWorldId) return null;
 
   const criticHypothesis = authoritativeBrief.hypotheses.find((item) => item.id === id);
   if (!criticHypothesis) return null;
@@ -238,7 +253,7 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
   if (!requiredRefs.length || requiredRefs.some((ref) => !reviewedRefs.includes(ref)) || reviewedRefs.some((ref) => !allowedRefs.has(ref))) return null;
 
   const candidate = selectedMotionDirection({
-    ...exploration,
+    ...authoritativeExploration,
     selection: { hypothesisId: id, humanConfirmed: true, rationale: text(rationale) }
   });
   if (!candidate) return null;
