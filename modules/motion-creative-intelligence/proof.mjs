@@ -4,6 +4,7 @@ function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function list(value) { return [...new Set((Array.isArray(value) ? value : []).map(text).filter(Boolean))]; }
 function finding(severity, code, message, evidence = {}) { return { severity, code, message, evidence }; }
 
+const SHA256 = /^[a-f0-9]{64}$/i;
 const DEFAULT_MOMENTS = [
   { id: 'entry', label: 'Entry / first contact', purpose: 'Prove opening rhythm, attention hierarchy and stillness before the first earned movement.', viewport: 'desktop', input: 'passive' },
   { id: 'primary-reveal', label: 'Primary reveal', purpose: 'Prove the signature motion behavior at a meaningful hierarchy change.', viewport: 'desktop', input: 'passive' },
@@ -120,6 +121,8 @@ function normalizeRenderedStudy(study = {}) {
     captureRef: text(study.captureRef),
     sourceRef: text(study.sourceRef),
     timelineRef: text(study.timelineRef),
+    sourceSha256: text(study.sourceSha256).toLowerCase(),
+    timelineSha256: text(study.timelineSha256).toLowerCase(),
     viewport: text(study.viewport),
     input: text(study.input),
     durationMs: Number.isFinite(study.durationMs) ? study.durationMs : null,
@@ -148,6 +151,7 @@ export function reviewMotionProofEvidence(evidence = {}) {
     if (rendered.viewport !== planned.viewport || rendered.input !== planned.input) findings.push(finding('blocker', 'motion-proof-render-context-drift', 'Rendered study viewport/input context does not match the proof plan.', { studyId: planned.id }));
     if (!rendered.videoRef && !rendered.captureRef) findings.push(finding('blocker', 'motion-proof-temporal-capture-missing', 'Motion proof needs a temporal capture reference; a static specification is not evidence.', { studyId: planned.id }));
     if (!rendered.sourceRef || !rendered.timelineRef) findings.push(finding('blocker', 'motion-proof-source-or-timeline-missing', 'Rendered motion proof requires exact source and timeline/timing provenance.', { studyId: planned.id }));
+    if (!SHA256.test(rendered.sourceSha256) || !SHA256.test(rendered.timelineSha256)) findings.push(finding('blocker', 'motion-proof-provenance-digest-missing', 'Rendered motion proof must bind exact source and browser timeline content with SHA-256 digests.', { studyId: planned.id }));
     if (rendered.browserRendered !== true || rendered.exactSourceRendered !== true) findings.push(finding('blocker', 'motion-proof-browser-integrity-unproven', 'Motion proof must state that a browser rendered the exact referenced source.', { studyId: planned.id }));
     if (!(rendered.durationMs > 0) || !(rendered.frameCount > 1)) findings.push(finding('blocker', 'motion-proof-temporal-metrics-invalid', 'Temporal evidence needs positive duration and multiple rendered frames.', { studyId: planned.id, durationMs: rendered.durationMs, frameCount: rendered.frameCount }));
   }
@@ -164,6 +168,7 @@ export function reviewMotionProofEvidence(evidence = {}) {
     findings,
     truth: {
       exactBrowserTemporalEvidence: blockers.length === 0,
+      sourceAndTimelineDigestsRequired: true,
       proofDoesNotSelectWinner: true,
       humanMotionSelectionConfirmed: false,
       motionCriticApproval: false,
