@@ -13,6 +13,21 @@ const DEFAULT_MOMENTS = [
   { id: 'reduced-motion', label: 'Reduced-motion interpretation', purpose: 'Prove sequencing and hierarchy survive without unnecessary simulated travel or deformation.', viewport: 'mobile', input: 'reduced-motion' }
 ];
 
+function canonicalValue(value) {
+  if (Array.isArray(value)) return value.map(canonicalValue);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalValue(value[key])]));
+  return value;
+}
+
+function sameContract(left, right) {
+  return JSON.stringify(canonicalValue(left)) === JSON.stringify(canonicalValue(right));
+}
+
+function sameSetById(left = [], right = []) {
+  const sort = (items) => [...items].sort((a, b) => text(a?.id).localeCompare(text(b?.id)));
+  return sameContract(sort(left), sort(right));
+}
+
 function normalizeMoment(moment = {}, index = 0) {
   return {
     id: text(moment.id) || `moment-${index + 1}`,
@@ -24,45 +39,8 @@ function normalizeMoment(moment = {}, index = 0) {
   };
 }
 
-export function reviewMotionProofPlan(plan = {}) {
-  const findings = [];
-  if (plan.schema !== 'ai-studio-os/motion-proof-plan@1') findings.push(finding('blocker', 'motion-proof-plan-schema-invalid', 'Motion proof requires motion-proof-plan@1.'));
-  if (!text(plan.projectId) || !text(plan.creativeWorldId)) findings.push(finding('blocker', 'motion-proof-plan-binding-missing', 'Motion proof plan must bind project and Creative World identity.'));
-  if (plan.explorationReview?.reviewReady !== true) findings.push(finding('blocker', 'motion-proof-exploration-not-ready', 'Only a creatively review-ready Motion exploration may enter rendered proof.'));
-
-  const hypotheses = Array.isArray(plan.hypotheses) ? plan.hypotheses : [];
-  const moments = Array.isArray(plan.moments) ? plan.moments : [];
-  const studies = Array.isArray(plan.studies) ? plan.studies : [];
-  if (hypotheses.length < 3) findings.push(finding('major', 'motion-proof-divergence-coverage-thin', 'Rendered proof should compare at least three serious motion hypotheses.', { count: hypotheses.length }));
-  if (moments.length < 3) findings.push(finding('major', 'motion-proof-moment-coverage-thin', 'Motion proof needs multiple temporal moments, not one hero animation.', { count: moments.length }));
-  if (!moments.some((moment) => moment.viewport === 'mobile')) findings.push(finding('major', 'motion-proof-mobile-missing', 'Motion proof must include mobile behavior.'));
-  if (!moments.some((moment) => moment.input === 'reduced-motion')) findings.push(finding('major', 'motion-proof-reduced-motion-missing', 'Motion proof must include a reduced-motion interpretation.'));
-
-  const expected = hypotheses.length * moments.length;
-  if (studies.length !== expected) findings.push(finding('blocker', 'motion-proof-study-matrix-incomplete', 'Every motion hypothesis must be tested against every configured proof moment.', { expected, actual: studies.length }));
-  const keys = new Set(studies.map((study) => `${study.hypothesisId}::${study.momentId}`));
-  for (const hypothesis of hypotheses) {
-    for (const moment of moments) {
-      if (!keys.has(`${hypothesis.id}::${moment.id}`)) findings.push(finding('blocker', 'motion-proof-study-missing', 'Motion proof matrix is missing a hypothesis/moment study.', { hypothesisId: hypothesis.id, momentId: moment.id }));
-    }
-  }
-
-  const blockers = findings.filter((item) => item.severity === 'blocker');
-  const majors = findings.filter((item) => item.severity === 'major');
-  return {
-    schema: 'ai-studio-os/motion-proof-plan-review@1',
-    pass: blockers.length === 0,
-    reviewReady: blockers.length === 0 && majors.length === 0,
-    status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-browser-render',
-    findings,
-    truth: { proofPlanIsNotRenderedEvidence: true, proofDoesNotSelectWinner: true }
-  };
-}
-
-export function buildMotionProofPlan({ exploration, moments = DEFAULT_MOMENTS } = {}) {
-  const explorationReview = reviewMotionCreativeExploration(exploration ?? {});
-  const normalizedMoments = (Array.isArray(moments) ? moments : DEFAULT_MOMENTS).map(normalizeMoment);
-  const hypotheses = (exploration?.hypotheses ?? []).map((hypothesis) => ({
+function proofHypothesesFromExploration(exploration = {}) {
+  return (exploration?.hypotheses ?? []).map((hypothesis) => ({
     id: hypothesis.id,
     title: hypothesis.title,
     interpretation: hypothesis.interpretation,
@@ -72,10 +50,13 @@ export function buildMotionProofPlan({ exploration, moments = DEFAULT_MOMENTS } 
     stillnessPolicy: hypothesis.language?.stillnessPolicy ?? null,
     reducedMotionInterpretation: hypothesis.language?.reducedMotionInterpretation ?? null
   }));
-  const studies = hypotheses.flatMap((hypothesis) => normalizedMoments.map((moment) => ({
+}
+
+function studyMatrix({ projectId, creativeWorldId, hypotheses = [], moments = [] } = {}) {
+  return hypotheses.flatMap((hypothesis) => moments.map((moment) => ({
     id: `${hypothesis.id}--${moment.id}`,
-    projectId: exploration?.projectId ?? null,
-    creativeWorldId: exploration?.creativeWorldId ?? null,
+    projectId: projectId ?? null,
+    creativeWorldId: creativeWorldId ?? null,
     hypothesisId: hypothesis.id,
     momentId: moment.id,
     viewport: moment.viewport,
@@ -90,11 +71,69 @@ export function buildMotionProofPlan({ exploration, moments = DEFAULT_MOMENTS } 
       reducedMotionInterpretation: moment.input === 'reduced-motion' ? hypothesis.reducedMotionInterpretation : null
     }
   })));
+}
+
+export function reviewMotionProofPlan(plan = {}) {
+  const findings = [];
+  if (plan.schema !== 'ai-studio-os/motion-proof-plan@1') findings.push(finding('blocker', 'motion-proof-plan-schema-invalid', 'Motion proof requires motion-proof-plan@1.'));
+  if (!text(plan.projectId) || !text(plan.creativeWorldId)) findings.push(finding('blocker', 'motion-proof-plan-binding-missing', 'Motion proof plan must bind project and Creative World identity.'));
+
+  const authoritativeExploration = plan?.authorityInputs?.exploration ?? null;
+  const explorationReview = reviewMotionCreativeExploration(authoritativeExploration ?? {});
+  if (!explorationReview.reviewReady) findings.push(finding('blocker', 'motion-proof-exploration-not-ready', 'Only a Motion exploration whose canonical authority recomputes successfully may enter rendered proof.', { findingCodes: explorationReview.findings.map((item) => item.code) }));
+  if (authoritativeExploration && (plan.projectId !== authoritativeExploration.projectId || plan.creativeWorldId !== authoritativeExploration.creativeWorldId)) {
+    findings.push(finding('blocker', 'motion-proof-exploration-binding-drift', 'Motion proof project or Creative World drifted from the authoritative Motion exploration.'));
+  }
+
+  const hypotheses = Array.isArray(plan.hypotheses) ? plan.hypotheses : [];
+  const expectedHypotheses = proofHypothesesFromExploration(authoritativeExploration ?? {});
+  if (!sameSetById(hypotheses, expectedHypotheses)) findings.push(finding('blocker', 'motion-proof-hypothesis-contract-drift', 'Motion proof hypotheses must be the exact proof-facing contracts derived from the authoritative Motion exploration.'));
+  if (plan.explorationRef?.schema !== authoritativeExploration?.schema || !sameContract([...(plan.explorationRef?.hypothesisIds ?? [])].sort(), expectedHypotheses.map((item) => item.id).sort())) {
+    findings.push(finding('blocker', 'motion-proof-exploration-ref-drift', 'Motion proof exploration reference drifted from the recomputed authority.'));
+  }
+
+  const moments = Array.isArray(plan.moments) ? plan.moments.map(normalizeMoment) : [];
+  const studies = Array.isArray(plan.studies) ? plan.studies : [];
+  if (hypotheses.length < 3) findings.push(finding('major', 'motion-proof-divergence-coverage-thin', 'Rendered proof should compare at least three serious motion hypotheses.', { count: hypotheses.length }));
+  if (moments.length < 3) findings.push(finding('major', 'motion-proof-moment-coverage-thin', 'Motion proof needs multiple temporal moments, not one hero animation.', { count: moments.length }));
+  if (moments.some((moment) => !moment.id || !moment.label || !moment.purpose || !moment.viewport || !moment.input)) findings.push(finding('major', 'motion-proof-moment-contract-incomplete', 'Every Motion proof moment needs identity, purpose, viewport and input context.'));
+  if (!moments.some((moment) => moment.viewport === 'mobile')) findings.push(finding('major', 'motion-proof-mobile-missing', 'Motion proof must include mobile behavior.'));
+  if (!moments.some((moment) => moment.input === 'reduced-motion')) findings.push(finding('major', 'motion-proof-reduced-motion-missing', 'Motion proof must include a reduced-motion interpretation.'));
+
+  const expectedStudies = studyMatrix({ projectId: plan.projectId, creativeWorldId: plan.creativeWorldId, hypotheses: expectedHypotheses, moments });
+  if (!sameSetById(studies, expectedStudies)) findings.push(finding('blocker', 'motion-proof-study-contract-drift', 'Motion proof study matrix must exactly preserve hypothesis intent, moment context and project/world binding from the authoritative exploration.', { expected: expectedStudies.length, actual: studies.length }));
+  if (new Set(studies.map((study) => study.id)).size !== studies.length) findings.push(finding('blocker', 'motion-proof-study-id-duplicate', 'Motion proof study IDs must be unique.'));
+
+  const blockers = findings.filter((item) => item.severity === 'blocker');
+  const majors = findings.filter((item) => item.severity === 'major');
+  return {
+    schema: 'ai-studio-os/motion-proof-plan-review@1',
+    pass: blockers.length === 0,
+    reviewReady: blockers.length === 0 && majors.length === 0,
+    status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-browser-render',
+    findings,
+    authoritativeExplorationReview: explorationReview,
+    truth: {
+      proofPlanIsNotRenderedEvidence: true,
+      proofDoesNotSelectWinner: true,
+      explorationAuthorityRecomputed: true,
+      cachedExplorationReviewTrusted: false,
+      exactHypothesisContractRequired: true
+    }
+  };
+}
+
+export function buildMotionProofPlan({ exploration, moments = DEFAULT_MOMENTS } = {}) {
+  const explorationReview = reviewMotionCreativeExploration(exploration ?? {});
+  const normalizedMoments = (Array.isArray(moments) ? moments : DEFAULT_MOMENTS).map(normalizeMoment);
+  const hypotheses = proofHypothesesFromExploration(exploration ?? {});
+  const studies = studyMatrix({ projectId: exploration?.projectId, creativeWorldId: exploration?.creativeWorldId, hypotheses, moments: normalizedMoments });
   const plan = {
     schema: 'ai-studio-os/motion-proof-plan@1',
     stage: 'motion-proof-plan',
     projectId: exploration?.projectId ?? null,
     creativeWorldId: exploration?.creativeWorldId ?? null,
+    authorityInputs: { exploration: exploration ?? null },
     explorationRef: { schema: exploration?.schema ?? null, hypothesisIds: hypotheses.map((item) => item.id) },
     explorationReview,
     hypotheses,
@@ -103,6 +142,7 @@ export function buildMotionProofPlan({ exploration, moments = DEFAULT_MOMENTS } 
     truth: {
       temporalStudiesRequired: true,
       proofPlanIsNotRenderedEvidence: true,
+      explorationAuthorityMustRecompute: true,
       humanMotionSelectionConfirmed: false,
       motionCriticApproval: false,
       productionApproved: false
@@ -135,11 +175,13 @@ function normalizeRenderedStudy(study = {}) {
 export function reviewMotionProofEvidence(evidence = {}) {
   const findings = [];
   if (evidence.schema !== 'ai-studio-os/motion-proof-evidence@1') findings.push(finding('blocker', 'motion-proof-evidence-schema-invalid', 'Rendered motion evidence requires motion-proof-evidence@1.'));
-  if (evidence.plan?.schema !== 'ai-studio-os/motion-proof-plan@1' || evidence.plan?.reviewReady !== true) findings.push(finding('blocker', 'motion-proof-plan-not-ready', 'Rendered evidence must originate from a review-ready Motion proof plan.'));
+  const planReview = reviewMotionProofPlan(evidence.plan ?? {});
+  if (!planReview.reviewReady) findings.push(finding('blocker', 'motion-proof-plan-not-ready', 'Rendered evidence must originate from a Motion proof plan whose exploration authority and hypothesis contract still recompute.', { findingCodes: planReview.findings.map((item) => item.code) }));
   if (evidence.projectId !== evidence.plan?.projectId || evidence.creativeWorldId !== evidence.plan?.creativeWorldId) findings.push(finding('blocker', 'motion-proof-evidence-binding-drift', 'Rendered evidence must remain bound to the proof plan project and Creative World.'));
 
   const expectedStudies = evidence.plan?.studies ?? [];
   const renderedStudies = Array.isArray(evidence.renderedStudies) ? evidence.renderedStudies : [];
+  if (new Set(renderedStudies.map((study) => study.studyId)).size !== renderedStudies.length) findings.push(finding('blocker', 'motion-proof-render-id-duplicate', 'Rendered Motion proof study IDs must be unique.'));
   const renderedById = new Map(renderedStudies.map((study) => [study.studyId, study]));
   for (const planned of expectedStudies) {
     const rendered = renderedById.get(planned.id);
@@ -166,9 +208,12 @@ export function reviewMotionProofEvidence(evidence = {}) {
     reviewReady: blockers.length === 0 && majors.length === 0,
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-motion-critic',
     findings,
+    planReview,
     truth: {
       exactBrowserTemporalEvidence: blockers.length === 0,
       sourceAndTimelineDigestsRequired: true,
+      proofPlanAuthorityRecomputed: true,
+      cachedPlanReviewTrusted: false,
       proofDoesNotSelectWinner: true,
       humanMotionSelectionConfirmed: false,
       motionCriticApproval: false,
