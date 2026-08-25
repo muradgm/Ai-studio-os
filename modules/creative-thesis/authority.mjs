@@ -62,10 +62,17 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
     }
   }
 
-  if (deliberation?.projectId && thesis?.projectId && deliberation.projectId !== thesis.projectId) {
+  const deliberationProjectId = clean(deliberation?.projectId);
+  const thesisProjectId = clean(thesis?.projectId);
+  if (!deliberationProjectId || !thesisProjectId) {
+    findings.push(finding('blocker', 'creative-thesis-authority-project-identity-missing', 'Canonical Creative Thesis authority requires both deliberation and thesis to carry explicit project identity.', {
+      deliberationProjectId: deliberationProjectId || null,
+      thesisProjectId: thesisProjectId || null
+    }));
+  } else if (deliberationProjectId !== thesisProjectId) {
     findings.push(finding('blocker', 'creative-thesis-authority-project-drift', 'Deliberation and thesis belong to different projects.', {
-      deliberationProjectId: deliberation.projectId,
-      thesisProjectId: thesis.projectId
+      deliberationProjectId,
+      thesisProjectId
     }));
   }
 
@@ -85,7 +92,7 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
     findings,
     authority: blockers.length ? null : {
       kind: 'canonical-creative-thesis',
-      projectId: thesis.projectId ?? deliberation.projectId ?? null,
+      projectId: thesisProjectId,
       governingIdea: thesisGoverningIdea(thesis),
       creativeTension: thesisCreativeTension(thesis),
       deliberationSchema: deliberation.schema,
@@ -95,6 +102,7 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
     truth: {
       deliberationRecomputedAtAuthorityBoundary: true,
       thesisRecomputedAtAuthorityBoundary: true,
+      deliberationProjectIdentityRequired: true,
       deliberationCanSelfApprove: false,
       humanCreativeApprovalRequired: true,
       arbitraryThesisObjectAccepted: false
