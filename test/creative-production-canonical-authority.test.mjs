@@ -3,20 +3,82 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 import { runCreativeProductionRuntime } from '../lib/creative-production-runtime.mjs';
+import {
+  authoredCandidateFromDeliberation,
+  buildCreativeThesisDeliberation
+} from '../modules/creative-thesis/intelligence.mjs';
 
 const baseInput = JSON.parse(fs.readFileSync(new URL('../benchmarks/005-du-bonheur-creative-production/input.json', import.meta.url)));
 
+function buildDeliberation() {
+  return buildCreativeThesisDeliberation({
+    projectId: baseInput.id,
+    businessTruths: ['French pastry craft', 'Physical counter service ritual', 'Contemporary Berlin context'],
+    opportunityGaps: ['Make the service ritual distinctive without nostalgic French luxury codes'],
+    contradictions: ['service efficiency × ceremony', 'sensory abundance × restraint', 'French craft × contemporary Berlin'],
+    hypotheses: [
+      {
+        id: 'counter-ritual-thesis',
+        statement: 'Service ritual becomes the organizing experience, not decorative patisserie nostalgia.',
+        tension: 'service efficiency × ceremony',
+        truthRefs: ['Physical counter service ritual'],
+        opportunityRefs: ['Make the service ritual distinctive without nostalgic French luxury codes'],
+        crossDomainConnections: ['service × choreography'],
+        experientialConsequences: ['Navigation and reveal sequences follow service thresholds.'],
+        commercialConsequences: ['Ordering clarity remains part of the experience architecture.'],
+        antiGenericClaims: ['Reject nostalgic Parisian luxury staging.'],
+        critique: ['Strong project specificity; risk of over-theatricalizing utility.']
+      },
+      {
+        id: 'material-craft',
+        statement: 'Make pastry material transformation the evidence of craft.',
+        tension: 'precision × impermanence',
+        truthRefs: ['French pastry craft'],
+        opportunityRefs: ['Make the service ritual distinctive without nostalgic French luxury codes'],
+        crossDomainConnections: ['patisserie × material architecture'],
+        experientialConsequences: ['Product detail and layer transitions become structural evidence.'],
+        commercialConsequences: ['Product quality carries premium perception.'],
+        antiGenericClaims: ['Reject generic lifestyle cafe imagery.'],
+        critique: ['Strong image potential but weaker service differentiation.']
+      },
+      {
+        id: 'controlled-indulgence',
+        statement: 'Use restraint to intensify moments of sensory indulgence.',
+        tension: 'sensory abundance × Berlin restraint',
+        truthRefs: ['Contemporary Berlin context'],
+        opportunityRefs: ['Make the service ritual distinctive without nostalgic French luxury codes'],
+        crossDomainConnections: ['editorial restraint × sensory contrast'],
+        experientialConsequences: ['Pacing and negative space amplify product reveals.'],
+        commercialConsequences: ['Premium character comes from product focus rather than decorative luxury.'],
+        antiGenericClaims: ['Reject gold-and-serif luxury shorthand.'],
+        critique: ['Could transfer to competitors unless anchored to service truth.']
+      }
+    ],
+    selection: {
+      hypothesisId: 'counter-ritual-thesis',
+      rationale: 'It converts the most project-specific operational truth into a complete experience structure.',
+      competitorTransferJudgment: 'A competitor without the same counter ritual could not reuse it unchanged without losing meaning.',
+      strategicRelevanceJudgment: 'It differentiates through a real service behavior while preserving ordering utility.',
+      experientialPotentialJudgment: 'It can govern composition, navigation, typography pacing, motion, interaction and responsive sequencing.'
+    }
+  });
+}
+
 function canonicalInput(overrides = {}) {
   const legacy = runCreativeProductionRuntime(baseInput);
-  const thesisStatement = 'Service ritual becomes the organizing experience, not decorative patisserie nostalgia.';
+  const deliberation = buildDeliberation();
+  const authored = authoredCandidateFromDeliberation(deliberation);
+  const thesisStatement = authored.governingIdea;
   const thesis = {
     schema: 'ai-studio-os/creative-thesis@1',
     id: 'du-bonheur-thesis',
     projectId: baseInput.id,
     statement: thesisStatement,
     governingIdea: { statement: thesisStatement },
+    creativeTension: { label: authored.creativeTension },
     reviewReady: true,
-    pass: true
+    pass: true,
+    truth: { humanCreativeApproval: true }
   };
   const world = {
     schema: 'ai-studio-os/creative-world@1',
@@ -51,6 +113,7 @@ function canonicalInput(overrides = {}) {
   return {
     ...structuredClone(baseInput),
     canonicalCreativeAuthority: true,
+    creativeThesisDeliberation: deliberation,
     creativeThesis: thesis,
     selectedCreativeWorld: world,
     creativeWorldExploration: {
@@ -87,6 +150,8 @@ test('canonical Creative World is the sole world-level production authority', ()
 
   assert.equal(output.status, 'production-plan-ready');
   assert.equal(output.canonicalHandoff?.pass, true);
+  assert.equal(output.canonicalHandoff?.truth.creativeThesisAuthorityValid, true);
+  assert.equal(output.canonicalHandoff?.truth.creativeThesisHumanApproved, true);
   assert.equal(output.canonicalHandoff?.truth.creativeSelectionProvenanceValid, true);
   assert.equal(output.canonicalHandoff?.truth.creativeWorldProductionContractComplete, true);
   assert.equal(output.selectionAuthority, 'canonical-creative-world');
@@ -103,6 +168,15 @@ test('canonical Creative World is the sole world-level production authority', ()
   for (const entry of output.registry.entries ?? []) {
     assert.equal(entry.directionRef, 'Canonical Counter Ritual direction');
   }
+});
+
+test('canonical production fails closed when thesis deliberation provenance is absent', () => {
+  const input = canonicalInput();
+  delete input.creativeThesisDeliberation;
+  const output = runCreativeProductionRuntime(input);
+  assert.equal(output.status, 'blocked');
+  assert.equal(output.gateway, undefined);
+  assert.ok(output.canonicalHandoff.findings.some((item) => item.code === 'canonical-thesis-authority-invalid'));
 });
 
 test('canonical production fails closed before tool routing when selected world loses human authority', () => {
