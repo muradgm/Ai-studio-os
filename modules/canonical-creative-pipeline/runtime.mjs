@@ -1,4 +1,5 @@
 import { reviewCreativeThesisAuthority } from '../creative-thesis/authority.mjs';
+import { reviewCreativeWorldExploration } from '../creative-world/runtime.mjs';
 
 function finding(severity, code, message, evidence = {}) {
   return { severity, code, message, evidence };
@@ -36,21 +37,87 @@ function selectedWorldIsAuthoritative(world = {}) {
     && world.truth?.visualWorldProofReviewed === true;
 }
 
-function selectionProvenance(exploration = {}, world = {}, styleFrameProof = {}) {
+function sameWorldContract(candidate = {}, world = {}) {
+  if (!candidate || !world || candidate.id !== world.id) return false;
+  const stringFieldsMatch = REQUIRED_WORLD_STRING_FIELDS.every((field) => clean(candidate?.[field]) === clean(world?.[field]));
+  return stringFieldsMatch
+    && clean(candidate?.typographyIntent?.statement) === clean(world?.typographyIntent?.statement)
+    && clean(candidate?.categoryTransferTest?.whyProjectSpecific) === clean(world?.categoryTransferTest?.whyProjectSpecific)
+    && clean(candidate?.thesisRef?.projectId) === clean(world?.thesisRef?.projectId)
+    && clean(candidate?.thesisRef?.governingIdea) === clean(world?.thesisRef?.governingIdea);
+}
+
+function explorationAuthority(exploration = {}, world = {}, thesis = {}) {
+  const schemaValid = exploration?.schema === 'ai-studio-os/creative-world-exploration@1';
+  const worlds = Array.isArray(exploration?.worlds) ? exploration.worlds : [];
+  const candidate = worlds.find((item) => item?.id === world?.id) ?? null;
+  const candidateCountValid = worlds.length >= 3 && worlds.length <= 5;
+  const candidateMembershipValid = sameWorldContract(candidate, world);
+  const thesisIdea = clean(thesis?.governingIdea?.statement ?? thesis?.statement);
+  const explorationThesisIdea = clean(exploration?.creativeThesis?.governingIdea?.statement ?? exploration?.thesisRef?.governingIdea);
+  const thesisBindingValid = exploration?.creativeThesis?.schema === thesis?.schema
+    && clean(exploration?.creativeThesis?.projectId) === clean(thesis?.projectId)
+    && Boolean(thesisIdea)
+    && explorationThesisIdea === thesisIdea;
+  const recomputedReview = schemaValid ? reviewCreativeWorldExploration(exploration) : { reviewReady: false, findings: [] };
+  return {
+    valid: schemaValid && candidateCountValid && candidateMembershipValid && thesisBindingValid && recomputedReview.reviewReady === true,
+    schemaValid,
+    candidateCountValid,
+    candidateMembershipValid,
+    thesisBindingValid,
+    recomputedReviewReady: recomputedReview.reviewReady === true,
+    reviewFindingCodes: (recomputedReview.findings ?? []).map((item) => item.code)
+  };
+}
+
+function renderedVisualEvidenceAuthority(visualProofEvidence = {}, world = {}, selectionEvidenceRefs = [], projectId = null) {
+  const schemaValid = visualProofEvidence?.schema === 'ai-studio-os/style-frame-proof-evidence@2';
+  const projectBindingValid = Boolean(projectId)
+    && clean(visualProofEvidence?.projectId) === clean(projectId);
+  const exactBrowserRaster = visualProofEvidence?.truth?.exactBrowserRaster === true;
+  const worldEvidence = (visualProofEvidence?.worlds ?? []).find((item) => item?.worldId === world?.id) ?? null;
+  const renderedRefs = Array.isArray(worldEvidence?.evidenceRefs) ? worldEvidence.evidenceRefs.filter((value) => clean(value)) : [];
+  const selectionRefs = Array.isArray(selectionEvidenceRefs) ? selectionEvidenceRefs.filter((value) => clean(value)) : [];
+  const exactSelectionRefsValid = selectionRefs.length > 0 && selectionRefs.every((ref) => renderedRefs.includes(ref));
+  const worldEvidenceReady = worldEvidence?.reviewReady === true && renderedRefs.length > 0;
+  const valid = schemaValid
+    && visualProofEvidence?.reviewReady === true
+    && exactBrowserRaster
+    && projectBindingValid
+    && worldEvidenceReady
+    && exactSelectionRefsValid;
+  return {
+    valid,
+    schemaValid,
+    projectBindingValid,
+    exactBrowserRaster,
+    worldEvidenceReady,
+    exactSelectionRefsValid,
+    selectionRefs,
+    renderedRefs
+  };
+}
+
+function selectionProvenance(exploration = {}, world = {}, thesis = {}, visualProofEvidence = {}, projectId = null) {
   const selection = exploration?.selection ?? {};
   const evidenceRefs = Array.isArray(selection.visualEvidenceRefs)
     ? selection.visualEvidenceRefs.filter((value) => clean(value))
     : [];
-  const frameIds = new Set((styleFrameProof?.frames ?? []).map((frame) => clean(frame?.id)).filter(Boolean));
-  const referencedRenderedEvidence = evidenceRefs.some((ref) => frameIds.has(ref));
-  const valid = exploration?.selectedWorld?.id === world?.id
+  const explorationReview = explorationAuthority(exploration, world, thesis);
+  const visualEvidence = renderedVisualEvidenceAuthority(visualProofEvidence, world, evidenceRefs, projectId);
+  const selectionRecordValid = exploration?.selectedWorld?.id === world?.id
     && exploration?.truth?.humanWorldSelectionConfirmed === true
     && selection.worldId === world?.id
     && selection.humanConfirmed === true
-    && selection.visualReviewConfirmed === true
-    && evidenceRefs.length > 0
-    && referencedRenderedEvidence;
-  return { valid, evidenceRefs, referencedRenderedEvidence };
+    && selection.visualReviewConfirmed === true;
+  return {
+    valid: explorationReview.valid && selectionRecordValid && visualEvidence.valid,
+    selectionRecordValid,
+    evidenceRefs,
+    explorationReview,
+    visualEvidence
+  };
 }
 
 function recomputeWorldStructuralReview(world = {}, thesis = {}) {
@@ -124,14 +191,15 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const thesis = input.creativeThesis ?? creative.creativeThesis ?? {};
   const exploration = input.creativeWorldExploration ?? creative.creativeWorldExploration ?? {};
   const world = input.selectedCreativeWorld ?? creative.selectedCreativeWorld ?? exploration.selectedWorld ?? null;
-  const styleFrameProof = input.styleFrameProof ?? creative.styleFrameProof ?? {};
+  const styleFrameProof = input.styleFrameProof ?? creative.styleFrameProof ?? null;
+  const visualProofEvidence = input.visualProofEvidence ?? input.styleFrameProofEvidence ?? creative.visualProofEvidence ?? creative.styleFrameProofEvidence ?? {};
   const direction = input.creativeDirection ?? creative.creativeDirection ?? {};
   const typography = input.typography ?? null;
   const projectId = input.projectId ?? creative.id ?? thesis?.projectId ?? null;
 
   const thesisAuthorityReview = reviewCreativeThesisAuthority({ deliberation, thesis });
   if (thesisAuthorityReview.pass !== true) {
-    findings.push(finding('blocker', 'canonical-thesis-authority-invalid', 'Canonical production requires a Creative Thesis whose authority is traceable to re-reviewed deliberation, re-reviewed thesis structure, and explicit human creative approval.', {
+    findings.push(finding('blocker', 'canonical-thesis-authority-invalid', 'Canonical production requires a Creative Thesis whose authority is traceable to re-reviewed deliberation, re-reviewed thesis structure, explicit project identity, and human creative approval.', {
       authorityFindingCodes: thesisAuthorityReview.findings.map((item) => item.code)
     }));
   }
@@ -142,12 +210,24 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   }
 
   const selectedWorldId = world?.id ?? null;
-  const provenance = selectionProvenance(exploration, world ?? {}, styleFrameProof);
+  const provenance = selectionProvenance(exploration, world ?? {}, thesis, visualProofEvidence, projectId);
+  if (!provenance.explorationReview.valid) {
+    findings.push(finding('blocker', 'canonical-world-exploration-invalid', 'Canonical production requires the complete Creative World Exploration to remain review-ready, thesis-bound, and to contain the selected world among 3–5 reviewed alternatives.', {
+      worldId: selectedWorldId,
+      ...provenance.explorationReview
+    }));
+  }
+  if (!provenance.visualEvidence.valid) {
+    findings.push(finding('blocker', 'canonical-rendered-visual-proof-invalid', 'Canonical production requires review-ready style-frame-proof-evidence@2 with exact browser raster evidence for the selected world and exact selection evidence references.', {
+      worldId: selectedWorldId,
+      ...provenance.visualEvidence
+    }));
+  }
   if (!provenance.valid) {
-    findings.push(finding('blocker', 'canonical-world-selection-provenance-invalid', 'Selected Creative World authority must be traceable to the current exploration selection record and referenced rendered visual evidence.', {
+    findings.push(finding('blocker', 'canonical-world-selection-provenance-invalid', 'Selected Creative World authority must be traceable through a valid exploration selection record to exact rendered visual evidence.', {
       worldId: selectedWorldId,
       evidenceRefs: provenance.evidenceRefs,
-      referencedRenderedEvidence: provenance.referencedRenderedEvidence
+      selectionRecordValid: provenance.selectionRecordValid
     }));
   }
 
@@ -162,10 +242,10 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     }));
   }
 
-  const proofCoversWorld = styleFrameProof?.reviewReady === true
-    && (styleFrameProof?.frames ?? []).some((frame) => frame.worldId === selectedWorldId);
-  if (!proofCoversWorld) {
-    findings.push(finding('blocker', 'canonical-style-frame-proof-missing', 'Selected Creative World must be covered by review-ready rendered style-frame proof before production handoff.', { worldId: selectedWorldId }));
+  // A style-frame plan may still be supplied for diagnostics/provenance, but it
+  // never authorizes production. Only rendered visual proof evidence does.
+  if (styleFrameProof?.schema && styleFrameProof.schema !== 'ai-studio-os/style-frame-proof-plan@2') {
+    findings.push(finding('major', 'canonical-style-frame-plan-schema-unexpected', 'Optional Style Frame Proof plan has an unexpected schema; it is advisory only and cannot substitute for rendered proof evidence.'));
   }
 
   const directionBoundToWorld = direction?.worldContext?.id === selectedWorldId
@@ -185,7 +265,7 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     findings.push(finding('blocker', 'canonical-typography-not-approved', 'Production handoff requires a passing human-approved typography system when typography authority is required.'));
   }
 
-  for (const upstream of [creative.findings, deliberation.findings, thesisAuthorityReview.findings, exploration.findings, styleFrameProof.findings, direction.findings]) {
+  for (const upstream of [creative.findings, deliberation.findings, thesisAuthorityReview.findings, exploration.findings, visualProofEvidence.findings, styleFrameProof?.findings, direction.findings]) {
     if (hasBlocker(upstream)) {
       findings.push(finding('blocker', 'canonical-upstream-blocker-present', 'Production handoff cannot cross an unresolved upstream blocker.'));
       break;
@@ -208,13 +288,15 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
     truth: {
       creativeThesisAuthorityValid: thesisAuthorityReview.pass === true,
       creativeThesisHumanApproved: thesisAuthorityReview.authority?.humanApproved === true,
+      creativeWorldExplorationRevalidated: provenance.explorationReview.valid,
       creativeSelectionHumanGoverned: authorityValid,
       creativeSelectionProvenanceValid: provenance.valid,
+      renderedVisualProofEvidenceValid: provenance.visualEvidence.valid,
       creativeWorldProductionContractComplete: completeness.complete,
       creativeWorldStructuralReviewRecomputed: true,
       creativeWorldStructuralReviewReady: completeness.structuralReviewReady,
       creativeWorldThesisProjectBindingValid: completeness.thesisProjectBindingValid,
-      styleFrameProofReviewed: proofCoversWorld && world?.truth?.visualWorldProofReviewed === true,
+      styleFrameProofReviewed: provenance.visualEvidence.valid && world?.truth?.visualWorldProofReviewed === true,
       typographyHumanApproved: typography ? typographyIsAuthoritative(typography) : null,
       productionApprovalFabricated: false
     },
@@ -230,6 +312,8 @@ export function validateCanonicalCreativeProductionHandoff(output = {}, expected
   for (const code of expected.requiredFindingCodes ?? []) if (!output.findings?.some((item) => item.code === code)) failures.push(`missing finding ${code}`);
   for (const code of expected.forbiddenFindingCodes ?? []) if (output.findings?.some((item) => item.code === code)) failures.push(`forbidden finding ${code}`);
   if (expected.requireThesisAuthority && output.truth?.creativeThesisAuthorityValid !== true) failures.push('creative thesis authority is invalid');
+  if (expected.requireExplorationRevalidation && output.truth?.creativeWorldExplorationRevalidated !== true) failures.push('creative world exploration is invalid');
+  if (expected.requireRenderedVisualProof && output.truth?.renderedVisualProofEvidenceValid !== true) failures.push('rendered visual proof evidence is invalid');
   if (expected.requireProductionContractComplete && output.truth?.creativeWorldProductionContractComplete !== true) failures.push('creative world production contract is incomplete');
   if (expected.requireSelectionProvenance && output.truth?.creativeSelectionProvenanceValid !== true) failures.push('creative world selection provenance is invalid');
   if (expected.requireNoFabricatedProductionApproval && output.truth?.productionApprovalFabricated !== false) failures.push('production approval truth must remain false');
