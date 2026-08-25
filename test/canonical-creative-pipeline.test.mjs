@@ -8,6 +8,7 @@ import {
   authoredCandidateFromDeliberation,
   buildCreativeThesisDeliberation
 } from '../modules/creative-thesis/intelligence.mjs';
+import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 
 function buildDeliberation() {
   return buildCreativeThesisDeliberation({
@@ -66,16 +67,20 @@ function buildDeliberation() {
 function fixture() {
   const deliberation = buildDeliberation();
   const authored = authoredCandidateFromDeliberation(deliberation);
-  const thesis = {
-    schema: 'ai-studio-os/creative-thesis@1',
-    id: 'thesis-1',
+  const builtThesis = buildCreativeThesis({
     projectId: 'project-1',
-    statement: authored.governingIdea,
-    governingIdea: { statement: authored.governingIdea },
-    creativeTension: { label: authored.creativeTension },
-    reviewReady: true,
-    pass: true,
-    truth: { humanCreativeApproval: true }
+    intent: 'Build a distinctive experience around product truth and service behavior.',
+    businessTruths: deliberation.sourceTruths,
+    inspiration: { opportunityGaps: deliberation.sourceOpportunities },
+    antiPrinciples: ['generic premium styling', 'decorative storytelling detached from use'],
+    audience: 'Customers evaluating and choosing the product',
+    commercialObjective: 'Increase understanding and conversion confidence',
+    authoredCandidate: authored
+  });
+  const thesis = {
+    ...builtThesis,
+    id: 'thesis-1',
+    truth: { ...(builtThesis.truth ?? {}), humanCreativeApproval: true }
   };
   const world = {
     schema: 'ai-studio-os/creative-world@1',
@@ -92,6 +97,10 @@ function fixture() {
     motionLanguage: 'measured threshold transitions with controlled persistence',
     interactionModel: 'direct manipulation with quiet contextual feedback',
     responsiveStrategy: 'recompose hierarchy rather than merely stack desktop sections',
+    categoryTransferTest: {
+      whyProjectSpecific: 'The world is organized around this project’s product-truth and service evidence rather than category styling.',
+      transferRisk: 'Without those truths it collapses into generic editorial premium behavior.'
+    },
     antiPatterns: ['generic luxury serif staging', 'card-grid SaaS composition'],
     thesisRef: {
       schema: thesis.schema,
@@ -156,6 +165,8 @@ test('canonical handoff passes only valid, traceable, production-complete creati
   assert.equal(output.truth.creativeSelectionHumanGoverned, true);
   assert.equal(output.truth.creativeSelectionProvenanceValid, true);
   assert.equal(output.truth.creativeWorldProductionContractComplete, true);
+  assert.equal(output.truth.creativeWorldStructuralReviewRecomputed, true);
+  assert.equal(output.truth.creativeWorldStructuralReviewReady, true);
   assert.equal(output.truth.creativeWorldThesisProjectBindingValid, true);
   assert.equal(output.truth.productionApprovalFabricated, false);
 });
@@ -176,6 +187,31 @@ test('thesis without explicit human creative approval cannot cross production bo
   assert.equal(output.pass, false);
   assert.equal(output.truth.creativeThesisHumanApproved, false);
   assert.ok(output.findings.some((item) => item.code === 'canonical-thesis-authority-invalid'));
+});
+
+test('fabricated world reviewReady cannot bypass recomputed project-specificity review', () => {
+  const parts = fixture();
+  parts.world.categoryTransferTest = {};
+  parts.world.reviewReady = true;
+  parts.world.findings = [];
+  parts.exploration.selectedWorld = parts.world;
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeWorldStructuralReviewReady, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-production-contract-incomplete'));
+});
+
+test('technology cannot become the selected world concept even with fabricated clean findings', () => {
+  const parts = fixture();
+  parts.world.worldIdea = 'A WebGL shader experience defines the brand world.';
+  parts.world.reviewReady = true;
+  parts.world.findings = [];
+  parts.exploration.selectedWorld = parts.world;
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeWorldStructuralReviewReady, false);
+  const issue = output.findings.find((item) => item.code === 'canonical-world-production-contract-incomplete');
+  assert.ok(issue.evidence.structuralFindingCodes.includes('creative-world-technology-became-concept'));
 });
 
 test('truthful human visual approval does not invalidate otherwise valid style-frame proof', () => {
