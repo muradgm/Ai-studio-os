@@ -115,12 +115,12 @@ function renderedFromPlan(plan) {
   }));
 }
 
-test('motion exploration becomes proof-ready before any winner is selected', () => {
+test('motion exploration becomes proof-ready before any authoritative winner is selected', () => {
   const exploration = proofReadyExploration(null);
   const review = reviewMotionCreativeExploration(exploration);
   assert.equal(review.reviewReady, true);
   assert.equal(review.status, 'ready-for-motion-proof');
-  assert.equal(review.truth.proofPrecedesHumanMotionSelection, true);
+  assert.equal(review.truth.proofPrecedesAuthoritativeHumanMotionSelection, true);
   assert.equal(selectedMotionDirection(exploration), null);
 });
 
@@ -184,16 +184,19 @@ test('one missing hypothesis/moment render keeps the proof blocked', () => {
   assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-render-count-mismatch'));
 });
 
-test('final direction still requires explicit human selection even after creative proof-readiness', () => {
+test('pre-proof human preference produces only a direction candidate', () => {
   const withoutSelection = proofReadyExploration();
   assert.equal(selectedMotionDirection(withoutSelection), null);
 
   const withSelection = proofReadyExploration({
     hypothesisId: 'editorial',
     humanConfirmed: true,
-    rationale: 'Rendered comparison shows the clearest hierarchy and strongest restraint.'
+    rationale: 'The preference currently favors the clearest hierarchy and strongest restraint.'
   });
-  const direction = selectedMotionDirection(withSelection);
-  assert.equal(direction?.hypothesisId, 'editorial');
-  assert.equal(direction?.truth.renderedMotionProofStillRequired, true);
+  const candidate = selectedMotionDirection(withSelection);
+  assert.equal(candidate?.schema, 'ai-studio-os/motion-direction-candidate@1');
+  assert.equal(candidate?.hypothesisId, 'editorial');
+  assert.equal(candidate?.truth.renderedMotionProofStillRequired, true);
+  assert.equal(candidate?.truth.motionCriticStillRequired, true);
+  assert.equal(candidate?.truth.technicalPlanningAuthorized, false);
 });
