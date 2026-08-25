@@ -63,12 +63,28 @@ function overlap(a, b) {
   return [...left].filter((token) => right.has(token)).length / Math.min(left.size, right.size);
 }
 
+function canonicalBundleFromInput(input = {}) {
+  if (input.canonicalCreativeAuthority && typeof input.canonicalCreativeAuthority === 'object') {
+    return { ...input.canonicalCreativeAuthority, projectId: input.projectId ?? input.canonicalCreativeAuthority.projectId };
+  }
+  const exploration = input.creativeWorldExploration ?? null;
+  return {
+    projectId: input.projectId ?? input.creativeThesis?.projectId ?? null,
+    creativeThesisDeliberation: input.creativeThesisDeliberation ?? null,
+    creativeThesis: input.creativeThesis ?? exploration?.creativeThesis ?? null,
+    selectedCreativeWorld: input.creativeWorld ?? input.selectedCreativeWorld ?? exploration?.selectedWorld ?? null,
+    creativeWorldExploration: exploration,
+    styleFrameProof: input.styleFrameProof ?? null,
+    visualProofEvidence: input.visualProofEvidence ?? input.styleFrameProofEvidence ?? null,
+    creativeDirection: input.creativeDirection ?? null
+  };
+}
+
 function recomputeWorldAuthority(exploration = {}) {
   const inputs = exploration.authorityInputs && typeof exploration.authorityInputs === 'object' ? exploration.authorityInputs : {};
   return reviewMotionCreativeWorldAuthority({
     projectId: inputs.projectId,
-    creativeWorldExploration: inputs.creativeWorldExploration,
-    creativeWorld: inputs.creativeWorld
+    canonicalCreativeAuthority: inputs.canonicalCreativeAuthority
   });
 }
 
@@ -80,8 +96,9 @@ export function reviewMotionCreativeExploration(exploration = {}) {
 
   if (!worldId) findings.push(finding('blocker', 'motion-creative-world-binding-missing', 'Motion exploration must be bound to a selected Creative World.'));
   if (worldAuthority.pass !== true) {
-    findings.push(finding('blocker', 'motion-creative-world-not-authoritative', 'Motion may interpret only a Creative World that remains canonical when authority is re-reviewed at the Motion boundary.', {
-      authorityFindingCodes: worldAuthority.findings.map((item) => item.code)
+    findings.push(finding('blocker', 'motion-creative-world-not-authoritative', 'Motion may interpret only a Creative World that remains canonical when the full creative authority handoff is re-reviewed at the Motion boundary.', {
+      authorityFindingCodes: worldAuthority.findings.map((item) => item.code),
+      canonicalFindingCodes: worldAuthority.canonicalHandoff?.findings?.map((item) => item.code) ?? []
     }));
   }
   if (worldAuthority.pass === true && worldAuthority.authority?.creativeWorldId !== worldId) {
@@ -133,7 +150,7 @@ export function reviewMotionCreativeExploration(exploration = {}) {
       technicalFeasibilityIsNotCreativeApproval: true,
       renderedMotionProofRequired: true,
       canonicalCreativeWorldAuthorityRequired: true,
-      canonicalCreativeWorldAuthorityRecomputed: true,
+      fullCanonicalCreativeHandoffRecomputed: true,
       shallowWorldAuthorityFlagsAccepted: false,
       proofPrecedesAuthoritativeHumanMotionSelection: true,
       humanMotionSelectionRequiredAfterCritic: true
@@ -141,28 +158,28 @@ export function reviewMotionCreativeExploration(exploration = {}) {
   };
 }
 
-export function buildMotionCreativeExploration({ projectId, creativeWorldExploration, creativeWorld, hypotheses = [], selection = null } = {}) {
-  const authoritativeWorld = creativeWorld ?? creativeWorldExploration?.selectedWorld ?? null;
+export function buildMotionCreativeExploration(input = {}) {
+  const canonicalCreativeAuthority = canonicalBundleFromInput(input);
+  const authoritativeWorld = canonicalCreativeAuthority.selectedCreativeWorld ?? canonicalCreativeAuthority.creativeWorldExploration?.selectedWorld ?? null;
   const exploration = {
     schema: 'ai-studio-os/motion-creative-exploration@1',
     stage: 'motion-creative-exploration',
-    projectId: text(projectId) || null,
+    projectId: text(input.projectId ?? canonicalCreativeAuthority.projectId) || null,
     creativeWorldId: text(authoritativeWorld?.id) || null,
     authorityInputs: {
-      projectId: text(projectId) || null,
-      creativeWorldExploration: creativeWorldExploration ?? null,
-      creativeWorld: authoritativeWorld
+      projectId: text(input.projectId ?? canonicalCreativeAuthority.projectId) || null,
+      canonicalCreativeAuthority
     },
-    creativeWorldExplorationRef: creativeWorldExploration ? {
-      schema: creativeWorldExploration.schema ?? null,
-      selectedWorldId: creativeWorldExploration.selectedWorld?.id ?? null,
-      candidateWorldIds: (creativeWorldExploration.worlds ?? []).map((world) => world.id)
+    creativeWorldExplorationRef: canonicalCreativeAuthority.creativeWorldExploration ? {
+      schema: canonicalCreativeAuthority.creativeWorldExploration.schema ?? null,
+      selectedWorldId: canonicalCreativeAuthority.creativeWorldExploration.selectedWorld?.id ?? null,
+      candidateWorldIds: (canonicalCreativeAuthority.creativeWorldExploration.worlds ?? []).map((world) => world.id)
     } : null,
-    hypotheses: (Array.isArray(hypotheses) ? hypotheses : []).map(normalizeHypothesis),
-    selection: selection && typeof selection === 'object' ? {
-      hypothesisId: text(selection.hypothesisId),
-      humanConfirmed: selection.humanConfirmed === true,
-      rationale: text(selection.rationale)
+    hypotheses: (Array.isArray(input.hypotheses) ? input.hypotheses : []).map(normalizeHypothesis),
+    selection: input.selection && typeof input.selection === 'object' ? {
+      hypothesisId: text(input.selection.hypothesisId),
+      humanConfirmed: input.selection.humanConfirmed === true,
+      rationale: text(input.selection.rationale)
     } : null,
     truth: {
       followsCreativeWorld: true,
@@ -170,7 +187,7 @@ export function buildMotionCreativeExploration({ projectId, creativeWorldExplora
       motionTasteRequiresRenderedProof: true,
       humanMotionSelectionRequired: true,
       proofPrecedesAuthoritativeHumanMotionSelection: true,
-      canonicalCreativeWorldAuthorityRecomputed: true,
+      fullCanonicalCreativeHandoffRequired: true,
       shallowCreativeWorldFlagsAccepted: false
     }
   };
@@ -227,7 +244,7 @@ export function selectedMotionDirection(exploration = {}) {
       motionCriticStillRequired: true,
       technicalPlanningAuthorized: false,
       productionApproved: false,
-      creativeWorldAuthorityRecomputed: true,
+      fullCanonicalCreativeHandoffRecomputed: true,
       spatialTechnologySelected: false,
       physicsEngineSelected: false,
       shaderImplementationSelected: false,
