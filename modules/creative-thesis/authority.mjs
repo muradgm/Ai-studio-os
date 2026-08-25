@@ -1,4 +1,5 @@
-import { authoredCandidateFromDeliberation } from './intelligence.mjs';
+import { authoredCandidateFromDeliberation, reviewCreativeThesisDeliberation } from './intelligence.mjs';
+import { reviewCreativeThesis } from './runtime.mjs';
 
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -22,19 +23,28 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
   if (deliberation?.schema !== 'ai-studio-os/creative-thesis-deliberation@1') {
     findings.push(finding('blocker', 'creative-thesis-authority-deliberation-schema-invalid', 'Canonical Creative Thesis authority requires the Creative Thesis deliberation contract.'));
   }
-  if (deliberation?.reviewReady !== true) {
-    findings.push(finding('blocker', 'creative-thesis-authority-deliberation-not-ready', 'Canonical Creative Thesis authority requires a review-ready deliberation.'));
+  const recomputedDeliberationReview = reviewCreativeThesisDeliberation(deliberation ?? {});
+  if (recomputedDeliberationReview.reviewReady !== true) {
+    findings.push(finding('blocker', 'creative-thesis-authority-deliberation-not-ready', 'Canonical Creative Thesis authority requires deliberation that remains review-ready when structurally re-reviewed at the authority boundary.', {
+      findingCodes: recomputedDeliberationReview.findings.map((item) => item.code)
+    }));
   }
+
   if (thesis?.schema !== 'ai-studio-os/creative-thesis@1') {
     findings.push(finding('blocker', 'creative-thesis-authority-thesis-schema-invalid', 'Canonical Creative Thesis authority requires creative-thesis@1.'));
   }
-  if (thesis?.reviewReady !== true || thesis?.pass !== true) {
-    findings.push(finding('blocker', 'creative-thesis-authority-thesis-not-ready', 'Canonical Creative Thesis authority requires a passing, review-ready thesis.'));
+  const recomputedThesisReview = reviewCreativeThesis(thesis ?? {});
+  if (recomputedThesisReview.reviewReady !== true) {
+    findings.push(finding('blocker', 'creative-thesis-authority-thesis-not-ready', 'Canonical Creative Thesis authority requires a thesis that remains review-ready when structurally re-reviewed at the authority boundary.', {
+      findingCodes: recomputedThesisReview.findings.map((item) => item.code)
+    }));
   }
 
-  const candidate = authoredCandidateFromDeliberation(deliberation);
+  const candidate = recomputedDeliberationReview.reviewReady === true
+    ? authoredCandidateFromDeliberation({ ...deliberation, reviewReady: true })
+    : null;
   if (!candidate) {
-    findings.push(finding('blocker', 'creative-thesis-authority-candidate-unavailable', 'The deliberation must produce a traceable authored thesis candidate.'));
+    findings.push(finding('blocker', 'creative-thesis-authority-candidate-unavailable', 'The re-reviewed deliberation must produce a traceable authored thesis candidate.'));
   } else {
     const actualIdea = thesisGoverningIdea(thesis);
     const actualTension = thesisCreativeTension(thesis);
@@ -83,6 +93,8 @@ export function reviewCreativeThesisAuthority({ deliberation, thesis } = {}) {
       humanApproved: true
     },
     truth: {
+      deliberationRecomputedAtAuthorityBoundary: true,
+      thesisRecomputedAtAuthorityBoundary: true,
       deliberationCanSelfApprove: false,
       humanCreativeApprovalRequired: true,
       arbitraryThesisObjectAccepted: false
