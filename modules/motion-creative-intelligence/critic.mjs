@@ -260,8 +260,8 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
 
   return {
     ...candidate,
-    schema: 'ai-studio-os/motion-direction@1',
-    status: 'proven-awaiting-technical-planning',
+    schema: 'ai-studio-os/motion-direction-proven-candidate@1',
+    status: 'proven-awaiting-authority-wrap',
     critic: {
       schema: critique.schema,
       recommendedHypothesisId: critique.comparativeJudgment?.recommendedHypothesisId ?? null,
@@ -277,7 +277,8 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
       renderedMotionProofReviewed: true,
       motionCriticReviewed: true,
       criticRecommendationIsAdvisory: true,
-      technicalPlanningAuthorized: true,
+      technicalPlanningAuthorized: false,
+      finalMotionDirectionAuthorityRequired: true,
       productionApproved: false
     }
   };
