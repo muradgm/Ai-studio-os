@@ -21,7 +21,7 @@ function language(overrides = {}) {
   };
 }
 
-function hypothesis(id, title, interpretation, signature) {
+function hypothesis(id, title, interpretation, signature, specialistIntent = {}) {
   return {
     id, title, interpretation,
     creativeWorldRefs: ['composition', 'material behavior', 'interaction character'],
@@ -32,7 +32,8 @@ function hypothesis(id, title, interpretation, signature) {
     responsiveConsequences: ['Mobile preserves the rhythm with shorter travel and fewer simultaneous layers.'],
     antiPatterns: ['No decorative motion without world evidence', 'No universal animation recipe'],
     critique: ['Risk: the signature could overpower content; proof must test restraint and legibility.'],
-    technicalOptions: ['CSS/WAAPI for utility states', 'GSAP only where sequencing requires orchestration']
+    technicalOptions: ['CSS/WAAPI for utility states', 'GSAP only where sequencing requires orchestration'],
+    specialistIntent
   };
 }
 
@@ -41,7 +42,14 @@ function strong() {
     projectId: 'project-a', creativeWorld: world,
     hypotheses: [
       hypothesis('continuity', 'Cinematic Continuity', 'Use persistent spatial continuity to make selected transformations feel consequential.', 'A product object persists between states while the interface around it re-composes.'),
-      hypothesis('editorial', 'Editorial Rhythm', 'Use temporal contrast, hard chapter cuts and typographic pacing instead of continuous spectacle.', 'A sharp chapter cut is followed by a measured typographic reveal and long stillness.'),
+      hypothesis('editorial', 'Editorial Rhythm', 'Use temporal contrast, hard chapter cuts and typographic pacing instead of continuous spectacle.', 'A sharp chapter cut is followed by a measured typographic reveal and long stillness.', {
+        spatialComposition: 'Keep the UI on a shallow plane while one focal object may cross depth only at narrative thresholds.',
+        cameraBehavior: 'Camera remains nearly fixed; any travel must signal a real chapter transition.',
+        physicalBehavior: 'Perceived mass is deliberate, damping is high, elasticity is low, and recovery is restrained.',
+        shaderMaterialBehavior: 'Material response should intensify product tactility without adding decorative glow or distortion.',
+        spatialNecessity: 'Use live 3D only if depth materially improves hierarchy or product understanding.',
+        implementationNotes: ['Spatial specialist chooses 2D, 2.5D, WebGL or Blender pipeline after proof.']
+      }),
       hypothesis('tactile', 'Tactile Materiality', 'Let interaction expose weight, friction and recovery only where the world describes physical material behavior.', 'Direct manipulation creates brief resistance, deformation and restrained recovery.')
     ],
     selection: { hypothesisId: 'editorial', humanConfirmed: true, rationale: 'It best preserves the world’s restraint while giving hierarchy a memorable temporal structure.' }
@@ -55,6 +63,18 @@ test('motion creative exploration requires taste, stillness and human selection 
   assert.equal(direction.hypothesisId, 'editorial');
   assert.equal(direction.truth.renderedMotionProofStillRequired, true);
   assert.equal(direction.truth.productionApproved, false);
+});
+
+test('selected motion direction may hand creative intent to future spatial intelligence without selecting technology', () => {
+  const direction = selectedMotionDirection(strong());
+  assert.equal(direction.specialistHandoffs.spatialCreativeIntent.authority, 'creative-intent-only');
+  assert.equal(direction.specialistHandoffs.cameraCreativeIntent.authority, 'creative-intent-only');
+  assert.equal(direction.specialistHandoffs.physicalBehaviorIntent.authority, 'perceptual-behavior-only');
+  assert.equal(direction.specialistHandoffs.shaderMaterialIntent.authority, 'creative-material-intent-only');
+  assert.equal(direction.truth.spatialTechnologySelected, false);
+  assert.equal(direction.truth.physicsEngineSelected, false);
+  assert.equal(direction.truth.shaderImplementationSelected, false);
+  assert.equal(direction.truth.blenderPipelineSelected, false);
 });
 
 test('technical motion cannot substitute for creative motion language', () => {
