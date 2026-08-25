@@ -82,20 +82,23 @@ function canonicalInput(overrides = {}) {
   };
 }
 
-test('canonical Creative World authority replaces legacy concept selection as production authority', () => {
+test('canonical Creative World is the sole world-level production authority', () => {
   const output = runCreativeProductionRuntime(canonicalInput());
 
   assert.equal(output.status, 'production-plan-ready');
   assert.equal(output.canonicalHandoff?.pass, true);
   assert.equal(output.canonicalHandoff?.truth.creativeSelectionProvenanceValid, true);
   assert.equal(output.canonicalHandoff?.truth.creativeWorldProductionContractComplete, true);
-  assert.equal(output.selectionAuthority, 'advisory-only');
-  assert.equal(output.legacyCalibration?.authoritative, false);
+  assert.equal(output.selectionAuthority, 'canonical-creative-world');
+  assert.equal(output.exploration, undefined);
+  assert.equal(output.selection, undefined);
+  assert.equal(output.legacyCalibration, undefined);
   assert.ok(output.stages.includes('canonical-creative-authority'));
+  assert.ok(!output.stages.includes('explore'));
   assert.ok(!output.stages.includes('concept-selection'));
   assert.equal(output.creativeDirection.directionStatement, 'Canonical Counter Ritual direction');
   assert.equal(output.creativeDirection.calibration.selectedConceptId, null);
-  assert.equal(output.creativeDirection.calibration.legacyConceptSelectionAuthority, 'advisory-only');
+  assert.equal(output.creativeDirection.calibration.legacyConceptSelectionAuthority, 'retired');
 
   for (const entry of output.registry.entries ?? []) {
     assert.equal(entry.directionRef, 'Canonical Counter Ritual direction');
@@ -111,7 +114,9 @@ test('canonical production fails closed before tool routing when selected world 
 
   assert.equal(output.status, 'blocked');
   assert.equal(output.canonicalHandoff?.pass, false);
-  assert.equal(output.selectionAuthority, 'advisory-only');
+  assert.equal(output.selectionAuthority, 'canonical-creative-world');
+  assert.equal(output.exploration, undefined);
+  assert.equal(output.selection, undefined);
   assert.equal(output.gateway, undefined);
   assert.ok(output.canonicalHandoff.findings.some((item) => item.code === 'canonical-world-not-authoritative'));
 });
@@ -124,6 +129,8 @@ test('canonical production fails closed when selected world is incomplete even i
   const output = runCreativeProductionRuntime(input);
 
   assert.equal(output.status, 'blocked');
+  assert.equal(output.exploration, undefined);
+  assert.equal(output.selection, undefined);
   assert.equal(output.gateway, undefined);
   assert.ok(output.canonicalHandoff.findings.some((item) => item.code === 'canonical-world-production-contract-incomplete'));
 });
@@ -133,5 +140,7 @@ test('legacy creative-production path remains authoritative when canonical input
   assert.equal(output.status, 'production-plan-ready');
   assert.equal(output.selectionAuthority, 'legacy-concept-selection');
   assert.equal(output.canonicalHandoff, undefined);
+  assert.ok(output.exploration);
+  assert.ok(output.selection);
   assert.ok(output.stages.includes('concept-selection'));
 });
