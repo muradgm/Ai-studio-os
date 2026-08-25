@@ -85,9 +85,11 @@ test('canonical thesis authority requires deliberation provenance plus human app
   assert.equal(result.pass, true);
   assert.equal(result.status, 'authoritative');
   assert.equal(result.authority.kind, 'canonical-creative-thesis');
+  assert.equal(result.authority.projectId, 'project-a');
   assert.equal(result.authority.governingIdea, 'Make service thresholds the architecture of the experience.');
   assert.equal(result.truth.deliberationRecomputedAtAuthorityBoundary, true);
   assert.equal(result.truth.thesisRecomputedAtAuthorityBoundary, true);
+  assert.equal(result.truth.deliberationProjectIdentityRequired, true);
 });
 
 test('canonical thesis authority rejects fabricated deliberation reviewReady flags', () => {
@@ -109,6 +111,23 @@ test('canonical thesis authority rejects fabricated thesis reviewReady flags', (
   const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis });
   assert.equal(result.pass, false);
   assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-thesis-not-ready'));
+});
+
+test('canonical thesis authority requires deliberation project identity', () => {
+  const delib = deliberation();
+  delete delib.projectId;
+  const thesis = thesisFrom(deliberation());
+  const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis });
+  assert.equal(result.pass, false);
+  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-project-identity-missing'));
+});
+
+test('canonical thesis authority rejects deliberation and thesis from different projects', () => {
+  const delib = deliberation();
+  const thesis = thesisFrom(delib, { projectId: 'project-b' });
+  const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis });
+  assert.equal(result.pass, false);
+  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-project-drift'));
 });
 
 test('canonical thesis authority fails on governing-idea drift', () => {
