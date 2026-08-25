@@ -74,7 +74,7 @@ export function reviewMotionCreativeExploration(exploration = {}) {
       authorityFindingCodes: exploration.worldAuthority?.findings?.map((item) => item.code) ?? []
     }));
   }
-  if (hypotheses.length < 3) findings.push(finding('major', 'motion-creative-divergence-thin', 'Explore at least three materially different motion interpretations before selection.', { count: hypotheses.length }));
+  if (hypotheses.length < 3) findings.push(finding('major', 'motion-creative-divergence-thin', 'Explore at least three materially different motion interpretations before convergence.', { count: hypotheses.length }));
 
   hypotheses.forEach((hypothesis, index) => {
     if (!hypothesis.interpretation) findings.push(finding('major', 'motion-interpretation-missing', 'Each motion hypothesis needs a creative interpretation, not only implementation notes.', { hypothesisId: hypothesis.id }));
@@ -94,11 +94,14 @@ export function reviewMotionCreativeExploration(exploration = {}) {
     }
   });
 
-  const selectedId = text(exploration.selection?.hypothesisId);
-  const selected = hypotheses.find((item) => item.id === selectedId);
-  if (!selected) findings.push(finding('blocker', 'motion-selection-missing', 'Motion exploration requires an explicit selected hypothesis before it can become direction.'));
-  if (selected && exploration.selection?.humanConfirmed !== true) findings.push(finding('blocker', 'motion-human-selection-missing', 'Motion creative direction requires explicit human selection.'));
-  if (selected && !text(exploration.selection?.rationale)) findings.push(finding('major', 'motion-selection-rationale-missing', 'Selected motion hypothesis requires comparative rationale.'));
+  const selectionSupplied = exploration.selection && typeof exploration.selection === 'object';
+  if (selectionSupplied) {
+    const selectedId = text(exploration.selection?.hypothesisId);
+    const selected = hypotheses.find((item) => item.id === selectedId);
+    if (!selected) findings.push(finding('blocker', 'motion-selection-invalid', 'A supplied motion selection must reference a hypothesis in the current exploration.', { hypothesisId: selectedId || null }));
+    if (selected && exploration.selection?.humanConfirmed !== true) findings.push(finding('blocker', 'motion-human-selection-missing', 'A supplied final motion selection requires explicit human confirmation.'));
+    if (selected && !text(exploration.selection?.rationale)) findings.push(finding('major', 'motion-selection-rationale-missing', 'A supplied motion selection requires comparative rationale.'));
+  }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -111,7 +114,9 @@ export function reviewMotionCreativeExploration(exploration = {}) {
     truth: {
       technicalFeasibilityIsNotCreativeApproval: true,
       renderedMotionProofRequired: true,
-      canonicalCreativeWorldAuthorityRequired: true
+      canonicalCreativeWorldAuthorityRequired: true,
+      proofPrecedesHumanMotionSelection: true,
+      humanMotionSelectionRequiredAfterProof: true
     }
   };
 }
@@ -141,6 +146,7 @@ export function buildMotionCreativeExploration({ projectId, creativeWorldExplora
       mayInterpretButNotOverrideCreativeWorld: true,
       motionTasteRequiresRenderedProof: true,
       humanMotionSelectionRequired: true,
+      proofPrecedesHumanMotionSelection: true,
       canonicalCreativeWorldAuthorityRecomputed: true,
       shallowCreativeWorldFlagsAccepted: false
     }
@@ -159,7 +165,9 @@ export function buildMotionCreativeExploration({ projectId, creativeWorldExplora
 export function selectedMotionDirection(exploration = {}) {
   const review = reviewMotionCreativeExploration(exploration);
   if (!review.reviewReady) return null;
+  if (!exploration.selection || exploration.selection.humanConfirmed !== true || !text(exploration.selection.rationale)) return null;
   const selected = exploration.hypotheses.find((item) => item.id === exploration.selection?.hypothesisId);
+  if (!selected) return null;
   const specialistIntent = normalizeSpecialistIntent(selected.specialistIntent);
   return {
     schema: 'ai-studio-os/motion-direction@1',
@@ -182,18 +190,9 @@ export function selectedMotionDirection(exploration = {}) {
         spatialNecessity: specialistIntent.spatialNecessity || 'Motion direction requests spatial interpretation only where it strengthens the selected Creative World.',
         authority: 'creative-intent-only'
       } : null,
-      cameraCreativeIntent: specialistIntent.cameraBehavior ? {
-        cameraBehavior: specialistIntent.cameraBehavior,
-        authority: 'creative-intent-only'
-      } : null,
-      physicalBehaviorIntent: specialistIntent.physicalBehavior ? {
-        physicalBehavior: specialistIntent.physicalBehavior,
-        authority: 'perceptual-behavior-only'
-      } : null,
-      shaderMaterialIntent: specialistIntent.shaderMaterialBehavior ? {
-        shaderMaterialBehavior: specialistIntent.shaderMaterialBehavior,
-        authority: 'creative-material-intent-only'
-      } : null,
+      cameraCreativeIntent: specialistIntent.cameraBehavior ? { cameraBehavior: specialistIntent.cameraBehavior, authority: 'creative-intent-only' } : null,
+      physicalBehaviorIntent: specialistIntent.physicalBehavior ? { physicalBehavior: specialistIntent.physicalBehavior, authority: 'perceptual-behavior-only' } : null,
+      shaderMaterialIntent: specialistIntent.shaderMaterialBehavior ? { shaderMaterialBehavior: specialistIntent.shaderMaterialBehavior, authority: 'creative-material-intent-only' } : null,
       implementationNotes: specialistIntent.implementationNotes
     },
     truth: {
