@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import { buildCreativeThesisDeliberation, authoredCandidateFromDeliberation } from '../modules/creative-thesis/intelligence.mjs';
 import { reviewCreativeThesisAuthority } from '../modules/creative-thesis/authority.mjs';
+import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 
 function deliberation() {
   return buildCreativeThesisDeliberation({
@@ -60,14 +61,19 @@ function deliberation() {
 
 function thesisFrom(delib, overrides = {}) {
   const candidate = authoredCandidateFromDeliberation(delib);
-  return {
-    schema: 'ai-studio-os/creative-thesis@1',
+  const thesis = buildCreativeThesis({
     projectId: delib.projectId,
-    pass: true,
-    reviewReady: true,
-    governingIdea: { statement: candidate.governingIdea, singular: true },
-    creativeTension: { label: candidate.creativeTension, traits: [] },
-    truth: { humanCreativeApproval: true },
+    intent: 'Create a distinctive digital experience rooted in the physical service ritual.',
+    businessTruths: delib.sourceTruths,
+    inspiration: { opportunityGaps: delib.sourceOpportunities },
+    antiPrinciples: ['generic premium storytelling', 'decorative luxury coding'],
+    audience: 'Customers choosing and ordering crafted products',
+    commercialObjective: 'Increase product understanding and ordering confidence',
+    authoredCandidate: candidate
+  });
+  return {
+    ...thesis,
+    truth: { ...(thesis.truth ?? {}), humanCreativeApproval: true },
     ...overrides
   };
 }
@@ -80,6 +86,29 @@ test('canonical thesis authority requires deliberation provenance plus human app
   assert.equal(result.status, 'authoritative');
   assert.equal(result.authority.kind, 'canonical-creative-thesis');
   assert.equal(result.authority.governingIdea, 'Make service thresholds the architecture of the experience.');
+  assert.equal(result.truth.deliberationRecomputedAtAuthorityBoundary, true);
+  assert.equal(result.truth.thesisRecomputedAtAuthorityBoundary, true);
+});
+
+test('canonical thesis authority rejects fabricated deliberation reviewReady flags', () => {
+  const delib = deliberation();
+  delib.hypotheses = delib.hypotheses.slice(0, 1);
+  delib.reviewReady = true;
+  delib.pass = true;
+  const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis: thesisFrom(deliberation()) });
+  assert.equal(result.pass, false);
+  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-deliberation-not-ready'));
+});
+
+test('canonical thesis authority rejects fabricated thesis reviewReady flags', () => {
+  const delib = deliberation();
+  const thesis = thesisFrom(delib);
+  thesis.intent = '';
+  thesis.reviewReady = true;
+  thesis.pass = true;
+  const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis });
+  assert.equal(result.pass, false);
+  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-thesis-not-ready'));
 });
 
 test('canonical thesis authority fails on governing-idea drift', () => {
@@ -104,10 +133,9 @@ test('canonical thesis authority fails on creative-tension drift', () => {
 
 test('canonical thesis authority cannot be self-approved by deliberation', () => {
   const delib = deliberation();
-  const result = reviewCreativeThesisAuthority({
-    deliberation: delib,
-    thesis: thesisFrom(delib, { truth: { humanCreativeApproval: false } })
-  });
+  const thesis = thesisFrom(delib);
+  thesis.truth.humanCreativeApproval = false;
+  const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis });
   assert.equal(result.pass, false);
   assert.ok(result.findings.some((item) => item.code === 'creative-thesis-authority-human-approval-missing'));
 });
