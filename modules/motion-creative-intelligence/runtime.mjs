@@ -94,13 +94,13 @@ export function reviewMotionCreativeExploration(exploration = {}) {
     }
   });
 
-  const selectionSupplied = exploration.selection && typeof exploration.selection === 'object';
-  if (selectionSupplied) {
+  const preferenceSupplied = exploration.selection && typeof exploration.selection === 'object';
+  if (preferenceSupplied) {
     const selectedId = text(exploration.selection?.hypothesisId);
     const selected = hypotheses.find((item) => item.id === selectedId);
-    if (!selected) findings.push(finding('blocker', 'motion-selection-invalid', 'A supplied motion selection must reference a hypothesis in the current exploration.', { hypothesisId: selectedId || null }));
-    if (selected && exploration.selection?.humanConfirmed !== true) findings.push(finding('blocker', 'motion-human-selection-missing', 'A supplied final motion selection requires explicit human confirmation.'));
-    if (selected && !text(exploration.selection?.rationale)) findings.push(finding('major', 'motion-selection-rationale-missing', 'A supplied motion selection requires comparative rationale.'));
+    if (!selected) findings.push(finding('blocker', 'motion-preference-invalid', 'A supplied motion preference must reference a hypothesis in the current exploration.', { hypothesisId: selectedId || null }));
+    if (selected && exploration.selection?.humanConfirmed !== true) findings.push(finding('blocker', 'motion-human-preference-missing', 'A supplied motion preference requires explicit human confirmation.'));
+    if (selected && !text(exploration.selection?.rationale)) findings.push(finding('major', 'motion-preference-rationale-missing', 'A supplied motion preference requires comparative rationale.'));
   }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -115,8 +115,8 @@ export function reviewMotionCreativeExploration(exploration = {}) {
       technicalFeasibilityIsNotCreativeApproval: true,
       renderedMotionProofRequired: true,
       canonicalCreativeWorldAuthorityRequired: true,
-      proofPrecedesHumanMotionSelection: true,
-      humanMotionSelectionRequiredAfterProof: true
+      proofPrecedesAuthoritativeHumanMotionSelection: true,
+      humanMotionSelectionRequiredAfterCritic: true
     }
   };
 }
@@ -146,7 +146,7 @@ export function buildMotionCreativeExploration({ projectId, creativeWorldExplora
       mayInterpretButNotOverrideCreativeWorld: true,
       motionTasteRequiresRenderedProof: true,
       humanMotionSelectionRequired: true,
-      proofPrecedesHumanMotionSelection: true,
+      proofPrecedesAuthoritativeHumanMotionSelection: true,
       canonicalCreativeWorldAuthorityRecomputed: true,
       shallowCreativeWorldFlagsAccepted: false
     }
@@ -170,7 +170,8 @@ export function selectedMotionDirection(exploration = {}) {
   if (!selected) return null;
   const specialistIntent = normalizeSpecialistIntent(selected.specialistIntent);
   return {
-    schema: 'ai-studio-os/motion-direction@1',
+    schema: 'ai-studio-os/motion-direction-candidate@1',
+    status: 'preference-recorded-awaiting-proof-and-critic',
     projectId: exploration.projectId,
     creativeWorldId: exploration.creativeWorldId,
     creativeWorldAuthority: exploration.worldAuthority?.authority ?? null,
@@ -196,8 +197,10 @@ export function selectedMotionDirection(exploration = {}) {
       implementationNotes: specialistIntent.implementationNotes
     },
     truth: {
-      creativeDirectionSelectedByHuman: true,
+      humanCreativePreferenceRecorded: true,
       renderedMotionProofStillRequired: true,
+      motionCriticStillRequired: true,
+      technicalPlanningAuthorized: false,
       productionApproved: false,
       creativeWorldAuthorityRecomputed: true,
       spatialTechnologySelected: false,
