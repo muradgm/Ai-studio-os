@@ -156,7 +156,7 @@ test('Critic must explain every alternative and cannot recommend a hypothesis it
   assert.ok(critique.findings.some((item) => item.code === 'motion-critic-alternative-rejections-incomplete'));
 });
 
-test('proof plus Critic still cannot create motion-direction@1 without explicit human confirmation and reviewed evidence', () => {
+test('proof plus Critic still cannot create final motion-direction@1 without explicit human confirmation and reviewed evidence', () => {
   const { exploration, critique, brief } = validCritiqueFixture();
   const selected = brief.hypotheses.find((item) => item.id === 'editorial');
 
@@ -179,7 +179,7 @@ test('proof plus Critic still cannot create motion-direction@1 without explicit 
   }), null);
 });
 
-test('human may overrule the advisory Critic recommendation when the chosen hypothesis evidence was explicitly reviewed', () => {
+test('human may overrule the advisory Critic recommendation, yielding a proven candidate that still awaits final Motion authority', () => {
   const { exploration, critique, brief } = validCritiqueFixture();
   const tactile = brief.hypotheses.find((item) => item.id === 'tactile');
   const direction = buildProvenMotionDirection({
@@ -192,13 +192,14 @@ test('human may overrule the advisory Critic recommendation when the chosen hypo
   });
 
   assert.ok(direction);
-  assert.equal(direction.schema, 'ai-studio-os/motion-direction@1');
-  assert.equal(direction.status, 'proven-awaiting-technical-planning');
+  assert.equal(direction.schema, 'ai-studio-os/motion-direction-proven-candidate@1');
+  assert.equal(direction.status, 'proven-awaiting-authority-wrap');
   assert.equal(direction.hypothesisId, 'tactile');
   assert.equal(direction.critic.recommendationFollowed, false);
   assert.equal(direction.truth.renderedMotionProofReviewed, true);
   assert.equal(direction.truth.motionCriticReviewed, true);
   assert.equal(direction.truth.humanCreativeSelectionConfirmed, true);
-  assert.equal(direction.truth.technicalPlanningAuthorized, true);
+  assert.equal(direction.truth.technicalPlanningAuthorized, false);
+  assert.equal(direction.truth.finalMotionDirectionAuthorityRequired, true);
   assert.equal(direction.truth.productionApproved, false);
 });
