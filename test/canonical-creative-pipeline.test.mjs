@@ -9,6 +9,8 @@ import {
   buildCreativeThesisDeliberation
 } from '../modules/creative-thesis/intelligence.mjs';
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
+import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
+import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
 function buildDeliberation() {
   return buildCreativeThesisDeliberation({
@@ -64,6 +66,83 @@ function buildDeliberation() {
   });
 }
 
+function authoredWorlds() {
+  return [
+    {
+      id: 'world-a',
+      label: 'Editorial Service Ritual',
+      worldIdea: 'A precise editorial service ritual.',
+      interpretationOfThesis: 'Product truth becomes a sequence of deliberate editorial moments.',
+      signatureBehavior: 'Content resolves through a measured threshold rhythm.',
+      worldClass: 'editorial-service-ritual',
+      narrativeModel: 'progressive-reveal',
+      compositionModel: 'asymmetric-editorial-grid',
+      typographyIntent: { statement: 'Editorial authority with highly functional reading behavior.' },
+      imageLanguage: 'close material studies with disciplined negative space',
+      materialLanguage: 'paper, glass and restrained metallic detail',
+      motionLanguage: 'measured threshold transitions with controlled persistence',
+      interactionModel: 'direct manipulation with quiet contextual feedback',
+      responsiveStrategy: 'recompose hierarchy rather than merely stack desktop sections',
+      categoryTransferTest: {
+        whyProjectSpecific: 'The world is organized around this project’s product-truth and service evidence rather than category styling.',
+        transferRisk: 'Without those truths it collapses into generic editorial premium behavior.'
+      },
+      antiPatterns: ['generic luxury serif staging', 'card-grid SaaS composition']
+    },
+    {
+      id: 'world-b',
+      label: 'Evidence Workshop',
+      worldIdea: 'A working evidence surface where proof accumulates through use.',
+      interpretationOfThesis: 'Product truth is exposed as observable evidence rather than a polished claim.',
+      signatureBehavior: 'Evidence layers lock into place as users inspect and compare.',
+      worldClass: 'evidence-workshop',
+      narrativeModel: 'forensic-assembly',
+      compositionModel: 'modular-workbench-field',
+      typographyIntent: { statement: 'Utility-first grotesk rhythm with dense evidence annotations.' },
+      imageLanguage: 'annotated process fragments and documentary evidence crops',
+      materialLanguage: 'measurement tape, labels, raw substrate and translucent overlays',
+      motionLanguage: 'snapping assembly, measured reveals and evidence locking',
+      interactionModel: 'inspect, compare and pin evidence into working states',
+      responsiveStrategy: 'convert the workbench into a prioritized evidence stack on narrow screens',
+      categoryTransferTest: {
+        whyProjectSpecific: 'Its structure depends on this project’s evidence and comparison behaviors.',
+        transferRisk: 'Without project evidence it becomes an empty dashboard aesthetic.'
+      },
+      antiPatterns: ['ambient storytelling without proof', 'decorative dashboard chrome']
+    },
+    {
+      id: 'world-c',
+      label: 'Service Choreography',
+      worldIdea: 'A spatial choreography organized around meaningful service transitions.',
+      interpretationOfThesis: 'Service behavior becomes the temporal structure through which product truth is understood.',
+      signatureBehavior: 'The interface crosses deliberate service thresholds that change spatial state.',
+      worldClass: 'service-choreography',
+      narrativeModel: 'threshold-sequence',
+      compositionModel: 'spatial-stage-zones',
+      typographyIntent: { statement: 'Humanist functional type with strong temporal hierarchy.' },
+      imageLanguage: 'wide contextual scenes punctuated by precise action details',
+      materialLanguage: 'soft light, physical thresholds, tactile surfaces and depth',
+      motionLanguage: 'continuous spatial handoffs with restrained acceleration',
+      interactionModel: 'progress through threshold actions that reveal the next service state',
+      responsiveStrategy: 'translate spatial thresholds into sequential state changes on mobile',
+      categoryTransferTest: {
+        whyProjectSpecific: 'The choreography maps to this project’s actual service sequence and decision points.',
+        transferRisk: 'Without those service transitions it becomes generic cinematic scrolling.'
+      },
+      antiPatterns: ['scroll spectacle without service meaning', 'one-size-fits-all section stacking']
+    }
+  ];
+}
+
+function proofMoments() {
+  return [
+    { id: 'opening', label: 'Opening', viewport: 'desktop', width: 1440, height: 900, purpose: 'Prove first-contact hierarchy.', productState: 'first contact' },
+    { id: 'core', label: 'Core', viewport: 'desktop', width: 1440, height: 900, purpose: 'Prove primary behavior.', productState: 'primary interaction' },
+    { id: 'decision', label: 'Decision', viewport: 'desktop', width: 1440, height: 900, purpose: 'Prove decision clarity.', productState: 'decision boundary' },
+    { id: 'mobile', label: 'Mobile', viewport: 'mobile', width: 390, height: 844, purpose: 'Prove mobile reinterpretation.', productState: 'mobile primary interaction' }
+  ];
+}
+
 function fixture() {
   const deliberation = buildDeliberation();
   const authored = authoredCandidateFromDeliberation(deliberation);
@@ -82,56 +161,39 @@ function fixture() {
     id: 'thesis-1',
     truth: { ...(builtThesis.truth ?? {}), humanCreativeApproval: true }
   };
-  const world = {
-    schema: 'ai-studio-os/creative-world@1',
-    id: 'world-a',
-    worldIdea: 'A precise editorial service ritual.',
-    interpretationOfThesis: 'Product truth becomes a sequence of deliberate editorial moments.',
-    signatureBehavior: 'Content resolves through a measured threshold rhythm.',
-    worldClass: 'editorial-service-ritual',
-    narrativeModel: 'progressive-reveal',
-    compositionModel: 'asymmetric-editorial-grid',
-    typographyIntent: { statement: 'Editorial authority with highly functional reading behavior.' },
-    imageLanguage: 'close material studies with disciplined negative space',
-    materialLanguage: 'paper, glass and restrained metallic detail',
-    motionLanguage: 'measured threshold transitions with controlled persistence',
-    interactionModel: 'direct manipulation with quiet contextual feedback',
-    responsiveStrategy: 'recompose hierarchy rather than merely stack desktop sections',
-    categoryTransferTest: {
-      whyProjectSpecific: 'The world is organized around this project’s product-truth and service evidence rather than category styling.',
-      transferRisk: 'Without those truths it collapses into generic editorial premium behavior.'
-    },
-    antiPatterns: ['generic luxury serif staging', 'card-grid SaaS composition'],
-    thesisRef: {
-      schema: thesis.schema,
-      projectId: thesis.projectId,
-      governingIdea: thesis.governingIdea.statement
-    },
-    findings: [],
-    reviewReady: true,
-    selected: true,
-    truth: {
-      humanCreativeSelectionConfirmed: true,
-      visualWorldProofReviewed: true
-    }
-  };
-  const styleFrameProof = {
-    reviewReady: true,
-    truth: { humanVisualApproval: false },
-    frames: [{ id: 'frame-world-a', worldId: 'world-a', rendered: true }],
-    findings: []
-  };
-  const exploration = {
-    selectedWorld: world,
-    selection: {
-      worldId: 'world-a',
-      humanConfirmed: true,
-      visualReviewConfirmed: true,
-      visualEvidenceRefs: ['frame-world-a']
-    },
-    truth: { humanWorldSelectionConfirmed: true },
-    findings: []
-  };
+
+  const preSelectionExploration = buildCreativeWorldExploration({
+    creativeThesis: thesis,
+    authoredWorlds: authoredWorlds()
+  });
+  assert.equal(preSelectionExploration.reviewReady, true);
+
+  const styleFrameProof = buildStyleFrameProof({ exploration: preSelectionExploration, moments: proofMoments() });
+  assert.equal(styleFrameProof.reviewReady, true);
+  const renderedFrames = styleFrameProof.frames.map((frame) => ({
+    frameId: frame.id,
+    worldId: frame.worldId,
+    imageRef: `image:${frame.id}`,
+    sourceRef: `source:${frame.id}`
+  }));
+  const visualProofEvidence = buildVisualProofEvidence({
+    plan: styleFrameProof,
+    renderedFrames,
+    comparisonRefs: ['comparison:all-worlds']
+  });
+  assert.equal(visualProofEvidence.reviewReady, true);
+
+  const selectedEvidenceRefs = visualProofEvidence.worlds.find((item) => item.worldId === 'world-a').evidenceRefs;
+  const exploration = selectCreativeWorld(preSelectionExploration, {
+    worldId: 'world-a',
+    humanConfirmed: true,
+    visualReviewConfirmed: true,
+    visualEvidenceRefs: selectedEvidenceRefs,
+    rationale: 'World A best preserves product truth while producing a distinct service rhythm.'
+  });
+  const world = exploration.selectedWorld;
+  assert.ok(world);
+
   const direction = {
     provisional: false,
     directionStatement: 'World A direction',
@@ -139,7 +201,7 @@ function fixture() {
     worldContext: { id: 'world-a' },
     findings: []
   };
-  return { deliberation, thesis, world, exploration, styleFrameProof, direction };
+  return { deliberation, thesis, world, exploration, styleFrameProof, visualProofEvidence, direction };
 }
 
 function handoffInput(parts) {
@@ -150,6 +212,7 @@ function handoffInput(parts) {
     selectedCreativeWorld: parts.world,
     creativeWorldExploration: parts.exploration,
     styleFrameProof: parts.styleFrameProof,
+    visualProofEvidence: parts.visualProofEvidence,
     creativeDirection: parts.direction
   };
 }
@@ -162,8 +225,10 @@ test('canonical handoff passes only valid, traceable, production-complete creati
   assert.equal(output.authority.selectedWorldId, 'world-a');
   assert.equal(output.truth.creativeThesisAuthorityValid, true);
   assert.equal(output.truth.creativeThesisHumanApproved, true);
+  assert.equal(output.truth.creativeWorldExplorationRevalidated, true);
   assert.equal(output.truth.creativeSelectionHumanGoverned, true);
   assert.equal(output.truth.creativeSelectionProvenanceValid, true);
+  assert.equal(output.truth.renderedVisualProofEvidenceValid, true);
   assert.equal(output.truth.creativeWorldProductionContractComplete, true);
   assert.equal(output.truth.creativeWorldStructuralReviewRecomputed, true);
   assert.equal(output.truth.creativeWorldStructuralReviewReady, true);
@@ -189,12 +254,60 @@ test('thesis without explicit human creative approval cannot cross production bo
   assert.ok(output.findings.some((item) => item.code === 'canonical-thesis-authority-invalid'));
 });
 
+test('fabricated partial exploration cannot authorize a selected world', () => {
+  const parts = fixture();
+  parts.exploration = {
+    selectedWorld: parts.world,
+    selection: structuredClone(parts.exploration.selection),
+    truth: { humanWorldSelectionConfirmed: true },
+    findings: []
+  };
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeWorldExplorationRevalidated, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-exploration-invalid'));
+});
+
+test('selected world must remain a member of the re-reviewed exploration candidate set', () => {
+  const parts = fixture();
+  parts.exploration.worlds = parts.exploration.worlds.filter((item) => item.id !== parts.world.id);
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-exploration-invalid'));
+});
+
+test('a style-frame proof plan cannot substitute for rendered proof evidence', () => {
+  const parts = fixture();
+  parts.visualProofEvidence = parts.styleFrameProof;
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.renderedVisualProofEvidenceValid, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-rendered-visual-proof-invalid'));
+});
+
+test('selection evidence refs must resolve exactly to rendered evidence for selected world', () => {
+  const parts = fixture();
+  parts.exploration.selection.visualEvidenceRefs = ['image:another-world-frame'];
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.renderedVisualProofEvidenceValid, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-rendered-visual-proof-invalid'));
+});
+
+test('world candidate cannot cross the production authority boundary', () => {
+  const parts = fixture();
+  parts.world.selected = false;
+  parts.world.truth.humanCreativeSelectionConfirmed = false;
+  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
+  assert.equal(output.pass, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-not-authoritative'));
+});
+
 test('fabricated world reviewReady cannot bypass recomputed project-specificity review', () => {
   const parts = fixture();
   parts.world.categoryTransferTest = {};
   parts.world.reviewReady = true;
   parts.world.findings = [];
-  parts.exploration.selectedWorld = parts.world;
   const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
   assert.equal(output.pass, false);
   assert.equal(output.truth.creativeWorldStructuralReviewReady, false);
@@ -206,7 +319,6 @@ test('technology cannot become the selected world concept even with fabricated c
   parts.world.worldIdea = 'A WebGL shader experience defines the brand world.';
   parts.world.reviewReady = true;
   parts.world.findings = [];
-  parts.exploration.selectedWorld = parts.world;
   const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
   assert.equal(output.pass, false);
   assert.equal(output.truth.creativeWorldStructuralReviewReady, false);
@@ -214,46 +326,9 @@ test('technology cannot become the selected world concept even with fabricated c
   assert.ok(issue.evidence.structuralFindingCodes.includes('creative-world-technology-became-concept'));
 });
 
-test('truthful human visual approval does not invalidate otherwise valid style-frame proof', () => {
-  const parts = fixture();
-  parts.styleFrameProof.truth.humanVisualApproval = true;
-  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
-  assert.equal(output.pass, true);
-  assert.equal(output.truth.styleFrameProofReviewed, true);
-});
-
-test('world candidate cannot cross the production authority boundary', () => {
-  const parts = fixture();
-  parts.world.selected = false;
-  parts.world.truth.humanCreativeSelectionConfirmed = false;
-  parts.exploration.selectedWorld = parts.world;
-  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
-  assert.equal(output.pass, false);
-  assert.ok(output.findings.some((item) => item.code === 'canonical-world-not-authoritative'));
-});
-
-test('fabricated selected flags without current exploration selection provenance are rejected', () => {
-  const parts = fixture();
-  parts.exploration.selection = null;
-  parts.exploration.truth.humanWorldSelectionConfirmed = false;
-  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
-  assert.equal(output.pass, false);
-  assert.equal(output.truth.creativeSelectionProvenanceValid, false);
-  assert.ok(output.findings.some((item) => item.code === 'canonical-world-selection-provenance-invalid'));
-});
-
-test('visual selection evidence must reference a rendered frame in the current proof', () => {
-  const parts = fixture();
-  parts.exploration.selection.visualEvidenceRefs = ['missing-frame'];
-  const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
-  assert.equal(output.pass, false);
-  assert.ok(output.findings.some((item) => item.code === 'canonical-world-selection-provenance-invalid'));
-});
-
 test('human-selected world with incomplete production dimensions is rejected', () => {
   const parts = fixture();
   parts.world.motionLanguage = '';
-  parts.exploration.selectedWorld = parts.world;
   const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
   assert.equal(output.pass, false);
   assert.equal(output.truth.creativeWorldProductionContractComplete, false);
@@ -265,7 +340,6 @@ test('human-selected world with incomplete production dimensions is rejected', (
 test('world thesis/project binding drift blocks production completeness', () => {
   const parts = fixture();
   parts.world.thesisRef.projectId = 'other-project';
-  parts.exploration.selectedWorld = parts.world;
   const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
   assert.equal(output.pass, false);
   assert.equal(output.truth.creativeWorldThesisProjectBindingValid, false);
@@ -299,6 +373,8 @@ test('validator preserves authority completeness expectations', () => {
     status: 'ready-for-production-planning',
     selectedWorldId: 'world-a',
     requireThesisAuthority: true,
+    requireExplorationRevalidation: true,
+    requireRenderedVisualProof: true,
     requireProductionContractComplete: true,
     requireSelectionProvenance: true,
     requireNoFabricatedProductionApproval: true,
