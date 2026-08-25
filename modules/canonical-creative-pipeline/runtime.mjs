@@ -29,7 +29,9 @@ function typographyIsAuthoritative(typography = {}) {
  *
  * This module deliberately does not generate, rank, select, or mutate creative
  * work. It only verifies that upstream human-governed decisions are coherent
- * before production is allowed to consume them.
+ * before production is allowed to consume them. Creative Production treats a
+ * passing packet as the authority boundary; legacy calibration may remain as
+ * diagnostic evidence but cannot override the selected world/direction.
  */
 export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const findings = [];
