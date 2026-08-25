@@ -58,6 +58,24 @@ test('altered caller hypothesis content cannot replace the exact hypothesis that
   assert.equal(direction, null);
 });
 
+test('the lower-level motion-direction producer also rejects post-Critic exploration drift', () => {
+  const fixture = buildMotionCritiqueFixture();
+  const editorial = fixture.brief.hypotheses.find((item) => item.id === 'editorial');
+  const driftedExploration = structuredClone(fixture.exploration);
+  driftedExploration.hypotheses.find((item) => item.id === 'editorial').language.motionThesis = 'A direct-producer replacement that was never rendered or critiqued.';
+
+  const direction = buildProvenMotionDirection({
+    exploration: driftedExploration,
+    critique: fixture.critique,
+    hypothesisId: 'editorial',
+    humanConfirmed: true,
+    rationale: 'Attempt to bypass the authority wrapper with altered exploration content.',
+    reviewedEvidenceRefs: editorial.requiredSelectionEvidenceRefs
+  });
+
+  assert.equal(direction, null);
+});
+
 test('raw motion-direction@1 with a true authorization flag is not sufficient for technical planning', () => {
   const fixture = buildMotionCritiqueFixture();
   const editorial = fixture.brief.hypotheses.find((item) => item.id === 'editorial');
