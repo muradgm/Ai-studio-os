@@ -532,6 +532,15 @@ export function reviewMotionProofEvidence(evidence = {}) {
   let browserReview = { findings: [], verified: false };
   const artifactBlockers = findings.filter((item) => item.severity === 'blocker');
   if (realOnly && artifactBlockers.length === 0) {
+    const comparisonPaths = list(evidence.comparisonRefs).map(resolveArtifactRef).filter(Boolean);
+    const expectedVideoPaths = list(renderedStudies.map((study) => study.videoRef)).map(resolveArtifactRef).filter(Boolean);
+    if (comparisonPaths.length && expectedVideoPaths.length) {
+      browserTargets.push({
+        kind: 'comparison',
+        comparisonPaths,
+        expectedVideoPaths
+      });
+    }
     browserReview = verifyIndependentMotionProofBrowserArtifacts(browserTargets);
     findings.push(...browserReview.findings);
   }
@@ -565,7 +574,8 @@ export function reviewMotionProofEvidence(evidence = {}) {
       mixedFixtureAndBrowserEvidenceRejected: true,
       sourceAndTimelineDigestsRequired: true,
       comparisonEvidenceRequired: true,
-      comparisonArtifactsVerified: blockers.length === 0 && realOnly && comparisonReview.verified === true,
+      comparisonBrowserDomVerified: blockers.length === 0 && realOnly && browserReview.verified === true && comparisonReview.verified === true,
+      comparisonArtifactsVerified: blockers.length === 0 && realOnly && browserReview.verified === true && comparisonReview.verified === true,
       proofPlanAuthorityRecomputed: true,
       cachedPlanReviewTrusted: false,
       testFixtureEvidenceOnly: blockers.length === 0 && fixtureOnly,
