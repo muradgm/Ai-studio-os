@@ -388,7 +388,7 @@ async function verifyStudyTarget(browser, target) {
     const preFinalDistances = replayTemporalSamples
       .filter((sample) => sample.elapsedMs < Number(timelineContract.durationMs) * 0.95)
       .map((sample) => visualDistance(sample.pixels, replaySignature.pixels));
-    if (!preFinalDistances.some(visiblyDifferent)) {
+    if (planned.input !== 'reduced-motion' && !preFinalDistances.some(visiblyDifferent)) {
       findings.push({
         code: 'motion-proof-independent-source-visible-motion-missing',
         message: 'Independent replay did not expose a materially distinct pre-final visual state; requestAnimationFrame callbacks alone are not temporal visual proof.'
