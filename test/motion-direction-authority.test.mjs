@@ -9,37 +9,37 @@ import {
 import { buildMotionTechnicalPlanningHandoff } from '../modules/motion-creative-intelligence/technical-planning.mjs';
 import { buildMotionCritiqueFixture } from '../fixtures/motion-critic-authority-fixture.mjs';
 
-function validDirectionFixture(hypothesisId = 'editorial') {
+function lowerLevelFixtureCandidate(hypothesisId = 'editorial') {
   const fixture = buildMotionCritiqueFixture();
   const hypothesis = fixture.brief.hypotheses.find((item) => item.id === hypothesisId);
-  const direction = buildAuthoritativeMotionDirection({
+  const candidate = buildProvenMotionDirection({
     exploration: fixture.exploration,
     critique: fixture.critique,
     hypothesisId,
     humanConfirmed: true,
-    rationale: `Human confirms ${hypothesis.title} after reviewing all required rendered studies.`,
+    rationale: `Fixture confirms ${hypothesis.title} only for lower-level contract testing.`,
     reviewedEvidenceRefs: hypothesis.requiredSelectionEvidenceRefs
   });
-  assert.ok(direction);
-  return { ...fixture, hypothesis, direction };
+  assert.ok(candidate);
+  return { ...fixture, hypothesis, candidate };
 }
 
-test('authoritative Motion Direction is reconstructed from the exact Critic exploration and rendered evidence', () => {
-  const { direction } = validDirectionFixture();
-  const review = reviewMotionDirectionAuthority(direction);
+test('synthetic fixture evidence cannot become authoritative Motion Direction for technical planning', () => {
+  const fixture = buildMotionCritiqueFixture();
+  const hypothesis = fixture.brief.hypotheses.find((item) => item.id === 'editorial');
+  assert.equal(fixture.evidence.truth.testFixtureEvidenceOnly, true);
+  assert.equal(fixture.evidence.truth.exactBrowserTemporalEvidence, false);
 
-  assert.equal(direction.schema, 'ai-studio-os/motion-direction@1');
-  assert.equal(direction.status, 'proven-awaiting-technical-planning');
-  assert.equal(direction.truth.directionBuiltFromCriticAuthoritativeExploration, true);
-  assert.equal(direction.truth.directionAuthorityRecomputable, true);
-  assert.equal(direction.truth.finalMotionDirectionAuthoritySatisfied, true);
-  assert.equal(direction.truth.technicalPlanningAuthorized, true);
-  assert.equal(review.reviewReady, true);
-  assert.equal(review.status, 'authoritative-for-technical-planning');
-  assert.equal(review.truth.renderedMotionProofReviewed, true);
-  assert.equal(review.truth.motionCriticReviewed, true);
-  assert.equal(review.truth.humanMotionSelectionConfirmed, true);
-  assert.equal(review.truth.productionApproved, false);
+  const direction = buildAuthoritativeMotionDirection({
+    exploration: fixture.exploration,
+    critique: fixture.critique,
+    hypothesisId: 'editorial',
+    humanConfirmed: true,
+    rationale: 'Attempt to turn synthetic fixture evidence into real technical authority.',
+    reviewedEvidenceRefs: hypothesis.requiredSelectionEvidenceRefs
+  });
+
+  assert.equal(direction, null);
 });
 
 test('altered caller hypothesis content cannot replace the exact hypothesis that was rendered and critiqued', () => {
@@ -80,58 +80,92 @@ test('the lower-level motion-direction producer also rejects post-Critic explora
 });
 
 test('lower-level proven candidate cannot claim final Motion Direction or technical-planning authority', () => {
-  const fixture = buildMotionCritiqueFixture();
-  const editorial = fixture.brief.hypotheses.find((item) => item.id === 'editorial');
-  const rawDirection = buildProvenMotionDirection({
-    exploration: fixture.exploration,
-    critique: fixture.critique,
-    hypothesisId: 'editorial',
-    humanConfirmed: true,
-    rationale: 'Human confirms after rendered comparison.',
-    reviewedEvidenceRefs: editorial.requiredSelectionEvidenceRefs
-  });
-  assert.ok(rawDirection);
-  assert.equal(rawDirection.schema, 'ai-studio-os/motion-direction-proven-candidate@1');
-  assert.equal(rawDirection.status, 'proven-awaiting-authority-wrap');
-  assert.equal(rawDirection.truth.technicalPlanningAuthorized, false);
-  assert.equal(rawDirection.truth.finalMotionDirectionAuthorityRequired, true);
+  const { candidate } = lowerLevelFixtureCandidate();
 
-  const review = reviewMotionDirectionAuthority(rawDirection);
-  const handoff = buildMotionTechnicalPlanningHandoff({ motionDirection: rawDirection });
+  assert.equal(candidate.schema, 'ai-studio-os/motion-direction-proven-candidate@1');
+  assert.equal(candidate.status, 'proven-awaiting-authority-wrap');
+  assert.equal(candidate.truth.technicalPlanningAuthorized, false);
+  assert.equal(candidate.truth.finalMotionDirectionAuthorityRequired, true);
+
+  const review = reviewMotionDirectionAuthority(candidate);
+  const handoff = buildMotionTechnicalPlanningHandoff({ motionDirection: candidate });
   assert.equal(review.reviewReady, false);
   assert.ok(review.findings.some((item) => item.code === 'motion-direction-schema-invalid'));
   assert.ok(review.findings.some((item) => item.code === 'motion-direction-authority-recompute-failed'));
   assert.equal(handoff.reviewReady, false);
+  assert.equal(handoff.truth.technicalStrategyMayNowBegin, false);
 });
 
-test('post-approval mutation of the authoritative Motion Direction is detected before technical planning', () => {
-  const { direction } = validDirectionFixture();
-  const forged = structuredClone(direction);
-  forged.language.motionThesis = 'Use spectacle and continuous ambient animation everywhere.';
-  forged.truth.technicalPlanningAuthorized = true;
+test('hand-shaped final Direction cannot bypass independently verified browser evidence', () => {
+  const { candidate, critique } = lowerLevelFixtureCandidate();
+  const forged = {
+    ...candidate,
+    schema: 'ai-studio-os/motion-direction@1',
+    status: 'proven-awaiting-technical-planning',
+    authorityInputs: {
+      critique,
+      hypothesisId: candidate.hypothesisId,
+      humanConfirmed: true,
+      rationale: 'Fabricated final wrapper around fixture-only proof.',
+      reviewedEvidenceRefs: candidate.critic.reviewedEvidenceRefs
+    },
+    truth: {
+      ...candidate.truth,
+      technicalPlanningAuthorized: true,
+      productionApproved: false
+    }
+  };
 
   const review = reviewMotionDirectionAuthority(forged);
   assert.equal(review.reviewReady, false);
-  assert.ok(review.findings.some((item) => item.code === 'motion-direction-authority-drift'));
+  assert.ok(review.findings.some((item) => item.code === 'motion-direction-authority-recompute-failed'));
+  assert.equal(review.truth.exactBrowserTemporalEvidenceRequired, true);
+  assert.equal(review.truth.testFixtureEvidenceRejectedForTechnicalAuthority, true);
 });
 
 test('Motion Direction cannot fabricate production approval at the technical-planning boundary', () => {
-  const { direction } = validDirectionFixture();
-  const forged = structuredClone(direction);
-  forged.truth.productionApproved = true;
+  const { candidate, critique } = lowerLevelFixtureCandidate();
+  const forged = {
+    ...candidate,
+    schema: 'ai-studio-os/motion-direction@1',
+    status: 'proven-awaiting-technical-planning',
+    authorityInputs: {
+      critique,
+      hypothesisId: candidate.hypothesisId,
+      humanConfirmed: true,
+      rationale: 'Fabricated final wrapper around fixture-only proof.',
+      reviewedEvidenceRefs: candidate.critic.reviewedEvidenceRefs
+    },
+    truth: {
+      ...candidate.truth,
+      technicalPlanningAuthorized: true,
+      productionApproved: true
+    }
+  };
 
   const review = reviewMotionDirectionAuthority(forged);
   assert.equal(review.reviewReady, false);
+  assert.ok(review.findings.some((item) => item.code === 'motion-direction-authority-recompute-failed'));
   assert.ok(review.findings.some((item) => item.code === 'motion-direction-production-approval-fabricated'));
 });
 
-test('technical planning handoff carries creative constraints but selects no implementation technology', () => {
-  const { direction } = validDirectionFixture();
-  const handoff = buildMotionTechnicalPlanningHandoff({ motionDirection: direction });
+test('technical planning handoff remains blocked for synthetic fixture evidence and selects no implementation technology', () => {
+  const fixture = buildMotionCritiqueFixture();
+  const hypothesis = fixture.brief.hypotheses.find((item) => item.id === 'editorial');
+  const direction = buildAuthoritativeMotionDirection({
+    exploration: fixture.exploration,
+    critique: fixture.critique,
+    hypothesisId: 'editorial',
+    humanConfirmed: true,
+    rationale: 'Synthetic fixture must not authorize technical strategy.',
+    reviewedEvidenceRefs: hypothesis.requiredSelectionEvidenceRefs
+  });
+  assert.equal(direction, null);
 
-  assert.equal(handoff.reviewReady, true);
-  assert.equal(handoff.status, 'ready-for-motion-technical-strategy');
-  assert.equal(handoff.truth.technicalStrategyMayNowBegin, true);
+  const handoff = buildMotionTechnicalPlanningHandoff({ motionDirection: direction });
+  assert.equal(handoff.reviewReady, false);
+  assert.equal(handoff.status, 'blocked');
+  assert.equal(handoff.truth.technicalStrategyMayNowBegin, false);
   assert.equal(handoff.truth.implementationTechnologySelected, false);
   assert.equal(handoff.truth.gsapSelected, false);
   assert.equal(handoff.truth.threeJsSelected, false);
@@ -141,6 +175,4 @@ test('technical planning handoff carries creative constraints but selects no imp
   assert.equal(handoff.truth.physicsEngineSelected, false);
   assert.equal(handoff.truth.shaderImplementationSelected, false);
   assert.equal(handoff.truth.productionApproved, false);
-  assert.equal(handoff.decisionPolicy.technologyMustBeJustifiedByBehavior, true);
-  assert.equal(handoff.decisionPolicy.technicalFeasibilityCannotRewriteCreativeAuthority, true);
 });
