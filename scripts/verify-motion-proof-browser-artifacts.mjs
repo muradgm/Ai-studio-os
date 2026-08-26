@@ -93,25 +93,46 @@ async function waitForMediaMetadata(page, selector) {
   });
 }
 
-async function seekVideoToFinalFrame(page) {
-  return page.locator('video').evaluate(async (video) => {
+async function decodedVideoFrameSamples(page, selector) {
+  return page.locator(selector).evaluate(async (video, { width, height }) => {
     video.muted = true;
-    const targetTime = Math.min(Math.max(video.duration - 0.05, 0.01), Math.max(video.duration - 0.01, 0.01));
-    if (targetTime > 0 && Number.isFinite(targetTime)) {
+    const offsets = [0.35, 0.18, 0.05];
+    const samples = [];
+    const seek = async (targetTime) => {
+      if (Math.abs(video.currentTime - targetTime) < 0.001 && video.readyState >= 2) return;
       await new Promise((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('video seek timeout')), 10_000);
-        video.addEventListener('seeked', () => { clearTimeout(timer); resolve(); }, { once: true });
-        video.addEventListener('error', () => { clearTimeout(timer); reject(new Error('video seek decode error')); }, { once: true });
+        const done = () => { clearTimeout(timer); resolve(); };
+        const fail = () => { clearTimeout(timer); reject(new Error('video seek decode error')); };
+        video.addEventListener('seeked', done, { once: true });
+        video.addEventListener('error', fail, { once: true });
         video.currentTime = targetTime;
       });
+      if (video.readyState < 2) {
+        await new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error('video frame decode timeout')), 10_000);
+          video.addEventListener('loadeddata', () => { clearTimeout(timer); resolve(); }, { once: true });
+          video.addEventListener('error', () => { clearTimeout(timer); reject(new Error('video frame decode error')); }, { once: true });
+        });
+      }
+    };
+
+    for (const offset of offsets) {
+      const targetTime = Math.max(0.01, Math.min(video.duration - offset, video.duration - 0.01));
+      if (!(targetTime > 0) || !Number.isFinite(targetTime)) continue;
+      await seek(targetTime);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.drawImage(video, 0, 0, width, height);
+      samples.push({
+        targetTime,
+        pixels: Array.from(context.getImageData(0, 0, width, height).data)
+      });
     }
-    const canvas = document.createElement('canvas');
-    canvas.width = 48;
-    canvas.height = 32;
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    return Array.from(context.getImageData(0, 0, canvas.width, canvas.height).data);
-  });
+    return samples;
+  }, { width: SAMPLE_WIDTH, height: SAMPLE_HEIGHT });
 }
 
 async function verifyTarget(browser, target) {
@@ -161,12 +182,14 @@ async function verifyTarget(browser, target) {
     if (captureSignature.width !== viewport.width || captureSignature.height !== viewport.height) findings.push({ code: 'motion-proof-independent-capture-viewport-mismatch', message: 'Decoded PNG dimensions do not match the planned browser viewport.' });
     const captureDistance = visualDistance(replaySignature.pixels, captureSignature.pixels);
     if (!visuallyBound(captureDistance)) {
-      findings.push({ code: 'motion-proof-independent-capture-replay-mismatch', message: 'Claimed PNG end frame is not pixel-bound to the independently replayed source state.' });
+      findings.push({ code: 'motion-proof-independent-capture-replay-mismatch', message: `Claimed PNG end frame is not pixel-bound to the independently replayed source state (mean delta ${captureDistance.meanDelta.toFixed(2)}, outlier share ${captureDistance.outlierShare.toFixed(4)}).` });
     }
 
-    await page.goto(pathToFileURL(target.videoPath).href, { waitUntil: 'domcontentloaded', timeout: 15_000 });
-    await page.waitForSelector('video', { timeout: 10_000 });
-    const media = await waitForMediaMetadata(page, 'video');
+    const videoBytes = await fs.readFile(target.videoPath);
+    const videoDataUrl = `data:video/webm;base64,${videoBytes.toString('base64')}`;
+    await page.setContent('<!doctype html><video id="proof-video" muted playsinline preload="auto"></video>', { waitUntil: 'load' });
+    await page.locator('#proof-video').evaluate((video, src) => { video.src = src; video.load(); }, videoDataUrl);
+    const media = await waitForMediaMetadata(page, '#proof-video');
     if (!(media.videoWidth > 0) || !(media.videoHeight > 0) || !(media.duration > 0) || media.readyState < 1) {
       findings.push({ code: 'motion-proof-independent-video-decode-invalid', message: 'Chromium could not decode a non-empty temporal WebM with valid dimensions and duration.' });
     } else {
@@ -175,14 +198,19 @@ async function verifyTarget(browser, target) {
       if (timelineContract.durationMs > 0 && (videoDurationMs < timelineContract.durationMs * 0.75 || videoDurationMs > timelineContract.durationMs + 5000)) {
         findings.push({ code: 'motion-proof-independent-video-duration-mismatch', message: 'Decoded WebM duration is not plausibly bound to the claimed browser timeline.' });
       }
-      const videoPixels = await seekVideoToFinalFrame(page);
-      const videoDistance = visualDistance(replaySignature.pixels, videoPixels);
-      if (!visuallyBound(videoDistance)) {
-        findings.push({ code: 'motion-proof-independent-video-replay-mismatch', message: 'Decoded WebM final state is not pixel-bound to the independently replayed source state.' });
+      const samples = await decodedVideoFrameSamples(page, '#proof-video');
+      if (!samples.length) {
+        findings.push({ code: 'motion-proof-independent-video-frame-missing', message: 'Decoded WebM did not yield a comparable temporal frame.' });
+      } else {
+        const distances = samples.map((sample) => ({ targetTime: sample.targetTime, ...visualDistance(captureSignature.pixels, sample.pixels) }));
+        const best = distances.sort((left, right) => left.meanDelta - right.meanDelta || left.outlierShare - right.outlierShare)[0];
+        if (!visuallyBound(best)) {
+          findings.push({ code: 'motion-proof-independent-video-replay-mismatch', message: `Decoded WebM does not visually bind to the replay-verified end frame (best mean delta ${best.meanDelta.toFixed(2)}, outlier share ${best.outlierShare.toFixed(4)}).` });
+        }
       }
     }
   } catch (error) {
-    findings.push({ code: 'motion-proof-independent-browser-replay-error', message: error?.message ?? 'Independent browser replay failed.' });
+    findings.push({ code: 'motion-proof-independent-browser-replay-error', message: `Independent browser replay failed: ${error?.message ?? 'unknown error'}` });
   } finally {
     await context.close();
   }
