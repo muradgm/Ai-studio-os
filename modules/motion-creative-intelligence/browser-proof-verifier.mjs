@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-browser-artifacts.mjs');
+const VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-browser-artifacts-v2.mjs');
 
 function blocker(code, message, evidence = {}) {
   return { severity: 'blocker', code, message, evidence };
@@ -27,7 +27,7 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
     const execution = spawnSync(process.execPath, [VERIFIER_PATH, inputPath], {
       cwd: REPO_ROOT,
       encoding: 'utf8',
-      timeout: 180_000,
+      timeout: 300_000,
       maxBuffer: 20 * 1024 * 1024
     });
 
@@ -62,7 +62,8 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
       item?.message || 'Independent browser verification failed.',
       {
         studyId: item?.studyId ?? null,
-        comparisonRef: item?.comparisonRef ?? null
+        comparisonRef: item?.comparisonRef ?? null,
+        verifierMessage: item?.message ?? null
       }
     ));
 
