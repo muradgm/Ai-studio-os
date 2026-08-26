@@ -1,3 +1,8 @@
+import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { reviewMotionCreativeExploration } from './runtime.mjs';
 
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
@@ -5,6 +10,11 @@ function list(value) { return [...new Set((Array.isArray(value) ? value : []).ma
 function finding(severity, code, message, evidence = {}) { return { severity, code, message, evidence }; }
 
 const SHA256 = /^[a-f0-9]{64}$/i;
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const ARTIFACT_ROOT = path.join(REPO_ROOT, 'artifacts');
+const TEST_FIXTURE_PROJECT_ID = 'motion-creative-intelligence-proof-fixture';
+const WEBM_HEADER = Buffer.from([0x1a, 0x45, 0xdf, 0xa3]);
+const PNG_HEADER = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const DEFAULT_MOMENTS = [
   { id: 'entry', label: 'Entry / first contact', purpose: 'Prove opening rhythm, attention hierarchy and stillness before the first earned movement.', viewport: 'desktop', input: 'passive' },
   { id: 'primary-reveal', label: 'Primary reveal', purpose: 'Prove the signature motion behavior at a meaningful hierarchy change.', viewport: 'desktop', input: 'passive' },
@@ -48,7 +58,8 @@ function proofHypothesesFromExploration(exploration = {}) {
     signatureMotionBehavior: hypothesis.language?.signatureMotionBehavior ?? null,
     temporalRhythm: hypothesis.language?.temporalRhythm ?? null,
     stillnessPolicy: hypothesis.language?.stillnessPolicy ?? null,
-    reducedMotionInterpretation: hypothesis.language?.reducedMotionInterpretation ?? null
+    reducedMotionInterpretation: hypothesis.language?.reducedMotionInterpretation ?? null,
+    responsiveConsequences: list(hypothesis.responsiveConsequences)
   }));
 }
 
@@ -68,9 +79,100 @@ function studyMatrix({ projectId, creativeWorldId, hypotheses = [], moments = []
       signatureMotionBehavior: hypothesis.signatureMotionBehavior,
       temporalRhythm: hypothesis.temporalRhythm,
       stillnessPolicy: hypothesis.stillnessPolicy,
-      reducedMotionInterpretation: moment.input === 'reduced-motion' ? hypothesis.reducedMotionInterpretation : null
+      reducedMotionInterpretation: moment.input === 'reduced-motion' ? hypothesis.reducedMotionInterpretation : null,
+      responsiveConsequences: moment.viewport === 'mobile' ? hypothesis.responsiveConsequences : []
     }
   })));
+}
+
+function digest(value) {
+  return crypto.createHash('sha256').update(value).digest('hex');
+}
+
+function startsWithBytes(buffer, header) {
+  return Buffer.isBuffer(buffer) && buffer.length >= header.length && buffer.subarray(0, header.length).equals(header);
+}
+
+function fixtureRef(ref) {
+  return text(ref).startsWith('fixture://');
+}
+
+function resolveArtifactRef(ref) {
+  const value = text(ref).replaceAll('\\', '/');
+  if (!value || value.includes('://') || value.startsWith('/') || value.split('/').includes('..')) return null;
+  const absolute = path.resolve(REPO_ROOT, value);
+  const withinArtifacts = absolute === ARTIFACT_ROOT || absolute.startsWith(`${ARTIFACT_ROOT}${path.sep}`);
+  return withinArtifacts ? absolute : null;
+}
+
+function readArtifact(ref, encoding = null) {
+  const absolute = resolveArtifactRef(ref);
+  if (!absolute) return { ok: false, reason: 'invalid-ref', absolute: null, value: null };
+  try {
+    const value = fs.readFileSync(absolute, encoding ?? undefined);
+    return { ok: true, reason: null, absolute, value };
+  } catch (error) {
+    return { ok: false, reason: error?.code ?? 'read-failed', absolute, value: null };
+  }
+}
+
+function verifyRenderedArtifacts({ evidence, planned, rendered }) {
+  const findings = [];
+  const refs = [rendered.videoRef, rendered.captureRef, rendered.sourceRef, rendered.timelineRef];
+  const allFixtureRefs = refs.every(fixtureRef);
+  const anyFixtureRefs = refs.some(fixtureRef);
+
+  if (anyFixtureRefs) {
+    if (!allFixtureRefs || evidence.projectId !== TEST_FIXTURE_PROJECT_ID) {
+      findings.push(finding('blocker', 'motion-proof-fixture-evidence-invalid', 'Synthetic fixture references are permitted only for the isolated Motion proof test fixture and may not be mixed with production artifact references.', { studyId: planned.id }));
+      return { findings, fixtureOnly: true };
+    }
+    return { findings, fixtureOnly: true };
+  }
+
+  const source = readArtifact(rendered.sourceRef, 'utf8');
+  const timeline = readArtifact(rendered.timelineRef, 'utf8');
+  const video = readArtifact(rendered.videoRef);
+  const capture = readArtifact(rendered.captureRef);
+
+  for (const [kind, artifact] of Object.entries({ source, timeline, video, capture })) {
+    if (!artifact.ok) findings.push(finding('blocker', 'motion-proof-artifact-unreadable', `Rendered Motion proof ${kind} artifact must exist beneath the repository artifact root and be independently readable.`, { studyId: planned.id, kind, ref: rendered[`${kind === 'source' ? 'source' : kind === 'timeline' ? 'timeline' : kind === 'video' ? 'video' : 'capture'}Ref`], reason: artifact.reason }));
+  }
+  if (findings.length) return { findings, fixtureOnly: false };
+
+  const expectedStudyLiteral = `const study=${JSON.stringify(planned)};`;
+  if (!source.value.includes(expectedStudyLiteral)) findings.push(finding('blocker', 'motion-proof-source-study-mismatch', 'Exact emitted browser source must embed the same planned study contract that is being reviewed.', { studyId: planned.id, sourceRef: rendered.sourceRef }));
+
+  const calculated = {
+    sourceSha256: digest(source.value),
+    timelineSha256: digest(timeline.value),
+    videoSha256: digest(video.value),
+    captureSha256: digest(capture.value)
+  };
+  for (const key of Object.keys(calculated)) {
+    if (!SHA256.test(rendered[key]) || rendered[key] !== calculated[key]) findings.push(finding('blocker', 'motion-proof-artifact-digest-mismatch', 'Rendered Motion proof digests must be recomputed from the exact referenced artifact bytes.', { studyId: planned.id, digest: key, claimed: rendered[key] || null, calculated: calculated[key] }));
+  }
+
+  if (!startsWithBytes(video.value, WEBM_HEADER) || video.value.length <= WEBM_HEADER.length) findings.push(finding('blocker', 'motion-proof-video-invalid', 'Temporal Motion proof requires a non-empty WebM artifact; a screenshot cannot substitute for temporal evidence.', { studyId: planned.id, videoRef: rendered.videoRef }));
+  if (!startsWithBytes(capture.value, PNG_HEADER) || capture.value.length <= PNG_HEADER.length) findings.push(finding('blocker', 'motion-proof-capture-invalid', 'Motion proof end-frame evidence must be a non-empty PNG artifact.', { studyId: planned.id, captureRef: rendered.captureRef }));
+
+  let parsedTimeline = null;
+  try {
+    parsedTimeline = JSON.parse(timeline.value);
+  } catch {
+    findings.push(finding('blocker', 'motion-proof-timeline-invalid-json', 'Browser timeline evidence must be valid JSON.', { studyId: planned.id, timelineRef: rendered.timelineRef }));
+  }
+  if (parsedTimeline) {
+    if (parsedTimeline.schema !== 'ai-studio-os/motion-proof-browser-timeline@1' || parsedTimeline.studyId !== planned.id || parsedTimeline.input !== planned.input) {
+      findings.push(finding('blocker', 'motion-proof-timeline-identity-mismatch', 'Browser timeline identity and input must match the exact planned study.', { studyId: planned.id, timelineStudyId: parsedTimeline.studyId ?? null, timelineInput: parsedTimeline.input ?? null }));
+    }
+    if (!sameContract(parsedTimeline.appliedCreativeIntent ?? null, planned.creativeIntent)) findings.push(finding('blocker', 'motion-proof-timeline-creative-intent-mismatch', 'Browser timeline must record the exact hypothesis-specific creative intent applied by the renderer.', { studyId: planned.id }));
+    if (!(parsedTimeline.durationMs > 0) || !(parsedTimeline.animationFrameCount > 1) || Math.abs(Math.round(parsedTimeline.durationMs) - rendered.durationMs) > 1 || parsedTimeline.animationFrameCount !== rendered.frameCount) {
+      findings.push(finding('blocker', 'motion-proof-timeline-metrics-mismatch', 'Claimed duration and frame count must match independently parsed browser timeline evidence.', { studyId: planned.id, claimedDurationMs: rendered.durationMs, timelineDurationMs: parsedTimeline.durationMs ?? null, claimedFrameCount: rendered.frameCount, timelineFrameCount: parsedTimeline.animationFrameCount ?? null }));
+    }
+  }
+
+  return { findings, fixtureOnly: false };
 }
 
 export function reviewMotionProofPlan(plan = {}) {
@@ -118,7 +220,8 @@ export function reviewMotionProofPlan(plan = {}) {
       proofDoesNotSelectWinner: true,
       explorationAuthorityRecomputed: true,
       cachedExplorationReviewTrusted: false,
-      exactHypothesisContractRequired: true
+      exactHypothesisContractRequired: true,
+      responsiveConsequencesBoundIntoMobileStudies: true
     }
   };
 }
@@ -143,6 +246,7 @@ export function buildMotionProofPlan({ exploration, moments = DEFAULT_MOMENTS } 
       temporalStudiesRequired: true,
       proofPlanIsNotRenderedEvidence: true,
       explorationAuthorityMustRecompute: true,
+      responsiveConsequencesBoundIntoMobileStudies: true,
       humanMotionSelectionConfirmed: false,
       motionCriticApproval: false,
       productionApproved: false
@@ -163,6 +267,8 @@ function normalizeRenderedStudy(study = {}) {
     timelineRef: text(study.timelineRef),
     sourceSha256: text(study.sourceSha256).toLowerCase(),
     timelineSha256: text(study.timelineSha256).toLowerCase(),
+    videoSha256: text(study.videoSha256).toLowerCase(),
+    captureSha256: text(study.captureSha256).toLowerCase(),
     viewport: text(study.viewport),
     input: text(study.input),
     durationMs: Number.isFinite(study.durationMs) ? study.durationMs : null,
@@ -183,6 +289,7 @@ export function reviewMotionProofEvidence(evidence = {}) {
   const renderedStudies = Array.isArray(evidence.renderedStudies) ? evidence.renderedStudies : [];
   if (new Set(renderedStudies.map((study) => study.studyId)).size !== renderedStudies.length) findings.push(finding('blocker', 'motion-proof-render-id-duplicate', 'Rendered Motion proof study IDs must be unique.'));
   const renderedById = new Map(renderedStudies.map((study) => [study.studyId, study]));
+  let fixtureOnly = renderedStudies.length > 0;
   for (const planned of expectedStudies) {
     const rendered = renderedById.get(planned.id);
     if (!rendered) {
@@ -191,11 +298,16 @@ export function reviewMotionProofEvidence(evidence = {}) {
     }
     if (rendered.hypothesisId !== planned.hypothesisId || rendered.momentId !== planned.momentId) findings.push(finding('blocker', 'motion-proof-render-identity-drift', 'Rendered study identity does not match its proof-plan study.', { studyId: planned.id }));
     if (rendered.viewport !== planned.viewport || rendered.input !== planned.input) findings.push(finding('blocker', 'motion-proof-render-context-drift', 'Rendered study viewport/input context does not match the proof plan.', { studyId: planned.id }));
-    if (!rendered.videoRef && !rendered.captureRef) findings.push(finding('blocker', 'motion-proof-temporal-capture-missing', 'Motion proof needs a temporal capture reference; a static specification is not evidence.', { studyId: planned.id }));
+    if (!rendered.videoRef) findings.push(finding('blocker', 'motion-proof-temporal-video-missing', 'Motion proof requires a temporal WebM reference; static capture evidence alone cannot qualify.', { studyId: planned.id }));
+    if (!rendered.captureRef) findings.push(finding('blocker', 'motion-proof-end-frame-missing', 'Motion proof requires a PNG end-frame alongside the temporal capture.', { studyId: planned.id }));
     if (!rendered.sourceRef || !rendered.timelineRef) findings.push(finding('blocker', 'motion-proof-source-or-timeline-missing', 'Rendered motion proof requires exact source and timeline/timing provenance.', { studyId: planned.id }));
     if (!SHA256.test(rendered.sourceSha256) || !SHA256.test(rendered.timelineSha256)) findings.push(finding('blocker', 'motion-proof-provenance-digest-missing', 'Rendered motion proof must bind exact source and browser timeline content with SHA-256 digests.', { studyId: planned.id }));
     if (rendered.browserRendered !== true || rendered.exactSourceRendered !== true) findings.push(finding('blocker', 'motion-proof-browser-integrity-unproven', 'Motion proof must state that a browser rendered the exact referenced source.', { studyId: planned.id }));
     if (!(rendered.durationMs > 0) || !(rendered.frameCount > 1)) findings.push(finding('blocker', 'motion-proof-temporal-metrics-invalid', 'Temporal evidence needs positive duration and multiple rendered frames.', { studyId: planned.id, durationMs: rendered.durationMs, frameCount: rendered.frameCount }));
+
+    const artifactReview = verifyRenderedArtifacts({ evidence, planned, rendered });
+    fixtureOnly = fixtureOnly && artifactReview.fixtureOnly;
+    findings.push(...artifactReview.findings);
   }
   if (renderedStudies.length !== expectedStudies.length) findings.push(finding('blocker', 'motion-proof-render-count-mismatch', 'Rendered motion evidence must exactly cover the planned study matrix.', { expected: expectedStudies.length, actual: renderedStudies.length }));
   if (!list(evidence.comparisonRefs).length) findings.push(finding('major', 'motion-proof-comparison-evidence-missing', 'Competing motion studies need comparison evidence so taste can be judged comparatively.'));
@@ -210,10 +322,14 @@ export function reviewMotionProofEvidence(evidence = {}) {
     findings,
     planReview,
     truth: {
-      exactBrowserTemporalEvidence: blockers.length === 0,
+      exactBrowserTemporalEvidence: blockers.length === 0 && !fixtureOnly,
+      referencedArtifactBytesReopened: blockers.length === 0 && !fixtureOnly,
+      artifactDigestsRecomputed: blockers.length === 0 && !fixtureOnly,
+      temporalVideoRequired: true,
       sourceAndTimelineDigestsRequired: true,
       proofPlanAuthorityRecomputed: true,
       cachedPlanReviewTrusted: false,
+      testFixtureEvidenceOnly: blockers.length === 0 && fixtureOnly,
       proofDoesNotSelectWinner: true,
       humanMotionSelectionConfirmed: false,
       motionCriticApproval: false,
