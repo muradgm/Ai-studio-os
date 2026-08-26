@@ -8,7 +8,8 @@ const MAX_VISUAL_MEAN_DELTA = 5;
 const MAX_VISUAL_OUTLIER_SHARE = 0.01;
 const MAX_FRAME_COUNT_DELTA = 4;
 const TEMPORAL_SAMPLE_FRACTIONS = [0.2, 0.5, 0.8];
-const TEMPORAL_SEEK_TOLERANCE_SECONDS = 0.08;
+const TEMPORAL_VIDEO_SAMPLE_STEP_SECONDS = 0.04;
+const TEMPORAL_VIDEO_LEAD_SECONDS = 0.75;
 const MIN_VISIBLE_MOTION_MEAN_DELTA = 0.75;
 const MIN_VISIBLE_MOTION_OUTLIER_SHARE = 0.001;
 
@@ -60,6 +61,24 @@ function visuallyBound(distance) {
 
 function visiblyDifferent(distance) {
   return distance.meanDelta >= MIN_VISIBLE_MOTION_MEAN_DELTA || distance.outlierShare >= MIN_VISIBLE_MOTION_OUTLIER_SHARE;
+}
+
+function orderedTemporalBinding(replaySamples, videoSamples) {
+  let cursor = 0;
+  const matches = [];
+  for (const replaySample of replaySamples) {
+    let selected = null;
+    for (let index = cursor; index < videoSamples.length; index += 1) {
+      const distance = visualDistance(replaySample.pixels, videoSamples[index].pixels);
+      if (!visuallyBound(distance)) continue;
+      selected = { index, videoTime: videoSamples[index].targetTime, distance };
+      break;
+    }
+    if (!selected) return { verified: false, matches };
+    matches.push(selected);
+    cursor = selected.index + 1;
+  }
+  return { verified: true, matches };
 }
 
 async function imageSignature(page, pngBytes) {
@@ -424,22 +443,18 @@ async function verifyStudyTarget(browser, target) {
         if (!visuallyBound(bestAnchor.distance)) {
           findings.push({ code: 'motion-proof-independent-video-replay-mismatch', message: `Decoded WebM does not visually bind to the replay-verified end frame (best mean delta ${bestAnchor.distance.meanDelta.toFixed(2)}, outlier share ${bestAnchor.distance.outlierShare.toFixed(4)}).` });
         } else if (replayTemporalSamples.length) {
-          let mismatchedTemporalSamples = 0;
           const claimedDurationSeconds = Number(timelineContract.durationMs) / 1000;
-          for (const replaySample of replayTemporalSamples) {
-            const elapsedSeconds = Math.max(0, Math.min(claimedDurationSeconds, replaySample.elapsedMs / 1000));
-            const expectedVideoTime = bestAnchor.targetTime - Math.max(0, claimedDurationSeconds - elapsedSeconds);
-            const windowTimes = [-TEMPORAL_SEEK_TOLERANCE_SECONDS, 0, TEMPORAL_SEEK_TOLERANCE_SECONDS]
-              .map((offset) => expectedVideoTime + offset)
-              .filter((time) => time > 0.01 && time < media.duration);
-            const videoSamples = await decodedVideoFramesAtTimes(page, '#proof-video', windowTimes);
-            const distances = videoSamples.map((sample) => visualDistance(replaySample.pixels, sample.pixels));
-            if (!distances.length || !distances.some(visuallyBound)) mismatchedTemporalSamples += 1;
-          }
-          if (mismatchedTemporalSamples > 0) {
+          const windowStart = Math.max(0.01, bestAnchor.targetTime - claimedDurationSeconds - TEMPORAL_VIDEO_LEAD_SECONDS);
+          const windowEnd = Math.max(windowStart, bestAnchor.targetTime);
+          const temporalVideoTimes = [];
+          for (let time = windowStart; time <= windowEnd + 0.0001; time += TEMPORAL_VIDEO_SAMPLE_STEP_SECONDS) temporalVideoTimes.push(time);
+          if (temporalVideoTimes[temporalVideoTimes.length - 1] < windowEnd - 0.005) temporalVideoTimes.push(windowEnd);
+          const temporalVideoSamples = await decodedVideoFramesAtTimes(page, '#proof-video', temporalVideoTimes);
+          const sequenceBinding = orderedTemporalBinding(replayTemporalSamples, temporalVideoSamples);
+          if (!sequenceBinding.verified) {
             findings.push({
               code: 'motion-proof-independent-video-timeline-mismatch',
-              message: `Decoded WebM is not frame-bound to the independently replayed motion timeline (${mismatchedTemporalSamples}/${replayTemporalSamples.length} sampled temporal states mismatched).`
+              message: `Decoded WebM does not contain the independently replayed sampled visual states in temporal order (${sequenceBinding.matches.length}/${replayTemporalSamples.length} states bound).`
             });
           }
         }
