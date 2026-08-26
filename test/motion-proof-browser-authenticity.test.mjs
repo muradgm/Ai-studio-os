@@ -184,3 +184,36 @@ window.__startMotionCreativeProof=run;setTimeout(run,20);
   assert.equal(review.verified, false);
   assert.ok(review.findings.some((item) => item.code === 'motion-proof-independent-video-replay-mismatch'));
 });
+
+test('comparison authority requires actual visible browser DOM rather than nested inert markup', async (t) => {
+  const executable = chromium.executablePath();
+  if (!executable || !fs.existsSync(executable)) {
+    t.skip('Playwright Chromium is not installed for this unit-test phase.');
+    return;
+  }
+
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'motion-proof-comparison-dom-'));
+  const videoPath = path.join(root, 'study.webm');
+  const validBoardPath = path.join(root, 'valid.html');
+  const inertBoardPath = path.join(root, 'inert.html');
+  fs.writeFileSync(videoPath, 'comparison-dom-path-binding');
+  fs.writeFileSync(validBoardPath, '<!doctype html><html><body><video controls src="./study.webm"></video></body></html>');
+  fs.writeFileSync(inertBoardPath, '<!doctype html><html><body><template><template></template><video controls src="./study.webm"></video></template></body></html>');
+
+  const validReview = verifyIndependentMotionProofBrowserArtifacts([{
+    kind: 'comparison',
+    comparisonPaths: [validBoardPath],
+    expectedVideoPaths: [videoPath]
+  }]);
+  assert.equal(validReview.verified, true);
+  assert.equal(validReview.findings.length, 0);
+
+  const inertReview = verifyIndependentMotionProofBrowserArtifacts([{
+    kind: 'comparison',
+    comparisonPaths: [inertBoardPath],
+    expectedVideoPaths: [videoPath]
+  }]);
+  assert.equal(inertReview.verified, false);
+  assert.ok(inertReview.findings.some((item) => item.code === 'motion-proof-independent-comparison-visible-video-missing'));
+  assert.ok(inertReview.findings.some((item) => item.code === 'motion-proof-independent-comparison-dom-coverage-mismatch'));
+});
