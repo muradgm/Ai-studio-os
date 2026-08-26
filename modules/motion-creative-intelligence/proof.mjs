@@ -251,7 +251,12 @@ function comparisonVideoSources(html = '') {
   const sources = [];
   let index = 0;
   let videoDepth = 0;
-  const rawTextElements = new Set(['script', 'style', 'template', 'noscript']);
+  const nonElementMarkupContainers = new Set([
+    'script', 'style', 'template', 'noscript',
+    'title', 'textarea',
+    'xmp', 'iframe', 'noembed', 'plaintext',
+    'select', 'datalist'
+  ]);
 
   while (index < html.length) {
     const start = html.indexOf('<', index);
@@ -277,7 +282,8 @@ function comparisonVideoSources(html = '') {
       continue;
     }
 
-    if (!tag.closing && rawTextElements.has(tag.name)) {
+    if (!tag.closing && nonElementMarkupContainers.has(tag.name)) {
+      if (tag.name === 'plaintext') break;
       const closeToken = `</${tag.name}`;
       const closeStart = html.toLowerCase().indexOf(closeToken, end + 1);
       if (closeStart < 0) break;
@@ -349,7 +355,7 @@ function verifyComparisonArtifacts({ evidence, renderedStudies, fixtureOnly }) {
 
     const sources = comparisonVideoSources(comparison.value);
     if (!sources.length) {
-      findings.push(finding('blocker', 'motion-proof-comparison-video-markup-missing', 'Comparison HTML must contain structurally parsed temporal video/source elements; comments or raw text do not count as comparative media.', { ref }));
+      findings.push(finding('blocker', 'motion-proof-comparison-video-markup-missing', 'Comparison HTML must contain structurally parsed temporal video/source elements; comments, RCDATA/raw-text and inert markup containers do not count as comparative media.', { ref }));
       continue;
     }
 
