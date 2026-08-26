@@ -88,7 +88,7 @@ function writeRealProofPackage(plan, { omitBoardVideoIndex = null, missingBoard 
   };
 }
 
-test('real comparison HTML is independently verified and covers every rendered temporal video', () => {
+test('complete comparison coverage cannot promote synthetic media into browser authority', () => {
   const { plan } = buildMotionProofFixture();
   const pkg = writeRealProofPackage(plan);
   const evidence = buildMotionProofEvidence({
@@ -97,8 +97,12 @@ test('real comparison HTML is independently verified and covers every rendered t
     comparisonRefs: [pkg.comparisonRef]
   });
 
-  assert.equal(evidence.reviewReady, true);
-  assert.equal(evidence.truth.comparisonArtifactsVerified, true);
+  assert.equal(evidence.reviewReady, false);
+  assert.equal(evidence.truth.exactBrowserTemporalEvidence, false);
+  assert.equal(evidence.truth.independentBrowserReplayVerified, false);
+  assert.equal(evidence.truth.comparisonArtifactsVerified, false);
+  assert.equal(evidence.findings.some((item) => item.code.startsWith('motion-proof-comparison-')), false);
+  assert.ok(evidence.findings.some((item) => item.code.startsWith('motion-proof-independent-')));
 });
 
 test('missing comparison artifact blocks rendered proof review readiness', () => {
