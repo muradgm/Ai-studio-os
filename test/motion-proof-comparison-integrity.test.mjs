@@ -18,7 +18,12 @@ function rel(file) {
   return path.relative(repoRoot, file).split(path.sep).join('/');
 }
 
-function writeRealProofPackage(plan, { omitBoardVideoIndex = null, missingBoard = false, commentOnlyBoard = false } = {}) {
+function writeRealProofPackage(plan, {
+  omitBoardVideoIndex = null,
+  missingBoard = false,
+  commentOnlyBoard = false,
+  boardContainer = null
+} = {}) {
   const rootRel = `artifacts/.motion-proof-comparison-test/${process.pid}-${packageCounter++}`;
   const root = path.join(repoRoot, rootRel);
   fs.mkdirSync(root, { recursive: true });
@@ -79,7 +84,11 @@ function writeRealProofPackage(plan, { omitBoardVideoIndex = null, missingBoard 
         return `<video controls src="${videoRel}"></video>`;
       })
       .join('\n');
-    const boardMarkup = commentOnlyBoard ? `<!--\n${videos}\n-->` : videos;
+    const boardMarkup = commentOnlyBoard
+      ? `<!--\n${videos}\n-->`
+      : boardContainer
+        ? `<${boardContainer}>${videos}</${boardContainer}>`
+        : videos;
     fs.writeFileSync(boardPath, `<!doctype html><html><body>${boardMarkup}</body></html>`);
   }
 
@@ -145,4 +154,21 @@ test('video markup inside HTML comments cannot satisfy comparison coverage', () 
   assert.equal(evidence.truth.comparisonArtifactsVerified, false);
   assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-markup-missing'));
   assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-coverage-incomplete'));
+});
+
+test('video-looking text inside RCDATA, raw-text, template, or non-rendered selection containers cannot satisfy comparison coverage', () => {
+  const { plan } = buildMotionProofFixture();
+  for (const boardContainer of ['textarea', 'title', 'template', 'select']) {
+    const pkg = writeRealProofPackage(plan, { boardContainer });
+    const evidence = buildMotionProofEvidence({
+      plan,
+      renderedStudies: pkg.renderedStudies,
+      comparisonRefs: [pkg.comparisonRef]
+    });
+
+    assert.equal(evidence.reviewReady, false, boardContainer);
+    assert.equal(evidence.truth.comparisonArtifactsVerified, false, boardContainer);
+    assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-markup-missing'), boardContainer);
+    assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-coverage-incomplete'), boardContainer);
+  }
 });
