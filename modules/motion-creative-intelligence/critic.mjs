@@ -45,6 +45,10 @@ function evidenceRefsByMoment(studies = [], momentId) {
   return uniqueRefsForStudies(studies.filter((study) => study.momentId === momentId));
 }
 
+function reviewHasBlocker(review = {}) {
+  return Object.values(review.dimensions ?? {}).some((dimension) => dimension?.judgment === 'blocker');
+}
+
 export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
   const findings = [];
   const explorationReview = reviewMotionCreativeExploration(exploration ?? {});
@@ -195,7 +199,7 @@ export function reviewMotionCritique(critique = {}) {
   const expectedRejected = expectedIds.filter((id) => id !== recommendedId);
   if (!sameIds(expectedRejected, rejectedIds) || rejections.some((item) => !text(item?.rationale))) findings.push(finding('major', 'motion-critic-alternative-rejections-incomplete', 'Critic must explain why every non-recommended hypothesis loses comparatively.', { expectedRejected, rejectedIds }));
   const recommendedReview = normalizedReviews.find((item) => item.hypothesisId === recommendedId);
-  if (recommendedReview && Object.values(recommendedReview.dimensions).some((dimension) => dimension.judgment === 'blocker')) findings.push(finding('blocker', 'motion-critic-recommended-hypothesis-blocked', 'Critic cannot recommend a hypothesis that it also marks with a blocker judgment.', { hypothesisId: recommendedId }));
+  if (recommendedReview && reviewHasBlocker(recommendedReview)) findings.push(finding('blocker', 'motion-critic-recommended-hypothesis-blocked', 'Critic cannot recommend a hypothesis that it also marks with a blocker judgment.', { hypothesisId: recommendedId }));
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -257,6 +261,9 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
 
   const criticHypothesis = authoritativeBrief.hypotheses.find((item) => item.id === id);
   if (!criticHypothesis) return null;
+  const selectedCriticReview = criticReview.normalizedReviews.find((item) => item.hypothesisId === id);
+  if (!selectedCriticReview || reviewHasBlocker(selectedCriticReview)) return null;
+
   const reviewedRefs = list(reviewedEvidenceRefs);
   const allowedRefs = new Set(criticHypothesis.evidenceRefs ?? []);
   const requiredRefs = list(criticHypothesis.requiredSelectionEvidenceRefs);
@@ -276,12 +283,14 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
       schema: critique.schema,
       recommendedHypothesisId: critique.comparativeJudgment?.recommendedHypothesisId ?? null,
       recommendationFollowed: critique.comparativeJudgment?.recommendedHypothesisId === id,
+      selectedHypothesisBlockerFree: true,
       reviewedEvidenceRefs: reviewedRefs
     },
     truth: {
       ...candidate.truth,
       humanCreativePreferenceRecorded: true,
       humanCreativeSelectionConfirmed: true,
+      selectedHypothesisCriticBlockersCleared: true,
       renderedMotionProofStillRequired: false,
       motionCriticStillRequired: false,
       renderedMotionProofReviewed: true,
