@@ -6,7 +6,7 @@ const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 32;
 const MAX_VISUAL_MEAN_DELTA = 5;
 const MAX_VISUAL_OUTLIER_SHARE = 0.01;
-const MAX_FRAME_COUNT_DELTA = 2;
+const MAX_FRAME_COUNT_DELTA = 4;
 const TEMPORAL_SAMPLE_FRACTIONS = [0.2, 0.5, 0.8];
 const TEMPORAL_SEEK_TOLERANCE_SECONDS = 0.08;
 const MIN_VISIBLE_MOTION_MEAN_DELTA = 0.75;
@@ -175,6 +175,46 @@ async function captureReplayTemporalSamples(page, claimedDurationMs) {
   return samples;
 }
 
+async function startIndependentFrameCounter(context, page) {
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Page.enable');
+  await cdp.send('Runtime.enable');
+  const { frameTree } = await cdp.send('Page.getFrameTree');
+  const { executionContextId } = await cdp.send('Page.createIsolatedWorld', {
+    frameId: frameTree.frame.id,
+    worldName: `motion-proof-verifier-${Date.now()}`,
+    grantUniveralAccess: false
+  });
+  await cdp.send('Runtime.evaluate', {
+    contextId: executionContextId,
+    expression: `(() => {
+      globalThis.__motionVerifierFrameCount = 0;
+      globalThis.__motionVerifierFrameCounting = true;
+      const tick = () => {
+        if (!globalThis.__motionVerifierFrameCounting) return;
+        globalThis.__motionVerifierFrameCount += 1;
+        requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    })()`,
+    returnByValue: true
+  });
+  return { cdp, executionContextId };
+}
+
+async function stopIndependentFrameCounter(counter) {
+  if (!counter) return null;
+  const response = await counter.cdp.send('Runtime.evaluate', {
+    contextId: counter.executionContextId,
+    expression: `(() => {
+      globalThis.__motionVerifierFrameCounting = false;
+      return globalThis.__motionVerifierFrameCount;
+    })()`,
+    returnByValue: true
+  });
+  return Number(response?.result?.value);
+}
+
 async function verifyComparisonTarget(browser, target) {
   const comparisonPaths = Array.isArray(target.comparisonPaths) ? target.comparisonPaths : [];
   const expectedVideoPaths = Array.isArray(target.expectedVideoPaths) ? target.expectedVideoPaths : [];
@@ -288,6 +328,7 @@ async function verifyStudyTarget(browser, target) {
   });
   const page = await context.newPage();
   const findings = [];
+  let independentFrameCounter = null;
 
   try {
     if (!sameContract(timelineContract.viewport ?? null, viewport)) findings.push({ code: 'motion-proof-independent-timeline-viewport-mismatch', message: 'Claimed browser timeline viewport does not match the planned browser context.' });
@@ -297,12 +338,15 @@ async function verifyStudyTarget(browser, target) {
     const domStudyId = await page.locator('[data-study]').first().getAttribute('data-study').catch(() => null);
     if (domStudyId !== planned.id) findings.push({ code: 'motion-proof-independent-source-dom-binding-mismatch', message: 'Replayed source DOM is not bound to the planned study.' });
 
+    independentFrameCounter = await startIndependentFrameCounter(context, page);
     if (planned.input === 'pointer') await page.click('[data-interaction-target]', { timeout: 5_000 });
     if (planned.input === 'touch') await page.tap('[data-interaction-target]', { timeout: 5_000 });
     await page.waitForFunction(() => window.__motionCreativeProof?.startedAt !== null, null, { timeout: 15_000 });
 
     const replayTemporalSamples = await captureReplayTemporalSamples(page, Number(timelineContract.durationMs));
     await page.waitForFunction(() => window.__motionCreativeProof?.done === true, null, { timeout: 15_000 });
+    const independentlyObservedFrameCount = await stopIndependentFrameCounter(independentFrameCounter);
+    independentFrameCounter = null;
 
     const replay = await page.evaluate(() => structuredClone(window.__motionCreativeProof));
     if (replay?.sourceStudyId !== planned.id || replay?.studyId !== planned.id) findings.push({ code: 'motion-proof-independent-source-study-mismatch', message: 'Independent browser replay did not execute the planned study identity.' });
@@ -311,15 +355,14 @@ async function verifyStudyTarget(browser, target) {
     if (planned.input === 'reduced-motion' && replay?.reducedMotionMedia !== true) findings.push({ code: 'motion-proof-independent-reduced-motion-media-mismatch', message: 'Independent browser replay did not execute under reduced-motion media.' });
 
     const claimedFrameCount = Number(timelineContract.animationFrameCount);
-    const observedFrameCount = Number(replay?.frameCount);
     if (!Number.isInteger(claimedFrameCount)
       || claimedFrameCount <= 1
-      || !Number.isInteger(observedFrameCount)
-      || observedFrameCount <= 1
-      || Math.abs(observedFrameCount - claimedFrameCount) > MAX_FRAME_COUNT_DELTA) {
+      || !Number.isInteger(independentlyObservedFrameCount)
+      || independentlyObservedFrameCount <= 1
+      || Math.abs(independentlyObservedFrameCount - claimedFrameCount) > MAX_FRAME_COUNT_DELTA) {
       findings.push({
         code: 'motion-proof-independent-timeline-frame-count-mismatch',
-        message: `Claimed animation frame count must match independent replay within ±${MAX_FRAME_COUNT_DELTA} frames (claimed ${claimedFrameCount}, observed ${observedFrameCount}).`
+        message: `Claimed animation frame count must match an isolated-world independent requestAnimationFrame counter within ±${MAX_FRAME_COUNT_DELTA} frames (claimed ${claimedFrameCount}, independently observed ${independentlyObservedFrameCount}).`
       });
     }
 
@@ -405,6 +448,9 @@ async function verifyStudyTarget(browser, target) {
   } catch (error) {
     findings.push({ code: 'motion-proof-independent-browser-replay-error', message: `Independent browser replay failed: ${error?.message ?? 'unknown error'}` });
   } finally {
+    if (independentFrameCounter) {
+      try { await stopIndependentFrameCounter(independentFrameCounter); } catch {}
+    }
     await context.close();
   }
 
