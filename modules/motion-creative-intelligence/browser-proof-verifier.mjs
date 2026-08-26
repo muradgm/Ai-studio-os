@@ -36,7 +36,7 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
         verified: false,
         findings: [blocker(
           'motion-proof-independent-browser-verifier-failed',
-          'Independent Chromium replay/media decoding must succeed before browser proof can become authoritative.',
+          'Independent Chromium replay/media decoding and comparison-DOM verification must succeed before browser proof can become authoritative.',
           {
             status: execution.status ?? null,
             signal: execution.signal ?? null,
@@ -60,11 +60,14 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
     const findings = (Array.isArray(result?.findings) ? result.findings : []).map((item) => blocker(
       item?.code || 'motion-proof-independent-browser-verification-failed',
       item?.message || 'Independent browser verification failed.',
-      { studyId: item?.studyId ?? null }
+      {
+        studyId: item?.studyId ?? null,
+        comparisonRef: item?.comparisonRef ?? null
+      }
     ));
 
     if (result?.verified !== true && findings.length === 0) {
-      findings.push(blocker('motion-proof-independent-browser-verification-unproven', 'Independent Chromium replay/media decoding did not prove the rendered Motion evidence.'));
+      findings.push(blocker('motion-proof-independent-browser-verification-unproven', 'Independent Chromium verification did not prove the rendered Motion evidence.'));
     }
 
     return { verified: result?.verified === true && findings.length === 0, findings };
