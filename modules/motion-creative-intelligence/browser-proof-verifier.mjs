@@ -57,15 +57,20 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
       };
     }
 
-    const findings = (Array.isArray(result?.findings) ? result.findings : []).map((item) => blocker(
-      item?.code || 'motion-proof-independent-browser-verification-failed',
-      item?.message || 'Independent browser verification failed.',
-      {
-        studyId: item?.studyId ?? null,
-        comparisonRef: item?.comparisonRef ?? null,
-        verifierMessage: item?.message ?? null
-      }
-    ));
+    const findings = (Array.isArray(result?.findings) ? result.findings : []).map((item) => {
+      const studyId = item?.studyId ?? null;
+      const baseMessage = item?.message || 'Independent browser verification failed.';
+      const message = studyId ? `[${studyId}] ${baseMessage}` : baseMessage;
+      return blocker(
+        item?.code || 'motion-proof-independent-browser-verification-failed',
+        message,
+        {
+          studyId,
+          comparisonRef: item?.comparisonRef ?? null,
+          verifierMessage: item?.message ?? null
+        }
+      );
+    });
 
     if (result?.verified !== true && findings.length === 0) {
       findings.push(blocker('motion-proof-independent-browser-verification-unproven', 'Independent Chromium verification did not prove the rendered Motion evidence.'));
