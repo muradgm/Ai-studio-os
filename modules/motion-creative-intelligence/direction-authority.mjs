@@ -1,4 +1,5 @@
 import { buildProvenMotionDirection, reviewMotionCritique } from './critic.mjs';
+import { reviewMotionProofEvidence } from './proof.mjs';
 
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function list(value) { return [...new Set((Array.isArray(value) ? value : []).map(text).filter(Boolean))]; }
@@ -52,11 +53,13 @@ function directionContract(direction = {}) {
 
 function proofAuthorityFromCriticReview(criticReview = {}) {
   const proofEvidence = criticReview.authoritativeBrief?.authorityInputs?.proofEvidence ?? null;
+  const proofReview = reviewMotionProofEvidence(proofEvidence ?? {});
   return {
     proofEvidence,
-    exactBrowserTemporalEvidence: proofEvidence?.truth?.exactBrowserTemporalEvidence === true,
-    artifactDigestsRecomputed: proofEvidence?.truth?.artifactDigestsRecomputed === true,
-    testFixtureEvidenceOnly: proofEvidence?.truth?.testFixtureEvidenceOnly === true
+    proofReview,
+    exactBrowserTemporalEvidence: proofReview.reviewReady === true && proofReview.truth?.exactBrowserTemporalEvidence === true,
+    artifactDigestsRecomputed: proofReview.reviewReady === true && proofReview.truth?.artifactDigestsRecomputed === true,
+    testFixtureEvidenceOnly: proofReview.truth?.testFixtureEvidenceOnly === true
   };
 }
 
@@ -114,7 +117,8 @@ export function buildAuthoritativeMotionDirection({
       directionBuiltFromCriticAuthoritativeExploration: true,
       exactProvenHypothesisContractRequired: true,
       exactBrowserTemporalEvidenceRequired: true,
-      referencedArtifactDigestsRecomputed: true,
+      proofAuthorityRecomputedForDirection: true,
+      referencedArtifactDigestsRecomputed: proofAuthority.artifactDigestsRecomputed,
       testFixtureEvidenceRejectedForTechnicalAuthority: true,
       directionAuthorityRecomputable: true,
       finalMotionDirectionAuthorityRequired: false,
@@ -176,6 +180,7 @@ export function reviewMotionDirectionAuthority(direction = {}) {
       motionDirectionRecomputedFromAuthorityInputs: true,
       exactProvenHypothesisContractRequired: true,
       exactBrowserTemporalEvidenceRequired: true,
+      proofAuthorityRecomputedForDirection: true,
       testFixtureEvidenceRejectedForTechnicalAuthority: true,
       renderedMotionProofReviewed: rebuilt?.truth?.renderedMotionProofReviewed === true,
       motionCriticReviewed: rebuilt?.truth?.motionCriticReviewed === true,
