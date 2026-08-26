@@ -53,6 +53,15 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
   if (!proofReview.reviewReady) findings.push(finding('blocker', 'motion-critic-proof-not-ready', 'Motion Critic requires review-ready rendered temporal evidence.', { findingCodes: proofReview.findings.map((item) => item.code) }));
   if (exploration?.projectId !== proofEvidence?.projectId || exploration?.creativeWorldId !== proofEvidence?.creativeWorldId) findings.push(finding('blocker', 'motion-critic-proof-binding-drift', 'Motion Critic proof must remain bound to the same project and Creative World as the exploration.'));
 
+  const proofExploration = proofEvidence?.plan?.authorityInputs?.exploration ?? null;
+  if (!proofExploration || !sameContract(exploration, proofExploration)) {
+    findings.push(finding(
+      'blocker',
+      'motion-critic-rendered-exploration-contract-drift',
+      'Motion Critic must evaluate the exact authoritative Motion exploration embedded in the rendered proof plan; matching IDs cannot substitute for the rendered hypothesis contracts.'
+    ));
+  }
+
   const explorationIds = (exploration?.hypotheses ?? []).map((item) => item.id);
   const proofIds = (proofEvidence?.plan?.hypotheses ?? []).map((item) => item.id);
   if (!sameIds(explorationIds, proofIds)) findings.push(finding('blocker', 'motion-critic-hypothesis-set-drift', 'Motion Critic must compare the exact hypothesis set that was rendered.', { explorationIds, proofIds }));
@@ -107,6 +116,7 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
     truth: {
       renderedProofIsEvidenceNotCritique: true,
       criticBriefAuthorityRecomputedFromInputs: true,
+      exactRenderedExplorationContractRequired: true,
       criticMustJudgeComparatively: true,
       criticRecommendationIsAdvisory: true,
       humanMotionSelectionRequired: true,
