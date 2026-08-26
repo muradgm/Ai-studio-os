@@ -42,6 +42,7 @@ async function waitForMediaMetadata(page, selector) {
 
 async function verifyTarget(browser, target) {
   const planned = target.planned ?? {};
+  const timelineContract = target.timelineContract ?? {};
   const viewport = planned.viewport === 'mobile' ? { width: 390, height: 844 } : { width: 1100, height: 720 };
   const context = await browser.newContext({
     viewport,
@@ -53,6 +54,9 @@ async function verifyTarget(browser, target) {
   const findings = [];
 
   try {
+    if (!sameContract(timelineContract.viewport ?? null, viewport)) findings.push({ code: 'motion-proof-independent-timeline-viewport-mismatch', message: 'Claimed browser timeline viewport does not match the planned browser context.' });
+    if (planned.input === 'reduced-motion' && timelineContract.reducedMotionMedia !== true) findings.push({ code: 'motion-proof-independent-timeline-reduced-motion-mismatch', message: 'Claimed reduced-motion timeline was not recorded under reduced-motion media.' });
+
     await page.goto(pathToFileURL(target.sourcePath).href, { waitUntil: 'load', timeout: 15_000 });
     const domStudyId = await page.locator('[data-study]').first().getAttribute('data-study').catch(() => null);
     if (domStudyId !== planned.id) findings.push({ code: 'motion-proof-independent-source-dom-binding-mismatch', message: 'Replayed source DOM is not bound to the planned study.' });
@@ -68,8 +72,13 @@ async function verifyTarget(browser, target) {
     if (planned.input === 'reduced-motion' && replay?.reducedMotionMedia !== true) findings.push({ code: 'motion-proof-independent-reduced-motion-media-mismatch', message: 'Independent browser replay did not execute under reduced-motion media.' });
 
     const replayTrace = traceContract(replay?.trace ?? []);
-    const claimedTrace = traceContract(target.timelineContract?.trace ?? []);
+    const claimedTrace = traceContract(timelineContract.trace ?? []);
     if (!sameContract(replayTrace, claimedTrace)) findings.push({ code: 'motion-proof-independent-timeline-trace-mismatch', message: 'Caller timeline trace does not match the independently replayed browser event contract.' });
+
+    const replayDurationMs = Number(replay?.completedAt) - Number(replay?.startedAt);
+    if (!(timelineContract.durationMs > 0) || !(replayDurationMs > 0) || Math.abs(replayDurationMs - timelineContract.durationMs) > 300) {
+      findings.push({ code: 'motion-proof-independent-timeline-duration-mismatch', message: 'Claimed timeline duration is not consistent with independently replayed browser execution.' });
+    }
 
     await page.goto(pathToFileURL(target.videoPath).href, { waitUntil: 'domcontentloaded', timeout: 15_000 });
     await page.waitForSelector('video', { timeout: 10_000 });
@@ -77,6 +86,11 @@ async function verifyTarget(browser, target) {
     if (!(media.videoWidth > 0) || !(media.videoHeight > 0) || !(media.duration > 0) || media.readyState < 1) {
       findings.push({ code: 'motion-proof-independent-video-decode-invalid', message: 'Chromium could not decode a non-empty temporal WebM with valid dimensions and duration.' });
     } else {
+      if (media.videoWidth !== viewport.width || media.videoHeight !== viewport.height) findings.push({ code: 'motion-proof-independent-video-viewport-mismatch', message: 'Decoded WebM dimensions do not match the planned browser viewport.' });
+      const videoDurationMs = media.duration * 1000;
+      if (timelineContract.durationMs > 0 && (videoDurationMs < timelineContract.durationMs * 0.75 || videoDurationMs > timelineContract.durationMs + 5000)) {
+        findings.push({ code: 'motion-proof-independent-video-duration-mismatch', message: 'Decoded WebM duration is not plausibly bound to the claimed browser timeline.' });
+      }
       await page.locator('video').evaluate(async (video) => {
         video.muted = true;
         const targetTime = Math.min(Math.max(video.duration * 0.5, 0.01), Math.max(video.duration - 0.01, 0.01));
@@ -95,6 +109,7 @@ async function verifyTarget(browser, target) {
     await page.waitForSelector('img', { timeout: 10_000 });
     const image = await page.locator('img').first().evaluate((img) => ({ width: img.naturalWidth, height: img.naturalHeight, complete: img.complete }));
     if (!image.complete || !(image.width > 0) || !(image.height > 0)) findings.push({ code: 'motion-proof-independent-capture-decode-invalid', message: 'Chromium could not decode the PNG end-frame evidence.' });
+    if (image.width !== viewport.width || image.height !== viewport.height) findings.push({ code: 'motion-proof-independent-capture-viewport-mismatch', message: 'Decoded PNG dimensions do not match the planned browser viewport.' });
   } catch (error) {
     findings.push({ code: 'motion-proof-independent-browser-replay-error', message: error?.message ?? 'Independent browser replay failed.' });
   } finally {
