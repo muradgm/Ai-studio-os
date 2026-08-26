@@ -18,7 +18,7 @@ function rel(file) {
   return path.relative(repoRoot, file).split(path.sep).join('/');
 }
 
-function writeRealProofPackage(plan, { omitBoardVideoIndex = null, missingBoard = false } = {}) {
+function writeRealProofPackage(plan, { omitBoardVideoIndex = null, missingBoard = false, commentOnlyBoard = false } = {}) {
   const rootRel = `artifacts/.motion-proof-comparison-test/${process.pid}-${packageCounter++}`;
   const root = path.join(repoRoot, rootRel);
   fs.mkdirSync(root, { recursive: true });
@@ -79,7 +79,8 @@ function writeRealProofPackage(plan, { omitBoardVideoIndex = null, missingBoard 
         return `<video controls src="${videoRel}"></video>`;
       })
       .join('\n');
-    fs.writeFileSync(boardPath, `<!doctype html><html><body>${videos}</body></html>`);
+    const boardMarkup = commentOnlyBoard ? `<!--\n${videos}\n-->` : videos;
+    fs.writeFileSync(boardPath, `<!doctype html><html><body>${boardMarkup}</body></html>`);
   }
 
   return {
@@ -128,5 +129,20 @@ test('comparison artifact that omits one rendered video blocks comparative proof
   });
 
   assert.equal(evidence.reviewReady, false);
+  assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-coverage-incomplete'));
+});
+
+test('video markup inside HTML comments cannot satisfy comparison coverage', () => {
+  const { plan } = buildMotionProofFixture();
+  const pkg = writeRealProofPackage(plan, { commentOnlyBoard: true });
+  const evidence = buildMotionProofEvidence({
+    plan,
+    renderedStudies: pkg.renderedStudies,
+    comparisonRefs: [pkg.comparisonRef]
+  });
+
+  assert.equal(evidence.reviewReady, false);
+  assert.equal(evidence.truth.comparisonArtifactsVerified, false);
+  assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-markup-missing'));
   assert.ok(evidence.findings.some((item) => item.code === 'motion-proof-comparison-video-coverage-incomplete'));
 });
