@@ -50,6 +50,16 @@ function directionContract(direction = {}) {
   };
 }
 
+function proofAuthorityFromCriticReview(criticReview = {}) {
+  const proofEvidence = criticReview.authoritativeBrief?.authorityInputs?.proofEvidence ?? null;
+  return {
+    proofEvidence,
+    exactBrowserTemporalEvidence: proofEvidence?.truth?.exactBrowserTemporalEvidence === true,
+    artifactDigestsRecomputed: proofEvidence?.truth?.artifactDigestsRecomputed === true,
+    testFixtureEvidenceOnly: proofEvidence?.truth?.testFixtureEvidenceOnly === true
+  };
+}
+
 export function buildAuthoritativeMotionDirection({
   exploration = null,
   critique,
@@ -60,6 +70,10 @@ export function buildAuthoritativeMotionDirection({
 } = {}) {
   const criticReview = reviewMotionCritique(critique ?? {});
   if (!criticReview.reviewReady) return null;
+
+  const proofAuthority = proofAuthorityFromCriticReview(criticReview);
+  if (!proofAuthority.exactBrowserTemporalEvidence || !proofAuthority.artifactDigestsRecomputed || proofAuthority.testFixtureEvidenceOnly) return null;
+
   const authoritativeExploration = criticReview.authoritativeBrief?.authorityInputs?.exploration ?? null;
   const id = text(hypothesisId);
   if (!authoritativeExploration || !id) return null;
@@ -99,6 +113,9 @@ export function buildAuthoritativeMotionDirection({
       ...(direction.truth ?? {}),
       directionBuiltFromCriticAuthoritativeExploration: true,
       exactProvenHypothesisContractRequired: true,
+      exactBrowserTemporalEvidenceRequired: true,
+      referencedArtifactDigestsRecomputed: true,
+      testFixtureEvidenceRejectedForTechnicalAuthority: true,
       directionAuthorityRecomputable: true,
       finalMotionDirectionAuthorityRequired: false,
       finalMotionDirectionAuthoritySatisfied: true,
@@ -127,7 +144,7 @@ export function reviewMotionDirectionAuthority(direction = {}) {
     reviewedEvidenceRefs: inputs.reviewedEvidenceRefs
   });
   if (!rebuilt) {
-    findings.push(finding('blocker', 'motion-direction-authority-recompute-failed', 'Motion Direction authority could not be reconstructed from rendered proof, Critic review and explicit human evidence review.'));
+    findings.push(finding('blocker', 'motion-direction-authority-recompute-failed', 'Motion Direction authority could not be reconstructed from independently verified browser proof, Critic review and explicit human evidence review.'));
   } else if (!sameContract(directionContract(direction), directionContract(rebuilt))) {
     findings.push(finding('blocker', 'motion-direction-authority-drift', 'Claimed Motion Direction drifted from the exact direction reconstructed from its proof and Critic authority.', {
       claimedHypothesisId: direction?.hypothesisId ?? null,
@@ -158,6 +175,8 @@ export function reviewMotionDirectionAuthority(direction = {}) {
     truth: {
       motionDirectionRecomputedFromAuthorityInputs: true,
       exactProvenHypothesisContractRequired: true,
+      exactBrowserTemporalEvidenceRequired: true,
+      testFixtureEvidenceRejectedForTechnicalAuthority: true,
       renderedMotionProofReviewed: rebuilt?.truth?.renderedMotionProofReviewed === true,
       motionCriticReviewed: rebuilt?.truth?.motionCriticReviewed === true,
       humanMotionSelectionConfirmed: rebuilt?.truth?.humanCreativeSelectionConfirmed === true,
