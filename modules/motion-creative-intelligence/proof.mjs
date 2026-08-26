@@ -487,7 +487,8 @@ export function reviewMotionProofEvidence(evidence = {}) {
   const renderedStudies = Array.isArray(evidence.renderedStudies) ? evidence.renderedStudies : [];
   if (new Set(renderedStudies.map((study) => study.studyId)).size !== renderedStudies.length) findings.push(finding('blocker', 'motion-proof-render-id-duplicate', 'Rendered Motion proof study IDs must be unique.'));
   const renderedById = new Map(renderedStudies.map((study) => [study.studyId, study]));
-  let fixtureOnly = renderedStudies.length > 0;
+  let sawFixtureStudy = false;
+  let sawRealStudy = false;
   const browserTargets = [];
   for (const planned of expectedStudies) {
     const rendered = renderedById.get(planned.id);
@@ -505,15 +506,26 @@ export function reviewMotionProofEvidence(evidence = {}) {
     if (!(rendered.durationMs > 0) || !(rendered.frameCount > 1)) findings.push(finding('blocker', 'motion-proof-temporal-metrics-invalid', 'Temporal evidence needs positive duration and multiple rendered frames.', { studyId: planned.id, durationMs: rendered.durationMs, frameCount: rendered.frameCount }));
 
     const artifactReview = verifyRenderedArtifacts({ evidence, planned, rendered });
-    fixtureOnly = fixtureOnly && artifactReview.fixtureOnly;
+    if (artifactReview.fixtureOnly) sawFixtureStudy = true;
+    else sawRealStudy = true;
     if (artifactReview.browserTarget) browserTargets.push(artifactReview.browserTarget);
     findings.push(...artifactReview.findings);
   }
   if (renderedStudies.length !== expectedStudies.length) findings.push(finding('blocker', 'motion-proof-render-count-mismatch', 'Rendered motion evidence must exactly cover the planned study matrix.', { expected: expectedStudies.length, actual: renderedStudies.length }));
 
+  const mixedEvidenceModes = sawFixtureStudy && sawRealStudy;
+  const fixtureOnly = sawFixtureStudy && !sawRealStudy;
+  const realOnly = sawRealStudy && !sawFixtureStudy;
+  if (mixedEvidenceModes) {
+    findings.push(finding('blocker', 'motion-proof-evidence-mode-mixed', 'Motion proof evidence must use one coherent authority mode: all isolated fixture studies or all real browser studies. Fixture and browser artifact studies may not be mixed.', {
+      fixtureStudyPresent: true,
+      browserStudyPresent: true
+    }));
+  }
+
   let browserReview = { findings: [], verified: false };
   const artifactBlockers = findings.filter((item) => item.severity === 'blocker');
-  if (!fixtureOnly && artifactBlockers.length === 0) {
+  if (realOnly && artifactBlockers.length === 0) {
     browserReview = verifyIndependentMotionProofBrowserArtifacts(browserTargets);
     findings.push(...browserReview.findings);
   }
@@ -537,15 +549,17 @@ export function reviewMotionProofEvidence(evidence = {}) {
     findings,
     planReview,
     truth: {
-      exactBrowserTemporalEvidence: blockers.length === 0 && !fixtureOnly && browserReview.verified === true,
-      independentBrowserReplayVerified: blockers.length === 0 && !fixtureOnly && browserReview.verified === true,
-      referencedArtifactBytesReopened: blockers.length === 0 && !fixtureOnly,
-      artifactDigestsRecomputed: blockers.length === 0 && !fixtureOnly,
+      exactBrowserTemporalEvidence: blockers.length === 0 && realOnly && browserReview.verified === true,
+      independentBrowserReplayVerified: blockers.length === 0 && realOnly && browserReview.verified === true,
+      referencedArtifactBytesReopened: blockers.length === 0 && realOnly,
+      artifactDigestsRecomputed: blockers.length === 0 && realOnly,
       temporalVideoRequired: true,
       mediaDecodeRequired: true,
+      coherentEvidenceModeRequired: true,
+      mixedFixtureAndBrowserEvidenceRejected: true,
       sourceAndTimelineDigestsRequired: true,
       comparisonEvidenceRequired: true,
-      comparisonArtifactsVerified: blockers.length === 0 && !fixtureOnly && comparisonReview.verified === true,
+      comparisonArtifactsVerified: blockers.length === 0 && realOnly && comparisonReview.verified === true,
       proofPlanAuthorityRecomputed: true,
       cachedPlanReviewTrusted: false,
       testFixtureEvidenceOnly: blockers.length === 0 && fixtureOnly,
