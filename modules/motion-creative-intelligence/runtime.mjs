@@ -147,15 +147,23 @@ function conceptualMotionText(hypothesis = {}) {
 export function reviewMotionCreativeExploration(exploration = {}) {
   const findings = [];
   const hypotheses = (Array.isArray(exploration.hypotheses) ? exploration.hypotheses : []).map(normalizeHypothesis);
+  const projectId = text(exploration.projectId);
   const worldId = text(exploration.creativeWorldId);
   const worldAuthority = recomputeWorldAuthority(exploration);
   const selectedWorld = selectedCreativeWorldFromAuthority(exploration);
 
+  if (!projectId) findings.push(finding('blocker', 'motion-creative-project-binding-missing', 'Motion exploration must be bound to a project identity.'));
   if (!worldId) findings.push(finding('blocker', 'motion-creative-world-binding-missing', 'Motion exploration must be bound to a selected Creative World.'));
   if (worldAuthority.pass !== true) {
     findings.push(finding('blocker', 'motion-creative-world-not-authoritative', 'Motion may interpret only a Creative World that remains canonical when the full creative authority handoff is re-reviewed at the Motion boundary.', {
       authorityFindingCodes: worldAuthority.findings.map((item) => item.code),
       canonicalFindingCodes: worldAuthority.canonicalHandoff?.findings?.map((item) => item.code) ?? []
+    }));
+  }
+  if (worldAuthority.pass === true && worldAuthority.authority?.projectId !== projectId) {
+    findings.push(finding('blocker', 'motion-creative-project-authority-drift', 'Motion exploration project identity drifted from recomputed canonical Creative World authority.', {
+      explorationProjectId: projectId || null,
+      authorityProjectId: worldAuthority.authority?.projectId ?? null
     }));
   }
   if (worldAuthority.pass === true && worldAuthority.authority?.creativeWorldId !== worldId) {
@@ -166,7 +174,7 @@ export function reviewMotionCreativeExploration(exploration = {}) {
   }
   if (hypotheses.length < 3) findings.push(finding('major', 'motion-creative-divergence-thin', 'Explore at least three materially different motion interpretations before convergence.', { count: hypotheses.length }));
   const hypothesisIds = hypotheses.map((item) => item.id);
-  if (new Set(hypothesisIds).size !== hypothesisIds.length) findings.push(finding('blocker', 'motion-hypothesis-id-duplicate', 'Motion hypotheses require unique IDs so proof, Critic evidence and human selection cannot become ambiguous.', { hypothesisIds }));
+  if (new Set(hypothesisIds).size !== hypotheses.length) findings.push(finding('blocker', 'motion-hypothesis-id-duplicate', 'Motion hypotheses require unique IDs so proof, Critic evidence and human selection cannot become ambiguous.', { hypothesisIds }));
 
   hypotheses.forEach((hypothesis, index) => {
     if (!hypothesis.interpretation) findings.push(finding('major', 'motion-interpretation-missing', 'Each motion hypothesis needs a creative interpretation, not only implementation notes.', { hypothesisId: hypothesis.id }));
@@ -217,6 +225,7 @@ export function reviewMotionCreativeExploration(exploration = {}) {
       technicalFeasibilityIsNotCreativeApproval: true,
       renderedMotionProofRequired: true,
       canonicalCreativeWorldAuthorityRequired: true,
+      projectAuthorityBindingRequired: true,
       fullCanonicalCreativeHandoffRecomputed: true,
       creativeWorldRefsResolved: blockers.every((item) => item.code !== 'motion-world-evidence-ref-invalid'),
       duplicateHypothesisIdsRejected: true,
