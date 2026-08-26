@@ -135,7 +135,95 @@ async function decodedVideoFrameSamples(page, selector) {
   }, { width: SAMPLE_WIDTH, height: SAMPLE_HEIGHT });
 }
 
-async function verifyTarget(browser, target) {
+async function verifyComparisonTarget(browser, target) {
+  const comparisonPaths = Array.isArray(target.comparisonPaths) ? target.comparisonPaths : [];
+  const expectedVideoPaths = Array.isArray(target.expectedVideoPaths) ? target.expectedVideoPaths : [];
+  const expectedUrls = new Set(expectedVideoPaths.map((file) => pathToFileURL(file).href));
+  const observedUrls = new Set();
+  const findings = [];
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+
+  try {
+    if (!comparisonPaths.length || !expectedUrls.size) {
+      findings.push({
+        code: 'motion-proof-independent-comparison-target-invalid',
+        message: 'Browser comparison verification requires comparison HTML and the exact rendered WebM set.'
+      });
+      return { studyId: null, verified: false, findings };
+    }
+
+    for (const comparisonPath of comparisonPaths) {
+      const page = await context.newPage();
+      try {
+        await page.goto(pathToFileURL(comparisonPath).href, { waitUntil: 'load', timeout: 15_000 });
+        const inspection = await page.evaluate(() => {
+          const sources = [];
+          let visibleVideoCount = 0;
+          let emptyVisibleVideoCount = 0;
+          for (const video of document.querySelectorAll('video')) {
+            const style = getComputedStyle(video);
+            const rect = video.getBoundingClientRect();
+            const visible = style.display !== 'none'
+              && style.visibility !== 'hidden'
+              && Number.parseFloat(style.opacity || '1') > 0
+              && rect.width > 0
+              && rect.height > 0
+              && video.getClientRects().length > 0;
+            if (!visible) continue;
+            visibleVideoCount += 1;
+            const videoSources = [];
+            if (video.hasAttribute('src') && video.getAttribute('src')?.trim()) videoSources.push(video.src);
+            for (const source of video.querySelectorAll('source')) {
+              if (source.hasAttribute('src') && source.getAttribute('src')?.trim()) videoSources.push(source.src);
+            }
+            if (!videoSources.length) emptyVisibleVideoCount += 1;
+            sources.push(...videoSources);
+          }
+          return { sources, visibleVideoCount, emptyVisibleVideoCount };
+        });
+
+        if (inspection.visibleVideoCount === 0) {
+          findings.push({
+            code: 'motion-proof-independent-comparison-visible-video-missing',
+            message: 'Comparison HTML must render actual visible video elements in the browser.',
+            comparisonRef: comparisonPath
+          });
+        }
+        if (inspection.emptyVisibleVideoCount > 0) {
+          findings.push({
+            code: 'motion-proof-independent-comparison-visible-video-source-missing',
+            message: 'Every visible comparison video must resolve to a concrete media source.',
+            comparisonRef: comparisonPath
+          });
+        }
+        for (const source of inspection.sources) observedUrls.add(source);
+      } catch (error) {
+        findings.push({
+          code: 'motion-proof-independent-comparison-browser-error',
+          message: `Independent comparison DOM verification failed: ${error?.message ?? 'unknown error'}`,
+          comparisonRef: comparisonPath
+        });
+      } finally {
+        await page.close();
+      }
+    }
+
+    const missingUrls = [...expectedUrls].filter((url) => !observedUrls.has(url));
+    const unexpectedUrls = [...observedUrls].filter((url) => !expectedUrls.has(url));
+    if (missingUrls.length || unexpectedUrls.length) {
+      findings.push({
+        code: 'motion-proof-independent-comparison-dom-coverage-mismatch',
+        message: `Visible browser comparison media must exactly match the rendered WebM set (missing ${missingUrls.length}, unexpected ${unexpectedUrls.length}).`
+      });
+    }
+  } finally {
+    await context.close();
+  }
+
+  return { studyId: null, verified: findings.length === 0, findings };
+}
+
+async function verifyStudyTarget(browser, target) {
   const planned = target.planned ?? {};
   const timelineContract = target.timelineContract ?? {};
   const viewport = planned.viewport === 'mobile' ? { width: 390, height: 844 } : { width: 1100, height: 720 };
@@ -218,6 +306,11 @@ async function verifyTarget(browser, target) {
   return { studyId: planned.id ?? null, verified: findings.length === 0, findings };
 }
 
+async function verifyTarget(browser, target) {
+  if (target?.kind === 'comparison') return verifyComparisonTarget(browser, target);
+  return verifyStudyTarget(browser, target);
+}
+
 const inputPath = process.argv[2];
 if (!inputPath) throw new Error('Verifier input path is required.');
 const payload = JSON.parse(await fs.readFile(inputPath, 'utf8'));
@@ -230,5 +323,5 @@ try {
   await browser.close();
 }
 
-const findings = results.flatMap((result) => result.findings.map((item) => ({ ...item, studyId: result.studyId })));
+const findings = results.flatMap((result) => result.findings.map((item) => ({ ...item, studyId: result.studyId ?? null })));
 process.stdout.write(JSON.stringify({ verified: targets.length > 0 && findings.length === 0, results, findings }));
