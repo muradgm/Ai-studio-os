@@ -171,22 +171,16 @@ test('decodable unrelated WebM cannot satisfy replay pixel binding', async (t) =
   const capturePath = path.join(root, 'end.png');
   const videoPath = path.join(root, 'unrelated.webm');
   const viewport = { width: 1100, height: 720 };
+  const durationMs = 600;
   const planned = {
     id: 'pixel-binding-test',
     viewport: 'desktop',
     input: 'passive',
     creativeIntent: {
-      motionThesis: 'Hold a stable bright field so unrelated dark media is visibly distinguishable.'
+      motionThesis: 'Move from a dark field to a bright final state so unrelated dark media remains independently distinguishable.'
     }
   };
-  const source = `<!doctype html><html><head><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}main{width:100vw;height:100vh;background:#fff}</style></head><body><main data-study="${planned.id}"></main><script>
-const study=${JSON.stringify(planned)};
-const proof=window.__motionCreativeProof={studyId:study.id,sourceStudyId:study.id,done:false,startedAt:null,completedAt:null,frameCount:0,trace:[],reducedMotionMedia:false,appliedCreativeIntent:structuredClone(study.creativeIntent)};
-let counting=true;const tick=()=>{if(counting){proof.frameCount++;requestAnimationFrame(tick)}};requestAnimationFrame(tick);
-async function run(){proof.startedAt=performance.now();proof.trace.push({event:'start',at:proof.startedAt});await new Promise(r=>setTimeout(r,220));proof.completedAt=performance.now();proof.trace.push({event:'complete',at:proof.completedAt});counting=false;proof.done=true;}
-window.__startMotionCreativeProof=run;setTimeout(run,20);
-</script></body></html>`;
-  fs.writeFileSync(sourcePath, source);
+  fs.writeFileSync(sourcePath, animatedProofSource(planned, durationMs));
 
   const browser = await chromium.launch({ headless: true });
   try {
@@ -201,7 +195,7 @@ window.__startMotionCreativeProof=run;setTimeout(run,20);
     const videoPage = await videoContext.newPage();
     await videoPage.setContent('<!doctype html><style>html,body{margin:0;width:100%;height:100%;background:#000}body{background:#000}</style>', { waitUntil: 'load' });
     const recordedVideo = videoPage.video();
-    await videoPage.waitForTimeout(700);
+    await videoPage.waitForTimeout(durationMs + 500);
     await videoContext.close();
     const recordedPath = await recordedVideo.path();
     fs.copyFileSync(recordedPath, videoPath);
@@ -216,9 +210,9 @@ window.__startMotionCreativeProof=run;setTimeout(run,20);
     input: planned.input,
     reducedMotionMedia: false,
     appliedCreativeIntent: planned.creativeIntent,
-    trace: [{ event: 'start', at: 1 }, { event: 'complete', at: 221 }],
-    durationMs: 220,
-    animationFrameCount: 8
+    trace: [{ event: 'start', at: 1 }, { event: 'complete', at: durationMs + 1 }],
+    durationMs,
+    animationFrameCount: 40
   };
   const review = verifyIndependentMotionProofBrowserArtifacts([{
     planned,
