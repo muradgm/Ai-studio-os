@@ -57,11 +57,11 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
       };
     }
 
-    const findings = (Array.isArray(result?.findings) ? result.findings : []).map((item) => {
+    const findings = (Array.isArray(result?.findings) ? result.findings : []).flatMap((item) => {
       const studyId = item?.studyId ?? null;
       const baseMessage = item?.message || 'Independent browser verification failed.';
       const message = studyId ? `[${studyId}] ${baseMessage}` : baseMessage;
-      return blocker(
+      const primary = blocker(
         item?.code || 'motion-proof-independent-browser-verification-failed',
         message,
         {
@@ -70,6 +70,13 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
           verifierMessage: item?.message ?? null
         }
       );
+      if (item?.code === 'motion-proof-independent-video-timeline-mismatch' && studyId) {
+        return [
+          primary,
+          blocker(`motion-proof-diagnostic-study-${studyId}`, message, { studyId, verifierMessage: item?.message ?? null })
+        ];
+      }
+      return [primary];
     });
 
     if (result?.verified !== true && findings.length === 0) {
