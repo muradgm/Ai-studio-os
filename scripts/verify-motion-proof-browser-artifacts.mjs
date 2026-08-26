@@ -2,6 +2,11 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
+const SAMPLE_WIDTH = 48;
+const SAMPLE_HEIGHT = 32;
+const MAX_VISUAL_MEAN_DELTA = 5;
+const MAX_VISUAL_OUTLIER_SHARE = 0.01;
+
 function canonicalValue(value) {
   if (Array.isArray(value)) return value.map(canonicalValue);
   if (value && typeof value === 'object') {
@@ -22,6 +27,54 @@ function traceContract(trace = []) {
   });
 }
 
+function visualDistance(left = [], right = []) {
+  if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length || left.length === 0) {
+    return { meanDelta: Infinity, outlierShare: 1 };
+  }
+  let total = 0;
+  let channels = 0;
+  let outliers = 0;
+  const pixelCount = left.length / 4;
+  for (let i = 0; i < left.length; i += 4) {
+    const dr = Math.abs(left[i] - right[i]);
+    const dg = Math.abs(left[i + 1] - right[i + 1]);
+    const db = Math.abs(left[i + 2] - right[i + 2]);
+    total += dr + dg + db;
+    channels += 3;
+    if (Math.max(dr, dg, db) > 32) outliers += 1;
+  }
+  return {
+    meanDelta: channels ? total / channels : Infinity,
+    outlierShare: pixelCount ? outliers / pixelCount : 1
+  };
+}
+
+function visuallyBound(distance) {
+  return distance.meanDelta <= MAX_VISUAL_MEAN_DELTA && distance.outlierShare <= MAX_VISUAL_OUTLIER_SHARE;
+}
+
+async function imageSignature(page, pngBytes) {
+  const dataUrl = `data:image/png;base64,${pngBytes.toString('base64')}`;
+  return page.evaluate(async ({ dataUrl, width, height }) => {
+    const image = new Image();
+    image.src = dataUrl;
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error('image decode error'));
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(image, 0, 0, width, height);
+    return {
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      pixels: Array.from(context.getImageData(0, 0, width, height).data)
+    };
+  }, { dataUrl, width: SAMPLE_WIDTH, height: SAMPLE_HEIGHT });
+}
+
 async function waitForMediaMetadata(page, selector) {
   return page.locator(selector).evaluate(async (media) => {
     if (media.readyState < 1) {
@@ -37,6 +90,27 @@ async function waitForMediaMetadata(page, selector) {
       videoWidth: media.videoWidth ?? null,
       videoHeight: media.videoHeight ?? null
     };
+  });
+}
+
+async function seekVideoToFinalFrame(page) {
+  return page.locator('video').evaluate(async (video) => {
+    video.muted = true;
+    const targetTime = Math.min(Math.max(video.duration - 0.05, 0.01), Math.max(video.duration - 0.01, 0.01));
+    if (targetTime > 0 && Number.isFinite(targetTime)) {
+      await new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('video seek timeout')), 10_000);
+        video.addEventListener('seeked', () => { clearTimeout(timer); resolve(); }, { once: true });
+        video.addEventListener('error', () => { clearTimeout(timer); reject(new Error('video seek decode error')); }, { once: true });
+        video.currentTime = targetTime;
+      });
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = 48;
+    canvas.height = 32;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    return Array.from(context.getImageData(0, 0, canvas.width, canvas.height).data);
   });
 }
 
@@ -80,6 +154,16 @@ async function verifyTarget(browser, target) {
       findings.push({ code: 'motion-proof-independent-timeline-duration-mismatch', message: 'Claimed timeline duration is not consistent with independently replayed browser execution.' });
     }
 
+    const replayPng = await page.screenshot({ type: 'png' });
+    const replaySignature = await imageSignature(page, replayPng);
+    const captureBytes = await fs.readFile(target.capturePath);
+    const captureSignature = await imageSignature(page, captureBytes);
+    if (captureSignature.width !== viewport.width || captureSignature.height !== viewport.height) findings.push({ code: 'motion-proof-independent-capture-viewport-mismatch', message: 'Decoded PNG dimensions do not match the planned browser viewport.' });
+    const captureDistance = visualDistance(replaySignature.pixels, captureSignature.pixels);
+    if (!visuallyBound(captureDistance)) {
+      findings.push({ code: 'motion-proof-independent-capture-replay-mismatch', message: 'Claimed PNG end frame is not pixel-bound to the independently replayed source state.' });
+    }
+
     await page.goto(pathToFileURL(target.videoPath).href, { waitUntil: 'domcontentloaded', timeout: 15_000 });
     await page.waitForSelector('video', { timeout: 10_000 });
     const media = await waitForMediaMetadata(page, 'video');
@@ -91,25 +175,12 @@ async function verifyTarget(browser, target) {
       if (timelineContract.durationMs > 0 && (videoDurationMs < timelineContract.durationMs * 0.75 || videoDurationMs > timelineContract.durationMs + 5000)) {
         findings.push({ code: 'motion-proof-independent-video-duration-mismatch', message: 'Decoded WebM duration is not plausibly bound to the claimed browser timeline.' });
       }
-      await page.locator('video').evaluate(async (video) => {
-        video.muted = true;
-        const targetTime = Math.min(Math.max(video.duration * 0.5, 0.01), Math.max(video.duration - 0.01, 0.01));
-        if (targetTime > 0 && Number.isFinite(targetTime)) {
-          await new Promise((resolve, reject) => {
-            const timer = setTimeout(() => reject(new Error('video seek timeout')), 10_000);
-            video.addEventListener('seeked', () => { clearTimeout(timer); resolve(); }, { once: true });
-            video.addEventListener('error', () => { clearTimeout(timer); reject(new Error('video seek decode error')); }, { once: true });
-            video.currentTime = targetTime;
-          });
-        }
-      });
+      const videoPixels = await seekVideoToFinalFrame(page);
+      const videoDistance = visualDistance(replaySignature.pixels, videoPixels);
+      if (!visuallyBound(videoDistance)) {
+        findings.push({ code: 'motion-proof-independent-video-replay-mismatch', message: 'Decoded WebM final state is not pixel-bound to the independently replayed source state.' });
+      }
     }
-
-    await page.goto(pathToFileURL(target.capturePath).href, { waitUntil: 'load', timeout: 15_000 });
-    await page.waitForSelector('img', { timeout: 10_000 });
-    const image = await page.locator('img').first().evaluate((img) => ({ width: img.naturalWidth, height: img.naturalHeight, complete: img.complete }));
-    if (!image.complete || !(image.width > 0) || !(image.height > 0)) findings.push({ code: 'motion-proof-independent-capture-decode-invalid', message: 'Chromium could not decode the PNG end-frame evidence.' });
-    if (image.width !== viewport.width || image.height !== viewport.height) findings.push({ code: 'motion-proof-independent-capture-viewport-mismatch', message: 'Decoded PNG dimensions do not match the planned browser viewport.' });
   } catch (error) {
     findings.push({ code: 'motion-proof-independent-browser-replay-error', message: error?.message ?? 'Independent browser replay failed.' });
   } finally {
