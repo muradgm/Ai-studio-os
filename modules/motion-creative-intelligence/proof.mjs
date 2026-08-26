@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { verifyIndependentMotionProofBrowserArtifacts } from './browser-proof-verifier.mjs';
 import { reviewMotionCreativeExploration } from './runtime.mjs';
 
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
@@ -125,9 +126,9 @@ function verifyRenderedArtifacts({ evidence, planned, rendered }) {
   if (anyFixtureRefs) {
     if (!allFixtureRefs || evidence.projectId !== TEST_FIXTURE_PROJECT_ID) {
       findings.push(finding('blocker', 'motion-proof-fixture-evidence-invalid', 'Synthetic fixture references are permitted only for the isolated Motion proof test fixture and may not be mixed with production artifact references.', { studyId: planned.id }));
-      return { findings, fixtureOnly: true };
+      return { findings, fixtureOnly: true, browserTarget: null };
     }
-    return { findings, fixtureOnly: true };
+    return { findings, fixtureOnly: true, browserTarget: null };
   }
 
   const source = readArtifact(rendered.sourceRef, 'utf8');
@@ -138,7 +139,7 @@ function verifyRenderedArtifacts({ evidence, planned, rendered }) {
   for (const [kind, artifact] of Object.entries({ source, timeline, video, capture })) {
     if (!artifact.ok) findings.push(finding('blocker', 'motion-proof-artifact-unreadable', `Rendered Motion proof ${kind} artifact must exist beneath the repository artifact root and be independently readable.`, { studyId: planned.id, kind, ref: rendered[`${kind === 'source' ? 'source' : kind === 'timeline' ? 'timeline' : kind === 'video' ? 'video' : 'capture'}Ref`], reason: artifact.reason }));
   }
-  if (findings.length) return { findings, fixtureOnly: false };
+  if (findings.length) return { findings, fixtureOnly: false, browserTarget: null };
 
   const expectedStudyLiteral = `const study=${JSON.stringify(planned)};`;
   if (!source.value.includes(expectedStudyLiteral)) findings.push(finding('blocker', 'motion-proof-source-study-mismatch', 'Exact emitted browser source must embed the same planned study contract that is being reviewed.', { studyId: planned.id, sourceRef: rendered.sourceRef }));
@@ -172,7 +173,18 @@ function verifyRenderedArtifacts({ evidence, planned, rendered }) {
     }
   }
 
-  return { findings, fixtureOnly: false };
+  return {
+    findings,
+    fixtureOnly: false,
+    browserTarget: parsedTimeline ? {
+      planned,
+      sourcePath: source.absolute,
+      timelinePath: timeline.absolute,
+      videoPath: video.absolute,
+      capturePath: capture.absolute,
+      timelineContract: parsedTimeline
+    } : null
+  };
 }
 
 function comparisonVideoSources(html = '') {
@@ -371,6 +383,7 @@ export function reviewMotionProofEvidence(evidence = {}) {
   if (new Set(renderedStudies.map((study) => study.studyId)).size !== renderedStudies.length) findings.push(finding('blocker', 'motion-proof-render-id-duplicate', 'Rendered Motion proof study IDs must be unique.'));
   const renderedById = new Map(renderedStudies.map((study) => [study.studyId, study]));
   let fixtureOnly = renderedStudies.length > 0;
+  const browserTargets = [];
   for (const planned of expectedStudies) {
     const rendered = renderedById.get(planned.id);
     if (!rendered) {
@@ -388,9 +401,17 @@ export function reviewMotionProofEvidence(evidence = {}) {
 
     const artifactReview = verifyRenderedArtifacts({ evidence, planned, rendered });
     fixtureOnly = fixtureOnly && artifactReview.fixtureOnly;
+    if (artifactReview.browserTarget) browserTargets.push(artifactReview.browserTarget);
     findings.push(...artifactReview.findings);
   }
   if (renderedStudies.length !== expectedStudies.length) findings.push(finding('blocker', 'motion-proof-render-count-mismatch', 'Rendered motion evidence must exactly cover the planned study matrix.', { expected: expectedStudies.length, actual: renderedStudies.length }));
+
+  let browserReview = { findings: [], verified: false };
+  const artifactBlockers = findings.filter((item) => item.severity === 'blocker');
+  if (!fixtureOnly && artifactBlockers.length === 0) {
+    browserReview = verifyIndependentMotionProofBrowserArtifacts(browserTargets);
+    findings.push(...browserReview.findings);
+  }
 
   const comparisonRefs = list(evidence.comparisonRefs);
   let comparisonReview = { findings: [], verified: false };
@@ -411,10 +432,12 @@ export function reviewMotionProofEvidence(evidence = {}) {
     findings,
     planReview,
     truth: {
-      exactBrowserTemporalEvidence: blockers.length === 0 && !fixtureOnly,
+      exactBrowserTemporalEvidence: blockers.length === 0 && !fixtureOnly && browserReview.verified === true,
+      independentBrowserReplayVerified: blockers.length === 0 && !fixtureOnly && browserReview.verified === true,
       referencedArtifactBytesReopened: blockers.length === 0 && !fixtureOnly,
       artifactDigestsRecomputed: blockers.length === 0 && !fixtureOnly,
       temporalVideoRequired: true,
+      mediaDecodeRequired: true,
       sourceAndTimelineDigestsRequired: true,
       comparisonEvidenceRequired: true,
       comparisonArtifactsVerified: blockers.length === 0 && !fixtureOnly && comparisonReview.verified === true,
