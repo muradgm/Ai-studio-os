@@ -6,10 +6,14 @@ const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 32;
 const MAX_VISUAL_MEAN_DELTA = 5;
 const MAX_VISUAL_OUTLIER_SHARE = 0.01;
+const MAX_TEMPORAL_VISUAL_MEAN_DELTA = 5;
+const MAX_TEMPORAL_VISUAL_OUTLIER_SHARE = 0.03;
 const MAX_FRAME_COUNT_DELTA = 4;
-const TEMPORAL_SAMPLE_FRACTIONS = [0.2, 0.5, 0.8];
-const TEMPORAL_VIDEO_SAMPLE_STEP_SECONDS = 0.04;
+const TEMPORAL_SAMPLE_FRACTIONS = [0.08, 0.16, 0.24, 0.32, 0.4, 0.48, 0.56, 0.64, 0.72, 0.8, 0.88];
+const TEMPORAL_VIDEO_SAMPLE_STEP_SECONDS = 0.02;
 const TEMPORAL_VIDEO_LEAD_SECONDS = 0.75;
+const MIN_TEMPORAL_MATCHES = 4;
+const MIN_TEMPORAL_VIDEO_SPAN_SECONDS = 0.12;
 const MIN_VISIBLE_MOTION_MEAN_DELTA = 0.75;
 const MIN_VISIBLE_MOTION_OUTLIER_SHARE = 0.001;
 
@@ -59,26 +63,82 @@ function visuallyBound(distance) {
   return distance.meanDelta <= MAX_VISUAL_MEAN_DELTA && distance.outlierShare <= MAX_VISUAL_OUTLIER_SHARE;
 }
 
+function temporallyBound(distance) {
+  return distance.meanDelta <= MAX_TEMPORAL_VISUAL_MEAN_DELTA
+    && distance.outlierShare <= MAX_TEMPORAL_VISUAL_OUTLIER_SHARE;
+}
+
 function visiblyDifferent(distance) {
   return distance.meanDelta >= MIN_VISIBLE_MOTION_MEAN_DELTA || distance.outlierShare >= MIN_VISIBLE_MOTION_OUTLIER_SHARE;
 }
 
 function orderedTemporalBinding(replaySamples, videoSamples) {
-  let cursor = 0;
-  const matches = [];
-  for (const replaySample of replaySamples) {
-    let selected = null;
-    for (let index = cursor; index < videoSamples.length; index += 1) {
-      const distance = visualDistance(replaySample.pixels, videoSamples[index].pixels);
-      if (!visuallyBound(distance)) continue;
-      selected = { index, videoTime: videoSamples[index].targetTime, distance };
-      break;
+  const replayCount = replaySamples.length;
+  const videoCount = videoSamples.length;
+  if (!replayCount || !videoCount) return { verified: false, matches: [], spanSeconds: 0, visuallyProgressive: false };
+
+  const scores = Array.from({ length: replayCount + 1 }, () => new Uint16Array(videoCount + 1));
+  for (let replayIndex = 1; replayIndex <= replayCount; replayIndex += 1) {
+    for (let videoIndex = 1; videoIndex <= videoCount; videoIndex += 1) {
+      const distance = visualDistance(replaySamples[replayIndex - 1].pixels, videoSamples[videoIndex - 1].pixels);
+      const diagonal = temporallyBound(distance) ? scores[replayIndex - 1][videoIndex - 1] + 1 : 0;
+      scores[replayIndex][videoIndex] = Math.max(
+        diagonal,
+        scores[replayIndex - 1][videoIndex],
+        scores[replayIndex][videoIndex - 1]
+      );
     }
-    if (!selected) return { verified: false, matches };
-    matches.push(selected);
-    cursor = selected.index + 1;
   }
-  return { verified: true, matches };
+
+  const matches = [];
+  let replayIndex = replayCount;
+  let videoIndex = videoCount;
+  while (replayIndex > 0 && videoIndex > 0) {
+    const replaySample = replaySamples[replayIndex - 1];
+    const videoSample = videoSamples[videoIndex - 1];
+    const distance = visualDistance(replaySample.pixels, videoSample.pixels);
+    const diagonalScore = scores[replayIndex - 1][videoIndex - 1] + 1;
+    if (temporallyBound(distance) && scores[replayIndex][videoIndex] === diagonalScore) {
+      matches.push({
+        replayIndex: replayIndex - 1,
+        videoIndex: videoIndex - 1,
+        fraction: replaySample.fraction,
+        replayElapsedMs: replaySample.elapsedMs,
+        videoTime: videoSample.targetTime,
+        distance
+      });
+      replayIndex -= 1;
+      videoIndex -= 1;
+    } else if (scores[replayIndex - 1][videoIndex] >= scores[replayIndex][videoIndex - 1]) {
+      replayIndex -= 1;
+    } else {
+      videoIndex -= 1;
+    }
+  }
+  matches.reverse();
+
+  const spanSeconds = matches.length > 1 ? matches[matches.length - 1].videoTime - matches[0].videoTime : 0;
+  let visuallyProgressive = false;
+  for (let left = 0; left < matches.length && !visuallyProgressive; left += 1) {
+    for (let right = left + 1; right < matches.length; right += 1) {
+      const leftPixels = videoSamples[matches[left].videoIndex].pixels;
+      const rightPixels = videoSamples[matches[right].videoIndex].pixels;
+      if (visiblyDifferent(visualDistance(leftPixels, rightPixels))) {
+        visuallyProgressive = true;
+        break;
+      }
+    }
+  }
+
+  const minimumMatches = Math.min(MIN_TEMPORAL_MATCHES, replayCount);
+  return {
+    verified: matches.length >= minimumMatches
+      && spanSeconds >= MIN_TEMPORAL_VIDEO_SPAN_SECONDS
+      && visuallyProgressive,
+    matches,
+    spanSeconds,
+    visuallyProgressive
+  };
 }
 
 async function imageSignature(page, pngBytes) {
@@ -454,7 +514,7 @@ async function verifyStudyTarget(browser, target) {
           if (!sequenceBinding.verified) {
             findings.push({
               code: 'motion-proof-independent-video-timeline-mismatch',
-              message: `Decoded WebM does not contain the independently replayed sampled visual states in temporal order (${sequenceBinding.matches.length}/${replayTemporalSamples.length} states bound).`
+              message: `Decoded WebM does not contain enough independently replayed visual states in temporal order (${sequenceBinding.matches.length}/${replayTemporalSamples.length} states bound, ${sequenceBinding.spanSeconds.toFixed(2)}s matched span, visual progression ${sequenceBinding.visuallyProgressive ? 'present' : 'missing'}).`
             });
           }
         }
