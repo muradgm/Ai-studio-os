@@ -187,14 +187,119 @@ function verifyRenderedArtifacts({ evidence, planned, rendered }) {
   };
 }
 
+function findMarkupTagEnd(html, start) {
+  let quote = null;
+  for (let index = start + 1; index < html.length; index += 1) {
+    const char = html[index];
+    if (quote) {
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === '>') return index;
+  }
+  return -1;
+}
+
+function parseMarkupTag(raw = '') {
+  let index = raw.startsWith('</') ? 2 : 1;
+  while (/\s/.test(raw[index] ?? '')) index += 1;
+  const nameStart = index;
+  while (/[A-Za-z0-9:-]/.test(raw[index] ?? '')) index += 1;
+  const name = raw.slice(nameStart, index).toLowerCase();
+  const attributes = {};
+
+  while (index < raw.length) {
+    while (/\s/.test(raw[index] ?? '')) index += 1;
+    if (index >= raw.length || raw[index] === '>' || raw[index] === '/') break;
+    const attrStart = index;
+    while (index < raw.length && !/[\s=/>]/.test(raw[index])) index += 1;
+    const attrName = raw.slice(attrStart, index).toLowerCase();
+    while (/\s/.test(raw[index] ?? '')) index += 1;
+    let value = '';
+    if (raw[index] === '=') {
+      index += 1;
+      while (/\s/.test(raw[index] ?? '')) index += 1;
+      const quote = raw[index] === '"' || raw[index] === "'" ? raw[index] : null;
+      if (quote) {
+        index += 1;
+        const valueStart = index;
+        while (index < raw.length && raw[index] !== quote) index += 1;
+        value = raw.slice(valueStart, index);
+        if (raw[index] === quote) index += 1;
+      } else {
+        const valueStart = index;
+        while (index < raw.length && !/[\s>]/.test(raw[index])) index += 1;
+        value = raw.slice(valueStart, index);
+      }
+    }
+    if (attrName) attributes[attrName] = value;
+  }
+
+  return {
+    name,
+    closing: raw.startsWith('</'),
+    selfClosing: /\/\s*>$/.test(raw),
+    attributes
+  };
+}
+
 function comparisonVideoSources(html = '') {
   const sources = [];
-  for (const tag of html.match(/<(?:video|source)\b[^>]*>/gi) ?? []) {
-    const quoted = tag.match(/\bsrc\s*=\s*(["'])(.*?)\1/i);
-    const unquoted = quoted ? null : tag.match(/\bsrc\s*=\s*([^\s>]+)/i);
-    const value = text(quoted?.[2] ?? unquoted?.[1] ?? '');
-    if (value) sources.push(value);
+  let index = 0;
+  let videoDepth = 0;
+  const rawTextElements = new Set(['script', 'style', 'template', 'noscript']);
+
+  while (index < html.length) {
+    const start = html.indexOf('<', index);
+    if (start < 0) break;
+
+    if (html.startsWith('<!--', start)) {
+      const end = html.indexOf('-->', start + 4);
+      index = end < 0 ? html.length : end + 3;
+      continue;
+    }
+
+    const end = findMarkupTagEnd(html, start);
+    if (end < 0) break;
+    const raw = html.slice(start, end + 1);
+    if (/^<!|^<\?/i.test(raw)) {
+      index = end + 1;
+      continue;
+    }
+
+    const tag = parseMarkupTag(raw);
+    if (!tag.name) {
+      index = end + 1;
+      continue;
+    }
+
+    if (!tag.closing && rawTextElements.has(tag.name)) {
+      const closeToken = `</${tag.name}`;
+      const closeStart = html.toLowerCase().indexOf(closeToken, end + 1);
+      if (closeStart < 0) break;
+      const closeEnd = findMarkupTagEnd(html, closeStart);
+      index = closeEnd < 0 ? html.length : closeEnd + 1;
+      continue;
+    }
+
+    if (tag.closing && tag.name === 'video') {
+      videoDepth = Math.max(0, videoDepth - 1);
+    } else if (!tag.closing && tag.name === 'video') {
+      const src = text(tag.attributes.src);
+      if (src) sources.push(src);
+      if (!tag.selfClosing) videoDepth += 1;
+    } else if (!tag.closing && tag.name === 'source' && videoDepth > 0) {
+      const src = text(tag.attributes.src);
+      if (src) sources.push(src);
+    }
+
+    index = end + 1;
   }
+
   return list(sources);
 }
 
@@ -244,7 +349,7 @@ function verifyComparisonArtifacts({ evidence, renderedStudies, fixtureOnly }) {
 
     const sources = comparisonVideoSources(comparison.value);
     if (!sources.length) {
-      findings.push(finding('blocker', 'motion-proof-comparison-video-markup-missing', 'Comparison HTML must contain temporal video markup.', { ref }));
+      findings.push(finding('blocker', 'motion-proof-comparison-video-markup-missing', 'Comparison HTML must contain structurally parsed temporal video/source elements; comments or raw text do not count as comparative media.', { ref }));
       continue;
     }
 
