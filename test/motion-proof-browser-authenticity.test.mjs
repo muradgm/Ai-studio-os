@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 
 import { buildMotionProofEvidence } from '../modules/motion-creative-intelligence/proof.mjs';
-import { buildMotionProofFixture, renderedMotionStudiesFromPlan } from '../fixtures/motion-creative-authority-fixture.mjs';
+import { buildMotionProofFixture } from '../fixtures/motion-creative-authority-fixture.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const digest = (value) => crypto.createHash('sha256').update(value).digest('hex');
@@ -17,10 +17,10 @@ function rel(file) {
   return path.relative(repoRoot, file).split(path.sep).join('/');
 }
 
-function forgedBrowserArtifacts(plan) {
-  const study = plan.studies[0];
-  const root = path.join(repoRoot, 'artifacts', '.motion-proof-browser-authenticity-test', `${process.pid}-${Date.now()}`);
-  fs.mkdirSync(root, { recursive: true });
+function forgedBrowserArtifacts(plan, root, index) {
+  const study = plan.studies[index];
+  const studyRoot = path.join(root, study.id);
+  fs.mkdirSync(studyRoot, { recursive: true });
 
   const source = `<!doctype html><main data-study="${study.id}"><button data-interaction-target>run</button></main><script>
 const study=${JSON.stringify(study)};
@@ -32,9 +32,9 @@ window.__startMotionCreativeProof=run;setTimeout(run,20);
   const timelineObject = {
     schema: 'ai-studio-os/motion-proof-browser-timeline@1',
     studyId: study.id,
-    viewport: { width: 1100, height: 720 },
+    viewport: study.viewport === 'mobile' ? { width: 390, height: 844 } : { width: 1100, height: 720 },
     input: study.input,
-    reducedMotionMedia: false,
+    reducedMotionMedia: study.input === 'reduced-motion',
     appliedCreativeIntent: study.creativeIntent,
     trace: [{ event: 'start', at: 1 }, { event: 'complete', at: 121 }],
     durationMs: 120,
@@ -44,10 +44,10 @@ window.__startMotionCreativeProof=run;setTimeout(run,20);
   const video = Buffer.concat([WEBM_HEADER, Buffer.from([0x00])]);
   const capture = Buffer.concat([PNG_HEADER, Buffer.from([0x00])]);
   const paths = {
-    source: path.join(root, 'study.html'),
-    timeline: path.join(root, 'timeline.json'),
-    video: path.join(root, 'study.webm'),
-    capture: path.join(root, 'end.png')
+    source: path.join(studyRoot, 'study.html'),
+    timeline: path.join(studyRoot, 'timeline.json'),
+    video: path.join(studyRoot, 'study.webm'),
+    capture: path.join(studyRoot, 'end.png')
   };
   fs.writeFileSync(paths.source, source);
   fs.writeFileSync(paths.timeline, timeline);
@@ -75,19 +75,33 @@ window.__startMotionCreativeProof=run;setTimeout(run,20);
   };
 }
 
+function writeComparisonBoard(root, renderedStudies) {
+  const boardPath = path.join(root, 'comparison.html');
+  const cards = renderedStudies.map((rendered) => {
+    const videoPath = path.relative(root, path.join(repoRoot, rendered.videoRef)).split(path.sep).join('/');
+    return `<article><h2>${rendered.studyId}</h2><video controls src="${videoPath}"></video></article>`;
+  }).join('\n');
+  fs.writeFileSync(boardPath, `<!doctype html><html><body>${cards}</body></html>`);
+  return rel(boardPath);
+}
+
 test('header-shaped media plus self-authored source/timeline cannot become exact browser proof', () => {
   const { plan } = buildMotionProofFixture();
-  const rendered = renderedMotionStudiesFromPlan(plan);
-  rendered[0] = forgedBrowserArtifacts(plan);
+  const root = path.join(repoRoot, 'artifacts', '.motion-proof-browser-authenticity-test', `${process.pid}-${Date.now()}`);
+  fs.mkdirSync(root, { recursive: true });
+
+  const rendered = plan.studies.map((_, index) => forgedBrowserArtifacts(plan, root, index));
+  const comparisonRef = writeComparisonBoard(root, rendered);
 
   const evidence = buildMotionProofEvidence({
     plan,
     renderedStudies: rendered,
-    comparisonRefs: ['fixture://motion/compare.html']
+    comparisonRefs: [comparisonRef]
   });
 
   assert.equal(evidence.reviewReady, false);
   assert.equal(evidence.truth.exactBrowserTemporalEvidence, false);
   assert.equal(evidence.truth.independentBrowserReplayVerified, false);
+  assert.equal(evidence.findings.some((item) => item.code === 'motion-proof-evidence-mode-mixed'), false);
   assert.ok(evidence.findings.some((item) => item.code.startsWith('motion-proof-independent-')));
 });
