@@ -175,6 +175,87 @@ function verifyRenderedArtifacts({ evidence, planned, rendered }) {
   return { findings, fixtureOnly: false };
 }
 
+function comparisonVideoSources(html = '') {
+  const sources = [];
+  for (const tag of html.match(/<(?:video|source)\b[^>]*>/gi) ?? []) {
+    const quoted = tag.match(/\bsrc\s*=\s*(["'])(.*?)\1/i);
+    const unquoted = quoted ? null : tag.match(/\bsrc\s*=\s*([^\s>]+)/i);
+    const value = text(quoted?.[2] ?? unquoted?.[1] ?? '');
+    if (value) sources.push(value);
+  }
+  return list(sources);
+}
+
+function resolveComparisonVideoSource(comparisonAbsolute, source) {
+  const value = text(source).replaceAll('\\', '/');
+  if (!value || value.includes('://') || value.startsWith('/') || value.split('/').includes('..')) return null;
+  const absolute = path.resolve(path.dirname(comparisonAbsolute), value);
+  const withinArtifacts = absolute === ARTIFACT_ROOT || absolute.startsWith(`${ARTIFACT_ROOT}${path.sep}`);
+  return withinArtifacts ? absolute : null;
+}
+
+function verifyComparisonArtifacts({ evidence, renderedStudies, fixtureOnly }) {
+  const findings = [];
+  const refs = list(evidence.comparisonRefs);
+  const allFixtureRefs = refs.length > 0 && refs.every(fixtureRef);
+  const anyFixtureRefs = refs.some(fixtureRef);
+
+  if (anyFixtureRefs) {
+    if (!allFixtureRefs || evidence.projectId !== TEST_FIXTURE_PROJECT_ID || !fixtureOnly) {
+      findings.push(finding('blocker', 'motion-proof-comparison-fixture-invalid', 'Synthetic comparison evidence is permitted only with the isolated all-fixture Motion proof.', { comparisonRefs: refs }));
+    }
+    return { findings, verified: false };
+  }
+
+  if (fixtureOnly) {
+    findings.push(finding('blocker', 'motion-proof-comparison-evidence-mode-mismatch', 'Fixture-only temporal studies cannot claim real comparison-board authority.'));
+    return { findings, verified: false };
+  }
+
+  const expectedVideos = new Map();
+  for (const videoRef of list(renderedStudies.map((study) => study.videoRef))) {
+    const absolute = resolveArtifactRef(videoRef);
+    if (absolute) expectedVideos.set(absolute, videoRef);
+  }
+  const coveredVideos = new Set();
+
+  for (const ref of refs) {
+    const comparison = readArtifact(ref, 'utf8');
+    if (!comparison.ok) {
+      findings.push(finding('blocker', 'motion-proof-comparison-artifact-unreadable', 'Comparison evidence must exist beneath the repository artifact root and be independently readable.', { ref, reason: comparison.reason }));
+      continue;
+    }
+    if (path.extname(comparison.absolute).toLowerCase() !== '.html') {
+      findings.push(finding('blocker', 'motion-proof-comparison-artifact-invalid', 'Comparison evidence must be an HTML artifact.', { ref }));
+      continue;
+    }
+
+    const sources = comparisonVideoSources(comparison.value);
+    if (!sources.length) {
+      findings.push(finding('blocker', 'motion-proof-comparison-video-markup-missing', 'Comparison HTML must contain temporal video markup.', { ref }));
+      continue;
+    }
+
+    for (const source of sources) {
+      const absolute = resolveComparisonVideoSource(comparison.absolute, source);
+      if (!absolute) {
+        findings.push(finding('blocker', 'motion-proof-comparison-video-path-nonportable', 'Comparison video sources must remain relative, traversal-free paths within the standalone artifact root.', { comparisonRef: ref, source }));
+        continue;
+      }
+      if (expectedVideos.has(absolute)) coveredVideos.add(absolute);
+    }
+  }
+
+  const missingVideoRefs = [...expectedVideos.entries()]
+    .filter(([absolute]) => !coveredVideos.has(absolute))
+    .map(([, videoRef]) => videoRef);
+  if (missingVideoRefs.length) {
+    findings.push(finding('blocker', 'motion-proof-comparison-video-coverage-incomplete', 'Comparison evidence must portably reference every rendered temporal WebM.', { missingVideoRefs }));
+  }
+
+  return { findings, verified: findings.every((item) => item.severity !== 'blocker') };
+}
+
 export function reviewMotionProofPlan(plan = {}) {
   const findings = [];
   if (plan.schema !== 'ai-studio-os/motion-proof-plan@1') findings.push(finding('blocker', 'motion-proof-plan-schema-invalid', 'Motion proof requires motion-proof-plan@1.'));
@@ -310,7 +391,15 @@ export function reviewMotionProofEvidence(evidence = {}) {
     findings.push(...artifactReview.findings);
   }
   if (renderedStudies.length !== expectedStudies.length) findings.push(finding('blocker', 'motion-proof-render-count-mismatch', 'Rendered motion evidence must exactly cover the planned study matrix.', { expected: expectedStudies.length, actual: renderedStudies.length }));
-  if (!list(evidence.comparisonRefs).length) findings.push(finding('major', 'motion-proof-comparison-evidence-missing', 'Competing motion studies need comparison evidence so taste can be judged comparatively.'));
+
+  const comparisonRefs = list(evidence.comparisonRefs);
+  let comparisonReview = { findings: [], verified: false };
+  if (!comparisonRefs.length) {
+    findings.push(finding('major', 'motion-proof-comparison-evidence-missing', 'Competing motion studies need comparison evidence so taste can be judged comparatively.'));
+  } else {
+    comparisonReview = verifyComparisonArtifacts({ evidence, renderedStudies, fixtureOnly });
+    findings.push(...comparisonReview.findings);
+  }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -327,6 +416,8 @@ export function reviewMotionProofEvidence(evidence = {}) {
       artifactDigestsRecomputed: blockers.length === 0 && !fixtureOnly,
       temporalVideoRequired: true,
       sourceAndTimelineDigestsRequired: true,
+      comparisonEvidenceRequired: true,
+      comparisonArtifactsVerified: blockers.length === 0 && !fixtureOnly && comparisonReview.verified === true,
       proofPlanAuthorityRecomputed: true,
       cachedPlanReviewTrusted: false,
       testFixtureEvidenceOnly: blockers.length === 0 && fixtureOnly,
