@@ -81,6 +81,7 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
       signatureMotionBehavior: hypothesis.language?.signatureMotionBehavior ?? null,
       stillnessPolicy: hypothesis.language?.stillnessPolicy ?? null,
       evidenceRefs: uniqueRefsForStudies(studies),
+      timelineRefs: list(studies.map((study) => study.timelineRef)),
       requiredSelectionEvidenceRefs: list(studies.map((study) => study.videoRef || study.captureRef)),
       momentEvidence: Object.fromEntries((proofEvidence?.plan?.moments ?? []).map((moment) => [moment.id, evidenceRefsByMoment(studies, moment.id)]))
     };
@@ -121,6 +122,7 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
       renderedProofIsEvidenceNotCritique: true,
       criticBriefAuthorityRecomputedFromInputs: true,
       exactRenderedExplorationContractRequired: true,
+      typedTimelineEvidenceRequired: true,
       criticMustJudgeComparatively: true,
       criticRecommendationIsAdvisory: true,
       humanMotionSelectionRequired: true,
@@ -185,8 +187,8 @@ export function reviewMotionCritique(critique = {}) {
     if (!review.dimensions.responsiveness.evidenceRefs.some((ref) => responsiveRefs.has(ref))) findings.push(finding('major', 'motion-critic-mobile-evidence-missing', 'Responsiveness judgment must cite mobile-recomposition evidence.', { hypothesisId: review.hypothesisId }));
     const reducedRefs = new Set(hypothesis.momentEvidence?.['reduced-motion'] ?? []);
     if (!review.dimensions.accessibility.evidenceRefs.some((ref) => reducedRefs.has(ref))) findings.push(finding('major', 'motion-critic-reduced-motion-evidence-missing', 'Accessibility judgment must cite reduced-motion evidence.', { hypothesisId: review.hypothesisId }));
-    const timelineRefs = new Set((hypothesis.evidenceRefs ?? []).filter((ref) => /timeline|\.json$/i.test(ref)));
-    if (!review.dimensions.performance.evidenceRefs.some((ref) => timelineRefs.has(ref))) findings.push(finding('major', 'motion-critic-performance-timeline-missing', 'Performance judgment must cite browser timeline evidence.', { hypothesisId: review.hypothesisId }));
+    const timelineRefs = new Set(hypothesis.timelineRefs ?? []);
+    if (!review.dimensions.performance.evidenceRefs.some((ref) => timelineRefs.has(ref))) findings.push(finding('major', 'motion-critic-performance-timeline-missing', 'Performance judgment must cite the typed browser timeline evidence carried by the rendered study contract.', { hypothesisId: review.hypothesisId }));
     if (!review.strengths.length || !review.risks.length || !review.killCriteria.length) findings.push(finding('major', 'motion-critic-adversarial-review-thin', 'Each hypothesis needs strengths, risks and kill criteria before comparative recommendation.', { hypothesisId: review.hypothesisId }));
   }
 
