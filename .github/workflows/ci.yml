@@ -40,12 +40,14 @@ jobs:
           node --check scripts/ai-council-motion-system-v1-proof.mjs
           node --check scripts/ai-council-motion-system-v1-human-review-proof.mjs
           node --check scripts/motion-creative-intelligence-proof.mjs
+          node --check scripts/verify-motion-proof-browser-artifacts.mjs
           node --check scripts/ai-council-drawing-intelligence-authority-proof.mjs
           node --check modules/motion-system/runtime.mjs
           node --check modules/motion-system/approval.mjs
           node --check modules/motion-creative-intelligence/runtime.mjs
           node --check modules/motion-creative-intelligence/world-authority.mjs
           node --check modules/motion-creative-intelligence/proof.mjs
+          node --check modules/motion-creative-intelligence/browser-proof-verifier.mjs
           node --check modules/motion-creative-intelligence/critic.mjs
           node --check modules/motion-creative-intelligence/direction-authority.mjs
           node --check modules/motion-creative-intelligence/technical-planning.mjs
@@ -70,6 +72,9 @@ jobs:
 
       - name: Install Playwright Chromium for logo integrity
         run: npx playwright install chromium
+
+      - name: Run Motion proof browser authenticity regression
+        run: node --test test/motion-proof-browser-authenticity.test.mjs
 
       - name: Run real SVG corruption suite
         run: npm run test:logo-integrity
