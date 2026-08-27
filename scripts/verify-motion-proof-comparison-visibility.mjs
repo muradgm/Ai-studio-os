@@ -34,12 +34,12 @@ async function inspectVideoCandidate(page, index) {
 
     const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
     const ownRects = video.getClientRects();
-    if (!ownRects.length) return { geometricallyVisible: false, sources: [], clip: null };
+    if (!ownRects.length) return { geometricallyVisible: false, sources: [] };
     const videoRect = video.getBoundingClientRect();
-    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, sources: [], clip: null };
+    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, sources: [] };
 
     let visibleRect = intersect(videoRect, viewportRect);
-    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [], clip: null };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [] };
 
     let node = video;
     let effectiveOpacity = 1;
@@ -52,11 +52,11 @@ async function inspectVideoCandidate(page, index) {
         || style.visibility === 'hidden'
         || style.visibility === 'collapse'
         || style.contentVisibility === 'hidden'
-        || !Number.isFinite(opacity)) return { geometricallyVisible: false, sources: [], clip: null };
+        || !Number.isFinite(opacity)) return { geometricallyVisible: false, sources: [] };
 
       effectiveOpacity *= opacity;
       effectiveFilterOpacity *= parseFilterOpacity(style.filter);
-      if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return { geometricallyVisible: false, sources: [], clip: null };
+      if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return { geometricallyVisible: false, sources: [] };
 
       if (node !== video) {
         const ancestorRect = node.getBoundingClientRect();
@@ -64,12 +64,12 @@ async function inspectVideoCandidate(page, index) {
         const clipsY = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowY);
         if (clipsX) visibleRect = { ...visibleRect, left: Math.max(visibleRect.left, ancestorRect.left), right: Math.min(visibleRect.right, ancestorRect.right) };
         if (clipsY) visibleRect = { ...visibleRect, top: Math.max(visibleRect.top, ancestorRect.top), bottom: Math.min(visibleRect.bottom, ancestorRect.bottom) };
-        if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [], clip: null };
+        if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [] };
       }
       node = node.parentElement;
     }
 
-    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [], clip: null };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [] };
 
     const sources = [];
     if (video.hasAttribute('src') && video.getAttribute('src')?.trim()) sources.push(video.src);
@@ -77,38 +77,31 @@ async function inspectVideoCandidate(page, index) {
       if (source.hasAttribute('src') && source.getAttribute('src')?.trim()) sources.push(source.src);
     }
 
-    return {
-      geometricallyVisible: true,
-      sources,
-      clip: {
-        x: visibleRect.left + scrollX,
-        y: visibleRect.top + scrollY,
-        width: visibleRect.right - visibleRect.left,
-        height: visibleRect.bottom - visibleRect.top
-      }
-    };
+    return { geometricallyVisible: true, sources };
   }, filterOpacity.toString());
 }
 
-async function videoContributesRenderedPixels(page, index, clip) {
-  if (!clip || !(clip.width > 0.5) || !(clip.height > 0.5)) return false;
+async function videoContributesRenderedPixels(page, index) {
   const locator = page.locator('video').nth(index);
-  const originalVisibility = await locator.evaluate((video) => ({
-    value: video.style.getPropertyValue('visibility'),
-    priority: video.style.getPropertyPriority('visibility')
+  const originalOpacity = await locator.evaluate((video) => ({
+    value: video.style.getPropertyValue('opacity'),
+    priority: video.style.getPropertyPriority('opacity')
   }));
 
-  const shown = await page.screenshot({ type: 'png', clip });
+  const shown = await locator.screenshot({ type: 'png', animations: 'disabled' });
   try {
-    await locator.evaluate((video) => video.style.setProperty('visibility', 'hidden', 'important'));
+    // Opacity preserves geometry and the exact screenshot rectangle. If an opaque
+    // overlay fully occludes the candidate, removing only the video's paint does
+    // not alter the rendered pixels and the candidate cannot satisfy authority.
+    await locator.evaluate((video) => video.style.setProperty('opacity', '0', 'important'));
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
-    const hidden = await page.screenshot({ type: 'png', clip });
+    const hidden = await locator.screenshot({ type: 'png', animations: 'disabled' });
     return !shown.equals(hidden);
   } finally {
     await locator.evaluate((video, original) => {
-      if (!original.value) video.style.removeProperty('visibility');
-      else video.style.setProperty('visibility', original.value, original.priority || '');
-    }, originalVisibility);
+      if (!original.value) video.style.removeProperty('opacity');
+      else video.style.setProperty('opacity', original.value, original.priority || '');
+    }, originalOpacity);
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
   }
 }
@@ -122,7 +115,7 @@ async function inspectComparisonPage(page) {
   for (let index = 0; index < videoCount; index += 1) {
     const candidate = await inspectVideoCandidate(page, index);
     if (!candidate.geometricallyVisible) continue;
-    if (!await videoContributesRenderedPixels(page, index, candidate.clip)) continue;
+    if (!await videoContributesRenderedPixels(page, index)) continue;
 
     visibleVideoCount += 1;
     if (!candidate.sources.length) emptyVisibleVideoCount += 1;
