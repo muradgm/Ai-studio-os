@@ -314,7 +314,8 @@ test('static final-state WebM cannot satisfy temporal replay binding', async (t)
 
   assert.equal(review.verified, false);
   assert.ok(
-    review.findings.some((item) => item.code === 'motion-proof-dense-video-timeline-mismatch'),
+    review.findings.some((item) => item.evidence?.verifierLabel === 'motion-dense-temporal-authority'
+      && ['motion-proof-dense-terminal-binding-missing', 'motion-proof-dense-video-timeline-mismatch'].includes(item.code)),
     `static-final exploit must fail dense temporal authority; findings: ${JSON.stringify(review.findings)}`
   );
 });
