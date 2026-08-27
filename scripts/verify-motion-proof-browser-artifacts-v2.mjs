@@ -283,10 +283,15 @@ function endAnchorTimes(duration) {
 async function bestFinalAnchor(page, selector, media, finalPixels) {
   const samples = await decodedVideoFramesAtTimes(page, selector, endAnchorTimes(media.duration));
   if (!samples.length) return null;
-  return samples.map((sample) => ({
+  const scored = samples.map((sample) => ({
     ...sample,
     distance: visualDistance(finalPixels, sample.pixels)
-  })).sort((left, right) => left.distance.meanDelta - right.distance.meanDelta
+  }));
+  const earliestVerifiedTerminal = scored
+    .filter((sample) => visuallyBound(sample.distance))
+    .sort((left, right) => left.targetTime - right.targetTime)[0];
+  if (earliestVerifiedTerminal) return earliestVerifiedTerminal;
+  return scored.sort((left, right) => left.distance.meanDelta - right.distance.meanDelta
     || left.distance.outlierShare - right.distance.outlierShare)[0];
 }
 
