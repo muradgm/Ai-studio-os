@@ -119,7 +119,11 @@ async function renderProofArtifacts({ root, planned, durationMs = 600, staticVid
     const videoContext = await browser.newContext({ viewport, recordVideo: { dir: videoDir, size: viewport } });
     const videoPage = await videoContext.newPage();
     if (staticVideo) {
-      await videoPage.setContent('<!doctype html><style>html,body{margin:0;width:100%;height:100%;background:#fff}</style>', { waitUntil: 'load' });
+      // Use the exact replay-verified terminal PNG as the attack's only visual
+      // content. This deliberately satisfies end-state binding so the exploit
+      // can be rejected only for lacking the authored temporal progression.
+      const finalPngDataUrl = `data:image/png;base64,${fs.readFileSync(capturePath).toString('base64')}`;
+      await videoPage.setContent(`<!doctype html><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}img{display:block;width:100vw;height:100vh;object-fit:fill}</style><img src="${finalPngDataUrl}" alt="">`, { waitUntil: 'load' });
       await videoPage.waitForTimeout(durationMs + 500);
     } else {
       await videoPage.goto(pathToFileURL(sourcePath).href, { waitUntil: 'load' });
@@ -302,7 +306,10 @@ test('static final-state WebM cannot satisfy temporal replay binding', async (t)
   }]);
 
   assert.equal(review.verified, false);
-  assert.ok(review.findings.some((item) => item.code === 'motion-proof-independent-video-timeline-mismatch'));
+  assert.ok(
+    review.findings.some((item) => item.code === 'motion-proof-independent-video-timeline-mismatch'),
+    `static-final exploit must reach and fail temporal sequence binding; findings: ${JSON.stringify(review.findings)}`
+  );
 });
 
 test('forged high and low timeline frame counts cannot satisfy independent replay provenance', async (t) => {
@@ -323,25 +330,25 @@ test('forged high and low timeline frame counts cannot satisfy independent repla
   const { sourcePath, capturePath, videoPath, viewport } = await renderProofArtifacts({ root, planned, durationMs, staticVideo: false });
 
   for (const forgedFrameCount of [2, 999]) {
-    const timelineContract = {
-      schema: 'ai-studio-os/motion-proof-browser-timeline@1',
-      studyId: planned.id,
-      viewport,
-      input: planned.input,
-      reducedMotionMedia: false,
-      appliedCreativeIntent: planned.creativeIntent,
-      trace: [{ event: 'start', at: 1 }, { event: 'complete', at: durationMs + 1 }],
-      durationMs,
-      animationFrameCount: forgedFrameCount
-    };
     const review = verifyIndependentMotionProofBrowserArtifacts([{
       planned,
       sourcePath,
       timelinePath: path.join(root, `timeline-${forgedFrameCount}.json`),
       videoPath,
       capturePath,
-      timelineContract
+      timelineContract: {
+        schema: 'ai-studio-os/motion-proof-browser-timeline@1',
+        studyId: planned.id,
+        viewport,
+        input: planned.input,
+        reducedMotionMedia: false,
+        appliedCreativeIntent: planned.creativeIntent,
+        trace: [{ event: 'start', at: 1 }, { event: 'complete', at: durationMs + 1 }],
+        durationMs,
+        animationFrameCount: forgedFrameCount
+      }
     }]);
+
     assert.equal(review.verified, false);
     assert.ok(review.findings.some((item) => item.code === 'motion-proof-independent-timeline-frame-count-mismatch'));
   }
