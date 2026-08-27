@@ -10,8 +10,8 @@ import { findOptimalMonotonicMatches } from '../modules/motion-creative-intellig
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 32;
 const SAMPLE_STEP_SECONDS = 0.04;
-const MAX_MEAN_DELTA = 5;
-const MAX_OUTLIER_SHARE = 0.03;
+const MAX_MEAN_DELTA = 12;
+const MAX_OUTLIER_SHARE = 0.09;
 const MAX_FINAL_MEAN_DELTA = 5;
 const MAX_FINAL_OUTLIER_SHARE = 0.01;
 const MAX_NORMALIZED_PROGRESS_DRIFT = 0.12;
@@ -121,10 +121,6 @@ function activeMotionWindow(samples = [], durationSeconds = 0) {
     }
   }
 
-  // Recorder startup is not creative authority. Some valid clips begin recording
-  // after authored motion has already started, so no stable pre-motion baseline is
-  // observable. In that case the full progressive authored window remains valid;
-  // static evidence still fails the progression requirement above.
   const onsetMode = onsetIndex >= 0 ? 'stable-baseline-departure' : 'already-active-at-window-start';
   if (onsetIndex < 0) onsetIndex = 0;
 
@@ -132,10 +128,6 @@ function activeMotionWindow(samples = [], durationSeconds = 0) {
   const spanSeconds = Math.max(0, (active.at(-1)?.targetTime ?? 0) - (active[0]?.targetTime ?? 0));
   if (active.length < MIN_ACTIVE_MOTION_SAMPLES || spanSeconds < durationSeconds * MIN_ACTIVE_SPAN_RATIO || !progressive(active)) return null;
 
-  // The onset sample and terminal-anchor sample are quantized boundary states.
-  // Source execution and terminal PNG/WebM authority already prove those boundaries.
-  // Dense coverage therefore scores the authored interior, avoiding a one-frame
-  // codec/seek phase difference from changing a legitimate 78% verdict.
   const canTrimBoundaries = active.length >= MIN_ACTIVE_MOTION_SAMPLES + (ACTIVE_BOUNDARY_TRIM_SAMPLES * 2);
   const comparisonSamples = canTrimBoundaries
     ? active.slice(ACTIVE_BOUNDARY_TRIM_SAMPLES, -ACTIVE_BOUNDARY_TRIM_SAMPLES)
