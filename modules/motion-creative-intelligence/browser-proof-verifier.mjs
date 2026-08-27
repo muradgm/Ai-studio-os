@@ -8,7 +8,7 @@ const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..
 const MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-browser-artifacts-v2.mjs');
 const DENSE_MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-temporal-density.mjs');
 const REDUCED_MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-reduced-motion-artifacts-v2.mjs');
-const COMPARISON_VISIBILITY_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-comparison-visibility-v2.mjs');
+const COMPARISON_VISIBILITY_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-comparison-visibility.mjs');
 
 function blocker(code, message, evidence = {}) {
   return { severity: 'blocker', code, message, evidence };
