@@ -18,10 +18,8 @@ function filterOpacity(filterValue) {
 }
 
 async function inspectComparisonPage(page) {
-  return page.evaluate((filterOpacitySource) => {
+  return page.evaluate(async (filterOpacitySource) => {
     const parseFilterOpacity = (0, eval)(`(${filterOpacitySource})`);
-    const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
-
     const intersect = (left, right) => ({
       left: Math.max(left.left, right.left),
       top: Math.max(left.top, right.top),
@@ -44,7 +42,11 @@ async function inspectComparisonPage(page) {
       return false;
     };
 
-    const effectivelyVisible = (video) => {
+    const effectivelyVisibleAfterScroll = async (video) => {
+      video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+      const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
       const ownRects = video.getClientRects();
       if (!ownRects.length) return false;
       const videoRect = video.getBoundingClientRect();
@@ -89,7 +91,7 @@ async function inspectComparisonPage(page) {
     let visibleVideoCount = 0;
     let emptyVisibleVideoCount = 0;
     for (const video of document.querySelectorAll('video')) {
-      if (!effectivelyVisible(video)) continue;
+      if (!await effectivelyVisibleAfterScroll(video)) continue;
       visibleVideoCount += 1;
       const videoSources = [];
       if (video.hasAttribute('src') && video.getAttribute('src')?.trim()) videoSources.push(video.src);
@@ -123,7 +125,7 @@ async function verifyComparisonTarget(browser, target) {
         await fs.access(comparisonPath);
         await page.goto(pathToFileURL(comparisonPath).href, { waitUntil: 'load', timeout: 15_000 });
         const inspection = await inspectComparisonPage(page);
-        if (inspection.visibleVideoCount === 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-missing', message: 'Comparison HTML must present actual effectively visible video elements inside the viewport.', comparisonRef: comparisonPath });
+        if (inspection.visibleVideoCount === 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-missing', message: 'Comparison HTML must present actual effectively visible video elements when each candidate is brought into review view.', comparisonRef: comparisonPath });
         if (inspection.emptyVisibleVideoCount > 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-source-missing', message: 'Every effectively visible comparison video must resolve to a concrete media source.', comparisonRef: comparisonPath });
         for (const source of inspection.sources) observedUrls.add(source);
       } catch (error) {
