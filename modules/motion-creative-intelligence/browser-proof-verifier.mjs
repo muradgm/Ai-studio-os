@@ -61,19 +61,37 @@ function runVerifier(verifierPath, targets, tempRoot, label) {
 
 function withCompatibilityFindings(rawFindings) {
   const findings = [...rawFindings];
-  for (const item of rawFindings) {
-    if (item?.code !== 'motion-proof-independent-video-timeline-mismatch') continue;
+  const addAlias = (item, code, message, compatibilityAliasFor) => {
     const studyId = item?.studyId ?? null;
-    const alreadyPresent = findings.some((candidate) => candidate?.code === 'motion-proof-independent-video-replay-mismatch'
-      && (candidate?.studyId ?? null) === studyId);
-    if (alreadyPresent) continue;
-    findings.push({
-      ...item,
-      code: 'motion-proof-independent-video-replay-mismatch',
-      message: 'Submitted WebM does not bind to the independently replayed Motion execution because its temporal visual sequence does not match.',
-      compatibilityAliasFor: 'motion-proof-independent-video-timeline-mismatch'
-    });
+    const alreadyPresent = findings.some((candidate) => candidate?.code === code
+      && (candidate?.studyId ?? null) === studyId
+      && candidate?.verifierLabel === item?.verifierLabel);
+    if (alreadyPresent) return;
+    findings.push({ ...item, code, message, compatibilityAliasFor });
+  };
+
+  for (const item of rawFindings) {
+    if (item?.verifierLabel !== 'motion-temporal-authority') continue;
+
+    if (item?.code === 'motion-proof-independent-video-timeline-mismatch') {
+      addAlias(
+        item,
+        'motion-proof-independent-video-replay-mismatch',
+        'Submitted WebM does not bind to the independently replayed Motion execution because its temporal visual sequence does not match.',
+        'motion-proof-independent-video-timeline-mismatch'
+      );
+    }
+
+    if (item?.code === 'motion-proof-independent-video-replay-mismatch') {
+      addAlias(
+        item,
+        'motion-proof-independent-video-timeline-mismatch',
+        'Submitted WebM does not prove the independently replayed Motion timeline because its visual replay binding failed.',
+        'motion-proof-independent-video-replay-mismatch'
+      );
+    }
   }
+
   return findings;
 }
 
