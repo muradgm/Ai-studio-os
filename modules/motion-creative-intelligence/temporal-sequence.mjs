@@ -8,6 +8,31 @@ function betterAlignment(left, right) {
   return left;
 }
 
+function validPair(candidate, leftCount, rightCount) {
+  const left = Number(candidate?.left);
+  const right = Number(candidate?.right);
+  return Number.isInteger(left)
+    && Number.isInteger(right)
+    && left >= 0
+    && right >= 0
+    && left < leftCount
+    && right < rightCount;
+}
+
+function longestUncoveredRun(count, coveredIndexes) {
+  const covered = new Set(coveredIndexes);
+  let longest = 0;
+  let current = 0;
+  for (let index = 0; index < count; index += 1) {
+    if (covered.has(index)) current = 0;
+    else {
+      current += 1;
+      longest = Math.max(longest, current);
+    }
+  }
+  return longest;
+}
+
 export function findOptimalMonotonicMatches(leftCount, rightCount, candidates = []) {
   if (!Number.isInteger(leftCount) || !Number.isInteger(rightCount) || leftCount < 0 || rightCount < 0 || !Array.isArray(candidates)) return [];
 
@@ -15,7 +40,7 @@ export function findOptimalMonotonicMatches(leftCount, rightCount, candidates = 
   for (const candidate of candidates) {
     const left = Number(candidate?.left);
     const right = Number(candidate?.right);
-    if (!Number.isInteger(left) || !Number.isInteger(right) || left < 0 || right < 0 || left >= leftCount || right >= rightCount) continue;
+    if (!validPair(candidate, leftCount, rightCount)) continue;
     const key = `${left}:${right}`;
     const normalized = {
       ...candidate,
@@ -59,4 +84,36 @@ export function findOptimalMonotonicMatches(leftCount, rightCount, candidates = 
   };
 
   return solve(0, 0).matches;
+}
+
+export function evaluateDenseTemporalCoverage(leftCount, rightCount, candidates = []) {
+  if (!Number.isInteger(leftCount)
+    || !Number.isInteger(rightCount)
+    || leftCount <= 0
+    || rightCount <= 0
+    || !Array.isArray(candidates)) {
+    return {
+      matches: [],
+      leftCoverage: 0,
+      rightCoverage: 0,
+      monotonicCoverage: 0,
+      leftGap: leftCount > 0 ? leftCount : 0,
+      rightGap: rightCount > 0 ? rightCount : 0
+    };
+  }
+
+  const validCandidates = candidates.filter((candidate) => validPair(candidate, leftCount, rightCount));
+  const leftCovered = new Set(validCandidates.map((candidate) => Number(candidate.left)));
+  const rightCovered = new Set(validCandidates.map((candidate) => Number(candidate.right)));
+  const matches = findOptimalMonotonicMatches(leftCount, rightCount, validCandidates);
+  const minimumSequenceLength = Math.min(leftCount, rightCount);
+
+  return {
+    matches,
+    leftCoverage: leftCovered.size / leftCount,
+    rightCoverage: rightCovered.size / rightCount,
+    monotonicCoverage: minimumSequenceLength ? matches.length / minimumSequenceLength : 0,
+    leftGap: longestUncoveredRun(leftCount, leftCovered),
+    rightGap: longestUncoveredRun(rightCount, rightCovered)
+  };
 }
