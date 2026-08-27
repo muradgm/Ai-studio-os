@@ -33,6 +33,13 @@ function longestUncoveredRun(count, coveredIndexes) {
   return longest;
 }
 
+function matchedSpan(samples, matches, key, timeKey) {
+  if (!Array.isArray(samples) || !Array.isArray(matches) || matches.length < 2) return 0;
+  const first = Number(samples[matches[0]?.[key]]?.[timeKey]);
+  const last = Number(samples[matches.at(-1)?.[key]]?.[timeKey]);
+  return Number.isFinite(first) && Number.isFinite(last) ? Math.max(0, last - first) : 0;
+}
+
 export function findOptimalMonotonicMatches(leftCount, rightCount, candidates = []) {
   if (!Number.isInteger(leftCount) || !Number.isInteger(rightCount) || leftCount < 0 || rightCount < 0 || !Array.isArray(candidates)) return [];
 
@@ -115,5 +122,15 @@ export function evaluateDenseTemporalCoverage(leftCount, rightCount, candidates 
     monotonicCoverage: minimumSequenceLength ? matches.length / minimumSequenceLength : 0,
     leftGap: longestUncoveredRun(leftCount, leftCovered),
     rightGap: longestUncoveredRun(rightCount, rightCovered)
+  };
+}
+
+export function matchedTemporalSpanRatio(leftSamples = [], rightSamples = [], matches = [], timeKey = 'targetTime') {
+  const leftSpan = matchedSpan(leftSamples, matches, 'left', timeKey);
+  const rightSpan = matchedSpan(rightSamples, matches, 'right', timeKey);
+  return {
+    leftSpan,
+    rightSpan,
+    ratio: leftSpan > 0 && rightSpan > 0 ? Math.min(leftSpan, rightSpan) / Math.max(leftSpan, rightSpan) : 0
   };
 }
