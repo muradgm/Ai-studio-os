@@ -43,9 +43,13 @@ function runVerifier(verifierPath, targets, tempRoot, label) {
 
   try {
     const result = JSON.parse(execution.stdout || '{}');
+    const findings = Array.isArray(result?.findings) ? result.findings.map((item) => ({ ...item, verifierLabel: label })) : [];
+    if (result?.verified !== true && findings.length) {
+      console.error(`[${label}] ${JSON.stringify(findings)}`);
+    }
     return {
       verified: result?.verified === true,
-      findings: Array.isArray(result?.findings) ? result.findings.map((item) => ({ ...item, verifierLabel: label })) : []
+      findings
     };
   } catch (error) {
     return {
