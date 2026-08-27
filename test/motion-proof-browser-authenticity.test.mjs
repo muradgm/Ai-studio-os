@@ -289,7 +289,7 @@ test('static final-state WebM cannot satisfy temporal replay binding', async (t)
     appliedCreativeIntent: planned.creativeIntent,
     trace: [{ event: 'start', at: 1 }, { event: 'complete', at: durationMs + 1 }],
     durationMs,
-    animationFrameCount: 999
+    animationFrameCount: 40
   };
 
   const review = verifyIndependentMotionProofBrowserArtifacts([{
