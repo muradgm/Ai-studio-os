@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
-const MIN_PIXEL_CONTRIBUTION_RATIO = 0.05;
+const MIN_PIXEL_CONTRIBUTION_RATIO = 0.5;
 const PIXEL_DELTA_THRESHOLD = 12;
 const CONTRIBUTION_SAMPLE_WIDTH = 160;
 const CONTRIBUTION_SAMPLE_HEIGHT = 90;
@@ -92,8 +92,6 @@ async function inspectVideoCandidate(page, index) {
 
     if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', cssPath: '', clip: null };
 
-    // Only the browser-selected source is reviewable. Nested fallback <source>
-    // URLs that are not selected cannot satisfy comparison coverage.
     const currentSrc = video.currentSrc
       || (video.hasAttribute('src') && video.getAttribute('src')?.trim() ? video.src : '')
       || video.querySelector('source[src]')?.src
@@ -162,17 +160,14 @@ async function videoContribution(page, context, analysisPage, candidate) {
   };
   const shown = await page.screenshot({ type: 'png', animations: 'disabled', clip });
 
-  // The comparison page runs with JavaScript disabled. Hide the exact candidate
-  // through a DevTools stylesheet rather than mutating its DOM/style attributes,
-  // so CSS selectors such as video[style] and page MutationObservers cannot
-  // react to the authority probe.
   const cdp = await context.newCDPSession(page);
+  let styleSheetId = null;
   try {
     await cdp.send('Page.enable');
     await cdp.send('DOM.enable');
     await cdp.send('CSS.enable');
     const { frameTree } = await cdp.send('Page.getFrameTree');
-    const { styleSheetId } = await cdp.send('CSS.createStyleSheet', { frameId: frameTree.frame.id });
+    ({ styleSheetId } = await cdp.send('CSS.createStyleSheet', { frameId: frameTree.frame.id }));
     await cdp.send('CSS.setStyleSheetText', {
       styleSheetId,
       text: `${candidate.cssPath}{opacity:0!important}`
@@ -182,6 +177,9 @@ async function videoContribution(page, context, analysisPage, candidate) {
     const ratio = await pixelDifferenceRatio(analysisPage, shown, hidden);
     return { ratio, meaningful: ratio >= MIN_PIXEL_CONTRIBUTION_RATIO };
   } finally {
+    if (styleSheetId) {
+      try { await cdp.send('CSS.setStyleSheetText', { styleSheetId, text: '' }); } catch {}
+    }
     await cdp.detach().catch(() => {});
   }
 }
@@ -215,9 +213,6 @@ async function verifyComparisonTarget(browser, target) {
   const observedUrls = new Set();
   const findings = [];
 
-  // Untrusted comparison HTML is evidence, not executable authority. Page script
-  // execution is unnecessary for the generated proof boards and would let the
-  // artifact react to visibility probes.
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, javaScriptEnabled: false });
   const analysisContext = await browser.newContext({ viewport: { width: CONTRIBUTION_SAMPLE_WIDTH, height: CONTRIBUTION_SAMPLE_HEIGHT } });
   const analysisPage = await analysisContext.newPage();
