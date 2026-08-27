@@ -294,29 +294,49 @@ function longestUnmatchedRun(count, matchedIndexes) {
   return longest;
 }
 
+function normalizedProgressGrid(samples = [], count = 0) {
+  if (!Array.isArray(samples) || !samples.length || count <= 0) return [];
+  const gridCount = Math.min(samples.length, Math.max(1, Math.floor(count)));
+  if (gridCount === samples.length) return samples;
+  if (gridCount === 1) return [samples[0]];
+  return Array.from({ length: gridCount }, (_, index) => {
+    const progress = index / (gridCount - 1);
+    const sourceIndex = Math.round(progress * (samples.length - 1));
+    return samples[sourceIndex];
+  });
+}
+
 function denseBinding(submitted, independent) {
-  const submittedSpan = Math.max(0.001, (submitted.at(-1)?.targetTime ?? 0) - (submitted[0]?.targetTime ?? 0));
-  const independentSpan = Math.max(0.001, (independent.at(-1)?.targetTime ?? 0) - (independent[0]?.targetTime ?? 0));
+  // Both recordings are sampled every 40 ms, but their independently detected
+  // active windows can differ by a few samples because recorder pre-roll/tails
+  // and codec settling are not identical. Compare on one equal normalized-
+  // progress grid so coverage measures authored temporal correspondence rather
+  // than penalizing whichever valid recording exposes more raw samples.
+  const gridCount = Math.min(submitted.length, independent.length);
+  const normalizedSubmitted = normalizedProgressGrid(submitted, gridCount);
+  const normalizedIndependent = normalizedProgressGrid(independent, gridCount);
+  const submittedSpan = Math.max(0.001, (normalizedSubmitted.at(-1)?.targetTime ?? 0) - (normalizedSubmitted[0]?.targetTime ?? 0));
+  const independentSpan = Math.max(0.001, (normalizedIndependent.at(-1)?.targetTime ?? 0) - (normalizedIndependent[0]?.targetTime ?? 0));
   const spanRatio = Math.min(submittedSpan, independentSpan) / Math.max(submittedSpan, independentSpan);
   const candidates = [];
 
-  for (let left = 0; left < submitted.length; left += 1) {
-    const leftProgress = (submitted[left].targetTime - submitted[0].targetTime) / submittedSpan;
-    for (let right = 0; right < independent.length; right += 1) {
-      const rightProgress = (independent[right].targetTime - independent[0].targetTime) / independentSpan;
+  for (let left = 0; left < normalizedSubmitted.length; left += 1) {
+    const leftProgress = (normalizedSubmitted[left].targetTime - normalizedSubmitted[0].targetTime) / submittedSpan;
+    for (let right = 0; right < normalizedIndependent.length; right += 1) {
+      const rightProgress = (normalizedIndependent[right].targetTime - normalizedIndependent[0].targetTime) / independentSpan;
       const drift = Math.abs(leftProgress - rightProgress);
       if (drift > MAX_NORMALIZED_PROGRESS_DRIFT) continue;
-      const distance = visualDistance(submitted[left].pixels, independent[right].pixels);
+      const distance = visualDistance(normalizedSubmitted[left].pixels, normalizedIndependent[right].pixels);
       if (!temporalBound(distance)) continue;
       candidates.push({ left, right, drift, distance });
     }
   }
 
-  const matches = findOptimalMonotonicMatches(submitted.length, independent.length, candidates);
-  const leftCoverage = submitted.length ? matches.length / submitted.length : 0;
-  const rightCoverage = independent.length ? matches.length / independent.length : 0;
-  const leftGap = longestUnmatchedRun(submitted.length, matches.map((item) => item.left));
-  const rightGap = longestUnmatchedRun(independent.length, matches.map((item) => item.right));
+  const matches = findOptimalMonotonicMatches(normalizedSubmitted.length, normalizedIndependent.length, candidates);
+  const leftCoverage = normalizedSubmitted.length ? matches.length / normalizedSubmitted.length : 0;
+  const rightCoverage = normalizedIndependent.length ? matches.length / normalizedIndependent.length : 0;
+  const leftGap = longestUnmatchedRun(normalizedSubmitted.length, matches.map((item) => item.left));
+  const rightGap = longestUnmatchedRun(normalizedIndependent.length, matches.map((item) => item.right));
   const maxDrift = matches.length ? Math.max(...matches.map((item) => item.drift)) : Infinity;
   return {
     verified: spanRatio >= MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS
@@ -325,8 +345,8 @@ function denseBinding(submitted, independent) {
       && leftGap <= MAX_CONSECUTIVE_UNMATCHED
       && rightGap <= MAX_CONSECUTIVE_UNMATCHED
       && maxDrift <= MAX_NORMALIZED_PROGRESS_DRIFT
-      && progressive(submitted)
-      && progressive(independent),
+      && progressive(normalizedSubmitted)
+      && progressive(normalizedIndependent),
     matches: matches.length,
     leftCoverage,
     rightCoverage,
@@ -335,7 +355,8 @@ function denseBinding(submitted, independent) {
     maxDrift,
     spanRatio,
     submittedSpan,
-    independentSpan
+    independentSpan,
+    gridCount
   };
 }
 
@@ -386,7 +407,7 @@ async function verifyTarget(browser, target) {
             const binding = denseBinding(submittedActive.samples, independentActive.samples);
             if (!binding.verified) findings.push({
               code: 'motion-proof-dense-video-timeline-mismatch',
-              message: `Submitted WebM lacks dense monotonic correspondence across normalized authored motion progress (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max normalized drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}, active-span ratio ${(binding.spanRatio * 100).toFixed(1)}%; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; onset ${submittedActive.onsetMode}/${independentActive.onsetMode}; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
+              message: `Submitted WebM lacks dense monotonic correspondence across normalized authored motion progress (grid ${binding.gridCount}, matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max normalized drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}, active-span ratio ${(binding.spanRatio * 100).toFixed(1)}%; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; onset ${submittedActive.onsetMode}/${independentActive.onsetMode}; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
             });
           }
         }
