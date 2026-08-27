@@ -280,16 +280,28 @@ function logicalTimes(anchor, durationSeconds) {
   return times;
 }
 
-function denseBinding(submitted, independent) {
-  const submittedSpan = Math.max(0.001, (submitted.at(-1)?.targetTime ?? 0) - (submitted[0]?.targetTime ?? 0));
-  const independentSpan = Math.max(0.001, (independent.at(-1)?.targetTime ?? 0) - (independent[0]?.targetTime ?? 0));
-  const spanRatio = Math.min(submittedSpan, independentSpan) / Math.max(submittedSpan, independentSpan);
+function matchedTimeSpan(samples, matches, key) {
+  if (!Array.isArray(matches) || matches.length < 2) return 0;
+  const first = samples[matches[0]?.[key]]?.targetTime;
+  const last = samples[matches.at(-1)?.[key]]?.targetTime;
+  return Number.isFinite(first) && Number.isFinite(last) ? Math.max(0, last - first) : 0;
+}
+
+function terminalRelativeProgress(sampleTime, anchorTime, durationSeconds) {
+  if (!Number.isFinite(sampleTime) || !Number.isFinite(anchorTime) || !(durationSeconds > 0)) return Infinity;
+  return 1 - ((anchorTime - sampleTime) / durationSeconds);
+}
+
+function denseBinding(submitted, independent, submittedAnchorTime, independentAnchorTime, durationSeconds) {
+  const submittedActiveSpan = Math.max(0.001, (submitted.at(-1)?.targetTime ?? 0) - (submitted[0]?.targetTime ?? 0));
+  const independentActiveSpan = Math.max(0.001, (independent.at(-1)?.targetTime ?? 0) - (independent[0]?.targetTime ?? 0));
+  const observedActiveSpanRatio = Math.min(submittedActiveSpan, independentActiveSpan) / Math.max(submittedActiveSpan, independentActiveSpan);
   const candidates = [];
 
   for (let left = 0; left < submitted.length; left += 1) {
-    const leftProgress = (submitted[left].targetTime - submitted[0].targetTime) / submittedSpan;
+    const leftProgress = terminalRelativeProgress(submitted[left].targetTime, submittedAnchorTime, durationSeconds);
     for (let right = 0; right < independent.length; right += 1) {
-      const rightProgress = (independent[right].targetTime - independent[0].targetTime) / independentSpan;
+      const rightProgress = terminalRelativeProgress(independent[right].targetTime, independentAnchorTime, durationSeconds);
       const drift = Math.abs(leftProgress - rightProgress);
       if (drift > MAX_NORMALIZED_PROGRESS_DRIFT) continue;
       const distance = visualDistance(submitted[left].pixels, independent[right].pixels);
@@ -300,8 +312,14 @@ function denseBinding(submitted, independent) {
 
   const coverage = evaluateDenseTemporalCoverage(submitted.length, independent.length, candidates);
   const maxDrift = coverage.matches.length ? Math.max(...coverage.matches.map((item) => item.drift)) : Infinity;
+  const submittedMatchedSpan = matchedTimeSpan(submitted, coverage.matches, 'left');
+  const independentMatchedSpan = matchedTimeSpan(independent, coverage.matches, 'right');
+  const matchedSpanRatio = submittedMatchedSpan > 0 && independentMatchedSpan > 0
+    ? Math.min(submittedMatchedSpan, independentMatchedSpan) / Math.max(submittedMatchedSpan, independentMatchedSpan)
+    : 0;
+
   return {
-    verified: spanRatio >= MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS
+    verified: matchedSpanRatio >= MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS
       && coverage.leftCoverage >= MIN_BIDIRECTIONAL_COVERAGE
       && coverage.rightCoverage >= MIN_BIDIRECTIONAL_COVERAGE
       && coverage.monotonicCoverage >= MIN_BIDIRECTIONAL_COVERAGE
@@ -317,9 +335,12 @@ function denseBinding(submitted, independent) {
     leftGap: coverage.leftGap,
     rightGap: coverage.rightGap,
     maxDrift,
-    spanRatio,
-    submittedSpan,
-    independentSpan,
+    matchedSpanRatio,
+    submittedMatchedSpan,
+    independentMatchedSpan,
+    observedActiveSpanRatio,
+    submittedActiveSpan,
+    independentActiveSpan,
     submittedSamples: submitted.length,
     independentSamples: independent.length
   };
@@ -369,10 +390,16 @@ async function verifyTarget(browser, target) {
               message: 'Dense temporal authority requires a material progressive active-motion span ending in the replay-verified terminal state; recorder pre-roll is not required to expose a stable baseline.'
             });
           } else {
-            const binding = denseBinding(submittedActive.samples, independentActive.samples);
+            const binding = denseBinding(
+              submittedActive.samples,
+              independentActive.samples,
+              submittedAnchor.targetTime,
+              independentAnchor.targetTime,
+              durationSeconds
+            );
             if (!binding.verified) findings.push({
               code: 'motion-proof-dense-video-timeline-mismatch',
-              message: `Submitted WebM lacks dense raw-sample correspondence across normalized authored motion progress (raw samples ${binding.submittedSamples}/${binding.independentSamples}, monotonic matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, monotonic coverage ${(binding.monotonicCoverage * 100).toFixed(1)}%, submitted max raw gap ${binding.leftGap}, independent max raw gap ${binding.rightGap}, max normalized drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}, active-span ratio ${(binding.spanRatio * 100).toFixed(1)}%; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; onset ${submittedActive.onsetMode}/${independentActive.onsetMode}; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
+              message: `Submitted WebM lacks dense raw-sample correspondence across terminal-relative authored motion progress (raw samples ${binding.submittedSamples}/${binding.independentSamples}, monotonic matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, monotonic coverage ${(binding.monotonicCoverage * 100).toFixed(1)}%, submitted max raw gap ${binding.leftGap}, independent max raw gap ${binding.rightGap}, max terminal-relative drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}, matched-span ratio ${(binding.matchedSpanRatio * 100).toFixed(1)}% (${binding.submittedMatchedSpan.toFixed(3)}s / ${binding.independentMatchedSpan.toFixed(3)}s), detector active-span ratio ${(binding.observedActiveSpanRatio * 100).toFixed(1)}% (${binding.submittedActiveSpan.toFixed(3)}s / ${binding.independentActiveSpan.toFixed(3)}s); detected active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; onset ${submittedActive.onsetMode}/${independentActive.onsetMode}; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
             });
           }
         }
