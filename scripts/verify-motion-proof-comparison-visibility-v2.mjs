@@ -116,9 +116,12 @@ async function inspectVideoCandidate(page, index) {
       geometricallyVisible: true,
       currentSrc,
       selector: selectorFor(video),
+      // page.screenshot({ clip }) is taken from the current viewport. visibleRect
+      // is already viewport-relative after scrollIntoView; adding scrollX/Y here
+      // makes long-board clips fall outside the resulting screenshot image.
       clip: {
-        x: scrollX + visibleRect.left,
-        y: scrollY + visibleRect.top,
+        x: visibleRect.left,
+        y: visibleRect.top,
         width: visibleRect.right - visibleRect.left,
         height: visibleRect.bottom - visibleRect.top
       }
