@@ -4,6 +4,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
+import { findStableTerminalAnchorIndex } from '../modules/motion-creative-intelligence/terminal-anchor.mjs';
+
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 32;
 const SAMPLE_STEP_SECONDS = 0.04;
@@ -183,31 +185,14 @@ async function terminalAnchor(page, selector, media, finalPixels, durationSecond
     ...sample,
     distance: visualDistance(sample.pixels, finalPixels)
   }));
-  const bound = scored.map((sample) => finalBound(sample.distance));
+  const finalBoundFlags = scored.map((sample) => finalBound(sample.distance));
+  const nearTerminalFlags = scored.map((sample) => temporalBound(sample.distance));
+  const anchorIndex = findStableTerminalAnchorIndex(finalBoundFlags, nearTerminalFlags, {
+    minSuffixSamples: MIN_TERMINAL_SUFFIX_SAMPLES,
+    maxConsecutiveGaps: MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS
+  });
 
-  // The recording must actually end in a sustained verified terminal state.
-  const terminalTail = bound.slice(-MIN_TERMINAL_SUFFIX_SAMPLES);
-  if (terminalTail.length < MIN_TERMINAL_SUFFIX_SAMPLES || terminalTail.some((value) => !value)) return null;
-
-  // Walk backward from the verified tail to the semantic onset of the sustained
-  // terminal state. Permit one isolated codec-noise gap, but stop at a real
-  // transition boundary (two consecutive non-terminal samples).
-  let anchorIndex = scored.length - MIN_TERMINAL_SUFFIX_SAMPLES;
-  let consecutiveGaps = 0;
-  for (let index = scored.length - MIN_TERMINAL_SUFFIX_SAMPLES - 1; index >= 0; index -= 1) {
-    if (bound[index]) {
-      anchorIndex = index;
-      consecutiveGaps = 0;
-      continue;
-    }
-    consecutiveGaps += 1;
-    if (consecutiveGaps > MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS) break;
-  }
-
-  // If a single tolerated gap preceded the current anchor, use the first bound
-  // sample after that gap as the semantic terminal onset rather than crossing it.
-  while (anchorIndex < scored.length && !bound[anchorIndex]) anchorIndex += 1;
-  return scored[anchorIndex] ?? null;
+  return anchorIndex >= 0 ? scored[anchorIndex] : null;
 }
 
 function logicalTimes(anchor, durationSeconds) {

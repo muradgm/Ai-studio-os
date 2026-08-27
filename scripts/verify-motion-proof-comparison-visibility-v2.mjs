@@ -107,8 +107,11 @@ async function inspectVideoCandidate(page, index) {
 }
 
 async function videoContributesRenderedPixels(page, candidate) {
-  if (!candidate?.selector || !candidate?.clip) return false;
-  const shown = await page.screenshot({ type: 'png', clip: candidate.clip });
+  if (!candidate?.selector) return false;
+  const locator = page.locator(candidate.selector);
+  if (await locator.count() !== 1) return false;
+
+  const shown = await locator.screenshot({ type: 'png' });
   const cdp = await page.context().newCDPSession(page);
   let scriptsDisabled = false;
   let styleSheetId = null;
@@ -130,7 +133,7 @@ async function videoContributesRenderedPixels(page, candidate) {
       text: `${candidate.selector}{opacity:0!important}`
     });
     await new Promise((resolve) => setTimeout(resolve, 50));
-    const hidden = await page.screenshot({ type: 'png', clip: candidate.clip });
+    const hidden = await locator.screenshot({ type: 'png' });
     return !shown.equals(hidden);
   } finally {
     if (styleSheetId) {
