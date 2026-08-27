@@ -1,5 +1,10 @@
 import { reviewMotionCreativeExploration, selectedMotionDirection } from './runtime.mjs';
 import { reviewMotionProofEvidence } from './proof.mjs';
+import {
+  comparisonArtifactSnapshotReady,
+  comparisonArtifactSnapshotsEqual,
+  snapshotComparisonArtifacts
+} from './comparison-artifact-authority.mjs';
 
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function list(value) { return [...new Set((Array.isArray(value) ? value : []).map(text).filter(Boolean))]; }
@@ -70,6 +75,11 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
   const proofIds = (proofEvidence?.plan?.hypotheses ?? []).map((item) => item.id);
   if (!sameIds(explorationIds, proofIds)) findings.push(finding('blocker', 'motion-critic-hypothesis-set-drift', 'Motion Critic must compare the exact hypothesis set that was rendered.', { explorationIds, proofIds }));
 
+  const comparisonArtifacts = snapshotComparisonArtifacts(proofEvidence?.comparisonRefs);
+  if (proofReview.reviewReady && !comparisonArtifactSnapshotReady(comparisonArtifacts)) {
+    findings.push(finding('blocker', 'motion-critic-comparison-artifact-digest-unavailable', 'Motion Critic requires an immutable byte-level snapshot of every comparison artifact before critique.'));
+  }
+
   const renderedStudies = Array.isArray(proofEvidence?.renderedStudies) ? proofEvidence.renderedStudies : [];
   const hypotheses = (exploration?.hypotheses ?? []).map((hypothesis) => {
     const studies = renderedStudies.filter((study) => study.hypothesisId === hypothesis.id);
@@ -99,7 +109,8 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
       schema: proofEvidence?.schema ?? null,
       status: proofEvidence?.status ?? null,
       studyIds: (proofEvidence?.renderedStudies ?? []).map((study) => study.studyId),
-      comparisonRefs: list(proofEvidence?.comparisonRefs)
+      comparisonRefs: list(proofEvidence?.comparisonRefs),
+      comparisonArtifacts
     },
     hypotheses,
     dimensions: [...MOTION_CRITIC_DIMENSIONS],
@@ -123,6 +134,7 @@ export function buildMotionCriticBrief({ exploration, proofEvidence } = {}) {
       criticBriefAuthorityRecomputedFromInputs: true,
       exactRenderedExplorationContractRequired: true,
       typedTimelineEvidenceRequired: true,
+      comparisonArtifactDigestBound: true,
       criticMustJudgeComparatively: true,
       criticRecommendationIsAdvisory: true,
       humanMotionSelectionRequired: true,
@@ -166,6 +178,12 @@ export function reviewMotionCritique(critique = {}) {
   if (claimedBrief?.schema !== 'ai-studio-os/motion-critic-brief@1') findings.push(finding('blocker', 'motion-critic-brief-schema-invalid', 'Motion Critic requires motion-critic-brief@1.'));
   if (!brief.reviewReady) findings.push(finding('blocker', 'motion-critic-brief-invalid', 'Motion Critic brief authority failed recomputation from its underlying exploration and rendered proof.', { findingCodes: brief.findings.map((item) => item.code) }));
   if (claimedBrief?.projectId !== brief.projectId || claimedBrief?.creativeWorldId !== brief.creativeWorldId || !sameIds(claimedBrief?.hypotheses?.map((item) => item.id) ?? [], brief.hypotheses.map((item) => item.id))) findings.push(finding('blocker', 'motion-critic-brief-drift', 'Claimed critic brief identity or hypothesis set drifted from recomputed authority.'));
+  if (!comparisonArtifactSnapshotsEqual(claimedBrief?.proofRef?.comparisonArtifacts, brief?.proofRef?.comparisonArtifacts)) {
+    findings.push(finding('blocker', 'motion-critic-comparison-artifact-byte-drift', 'Comparison evidence bytes changed after the Critic brief snapshot. Critique and final Motion Direction must remain bound to the exact comparison board that was reviewed.', {
+      claimed: claimedBrief?.proofRef?.comparisonArtifacts ?? [],
+      recomputed: brief?.proofRef?.comparisonArtifacts ?? []
+    }));
+  }
 
   const expectedIds = brief.hypotheses.map((item) => item.id);
   const hypothesisReviews = Array.isArray(critique?.hypothesisReviews) ? critique.hypothesisReviews : [];
@@ -215,6 +233,7 @@ export function reviewMotionCritique(critique = {}) {
     authoritativeBrief: brief,
     truth: {
       criticBriefAuthorityRecomputed: true,
+      comparisonArtifactDigestRecomputed: true,
       renderedEvidenceReviewed: blockers.length === 0 && majors.length === 0,
       criticRecommendationIsAdvisory: true,
       humanMotionSelectionConfirmed: false,
@@ -286,13 +305,15 @@ export function buildProvenMotionDirection({ exploration, critique, hypothesisId
       recommendedHypothesisId: critique.comparativeJudgment?.recommendedHypothesisId ?? null,
       recommendationFollowed: critique.comparativeJudgment?.recommendedHypothesisId === id,
       selectedHypothesisBlockerFree: true,
-      reviewedEvidenceRefs: reviewedRefs
+      reviewedEvidenceRefs: reviewedRefs,
+      comparisonArtifacts: authoritativeBrief?.proofRef?.comparisonArtifacts ?? []
     },
     truth: {
       ...candidate.truth,
       humanCreativePreferenceRecorded: true,
       humanCreativeSelectionConfirmed: true,
       selectedHypothesisCriticBlockersCleared: true,
+      comparisonArtifactDigestBound: true,
       renderedMotionProofStillRequired: false,
       motionCriticStillRequired: false,
       renderedMotionProofReviewed: true,
