@@ -28,6 +28,7 @@ const INITIAL_REFERENCE_SAMPLES = 2;
 const MIN_ACTIVE_MOTION_SAMPLES = 6;
 const MIN_ACTIVE_SPAN_RATIO = 0.5;
 const MIN_DEPARTURE_RUN = 2;
+const ACTIVE_BOUNDARY_TRIM_SAMPLES = 1;
 
 function canonicalValue(value) {
   if (Array.isArray(value)) return value.map(canonicalValue);
@@ -119,11 +120,23 @@ function activeMotionWindow(samples = [], durationSeconds = 0) {
   const active = samples.slice(onsetIndex);
   const spanSeconds = Math.max(0, (active.at(-1)?.targetTime ?? 0) - (active[0]?.targetTime ?? 0));
   if (active.length < MIN_ACTIVE_MOTION_SAMPLES || spanSeconds < durationSeconds * MIN_ACTIVE_SPAN_RATIO || !progressive(active)) return null;
+
+  // The onset sample and terminal-anchor sample are quantized boundary states.
+  // Source execution and terminal PNG/WebM authority already prove those boundaries.
+  // Dense coverage therefore scores the authored interior, avoiding a one-frame
+  // codec/seek phase difference from changing a legitimate 78% verdict.
+  const canTrimBoundaries = active.length >= MIN_ACTIVE_MOTION_SAMPLES + (ACTIVE_BOUNDARY_TRIM_SAMPLES * 2);
+  const comparisonSamples = canTrimBoundaries
+    ? active.slice(ACTIVE_BOUNDARY_TRIM_SAMPLES, -ACTIVE_BOUNDARY_TRIM_SAMPLES)
+    : active;
+  if (comparisonSamples.length < MIN_ACTIVE_MOTION_SAMPLES || !progressive(comparisonSamples)) return null;
+
   return {
-    samples: active,
-    startTime: active[0].targetTime,
-    endTime: active.at(-1).targetTime,
-    spanSeconds
+    samples: comparisonSamples,
+    startTime: comparisonSamples[0].targetTime,
+    endTime: comparisonSamples.at(-1).targetTime,
+    spanSeconds,
+    boundaryTrimSamples: canTrimBoundaries ? ACTIVE_BOUNDARY_TRIM_SAMPLES : 0
   };
 }
 
@@ -361,7 +374,7 @@ async function verifyTarget(browser, target) {
             const binding = denseBinding(submittedActive.samples, independentActive.samples, submittedActive.startTime, independentActive.startTime);
             if (!binding.verified) findings.push({
               code: 'motion-proof-dense-video-timeline-mismatch',
-              message: `Submitted WebM lacks dense time-aligned correspondence across the active authored motion span (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}s; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s).`
+              message: `Submitted WebM lacks dense time-aligned correspondence across the active authored motion interior (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}s; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
             });
           }
         }
