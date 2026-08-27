@@ -95,7 +95,7 @@ test('reduced-motion authority rejects substituted media whose terminal state do
   assert.ok(review.findings.some((item) => item.code === 'motion-proof-independent-video-replay-mismatch'));
 });
 
-test('comparison authority rejects filter-hidden, clipped, overflow-clipped, and off-screen videos', async (t) => {
+test('comparison authority rejects hidden, clipped, off-screen, and fully occluded videos', async (t) => {
   const executable = chromium.executablePath();
   if (!executable || !fs.existsSync(executable)) {
     t.skip('Playwright Chromium is not installed for this unit-test phase.');
@@ -106,12 +106,17 @@ test('comparison authority rejects filter-hidden, clipped, overflow-clipped, and
   const videoPath = path.join(root, 'study.webm');
   fs.writeFileSync(videoPath, 'comparison-path-authority');
 
+  const video = '<video controls width="640" height="360" src="./study.webm" style="display:block;background:#111"></video>';
+  const overlay = '<div style="position:fixed;inset:0;background:#fff;z-index:999999"></div>';
+  const pointerNoneOverlay = '<div style="position:fixed;inset:0;background:#fff;z-index:999999;pointer-events:none"></div>';
   const boards = {
-    valid: '<!doctype html><html><body><video controls width="640" height="360" src="./study.webm"></video></body></html>',
-    filter: '<!doctype html><html><body><section style="filter:opacity(0)"><video controls width="640" height="360" src="./study.webm"></video></section></body></html>',
-    clip: '<!doctype html><html><body><section style="clip-path:inset(50%)"><video controls width="640" height="360" src="./study.webm"></video></section></body></html>',
-    overflow: '<!doctype html><html><body><section style="width:0;height:0;overflow:hidden"><video controls width="640" height="360" src="./study.webm"></video></section></body></html>',
-    offscreen: '<!doctype html><html><body><section style="position:absolute;left:-5000px;top:-5000px"><video controls width="640" height="360" src="./study.webm"></video></section></body></html>'
+    valid: `<!doctype html><html><body>${video}</body></html>`,
+    filter: `<!doctype html><html><body><section style="filter:opacity(0)">${video}</section></body></html>`,
+    clip: `<!doctype html><html><body><section style="clip-path:inset(50%)">${video}</section></body></html>`,
+    overflow: `<!doctype html><html><body><section style="width:0;height:0;overflow:hidden">${video}</section></body></html>`,
+    offscreen: `<!doctype html><html><body><section style="position:absolute;left:-5000px;top:-5000px">${video}</section></body></html>`,
+    overlay: `<!doctype html><html><body>${video}${overlay}</body></html>`,
+    pointerNoneOverlay: `<!doctype html><html><body>${video}${pointerNoneOverlay}</body></html>`
   };
 
   const boardPaths = {};
@@ -125,10 +130,10 @@ test('comparison authority rejects filter-hidden, clipped, overflow-clipped, and
     comparisonPaths: [boardPaths.valid],
     expectedVideoPaths: [videoPath]
   }]);
-  assert.equal(validReview.verified, true);
+  assert.equal(validReview.verified, true, validReview.findings.map((item) => `${item.code}: ${item.message}`).join('\n'));
   assert.equal(validReview.findings.length, 0);
 
-  for (const name of ['filter', 'clip', 'overflow', 'offscreen']) {
+  for (const name of ['filter', 'clip', 'overflow', 'offscreen', 'overlay', 'pointerNoneOverlay']) {
     const blockedReview = verifyIndependentMotionProofBrowserArtifacts([{
       kind: 'comparison',
       comparisonPaths: [boardPaths[name]],
