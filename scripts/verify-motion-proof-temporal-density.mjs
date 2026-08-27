@@ -5,6 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
 import { findStableTerminalAnchorIndex } from '../modules/motion-creative-intelligence/terminal-anchor.mjs';
+import { findOptimalMonotonicMatches } from '../modules/motion-creative-intelligence/temporal-sequence.mjs';
 
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 32;
@@ -18,6 +19,8 @@ const MIN_BIDIRECTIONAL_COVERAGE = 0.78;
 const MAX_CONSECUTIVE_UNMATCHED = 3;
 const MIN_VISIBLE_MOTION_MEAN_DELTA = 0.75;
 const MIN_VISIBLE_MOTION_OUTLIER_SHARE = 0.001;
+const MAX_TERMINAL_REFERENCE_MEAN_DELTA = 1.5;
+const MAX_TERMINAL_REFERENCE_OUTLIER_SHARE = 0.002;
 const TERMINAL_SEARCH_PADDING_SECONDS = 2;
 const MIN_TERMINAL_SUFFIX_SAMPLES = 3;
 const MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS = 1;
@@ -61,6 +64,11 @@ function visiblyDifferent(distance) {
   return distance.meanDelta >= MIN_VISIBLE_MOTION_MEAN_DELTA || distance.outlierShare >= MIN_VISIBLE_MOTION_OUTLIER_SHARE;
 }
 
+function terminalReferenceNear(distance) {
+  return distance.meanDelta <= MAX_TERMINAL_REFERENCE_MEAN_DELTA
+    && distance.outlierShare <= MAX_TERMINAL_REFERENCE_OUTLIER_SHARE;
+}
+
 function progressive(samples) {
   for (let left = 0; left < samples.length; left += 1) {
     for (let right = left + 1; right < samples.length; right += 1) {
@@ -68,6 +76,16 @@ function progressive(samples) {
     }
   }
   return false;
+}
+
+function averagePixels(samples = []) {
+  const length = samples[0]?.pixels?.length ?? 0;
+  if (!length || samples.some((sample) => !Array.isArray(sample?.pixels) || sample.pixels.length !== length)) return null;
+  const sums = Array(length).fill(0);
+  for (const sample of samples) {
+    for (let index = 0; index < length; index += 1) sums[index] += sample.pixels[index];
+  }
+  return sums.map((value) => Math.round(value / samples.length));
 }
 
 function contextOptions(planned, viewport, recordDir = null) {
@@ -166,9 +184,6 @@ async function framesAt(page, selector, times) {
 }
 
 function terminalSearchTimes(mediaDuration, durationSeconds) {
-  // Search far enough back to include the authored interval plus recorder lead/tail,
-  // then identify the *start* of the sustained replay-bound terminal suffix.
-  // This makes authority invariant to a longer stable final-state recording tail.
   const start = Math.max(0.01, mediaDuration - durationSeconds - TERMINAL_SEARCH_PADDING_SECONDS);
   const end = Math.max(start, mediaDuration - 0.01);
   const times = [];
@@ -181,18 +196,28 @@ async function terminalAnchor(page, selector, media, finalPixels, durationSecond
   const samples = await framesAt(page, selector, terminalSearchTimes(media.duration, durationSeconds));
   if (samples.length < MIN_TERMINAL_SUFFIX_SAMPLES) return null;
 
-  const scored = samples.map((sample) => ({
+  const scoredToFinal = samples.map((sample) => ({
     ...sample,
     distance: visualDistance(sample.pixels, finalPixels)
   }));
-  const finalBoundFlags = scored.map((sample) => finalBound(sample.distance));
-  const nearTerminalFlags = scored.map((sample) => temporalBound(sample.distance));
-  const anchorIndex = findStableTerminalAnchorIndex(finalBoundFlags, nearTerminalFlags, {
+  const strictTail = scoredToFinal.slice(-MIN_TERMINAL_SUFFIX_SAMPLES);
+  if (strictTail.length < MIN_TERMINAL_SUFFIX_SAMPLES || strictTail.some((sample) => !finalBound(sample.distance))) return null;
+
+  // PNG binding answers "did this video end at the proven final state?". The
+  // semantic onset of that state is measured against the video's own verified
+  // terminal tail so codec bias between a PNG screenshot and WebM frames cannot
+  // make subtle motion look terminal from frame zero.
+  const terminalPixels = averagePixels(strictTail);
+  if (!terminalPixels) return null;
+  const terminalDistances = samples.map((sample) => visualDistance(sample.pixels, terminalPixels));
+  const settledFlags = terminalDistances.map((distance) => !visiblyDifferent(distance));
+  const nearSettledFlags = terminalDistances.map((distance) => terminalReferenceNear(distance));
+  const anchorIndex = findStableTerminalAnchorIndex(settledFlags, nearSettledFlags, {
     minSuffixSamples: MIN_TERMINAL_SUFFIX_SAMPLES,
     maxConsecutiveGaps: MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS
   });
 
-  return anchorIndex >= 0 ? scored[anchorIndex] : null;
+  return anchorIndex >= 0 ? scoredToFinal[anchorIndex] : null;
 }
 
 function logicalTimes(anchor, durationSeconds) {
@@ -218,26 +243,24 @@ function longestUnmatchedRun(count, matchedIndexes) {
 }
 
 function denseBinding(submitted, independent, submittedAnchor, independentAnchor) {
-  const usedSubmitted = new Set();
-  const matches = [];
-  for (let right = 0; right < independent.length; right += 1) {
-    const rightRelative = independent[right].targetTime - independentAnchor;
-    let best = null;
-    for (let left = 0; left < submitted.length; left += 1) {
-      if (usedSubmitted.has(left)) continue;
-      const leftRelative = submitted[left].targetTime - submittedAnchor;
+  const candidates = [];
+  for (let left = 0; left < submitted.length; left += 1) {
+    const leftRelative = submitted[left].targetTime - submittedAnchor;
+    for (let right = 0; right < independent.length; right += 1) {
+      const rightRelative = independent[right].targetTime - independentAnchor;
       const drift = Math.abs(leftRelative - rightRelative);
       if (drift > MAX_TIME_DRIFT_SECONDS) continue;
       const distance = visualDistance(submitted[left].pixels, independent[right].pixels);
       if (!temporalBound(distance)) continue;
-      if (!best || drift < best.drift || (drift === best.drift && distance.meanDelta < best.distance.meanDelta)) best = { left, right, drift, distance };
-    }
-    if (best) {
-      usedSubmitted.add(best.left);
-      matches.push(best);
+      candidates.push({ left, right, drift, distance });
     }
   }
 
+  // Authority requires an ordered temporal correspondence. Use a maximum-cardinality
+  // monotonic alignment rather than greedy nearest-frame assignment so dropped or
+  // duplicated codec frames cannot create false negatives, while reordered montage
+  // frames cannot be matched out of sequence.
+  const matches = findOptimalMonotonicMatches(submitted.length, independent.length, candidates);
   const leftCoverage = submitted.length ? matches.length / submitted.length : 0;
   const rightCoverage = independent.length ? matches.length / independent.length : 0;
   const leftGap = longestUnmatchedRun(submitted.length, matches.map((item) => item.left));
