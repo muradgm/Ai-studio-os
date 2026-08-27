@@ -5,7 +5,10 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
 import { findStableTerminalAnchorIndex } from '../modules/motion-creative-intelligence/terminal-anchor.mjs';
-import { evaluateDenseTemporalCoverage } from '../modules/motion-creative-intelligence/temporal-sequence.mjs';
+import {
+  evaluateDenseTemporalCoverage,
+  matchedTemporalSpanRatio
+} from '../modules/motion-creative-intelligence/temporal-sequence.mjs';
 
 const SAMPLE_WIDTH = 48;
 const SAMPLE_HEIGHT = 32;
@@ -280,13 +283,6 @@ function logicalTimes(anchor, durationSeconds) {
   return times;
 }
 
-function matchedTimeSpan(samples, matches, key) {
-  if (!Array.isArray(matches) || matches.length < 2) return 0;
-  const first = samples[matches[0]?.[key]]?.targetTime;
-  const last = samples[matches.at(-1)?.[key]]?.targetTime;
-  return Number.isFinite(first) && Number.isFinite(last) ? Math.max(0, last - first) : 0;
-}
-
 function terminalRelativeProgress(sampleTime, anchorTime, durationSeconds) {
   if (!Number.isFinite(sampleTime) || !Number.isFinite(anchorTime) || !(durationSeconds > 0)) return Infinity;
   return 1 - ((anchorTime - sampleTime) / durationSeconds);
@@ -312,14 +308,10 @@ function denseBinding(submitted, independent, submittedAnchorTime, independentAn
 
   const coverage = evaluateDenseTemporalCoverage(submitted.length, independent.length, candidates);
   const maxDrift = coverage.matches.length ? Math.max(...coverage.matches.map((item) => item.drift)) : Infinity;
-  const submittedMatchedSpan = matchedTimeSpan(submitted, coverage.matches, 'left');
-  const independentMatchedSpan = matchedTimeSpan(independent, coverage.matches, 'right');
-  const matchedSpanRatio = submittedMatchedSpan > 0 && independentMatchedSpan > 0
-    ? Math.min(submittedMatchedSpan, independentMatchedSpan) / Math.max(submittedMatchedSpan, independentMatchedSpan)
-    : 0;
+  const matchedSpan = matchedTemporalSpanRatio(submitted, independent, coverage.matches);
 
   return {
-    verified: matchedSpanRatio >= MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS
+    verified: matchedSpan.ratio >= MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS
       && coverage.leftCoverage >= MIN_BIDIRECTIONAL_COVERAGE
       && coverage.rightCoverage >= MIN_BIDIRECTIONAL_COVERAGE
       && coverage.monotonicCoverage >= MIN_BIDIRECTIONAL_COVERAGE
@@ -335,9 +327,9 @@ function denseBinding(submitted, independent, submittedAnchorTime, independentAn
     leftGap: coverage.leftGap,
     rightGap: coverage.rightGap,
     maxDrift,
-    matchedSpanRatio,
-    submittedMatchedSpan,
-    independentMatchedSpan,
+    matchedSpanRatio: matchedSpan.ratio,
+    submittedMatchedSpan: matchedSpan.leftSpan,
+    independentMatchedSpan: matchedSpan.rightSpan,
     observedActiveSpanRatio,
     submittedActiveSpan,
     independentActiveSpan,
