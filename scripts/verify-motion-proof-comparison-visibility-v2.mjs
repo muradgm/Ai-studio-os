@@ -2,6 +2,11 @@ import fs from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
+const MIN_PIXEL_CONTRIBUTION_RATIO = 0.5;
+const PIXEL_DELTA_THRESHOLD = 12;
+const CONTRIBUTION_SAMPLE_WIDTH = 160;
+const CONTRIBUTION_SAMPLE_HEIGHT = 90;
+
 function filterOpacity(filterValue) {
   if (!filterValue || filterValue === 'none') return 1;
   let product = 1;
@@ -48,13 +53,29 @@ async function inspectVideoCandidate(page, index) {
     video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
+    // Freeze decodable comparison media at a deterministic review frame so the
+    // shown/hidden pixel probe measures occlusion rather than playback drift.
+    try {
+      video.pause();
+      if (Number.isFinite(video.duration) && video.duration > 0.05 && video.readyState >= 1) {
+        const target = Math.max(0.01, Math.min(video.duration * 0.5, Math.max(0.01, video.duration - 0.01)));
+        if (Math.abs(video.currentTime - target) > 0.01) {
+          await new Promise((resolve) => {
+            const timer = setTimeout(resolve, 1500);
+            video.addEventListener('seeked', () => { clearTimeout(timer); resolve(); }, { once: true });
+            try { video.currentTime = target; } catch { clearTimeout(timer); resolve(); }
+          });
+        }
+      }
+    } catch {}
+
     const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
-    if (!video.getClientRects().length) return { geometricallyVisible: false, sources: [] };
+    if (!video.getClientRects().length) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
     const videoRect = video.getBoundingClientRect();
-    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, sources: [] };
+    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
 
     let visibleRect = intersect(videoRect, viewportRect);
-    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [] };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
 
     let node = video;
     let effectiveOpacity = 1;
@@ -67,11 +88,11 @@ async function inspectVideoCandidate(page, index) {
         || style.visibility === 'hidden'
         || style.visibility === 'collapse'
         || style.contentVisibility === 'hidden'
-        || !Number.isFinite(opacity)) return { geometricallyVisible: false, sources: [] };
+        || !Number.isFinite(opacity)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
 
       effectiveOpacity *= opacity;
       effectiveFilterOpacity *= parseFilterOpacity(style.filter);
-      if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return { geometricallyVisible: false, sources: [] };
+      if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
 
       if (node !== video) {
         const ancestorRect = node.getBoundingClientRect();
@@ -79,22 +100,21 @@ async function inspectVideoCandidate(page, index) {
         const clipsY = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowY);
         if (clipsX) visibleRect = { ...visibleRect, left: Math.max(visibleRect.left, ancestorRect.left), right: Math.min(visibleRect.right, ancestorRect.right) };
         if (clipsY) visibleRect = { ...visibleRect, top: Math.max(visibleRect.top, ancestorRect.top), bottom: Math.min(visibleRect.bottom, ancestorRect.bottom) };
-        if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [] };
+        if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
       }
       node = node.parentElement;
     }
 
-    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [] };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
 
-    const sources = [];
-    if (video.hasAttribute('src') && video.getAttribute('src')?.trim()) sources.push(video.src);
-    for (const source of video.querySelectorAll('source')) {
-      if (source.hasAttribute('src') && source.getAttribute('src')?.trim()) sources.push(source.src);
-    }
+    const currentSrc = video.currentSrc
+      || (video.hasAttribute('src') && video.getAttribute('src')?.trim() ? video.src : '')
+      || video.querySelector('source[src]')?.src
+      || '';
 
     return {
       geometricallyVisible: true,
-      sources,
+      currentSrc,
       selector: selectorFor(video),
       clip: {
         x: scrollX + visibleRect.left,
@@ -106,48 +126,82 @@ async function inspectVideoCandidate(page, index) {
   }, filterOpacity.toString());
 }
 
-async function videoContributesRenderedPixels(page, candidate) {
-  if (!candidate?.selector) return false;
-  const locator = page.locator(candidate.selector);
-  if (await locator.count() !== 1) return false;
+async function pixelDifferenceRatio(analysisPage, shownBytes, hiddenBytes) {
+  const shown = `data:image/png;base64,${shownBytes.toString('base64')}`;
+  const hidden = `data:image/png;base64,${hiddenBytes.toString('base64')}`;
+  return analysisPage.evaluate(async ({ shown, hidden, width, height, threshold }) => {
+    const load = async (src) => {
+      const image = new Image();
+      image.src = src;
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('comparison probe screenshot decode failed'));
+      });
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.drawImage(image, 0, 0, width, height);
+      return context.getImageData(0, 0, width, height).data;
+    };
 
-  const shown = await locator.screenshot({ type: 'png' });
-  const cdp = await page.context().newCDPSession(page);
-  let scriptsDisabled = false;
+    const [left, right] = await Promise.all([load(shown), load(hidden)]);
+    let changed = 0;
+    const pixels = width * height;
+    for (let index = 0; index < left.length; index += 4) {
+      const delta = Math.max(
+        Math.abs(left[index] - right[index]),
+        Math.abs(left[index + 1] - right[index + 1]),
+        Math.abs(left[index + 2] - right[index + 2])
+      );
+      if (delta >= threshold) changed += 1;
+    }
+    return pixels ? changed / pixels : 0;
+  }, {
+    shown,
+    hidden,
+    width: CONTRIBUTION_SAMPLE_WIDTH,
+    height: CONTRIBUTION_SAMPLE_HEIGHT,
+    threshold: PIXEL_DELTA_THRESHOLD
+  });
+}
+
+async function videoContribution(page, context, analysisPage, candidate) {
+  if (!candidate?.selector || !candidate?.clip) return { ratio: 0, meaningful: false };
+  const locator = page.locator(candidate.selector);
+  if (await locator.count() !== 1) return { ratio: 0, meaningful: false };
+
+  // Use a page-composited screenshot over the candidate review rectangle, not
+  // locator.screenshot(). This preserves opaque siblings/overlays in the pixels
+  // being judged and therefore measures actual reviewer-visible contribution.
+  const shown = await page.screenshot({ type: 'png', animations: 'disabled', clip: candidate.clip });
+  const cdp = await context.newCDPSession(page);
   let styleSheetId = null;
   try {
     await cdp.send('Page.enable');
     await cdp.send('DOM.enable');
     await cdp.send('CSS.enable');
     const { frameTree } = await cdp.send('Page.getFrameTree');
-
-    // Freeze untrusted page JavaScript before the probe. The hide rule is then
-    // applied through an inspector stylesheet, not an inline style/attribute,
-    // so neither MutationObserver nor CSS [style] selectors can react to it.
-    await cdp.send('Emulation.setScriptExecutionDisabled', { value: true });
-    scriptsDisabled = true;
-    const created = await cdp.send('CSS.createStyleSheet', { frameId: frameTree.frame.id });
-    styleSheetId = created.styleSheetId;
+    ({ styleSheetId } = await cdp.send('CSS.createStyleSheet', { frameId: frameTree.frame.id }));
     await cdp.send('CSS.setStyleSheetText', {
       styleSheetId,
       text: `${candidate.selector}{opacity:0!important}`
     });
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    const hidden = await locator.screenshot({ type: 'png' });
-    return !shown.equals(hidden);
+    await page.waitForTimeout(40);
+    const hidden = await page.screenshot({ type: 'png', animations: 'disabled', clip: candidate.clip });
+    const ratio = await pixelDifferenceRatio(analysisPage, shown, hidden);
+    return { ratio, meaningful: ratio >= MIN_PIXEL_CONTRIBUTION_RATIO };
   } finally {
     if (styleSheetId) {
       try { await cdp.send('CSS.setStyleSheetText', { styleSheetId, text: '' }); } catch {}
-    }
-    if (scriptsDisabled) {
-      try { await cdp.send('Emulation.setScriptExecutionDisabled', { value: false }); } catch {}
     }
     try { await cdp.detach(); } catch {}
   }
 }
 
-async function inspectComparisonPage(page) {
+async function inspectComparisonPage(page, context, analysisPage) {
   const sources = [];
+  const contributionRatios = [];
   let visibleVideoCount = 0;
   let emptyVisibleVideoCount = 0;
   const videoCount = await page.locator('video').count();
@@ -155,13 +209,16 @@ async function inspectComparisonPage(page) {
   for (let index = 0; index < videoCount; index += 1) {
     const candidate = await inspectVideoCandidate(page, index);
     if (!candidate.geometricallyVisible) continue;
-    if (!await videoContributesRenderedPixels(page, candidate)) continue;
+    const contribution = await videoContribution(page, context, analysisPage, candidate);
+    if (!contribution.meaningful) continue;
+
     visibleVideoCount += 1;
-    if (!candidate.sources.length) emptyVisibleVideoCount += 1;
-    sources.push(...candidate.sources);
+    contributionRatios.push(contribution.ratio);
+    if (!candidate.currentSrc) emptyVisibleVideoCount += 1;
+    else sources.push(candidate.currentSrc);
   }
 
-  return { sources, visibleVideoCount, emptyVisibleVideoCount };
+  return { sources, contributionRatios, visibleVideoCount, emptyVisibleVideoCount };
 }
 
 async function verifyComparisonTarget(browser, target) {
@@ -170,7 +227,13 @@ async function verifyComparisonTarget(browser, target) {
   const expectedUrls = new Set(expectedVideoPaths.map((file) => pathToFileURL(file).href));
   const observedUrls = new Set();
   const findings = [];
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+
+  // Comparison evidence is static review material. Disabling page JavaScript
+  // prevents page-authored code from observing or reacting to the authority probe.
+  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, javaScriptEnabled: false });
+  const analysisContext = await browser.newContext({ viewport: { width: CONTRIBUTION_SAMPLE_WIDTH, height: CONTRIBUTION_SAMPLE_HEIGHT } });
+  const analysisPage = await analysisContext.newPage();
+  await analysisPage.setContent('<!doctype html><html><body></body></html>');
 
   try {
     if (!comparisonPaths.length || !expectedUrls.size) {
@@ -183,9 +246,17 @@ async function verifyComparisonTarget(browser, target) {
       try {
         await fs.access(comparisonPath);
         await page.goto(pathToFileURL(comparisonPath).href, { waitUntil: 'load', timeout: 15_000 });
-        const inspection = await inspectComparisonPage(page);
-        if (inspection.visibleVideoCount === 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-missing', message: 'Comparison HTML must present actual effectively visible, pixel-contributing video elements when each candidate is brought into review view.', comparisonRef: comparisonPath });
-        if (inspection.emptyVisibleVideoCount > 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-source-missing', message: 'Every effectively visible comparison video must resolve to a concrete media source.', comparisonRef: comparisonPath });
+        const inspection = await inspectComparisonPage(page, context, analysisPage);
+        if (inspection.visibleVideoCount === 0) findings.push({
+          code: 'motion-proof-independent-comparison-visible-video-missing',
+          message: `Comparison HTML must present actual effectively visible video elements contributing at least ${(MIN_PIXEL_CONTRIBUTION_RATIO * 100).toFixed(0)}% of their review rectangle when each candidate is brought into view.`,
+          comparisonRef: comparisonPath
+        });
+        if (inspection.emptyVisibleVideoCount > 0) findings.push({
+          code: 'motion-proof-independent-comparison-visible-video-source-missing',
+          message: 'Every effectively visible comparison video must resolve to one browser-selected currentSrc.',
+          comparisonRef: comparisonPath
+        });
         for (const source of inspection.sources) observedUrls.add(source);
       } catch (error) {
         findings.push({ code: 'motion-proof-independent-comparison-browser-error', message: `Comparison visibility verification failed: ${error?.message ?? 'unknown error'}`, comparisonRef: comparisonPath });
@@ -197,9 +268,13 @@ async function verifyComparisonTarget(browser, target) {
     const missingUrls = [...expectedUrls].filter((url) => !observedUrls.has(url));
     const unexpectedUrls = [...observedUrls].filter((url) => !expectedUrls.has(url));
     if (missingUrls.length || unexpectedUrls.length) {
-      findings.push({ code: 'motion-proof-independent-comparison-dom-coverage-mismatch', message: `Effectively visible comparison media must exactly match the rendered WebM set (missing ${missingUrls.length}, unexpected ${unexpectedUrls.length}).` });
+      findings.push({
+        code: 'motion-proof-independent-comparison-dom-coverage-mismatch',
+        message: `Effectively visible browser-selected comparison media must exactly match the rendered WebM set (missing ${missingUrls.length}, unexpected ${unexpectedUrls.length}).`
+      });
     }
   } finally {
+    await analysisContext.close();
     await context.close();
   }
 
