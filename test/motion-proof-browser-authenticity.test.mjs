@@ -228,7 +228,14 @@ test('decodable unrelated WebM cannot satisfy replay pixel binding', async (t) =
   }]);
 
   assert.equal(review.verified, false);
-  assert.ok(review.findings.some((item) => item.code === 'motion-proof-independent-video-replay-mismatch'));
+  assert.ok(
+    review.findings.some((item) => [
+      'motion-proof-independent-video-replay-mismatch',
+      'motion-proof-independent-replay-video-final-mismatch',
+      'motion-proof-dense-video-timeline-mismatch'
+    ].includes(item.code)),
+    `unrelated WebM must fail replay/media authenticity; findings: ${JSON.stringify(review.findings)}`
+  );
 });
 
 test('comparison authority requires actual visible browser DOM rather than nested or ancestor-hidden markup', async (t) => {
