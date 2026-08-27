@@ -17,8 +17,9 @@ function filterOpacity(filterValue) {
   return product;
 }
 
-async function inspectComparisonPage(page) {
-  return page.evaluate(async (filterOpacitySource) => {
+async function inspectVideoCandidate(page, index) {
+  const locator = page.locator('video').nth(index);
+  return locator.evaluate(async (video, filterOpacitySource) => {
     const parseFilterOpacity = (0, eval)(`(${filterOpacitySource})`);
     const intersect = (left, right) => ({
       left: Math.max(left.left, right.left),
@@ -28,81 +29,107 @@ async function inspectComparisonPage(page) {
     });
     const positive = (rect) => rect.right - rect.left > 0.5 && rect.bottom - rect.top > 0.5;
 
-    const hitTestVisible = (video, rect) => {
-      if (!positive(rect)) return false;
-      const xs = [0.2, 0.5, 0.8].map((ratio) => rect.left + (rect.right - rect.left) * ratio);
-      const ys = [0.2, 0.5, 0.8].map((ratio) => rect.top + (rect.bottom - rect.top) * ratio);
-      for (const x of xs) {
-        for (const y of ys) {
-          if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) continue;
-          const stack = document.elementsFromPoint(x, y);
-          if (stack.includes(video)) return true;
-        }
+    video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
+    const ownRects = video.getClientRects();
+    if (!ownRects.length) return { geometricallyVisible: false, sources: [], clip: null };
+    const videoRect = video.getBoundingClientRect();
+    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, sources: [], clip: null };
+
+    let visibleRect = intersect(videoRect, viewportRect);
+    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [], clip: null };
+
+    let node = video;
+    let effectiveOpacity = 1;
+    let effectiveFilterOpacity = 1;
+    while (node && node.nodeType === Node.ELEMENT_NODE) {
+      const style = getComputedStyle(node);
+      const opacity = Number.parseFloat(style.opacity || '1');
+      if (node.hidden
+        || style.display === 'none'
+        || style.visibility === 'hidden'
+        || style.visibility === 'collapse'
+        || style.contentVisibility === 'hidden'
+        || !Number.isFinite(opacity)) return { geometricallyVisible: false, sources: [], clip: null };
+
+      effectiveOpacity *= opacity;
+      effectiveFilterOpacity *= parseFilterOpacity(style.filter);
+      if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return { geometricallyVisible: false, sources: [], clip: null };
+
+      if (node !== video) {
+        const ancestorRect = node.getBoundingClientRect();
+        const clipsX = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowX);
+        const clipsY = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowY);
+        if (clipsX) visibleRect = { ...visibleRect, left: Math.max(visibleRect.left, ancestorRect.left), right: Math.min(visibleRect.right, ancestorRect.right) };
+        if (clipsY) visibleRect = { ...visibleRect, top: Math.max(visibleRect.top, ancestorRect.top), bottom: Math.min(visibleRect.bottom, ancestorRect.bottom) };
+        if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [], clip: null };
       }
-      return false;
-    };
+      node = node.parentElement;
+    }
 
-    const effectivelyVisibleAfterScroll = async (video) => {
-      video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-      const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
-      const ownRects = video.getClientRects();
-      if (!ownRects.length) return false;
-      const videoRect = video.getBoundingClientRect();
-      if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return false;
-
-      let visibleRect = intersect(videoRect, viewportRect);
-      if (!positive(visibleRect)) return false;
-
-      let node = video;
-      let effectiveOpacity = 1;
-      let effectiveFilterOpacity = 1;
-      while (node && node.nodeType === Node.ELEMENT_NODE) {
-        const style = getComputedStyle(node);
-        const opacity = Number.parseFloat(style.opacity || '1');
-        if (node.hidden
-          || style.display === 'none'
-          || style.visibility === 'hidden'
-          || style.visibility === 'collapse'
-          || style.contentVisibility === 'hidden'
-          || !Number.isFinite(opacity)) return false;
-
-        effectiveOpacity *= opacity;
-        effectiveFilterOpacity *= parseFilterOpacity(style.filter);
-        if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return false;
-
-        if (node !== video) {
-          const ancestorRect = node.getBoundingClientRect();
-          const clipsX = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowX);
-          const clipsY = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowY);
-          if (clipsX) visibleRect = { ...visibleRect, left: Math.max(visibleRect.left, ancestorRect.left), right: Math.min(visibleRect.right, ancestorRect.right) };
-          if (clipsY) visibleRect = { ...visibleRect, top: Math.max(visibleRect.top, ancestorRect.top), bottom: Math.min(visibleRect.bottom, ancestorRect.bottom) };
-          if (!positive(visibleRect)) return false;
-        }
-        node = node.parentElement;
-      }
-
-      if (!positive(visibleRect)) return false;
-      return hitTestVisible(video, visibleRect);
-    };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, sources: [], clip: null };
 
     const sources = [];
-    let visibleVideoCount = 0;
-    let emptyVisibleVideoCount = 0;
-    for (const video of document.querySelectorAll('video')) {
-      if (!await effectivelyVisibleAfterScroll(video)) continue;
-      visibleVideoCount += 1;
-      const videoSources = [];
-      if (video.hasAttribute('src') && video.getAttribute('src')?.trim()) videoSources.push(video.src);
-      for (const source of video.querySelectorAll('source')) {
-        if (source.hasAttribute('src') && source.getAttribute('src')?.trim()) videoSources.push(source.src);
-      }
-      if (!videoSources.length) emptyVisibleVideoCount += 1;
-      sources.push(...videoSources);
+    if (video.hasAttribute('src') && video.getAttribute('src')?.trim()) sources.push(video.src);
+    for (const source of video.querySelectorAll('source')) {
+      if (source.hasAttribute('src') && source.getAttribute('src')?.trim()) sources.push(source.src);
     }
-    return { sources, visibleVideoCount, emptyVisibleVideoCount };
+
+    return {
+      geometricallyVisible: true,
+      sources,
+      clip: {
+        x: visibleRect.left + scrollX,
+        y: visibleRect.top + scrollY,
+        width: visibleRect.right - visibleRect.left,
+        height: visibleRect.bottom - visibleRect.top
+      }
+    };
   }, filterOpacity.toString());
+}
+
+async function videoContributesRenderedPixels(page, index, clip) {
+  if (!clip || !(clip.width > 0.5) || !(clip.height > 0.5)) return false;
+  const locator = page.locator('video').nth(index);
+  const originalVisibility = await locator.evaluate((video) => ({
+    value: video.style.getPropertyValue('visibility'),
+    priority: video.style.getPropertyPriority('visibility')
+  }));
+
+  const shown = await page.screenshot({ type: 'png', clip });
+  try {
+    await locator.evaluate((video) => video.style.setProperty('visibility', 'hidden', 'important'));
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const hidden = await page.screenshot({ type: 'png', clip });
+    return !shown.equals(hidden);
+  } finally {
+    await locator.evaluate((video, original) => {
+      if (!original.value) video.style.removeProperty('visibility');
+      else video.style.setProperty('visibility', original.value, original.priority || '');
+    }, originalVisibility);
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+  }
+}
+
+async function inspectComparisonPage(page) {
+  const sources = [];
+  let visibleVideoCount = 0;
+  let emptyVisibleVideoCount = 0;
+  const videoCount = await page.locator('video').count();
+
+  for (let index = 0; index < videoCount; index += 1) {
+    const candidate = await inspectVideoCandidate(page, index);
+    if (!candidate.geometricallyVisible) continue;
+    if (!await videoContributesRenderedPixels(page, index, candidate.clip)) continue;
+
+    visibleVideoCount += 1;
+    if (!candidate.sources.length) emptyVisibleVideoCount += 1;
+    sources.push(...candidate.sources);
+  }
+
+  return { sources, visibleVideoCount, emptyVisibleVideoCount };
 }
 
 async function verifyComparisonTarget(browser, target) {
@@ -125,7 +152,7 @@ async function verifyComparisonTarget(browser, target) {
         await fs.access(comparisonPath);
         await page.goto(pathToFileURL(comparisonPath).href, { waitUntil: 'load', timeout: 15_000 });
         const inspection = await inspectComparisonPage(page);
-        if (inspection.visibleVideoCount === 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-missing', message: 'Comparison HTML must present actual effectively visible video elements when each candidate is brought into review view.', comparisonRef: comparisonPath });
+        if (inspection.visibleVideoCount === 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-missing', message: 'Comparison HTML must present actual effectively visible, pixel-contributing video elements when each candidate is brought into review view.', comparisonRef: comparisonPath });
         if (inspection.emptyVisibleVideoCount > 0) findings.push({ code: 'motion-proof-independent-comparison-visible-video-source-missing', message: 'Every effectively visible comparison video must resolve to a concrete media source.', comparisonRef: comparisonPath });
         for (const source of inspection.sources) observedUrls.add(source);
       } catch (error) {
