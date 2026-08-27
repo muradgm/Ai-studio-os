@@ -95,7 +95,7 @@ test('reduced-motion authority rejects substituted media whose terminal state do
   assert.ok(review.findings.some((item) => item.code === 'motion-proof-independent-video-replay-mismatch'));
 });
 
-test('comparison authority rejects hidden, clipped, off-screen, fully occluded, and probe-reactive videos', async (t) => {
+test('comparison authority rejects hidden, clipped, off-screen, occluded, probe-reactive, fallback-source, and trivial-pixel videos', async (t) => {
   const executable = chromium.executablePath();
   if (!executable || !fs.existsSync(executable)) {
     t.skip('Playwright Chromium is not installed for this unit-test phase.');
@@ -104,7 +104,9 @@ test('comparison authority rejects hidden, clipped, off-screen, fully occluded, 
 
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'motion-comparison-visibility-authority-'));
   const videoPath = path.join(root, 'study.webm');
+  const alternateVideoPath = path.join(root, 'study-alternate.webm');
   fs.writeFileSync(videoPath, 'comparison-path-authority');
+  fs.writeFileSync(alternateVideoPath, 'comparison-alternate-path-authority');
 
   const video = '<video controls width="640" height="360" src="./study.webm" style="display:block;background:#111"></video>';
   const overlay = '<div class="overlay" style="position:fixed;inset:0;background:#fff;z-index:999999"></div>';
@@ -114,6 +116,13 @@ test('comparison authority rejects hidden, clipped, off-screen, fully occluded, 
 const video=document.querySelector('video');const overlay=document.querySelector('.overlay');
 new MutationObserver(()=>{if(video.getAttribute('style')?.includes('opacity'))overlay.style.display='none'}).observe(video,{attributes:true,attributeFilter:['style']});
 </script></body></html>`;
+  const fallbackSources = '<video controls width="640" height="360" style="display:block;background:#111"><source src="./study.webm" type="video/webm"><source src="./study-alternate.webm" type="video/webm"></video>';
+  const tinyHoleOverlay = `<div style="position:absolute;left:0;top:0;width:640px;height:360px;z-index:999999;pointer-events:none">
+<div style="position:absolute;left:0;top:0;width:640px;height:179px;background:#fff"></div>
+<div style="position:absolute;left:0;top:181px;width:640px;height:179px;background:#fff"></div>
+<div style="position:absolute;left:0;top:179px;width:319px;height:2px;background:#fff"></div>
+<div style="position:absolute;left:321px;top:179px;width:319px;height:2px;background:#fff"></div>
+</div>`;
   const boards = {
     valid: `<!doctype html><html><body>${video}</body></html>`,
     filter: `<!doctype html><html><body><section style="filter:opacity(0)">${video}</section></body></html>`,
@@ -123,7 +132,9 @@ new MutationObserver(()=>{if(video.getAttribute('style')?.includes('opacity'))ov
     overlay: `<!doctype html><html><body>${video}${overlay}</body></html>`,
     pointerNoneOverlay: `<!doctype html><html><body>${video}${pointerNoneOverlay}</body></html>`,
     styleReactive,
-    observerReactive
+    observerReactive,
+    fallbackSources: `<!doctype html><html><body>${fallbackSources}</body></html>`,
+    tinyHole: `<!doctype html><html><body style="margin:0"><div style="position:relative;width:640px;height:360px">${video}${tinyHoleOverlay}</div></body></html>`
   };
 
   const boardPaths = {};
@@ -140,7 +151,7 @@ new MutationObserver(()=>{if(video.getAttribute('style')?.includes('opacity'))ov
   assert.equal(validReview.verified, true, validReview.findings.map((item) => `${item.code}: ${item.message}`).join('\n'));
   assert.equal(validReview.findings.length, 0);
 
-  for (const name of ['filter', 'clip', 'overflow', 'offscreen', 'overlay', 'pointerNoneOverlay', 'styleReactive', 'observerReactive']) {
+  for (const name of ['filter', 'clip', 'overflow', 'offscreen', 'overlay', 'pointerNoneOverlay', 'styleReactive', 'observerReactive', 'tinyHole']) {
     const blockedReview = verifyIndependentMotionProofBrowserArtifacts([{
       kind: 'comparison',
       comparisonPaths: [boardPaths[name]],
@@ -150,4 +161,12 @@ new MutationObserver(()=>{if(video.getAttribute('style')?.includes('opacity'))ov
     assert.ok(blockedReview.findings.some((item) => item.code === 'motion-proof-independent-comparison-visible-video-missing'));
     assert.ok(blockedReview.findings.some((item) => item.code === 'motion-proof-independent-comparison-dom-coverage-mismatch'));
   }
+
+  const fallbackReview = verifyIndependentMotionProofBrowserArtifacts([{
+    kind: 'comparison',
+    comparisonPaths: [boardPaths.fallbackSources],
+    expectedVideoPaths: [videoPath, alternateVideoPath]
+  }]);
+  assert.equal(fallbackReview.verified, false, 'one visible video with fallback sources cannot prove two independently visible recordings');
+  assert.ok(fallbackReview.findings.some((item) => item.code === 'motion-proof-independent-comparison-dom-coverage-mismatch'));
 });
