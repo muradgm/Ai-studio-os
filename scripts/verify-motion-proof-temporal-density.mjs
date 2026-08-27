@@ -16,6 +16,9 @@ const MIN_BIDIRECTIONAL_COVERAGE = 0.78;
 const MAX_CONSECUTIVE_UNMATCHED = 3;
 const MIN_VISIBLE_MOTION_MEAN_DELTA = 0.75;
 const MIN_VISIBLE_MOTION_OUTLIER_SHARE = 0.001;
+const TERMINAL_SEARCH_PADDING_SECONDS = 2;
+const MIN_TERMINAL_SUFFIX_SAMPLES = 3;
+const MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS = 1;
 
 function canonicalValue(value) {
   if (Array.isArray(value)) return value.map(canonicalValue);
@@ -160,16 +163,51 @@ async function framesAt(page, selector, times) {
   }, { width: SAMPLE_WIDTH, height: SAMPLE_HEIGHT, times });
 }
 
-function terminalTimes(duration) {
-  return [0.7, 0.5, 0.35, 0.22, 0.12, 0.05].map((offset) => duration - offset).filter((time) => time > 0.01 && time < duration);
+function terminalSearchTimes(mediaDuration, durationSeconds) {
+  // Search far enough back to include the authored interval plus recorder lead/tail,
+  // then identify the *start* of the sustained replay-bound terminal suffix.
+  // This makes authority invariant to a longer stable final-state recording tail.
+  const start = Math.max(0.01, mediaDuration - durationSeconds - TERMINAL_SEARCH_PADDING_SECONDS);
+  const end = Math.max(start, mediaDuration - 0.01);
+  const times = [];
+  for (let t = start; t <= end + 0.0001; t += SAMPLE_STEP_SECONDS) times.push(t);
+  if (!times.length || times[times.length - 1] < end - 0.005) times.push(end);
+  return times;
 }
 
-async function terminalAnchor(page, selector, media, finalPixels) {
-  const samples = await framesAt(page, selector, terminalTimes(media.duration));
-  const bound = samples.map((sample) => ({ ...sample, distance: visualDistance(sample.pixels, finalPixels) }))
-    .filter((sample) => finalBound(sample.distance))
-    .sort((a, b) => a.targetTime - b.targetTime);
-  return bound[0] ?? null;
+async function terminalAnchor(page, selector, media, finalPixels, durationSeconds) {
+  const samples = await framesAt(page, selector, terminalSearchTimes(media.duration, durationSeconds));
+  if (samples.length < MIN_TERMINAL_SUFFIX_SAMPLES) return null;
+
+  const scored = samples.map((sample) => ({
+    ...sample,
+    distance: visualDistance(sample.pixels, finalPixels)
+  }));
+  const bound = scored.map((sample) => finalBound(sample.distance));
+
+  // The recording must actually end in a sustained verified terminal state.
+  const terminalTail = bound.slice(-MIN_TERMINAL_SUFFIX_SAMPLES);
+  if (terminalTail.length < MIN_TERMINAL_SUFFIX_SAMPLES || terminalTail.some((value) => !value)) return null;
+
+  // Walk backward from the verified tail to the semantic onset of the sustained
+  // terminal state. Permit one isolated codec-noise gap, but stop at a real
+  // transition boundary (two consecutive non-terminal samples).
+  let anchorIndex = scored.length - MIN_TERMINAL_SUFFIX_SAMPLES;
+  let consecutiveGaps = 0;
+  for (let index = scored.length - MIN_TERMINAL_SUFFIX_SAMPLES - 1; index >= 0; index -= 1) {
+    if (bound[index]) {
+      anchorIndex = index;
+      consecutiveGaps = 0;
+      continue;
+    }
+    consecutiveGaps += 1;
+    if (consecutiveGaps > MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS) break;
+  }
+
+  // If a single tolerated gap preceded the current anchor, use the first bound
+  // sample after that gap as the semantic terminal onset rather than crossing it.
+  while (anchorIndex < scored.length && !bound[anchorIndex]) anchorIndex += 1;
+  return scored[anchorIndex] ?? null;
 }
 
 function logicalTimes(anchor, durationSeconds) {
@@ -266,10 +304,10 @@ async function verifyTarget(browser, target) {
       if (!valid(submittedMedia) || !valid(independentMedia)) {
         findings.push({ code: 'motion-proof-dense-video-decode-invalid', message: 'Dense temporal authority requires decodable submitted and independent WebMs at the planned viewport.' });
       } else {
-        const submittedAnchor = await terminalAnchor(page, '#submitted', submittedMedia, finalPixels);
-        const independentAnchor = await terminalAnchor(page, '#independent', independentMedia, finalPixels);
+        const submittedAnchor = await terminalAnchor(page, '#submitted', submittedMedia, finalPixels, durationSeconds);
+        const independentAnchor = await terminalAnchor(page, '#independent', independentMedia, finalPixels, durationSeconds);
         if (!submittedAnchor || !independentAnchor) {
-          findings.push({ code: 'motion-proof-dense-terminal-binding-missing', message: 'Dense temporal authority requires both recordings to bind to the replay-verified terminal state.' });
+          findings.push({ code: 'motion-proof-dense-terminal-binding-missing', message: 'Dense temporal authority requires both recordings to end in, and expose the semantic onset of, the replay-verified terminal state.' });
         } else {
           const submittedSamples = await framesAt(page, '#submitted', logicalTimes(submittedAnchor.targetTime, durationSeconds));
           const independentSamples = await framesAt(page, '#independent', logicalTimes(independentAnchor.targetTime, durationSeconds));
