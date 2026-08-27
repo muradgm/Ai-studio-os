@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-browser-artifacts-v2.mjs');
-const REDUCED_MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-reduced-motion-artifacts.mjs');
+const REDUCED_MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-reduced-motion-artifacts-v2.mjs');
+const COMPARISON_VISIBILITY_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-comparison-visibility.mjs');
 
 function blocker(code, message, evidence = {}) {
   return { severity: 'blocker', code, message, evidence };
@@ -69,12 +70,14 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-studio-motion-proof-'));
 
   try {
+    const comparisonTargets = targets.filter((target) => target?.kind === 'comparison');
     const reducedMotionTargets = targets.filter((target) => target?.kind !== 'comparison' && target?.planned?.input === 'reduced-motion');
-    const motionTargets = targets.filter((target) => target?.kind === 'comparison' || target?.planned?.input !== 'reduced-motion');
+    const motionTargets = targets.filter((target) => target?.kind !== 'comparison' && target?.planned?.input !== 'reduced-motion');
 
     const motionResult = runVerifier(MOTION_VERIFIER_PATH, motionTargets, tempRoot, 'motion-temporal-authority');
-    const reducedMotionResult = runVerifier(REDUCED_MOTION_VERIFIER_PATH, reducedMotionTargets, tempRoot, 'reduced-motion-state-authority');
-    const rawFindings = [...motionResult.findings, ...reducedMotionResult.findings];
+    const reducedMotionResult = runVerifier(REDUCED_MOTION_VERIFIER_PATH, reducedMotionTargets, tempRoot, 'reduced-motion-terminal-state-authority');
+    const comparisonResult = runVerifier(COMPARISON_VISIBILITY_VERIFIER_PATH, comparisonTargets, tempRoot, 'comparison-visibility-authority');
+    const rawFindings = [...motionResult.findings, ...reducedMotionResult.findings, ...comparisonResult.findings];
 
     const findings = rawFindings.map((item) => {
       const studyId = item?.studyId ?? null;
@@ -97,6 +100,7 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
 
     const verified = motionResult.verified === true
       && reducedMotionResult.verified === true
+      && comparisonResult.verified === true
       && findings.length === 0;
 
     if (!verified && findings.length === 0) {
