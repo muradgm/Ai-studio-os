@@ -6,6 +6,7 @@ import {
   findOptimalMonotonicMatches,
   matchedTemporalSpanRatio
 } from '../modules/motion-creative-intelligence/temporal-sequence.mjs';
+import { selectCompleteDenseAttempt } from '../modules/motion-creative-intelligence/dense-attempt-authority.mjs';
 
 test('dense temporal alignment finds the maximum monotonic correspondence instead of a greedy local match', () => {
   const candidates = [
@@ -97,4 +98,53 @@ test('matched temporal span rejects a time-compressed substitution despite ident
   const span = matchedTemporalSpanRatio(leftSamples, rightSamples, matches);
   assert.equal(span.ratio, 0.75);
   assert.ok(span.ratio < 0.8);
+});
+
+test('complementary dense replay failures cannot be aggregated into authority', () => {
+  const leftHeavyFailure = {
+    verified: false,
+    findings: [{
+      code: 'motion-proof-dense-video-timeline-mismatch',
+      message: 'submitted coverage 90.0%, independent coverage 60.0%, monotonic coverage 80.0%, submitted max raw gap 1, independent max raw gap 3, max terminal-relative drift 0.040, matched-span ratio 90.0%'
+    }]
+  };
+  const rightHeavyFailure = {
+    verified: false,
+    findings: [{
+      code: 'motion-proof-dense-video-timeline-mismatch',
+      message: 'submitted coverage 60.0%, independent coverage 90.0%, monotonic coverage 80.0%, submitted max raw gap 3, independent max raw gap 1, max terminal-relative drift 0.040, matched-span ratio 90.0%'
+    }]
+  };
+
+  const authority = selectCompleteDenseAttempt([leftHeavyFailure, rightHeavyFailure]);
+  assert.equal(authority.verified, false);
+  assert.equal(authority.retryableOnly, true);
+  assert.equal(authority.selectedAttemptIndex, null);
+});
+
+test('dense replay authority may select one complete independently passing attempt', () => {
+  const cadenceFailure = {
+    verified: false,
+    findings: [{
+      code: 'motion-proof-dense-video-timeline-mismatch',
+      message: 'submitted coverage 70.0%, independent coverage 69.0%, monotonic coverage 70.0%, submitted max raw gap 2, independent max raw gap 2, max terminal-relative drift 0.050, matched-span ratio 92.0%'
+    }]
+  };
+  const completePass = { verified: true, findings: [] };
+
+  const authority = selectCompleteDenseAttempt([cadenceFailure, completePass]);
+  assert.equal(authority.verified, true);
+  assert.equal(authority.selectedAttemptIndex, 1);
+});
+
+test('a hard replay binding failure cannot be hidden by another passing attempt', () => {
+  const hardBindingFailure = {
+    verified: false,
+    findings: [{ code: 'motion-proof-dense-source-binding-mismatch', message: 'study identity changed' }]
+  };
+  const completePass = { verified: true, findings: [] };
+
+  const authority = selectCompleteDenseAttempt([hardBindingFailure, completePass]);
+  assert.equal(authority.verified, false);
+  assert.equal(authority.hardFailureIndex, 0);
 });
