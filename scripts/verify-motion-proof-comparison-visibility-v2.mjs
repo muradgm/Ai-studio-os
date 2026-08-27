@@ -3,7 +3,8 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright';
 
 const MIN_PIXEL_CONTRIBUTION_RATIO = 0.5;
-const PIXEL_DELTA_THRESHOLD = 12;
+const PIXEL_DELTA_THRESHOLD = 32;
+const MIN_EFFECTIVE_PAINT_ALPHA = 0.1;
 const CONTRIBUTION_SAMPLE_WIDTH = 160;
 const CONTRIBUTION_SAMPLE_HEIGHT = 90;
 
@@ -25,10 +26,9 @@ function filterOpacity(filterValue) {
 async function inspectVideoCandidate(page, index) {
   const locator = page.locator('video').nth(index);
 
-  // Keep all waits in Playwright's host process. Awaiting rAF/media events from a
-  // locator.evaluate promise can be garbage-collected when comparison media is
-  // intentionally invalid in adversarial fixtures. Page-authored JS is disabled,
-  // so these host-driven evaluation calls cannot be observed by the document.
+  // Keep waits in Playwright's host process. Awaiting media events from a
+  // locator.evaluate promise can be garbage-collected for intentionally invalid
+  // adversarial media. Page-authored JavaScript is disabled for this verifier.
   await locator.evaluate((video) => video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' }));
   await page.waitForTimeout(40);
   await locator.evaluate((video) => {
@@ -42,7 +42,7 @@ async function inspectVideoCandidate(page, index) {
   });
   await page.waitForTimeout(60);
 
-  return locator.evaluate((video, filterOpacitySource) => {
+  return locator.evaluate((video, { filterOpacitySource, minEffectivePaintAlpha }) => {
     const parseFilterOpacity = (0, eval)(`(${filterOpacitySource})`);
     const intersect = (left, right) => ({
       left: Math.max(left.left, right.left),
@@ -69,29 +69,36 @@ async function inspectVideoCandidate(page, index) {
     };
 
     const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
-    if (!video.getClientRects().length) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+    if (!video.getClientRects().length) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
     const videoRect = video.getBoundingClientRect();
-    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+    if (!(videoRect.width > 0.5 && videoRect.height > 0.5)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
 
     let visibleRect = intersect(videoRect, viewportRect);
-    if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
 
     let node = video;
     let effectiveOpacity = 1;
     let effectiveFilterOpacity = 1;
+    let selfOpacity = 1;
+    let selfFilterOpacity = 1;
     while (node && node.nodeType === Node.ELEMENT_NODE) {
       const style = getComputedStyle(node);
       const opacity = Number.parseFloat(style.opacity || '1');
+      const nodeFilterOpacity = parseFilterOpacity(style.filter);
       if (node.hidden
         || style.display === 'none'
         || style.visibility === 'hidden'
         || style.visibility === 'collapse'
         || style.contentVisibility === 'hidden'
-        || !Number.isFinite(opacity)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+        || !Number.isFinite(opacity)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
 
       effectiveOpacity *= opacity;
-      effectiveFilterOpacity *= parseFilterOpacity(style.filter);
-      if (effectiveOpacity <= 0.001 || effectiveFilterOpacity <= 0.001) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+      effectiveFilterOpacity *= nodeFilterOpacity;
+      if (node === video) {
+        selfOpacity = opacity;
+        selfFilterOpacity = nodeFilterOpacity;
+      }
+      if (effectiveOpacity * effectiveFilterOpacity < minEffectivePaintAlpha) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
 
       if (node !== video) {
         const ancestorRect = node.getBoundingClientRect();
@@ -99,15 +106,14 @@ async function inspectVideoCandidate(page, index) {
         const clipsY = ['hidden', 'clip', 'scroll', 'auto'].includes(style.overflowY);
         if (clipsX) visibleRect = { ...visibleRect, left: Math.max(visibleRect.left, ancestorRect.left), right: Math.min(visibleRect.right, ancestorRect.right) };
         if (clipsY) visibleRect = { ...visibleRect, top: Math.max(visibleRect.top, ancestorRect.top), bottom: Math.min(visibleRect.bottom, ancestorRect.bottom) };
-        if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+        if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
       }
       node = node.parentElement;
     }
 
-    if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
+    if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null, probeOpacity: 0 };
 
-    // Only one browser-selected/direct media URL may represent one visible video.
-    // Nested fallback <source> elements never count as multiple visible studies.
+    // One visible video can authorize only one browser-selected/direct URL.
     const currentSrc = video.currentSrc
       || (video.hasAttribute('src') && video.getAttribute('src')?.trim() ? video.src : '')
       || '';
@@ -116,9 +122,8 @@ async function inspectVideoCandidate(page, index) {
       geometricallyVisible: true,
       currentSrc,
       selector: selectorFor(video),
-      // page.screenshot({ clip }) is taken from the current viewport. visibleRect
-      // is already viewport-relative after scrollIntoView; adding scrollX/Y here
-      // makes long-board clips fall outside the resulting screenshot image.
+      probeOpacity: Math.max(0, Math.min(1, selfOpacity * selfFilterOpacity)),
+      // page.screenshot({ clip }) is viewport-relative after scrollIntoView.
       clip: {
         x: visibleRect.left,
         y: visibleRect.top,
@@ -126,13 +131,13 @@ async function inspectVideoCandidate(page, index) {
         height: visibleRect.bottom - visibleRect.top
       }
     };
-  }, filterOpacity.toString());
+  }, { filterOpacitySource: filterOpacity.toString(), minEffectivePaintAlpha: MIN_EFFECTIVE_PAINT_ALPHA });
 }
 
-async function pixelDifferenceRatio(analysisPage, shownBytes, hiddenBytes) {
-  const shown = `data:image/png;base64,${shownBytes.toString('base64')}`;
-  const hidden = `data:image/png;base64,${hiddenBytes.toString('base64')}`;
-  return analysisPage.evaluate(async ({ shown, hidden, width, height, threshold }) => {
+async function pixelDifferenceRatio(analysisPage, leftBytes, rightBytes) {
+  const leftSrc = `data:image/png;base64,${leftBytes.toString('base64')}`;
+  const rightSrc = `data:image/png;base64,${rightBytes.toString('base64')}`;
+  return analysisPage.evaluate(async ({ leftSrc, rightSrc, width, height, threshold }) => {
     const load = async (src) => {
       const image = new Image();
       image.src = src;
@@ -148,7 +153,7 @@ async function pixelDifferenceRatio(analysisPage, shownBytes, hiddenBytes) {
       return context.getImageData(0, 0, width, height).data;
     };
 
-    const [left, right] = await Promise.all([load(shown), load(hidden)]);
+    const [left, right] = await Promise.all([load(leftSrc), load(rightSrc)]);
     let changed = 0;
     const pixels = width * height;
     for (let index = 0; index < left.length; index += 4) {
@@ -161,8 +166,8 @@ async function pixelDifferenceRatio(analysisPage, shownBytes, hiddenBytes) {
     }
     return pixels ? changed / pixels : 0;
   }, {
-    shown,
-    hidden,
+    leftSrc,
+    rightSrc,
     width: CONTRIBUTION_SAMPLE_WIDTH,
     height: CONTRIBUTION_SAMPLE_HEIGHT,
     threshold: PIXEL_DELTA_THRESHOLD
@@ -174,10 +179,12 @@ async function videoContribution(page, context, analysisPage, candidate) {
   const locator = page.locator(candidate.selector);
   if (await locator.count() !== 1) return { ratio: 0, meaningful: false };
 
-  // Use a page-composited screenshot over the candidate review rectangle, not
-  // locator.screenshot(). This preserves opaque siblings/overlays in the pixels
-  // being judged and therefore measures actual reviewer-visible contribution.
-  const shown = await page.screenshot({ type: 'png', animations: 'disabled', clip: candidate.clip });
+  // A hide/reveal probe depends on the page background and can reject a genuinely
+  // visible dark/static clip that resembles its surroundings. Instead render the
+  // exact candidate twice through content-independent opposite filters. Pixels
+  // actually exposed to the reviewer switch black↔white; pixels occluded by any
+  // higher painted content stay unchanged. JavaScript is disabled, so the page
+  // cannot react to these DevTools-injected probe states.
   const cdp = await context.newCDPSession(page);
   let styleSheetId = null;
   try {
@@ -186,13 +193,23 @@ async function videoContribution(page, context, analysisPage, candidate) {
     await cdp.send('CSS.enable');
     const { frameTree } = await cdp.send('Page.getFrameTree');
     ({ styleSheetId } = await cdp.send('CSS.createStyleSheet', { frameId: frameTree.frame.id }));
+    const opacity = Number.isFinite(candidate.probeOpacity) ? candidate.probeOpacity : 1;
+
     await cdp.send('CSS.setStyleSheetText', {
       styleSheetId,
-      text: `${candidate.selector}{opacity:0!important}`
+      text: `${candidate.selector}{filter:brightness(0)!important;opacity:${opacity}!important}`
     });
     await page.waitForTimeout(40);
-    const hidden = await page.screenshot({ type: 'png', animations: 'disabled', clip: candidate.clip });
-    const ratio = await pixelDifferenceRatio(analysisPage, shown, hidden);
+    const black = await page.screenshot({ type: 'png', animations: 'disabled', clip: candidate.clip });
+
+    await cdp.send('CSS.setStyleSheetText', {
+      styleSheetId,
+      text: `${candidate.selector}{filter:brightness(0) invert(1)!important;opacity:${opacity}!important}`
+    });
+    await page.waitForTimeout(40);
+    const white = await page.screenshot({ type: 'png', animations: 'disabled', clip: candidate.clip });
+
+    const ratio = await pixelDifferenceRatio(analysisPage, black, white);
     return { ratio, meaningful: ratio >= MIN_PIXEL_CONTRIBUTION_RATIO };
   } finally {
     if (styleSheetId) {
@@ -231,8 +248,6 @@ async function verifyComparisonTarget(browser, target) {
   const observedUrls = new Set();
   const findings = [];
 
-  // Comparison evidence is static review material. Disabling page JavaScript
-  // prevents page-authored code from observing or reacting to the authority probe.
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, javaScriptEnabled: false });
   const analysisContext = await browser.newContext({ viewport: { width: CONTRIBUTION_SAMPLE_WIDTH, height: CONTRIBUTION_SAMPLE_HEIGHT } });
   const analysisPage = await analysisContext.newPage();
@@ -252,7 +267,7 @@ async function verifyComparisonTarget(browser, target) {
         const inspection = await inspectComparisonPage(page, context, analysisPage);
         if (inspection.visibleVideoCount === 0) findings.push({
           code: 'motion-proof-independent-comparison-visible-video-missing',
-          message: `Comparison HTML must present actual effectively visible video elements contributing at least ${(MIN_PIXEL_CONTRIBUTION_RATIO * 100).toFixed(0)}% of their review rectangle when each candidate is brought into view.`,
+          message: `Comparison HTML must present effectively visible video elements contributing at least ${(MIN_PIXEL_CONTRIBUTION_RATIO * 100).toFixed(0)}% of their review rectangle with material paint visibility.`,
           comparisonRef: comparisonPath
         });
         if (inspection.emptyVisibleVideoCount > 0) findings.push({
