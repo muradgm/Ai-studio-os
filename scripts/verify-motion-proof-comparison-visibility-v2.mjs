@@ -114,6 +114,7 @@ async function videoContributesRenderedPixels(page, candidate) {
   let styleSheetId = null;
   try {
     await cdp.send('Page.enable');
+    await cdp.send('DOM.enable');
     await cdp.send('CSS.enable');
     const { frameTree } = await cdp.send('Page.getFrameTree');
 
