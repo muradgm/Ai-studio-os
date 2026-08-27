@@ -24,7 +24,25 @@ function filterOpacity(filterValue) {
 
 async function inspectVideoCandidate(page, index) {
   const locator = page.locator('video').nth(index);
-  return locator.evaluate(async (video, filterOpacitySource) => {
+
+  // Keep all waits in Playwright's host process. Awaiting rAF/media events from a
+  // locator.evaluate promise can be garbage-collected when comparison media is
+  // intentionally invalid in adversarial fixtures. Page-authored JS is disabled,
+  // so these host-driven evaluation calls cannot be observed by the document.
+  await locator.evaluate((video) => video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' }));
+  await page.waitForTimeout(40);
+  await locator.evaluate((video) => {
+    try {
+      video.pause();
+      if (Number.isFinite(video.duration) && video.duration > 0.05 && video.readyState >= 1) {
+        const target = Math.max(0.01, Math.min(video.duration * 0.5, Math.max(0.01, video.duration - 0.01)));
+        if (Math.abs(video.currentTime - target) > 0.01) video.currentTime = target;
+      }
+    } catch {}
+  });
+  await page.waitForTimeout(60);
+
+  return locator.evaluate((video, filterOpacitySource) => {
     const parseFilterOpacity = (0, eval)(`(${filterOpacitySource})`);
     const intersect = (left, right) => ({
       left: Math.max(left.left, right.left),
@@ -49,25 +67,6 @@ async function inspectVideoCandidate(page, index) {
       }
       return `html > ${parts.join(' > ')}`;
     };
-
-    video.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
-    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-
-    // Freeze decodable comparison media at a deterministic review frame so the
-    // shown/hidden pixel probe measures occlusion rather than playback drift.
-    try {
-      video.pause();
-      if (Number.isFinite(video.duration) && video.duration > 0.05 && video.readyState >= 1) {
-        const target = Math.max(0.01, Math.min(video.duration * 0.5, Math.max(0.01, video.duration - 0.01)));
-        if (Math.abs(video.currentTime - target) > 0.01) {
-          await new Promise((resolve) => {
-            const timer = setTimeout(resolve, 1500);
-            video.addEventListener('seeked', () => { clearTimeout(timer); resolve(); }, { once: true });
-            try { video.currentTime = target; } catch { clearTimeout(timer); resolve(); }
-          });
-        }
-      }
-    } catch {}
 
     const viewportRect = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
     if (!video.getClientRects().length) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
@@ -107,9 +106,10 @@ async function inspectVideoCandidate(page, index) {
 
     if (!positive(visibleRect)) return { geometricallyVisible: false, currentSrc: '', selector: '', clip: null };
 
+    // Only one browser-selected/direct media URL may represent one visible video.
+    // Nested fallback <source> elements never count as multiple visible studies.
     const currentSrc = video.currentSrc
       || (video.hasAttribute('src') && video.getAttribute('src')?.trim() ? video.src : '')
-      || video.querySelector('source[src]')?.src
       || '';
 
     return {
