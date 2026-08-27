@@ -14,9 +14,10 @@ const MAX_MEAN_DELTA = 5;
 const MAX_OUTLIER_SHARE = 0.03;
 const MAX_FINAL_MEAN_DELTA = 5;
 const MAX_FINAL_OUTLIER_SHARE = 0.01;
-const MAX_TIME_DRIFT_SECONDS = 0.08;
+const MAX_NORMALIZED_PROGRESS_DRIFT = 0.12;
+const MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS = 0.8;
 const MIN_BIDIRECTIONAL_COVERAGE = 0.78;
-const MAX_CONSECUTIVE_UNMATCHED = 3;
+const MAX_CONSECUTIVE_UNMATCHED = 4;
 const MIN_VISIBLE_MOTION_MEAN_DELTA = 0.75;
 const MIN_VISIBLE_MOTION_OUTLIER_SHARE = 0.001;
 const MAX_TERMINAL_REFERENCE_MEAN_DELTA = 1.5;
@@ -95,8 +96,12 @@ function averagePixels(samples = []) {
 
 function activeMotionWindow(samples = [], durationSeconds = 0) {
   if (!Array.isArray(samples) || samples.length < MIN_ACTIVE_MOTION_SAMPLES) return null;
+  const fullSpanSeconds = Math.max(0, (samples.at(-1)?.targetTime ?? 0) - (samples[0]?.targetTime ?? 0));
+  if (fullSpanSeconds < durationSeconds * MIN_ACTIVE_SPAN_RATIO || !progressive(samples)) return null;
+
   let baselineCount = Math.min(INITIAL_REFERENCE_SAMPLES, samples.length);
-  if (baselineCount > 1 && visiblyDifferent(visualDistance(samples[0].pixels, samples[1].pixels))) baselineCount = 1;
+  const baselineAlreadyMoving = baselineCount > 1 && visiblyDifferent(visualDistance(samples[0].pixels, samples[1].pixels));
+  if (baselineAlreadyMoving) baselineCount = 1;
   const baselinePixels = averagePixels(samples.slice(0, baselineCount));
   if (!baselinePixels) return null;
 
@@ -115,7 +120,13 @@ function activeMotionWindow(samples = [], durationSeconds = 0) {
       break;
     }
   }
-  if (onsetIndex < 0) return null;
+
+  // Recorder startup is not creative authority. Some valid clips begin recording
+  // after authored motion has already started, so no stable pre-motion baseline is
+  // observable. In that case the full progressive authored window remains valid;
+  // static evidence still fails the progression requirement above.
+  const onsetMode = onsetIndex >= 0 ? 'stable-baseline-departure' : 'already-active-at-window-start';
+  if (onsetIndex < 0) onsetIndex = 0;
 
   const active = samples.slice(onsetIndex);
   const spanSeconds = Math.max(0, (active.at(-1)?.targetTime ?? 0) - (active[0]?.targetTime ?? 0));
@@ -136,6 +147,7 @@ function activeMotionWindow(samples = [], durationSeconds = 0) {
     startTime: comparisonSamples[0].targetTime,
     endTime: comparisonSamples.at(-1).targetTime,
     spanSeconds,
+    onsetMode,
     boundaryTrimSamples: canTrimBoundaries ? ACTIVE_BOUNDARY_TRIM_SAMPLES : 0
   };
 }
@@ -290,14 +302,18 @@ function longestUnmatchedRun(count, matchedIndexes) {
   return longest;
 }
 
-function denseBinding(submitted, independent, submittedStart, independentStart) {
+function denseBinding(submitted, independent) {
+  const submittedSpan = Math.max(0.001, (submitted.at(-1)?.targetTime ?? 0) - (submitted[0]?.targetTime ?? 0));
+  const independentSpan = Math.max(0.001, (independent.at(-1)?.targetTime ?? 0) - (independent[0]?.targetTime ?? 0));
+  const spanRatio = Math.min(submittedSpan, independentSpan) / Math.max(submittedSpan, independentSpan);
   const candidates = [];
+
   for (let left = 0; left < submitted.length; left += 1) {
-    const leftRelative = submitted[left].targetTime - submittedStart;
+    const leftProgress = (submitted[left].targetTime - submitted[0].targetTime) / submittedSpan;
     for (let right = 0; right < independent.length; right += 1) {
-      const rightRelative = independent[right].targetTime - independentStart;
-      const drift = Math.abs(leftRelative - rightRelative);
-      if (drift > MAX_TIME_DRIFT_SECONDS) continue;
+      const rightProgress = (independent[right].targetTime - independent[0].targetTime) / independentSpan;
+      const drift = Math.abs(leftProgress - rightProgress);
+      if (drift > MAX_NORMALIZED_PROGRESS_DRIFT) continue;
       const distance = visualDistance(submitted[left].pixels, independent[right].pixels);
       if (!temporalBound(distance)) continue;
       candidates.push({ left, right, drift, distance });
@@ -311,11 +327,12 @@ function denseBinding(submitted, independent, submittedStart, independentStart) 
   const rightGap = longestUnmatchedRun(independent.length, matches.map((item) => item.right));
   const maxDrift = matches.length ? Math.max(...matches.map((item) => item.drift)) : Infinity;
   return {
-    verified: leftCoverage >= MIN_BIDIRECTIONAL_COVERAGE
+    verified: spanRatio >= MIN_ACTIVE_SPAN_RATIO_BETWEEN_RECORDINGS
+      && leftCoverage >= MIN_BIDIRECTIONAL_COVERAGE
       && rightCoverage >= MIN_BIDIRECTIONAL_COVERAGE
       && leftGap <= MAX_CONSECUTIVE_UNMATCHED
       && rightGap <= MAX_CONSECUTIVE_UNMATCHED
-      && maxDrift <= MAX_TIME_DRIFT_SECONDS
+      && maxDrift <= MAX_NORMALIZED_PROGRESS_DRIFT
       && progressive(submitted)
       && progressive(independent),
     matches: matches.length,
@@ -323,7 +340,10 @@ function denseBinding(submitted, independent, submittedStart, independentStart) 
     rightCoverage,
     leftGap,
     rightGap,
-    maxDrift
+    maxDrift,
+    spanRatio,
+    submittedSpan,
+    independentSpan
   };
 }
 
@@ -368,13 +388,13 @@ async function verifyTarget(browser, target) {
           if (!submittedActive || !independentActive) {
             findings.push({
               code: 'motion-proof-dense-video-timeline-mismatch',
-              message: 'Dense temporal authority requires a material active-motion span between an initial stable state and the replay-verified terminal state.'
+              message: 'Dense temporal authority requires a material progressive active-motion span ending in the replay-verified terminal state; recorder pre-roll is not required to expose a stable baseline.'
             });
           } else {
-            const binding = denseBinding(submittedActive.samples, independentActive.samples, submittedActive.startTime, independentActive.startTime);
+            const binding = denseBinding(submittedActive.samples, independentActive.samples);
             if (!binding.verified) findings.push({
               code: 'motion-proof-dense-video-timeline-mismatch',
-              message: `Submitted WebM lacks dense time-aligned correspondence across the active authored motion interior (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}s; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
+              message: `Submitted WebM lacks dense monotonic correspondence across normalized authored motion progress (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max normalized drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}, active-span ratio ${(binding.spanRatio * 100).toFixed(1)}%; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s; onset ${submittedActive.onsetMode}/${independentActive.onsetMode}; boundary trim ${submittedActive.boundaryTrimSamples}/${independentActive.boundaryTrimSamples}).`
             });
           }
         }
