@@ -6,8 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-browser-artifacts-v2.mjs');
+const DENSE_MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-temporal-density.mjs');
 const REDUCED_MOTION_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-reduced-motion-artifacts-v2.mjs');
-const COMPARISON_VISIBILITY_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-comparison-visibility.mjs');
+const COMPARISON_VISIBILITY_VERIFIER_PATH = path.join(REPO_ROOT, 'scripts', 'verify-motion-proof-comparison-visibility-v2.mjs');
 
 function blocker(code, message, evidence = {}) {
   return { severity: 'blocker', code, message, evidence };
@@ -111,10 +112,12 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
     const motionTargets = targets.filter((target) => target?.kind !== 'comparison' && target?.planned?.input !== 'reduced-motion');
 
     const motionResult = runVerifier(MOTION_VERIFIER_PATH, motionTargets, tempRoot, 'motion-temporal-authority');
+    const denseMotionResult = runVerifier(DENSE_MOTION_VERIFIER_PATH, motionTargets, tempRoot, 'motion-dense-temporal-authority');
     const reducedMotionResult = runVerifier(REDUCED_MOTION_VERIFIER_PATH, reducedMotionTargets, tempRoot, 'reduced-motion-terminal-state-authority');
     const comparisonResult = runVerifier(COMPARISON_VISIBILITY_VERIFIER_PATH, comparisonTargets, tempRoot, 'comparison-visibility-authority');
     const rawFindings = withCompatibilityFindings([
       ...motionResult.findings,
+      ...denseMotionResult.findings,
       ...reducedMotionResult.findings,
       ...comparisonResult.findings
     ]);
@@ -140,6 +143,7 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
     });
 
     const verified = motionResult.verified === true
+      && denseMotionResult.verified === true
       && reducedMotionResult.verified === true
       && comparisonResult.verified === true
       && findings.length === 0;
