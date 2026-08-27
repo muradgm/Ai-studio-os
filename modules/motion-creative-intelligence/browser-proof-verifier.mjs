@@ -59,6 +59,24 @@ function runVerifier(verifierPath, targets, tempRoot, label) {
   }
 }
 
+function withCompatibilityFindings(rawFindings) {
+  const findings = [...rawFindings];
+  for (const item of rawFindings) {
+    if (item?.code !== 'motion-proof-independent-video-timeline-mismatch') continue;
+    const studyId = item?.studyId ?? null;
+    const alreadyPresent = findings.some((candidate) => candidate?.code === 'motion-proof-independent-video-replay-mismatch'
+      && (candidate?.studyId ?? null) === studyId);
+    if (alreadyPresent) continue;
+    findings.push({
+      ...item,
+      code: 'motion-proof-independent-video-replay-mismatch',
+      message: 'Submitted WebM does not bind to the independently replayed Motion execution because its temporal visual sequence does not match.',
+      compatibilityAliasFor: 'motion-proof-independent-video-timeline-mismatch'
+    });
+  }
+  return findings;
+}
+
 export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
   if (!Array.isArray(targets) || !targets.length) {
     return {
@@ -77,7 +95,11 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
     const motionResult = runVerifier(MOTION_VERIFIER_PATH, motionTargets, tempRoot, 'motion-temporal-authority');
     const reducedMotionResult = runVerifier(REDUCED_MOTION_VERIFIER_PATH, reducedMotionTargets, tempRoot, 'reduced-motion-terminal-state-authority');
     const comparisonResult = runVerifier(COMPARISON_VISIBILITY_VERIFIER_PATH, comparisonTargets, tempRoot, 'comparison-visibility-authority');
-    const rawFindings = [...motionResult.findings, ...reducedMotionResult.findings, ...comparisonResult.findings];
+    const rawFindings = withCompatibilityFindings([
+      ...motionResult.findings,
+      ...reducedMotionResult.findings,
+      ...comparisonResult.findings
+    ]);
 
     const findings = rawFindings.map((item) => {
       const studyId = item?.studyId ?? null;
@@ -90,6 +112,7 @@ export function verifyIndependentMotionProofBrowserArtifacts(targets = []) {
           comparisonRef: item?.comparisonRef ?? null,
           verifierLabel: item?.verifierLabel ?? null,
           verifierMessage: item?.message ?? null,
+          compatibilityAliasFor: item?.compatibilityAliasFor ?? null,
           status: item?.status ?? null,
           signal: item?.signal ?? null,
           error: item?.error ?? null,
