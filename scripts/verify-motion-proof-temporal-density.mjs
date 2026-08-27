@@ -24,6 +24,10 @@ const MAX_TERMINAL_REFERENCE_OUTLIER_SHARE = 0.002;
 const TERMINAL_SEARCH_PADDING_SECONDS = 2;
 const MIN_TERMINAL_SUFFIX_SAMPLES = 3;
 const MAX_TERMINAL_SUFFIX_CONSECUTIVE_GAPS = 1;
+const INITIAL_REFERENCE_SAMPLES = 2;
+const MIN_ACTIVE_MOTION_SAMPLES = 6;
+const MIN_ACTIVE_SPAN_RATIO = 0.5;
+const MIN_DEPARTURE_RUN = 2;
 
 function canonicalValue(value) {
   if (Array.isArray(value)) return value.map(canonicalValue);
@@ -86,6 +90,41 @@ function averagePixels(samples = []) {
     for (let index = 0; index < length; index += 1) sums[index] += sample.pixels[index];
   }
   return sums.map((value) => Math.round(value / samples.length));
+}
+
+function activeMotionWindow(samples = [], durationSeconds = 0) {
+  if (!Array.isArray(samples) || samples.length < MIN_ACTIVE_MOTION_SAMPLES) return null;
+  let baselineCount = Math.min(INITIAL_REFERENCE_SAMPLES, samples.length);
+  if (baselineCount > 1 && visiblyDifferent(visualDistance(samples[0].pixels, samples[1].pixels))) baselineCount = 1;
+  const baselinePixels = averagePixels(samples.slice(0, baselineCount));
+  if (!baselinePixels) return null;
+
+  const departed = samples.map((sample) => visiblyDifferent(visualDistance(sample.pixels, baselinePixels)));
+  let onsetIndex = -1;
+  for (let index = baselineCount; index <= samples.length - MIN_DEPARTURE_RUN; index += 1) {
+    let sustained = true;
+    for (let offset = 0; offset < MIN_DEPARTURE_RUN; offset += 1) {
+      if (!departed[index + offset]) {
+        sustained = false;
+        break;
+      }
+    }
+    if (sustained) {
+      onsetIndex = Math.max(0, index - 1);
+      break;
+    }
+  }
+  if (onsetIndex < 0) return null;
+
+  const active = samples.slice(onsetIndex);
+  const spanSeconds = Math.max(0, (active.at(-1)?.targetTime ?? 0) - (active[0]?.targetTime ?? 0));
+  if (active.length < MIN_ACTIVE_MOTION_SAMPLES || spanSeconds < durationSeconds * MIN_ACTIVE_SPAN_RATIO || !progressive(active)) return null;
+  return {
+    samples: active,
+    startTime: active[0].targetTime,
+    endTime: active.at(-1).targetTime,
+    spanSeconds
+  };
 }
 
 function contextOptions(planned, viewport, recordDir = null) {
@@ -203,10 +242,6 @@ async function terminalAnchor(page, selector, media, finalPixels, durationSecond
   const strictTail = scoredToFinal.slice(-MIN_TERMINAL_SUFFIX_SAMPLES);
   if (strictTail.length < MIN_TERMINAL_SUFFIX_SAMPLES || strictTail.some((sample) => !finalBound(sample.distance))) return null;
 
-  // PNG binding answers "did this video end at the proven final state?". The
-  // semantic onset of that state is measured against the video's own verified
-  // terminal tail so codec bias between a PNG screenshot and WebM frames cannot
-  // make subtle motion look terminal from frame zero.
   const terminalPixels = averagePixels(strictTail);
   if (!terminalPixels) return null;
   const terminalDistances = samples.map((sample) => visualDistance(sample.pixels, terminalPixels));
@@ -242,12 +277,12 @@ function longestUnmatchedRun(count, matchedIndexes) {
   return longest;
 }
 
-function denseBinding(submitted, independent, submittedAnchor, independentAnchor) {
+function denseBinding(submitted, independent, submittedStart, independentStart) {
   const candidates = [];
   for (let left = 0; left < submitted.length; left += 1) {
-    const leftRelative = submitted[left].targetTime - submittedAnchor;
+    const leftRelative = submitted[left].targetTime - submittedStart;
     for (let right = 0; right < independent.length; right += 1) {
-      const rightRelative = independent[right].targetTime - independentAnchor;
+      const rightRelative = independent[right].targetTime - independentStart;
       const drift = Math.abs(leftRelative - rightRelative);
       if (drift > MAX_TIME_DRIFT_SECONDS) continue;
       const distance = visualDistance(submitted[left].pixels, independent[right].pixels);
@@ -256,10 +291,6 @@ function denseBinding(submitted, independent, submittedAnchor, independentAnchor
     }
   }
 
-  // Authority requires an ordered temporal correspondence. Use a maximum-cardinality
-  // monotonic alignment rather than greedy nearest-frame assignment so dropped or
-  // duplicated codec frames cannot create false negatives, while reordered montage
-  // frames cannot be matched out of sequence.
   const matches = findOptimalMonotonicMatches(submitted.length, independent.length, candidates);
   const leftCoverage = submitted.length ? matches.length / submitted.length : 0;
   const rightCoverage = independent.length ? matches.length / independent.length : 0;
@@ -317,13 +348,22 @@ async function verifyTarget(browser, target) {
         if (!submittedAnchor || !independentAnchor) {
           findings.push({ code: 'motion-proof-dense-terminal-binding-missing', message: 'Dense temporal authority requires both recordings to end in, and expose the semantic onset of, the replay-verified terminal state.' });
         } else {
-          const submittedSamples = await framesAt(page, '#submitted', logicalTimes(submittedAnchor.targetTime, durationSeconds));
-          const independentSamples = await framesAt(page, '#independent', logicalTimes(independentAnchor.targetTime, durationSeconds));
-          const binding = denseBinding(submittedSamples, independentSamples, submittedAnchor.targetTime, independentAnchor.targetTime);
-          if (!binding.verified) findings.push({
-            code: 'motion-proof-dense-video-timeline-mismatch',
-            message: `Submitted WebM lacks dense time-aligned correspondence with independent replay (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}s).`
-          });
+          const submittedWindow = await framesAt(page, '#submitted', logicalTimes(submittedAnchor.targetTime, durationSeconds));
+          const independentWindow = await framesAt(page, '#independent', logicalTimes(independentAnchor.targetTime, durationSeconds));
+          const submittedActive = activeMotionWindow(submittedWindow, durationSeconds);
+          const independentActive = activeMotionWindow(independentWindow, durationSeconds);
+          if (!submittedActive || !independentActive) {
+            findings.push({
+              code: 'motion-proof-dense-video-timeline-mismatch',
+              message: 'Dense temporal authority requires a material active-motion span between an initial stable state and the replay-verified terminal state.'
+            });
+          } else {
+            const binding = denseBinding(submittedActive.samples, independentActive.samples, submittedActive.startTime, independentActive.startTime);
+            if (!binding.verified) findings.push({
+              code: 'motion-proof-dense-video-timeline-mismatch',
+              message: `Submitted WebM lacks dense time-aligned correspondence across the active authored motion span (matches ${binding.matches}, submitted coverage ${(binding.leftCoverage * 100).toFixed(1)}%, independent coverage ${(binding.rightCoverage * 100).toFixed(1)}%, submitted max gap ${binding.leftGap}, independent max gap ${binding.rightGap}, max drift ${Number.isFinite(binding.maxDrift) ? binding.maxDrift.toFixed(3) : 'n/a'}s; active spans ${submittedActive.spanSeconds.toFixed(3)}s / ${independentActive.spanSeconds.toFixed(3)}s).`
+            });
+          }
         }
       }
     } finally {
