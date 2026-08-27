@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 
 import {
   evaluateDenseTemporalCoverage,
-  findOptimalMonotonicMatches
+  findOptimalMonotonicMatches,
+  matchedTemporalSpanRatio
 } from '../modules/motion-creative-intelligence/temporal-sequence.mjs';
 
 test('dense temporal alignment finds the maximum monotonic correspondence instead of a greedy local match', () => {
@@ -76,4 +77,24 @@ test('cadence normalization cannot hide unmatched raw montage samples', () => {
   assert.ok(coverage.leftCoverage >= 0.78);
   assert.ok(coverage.monotonicCoverage >= 0.78);
   assert.ok(coverage.rightCoverage < 0.78);
+});
+
+test('matched temporal span ignores detector-only window padding when common motion speed agrees', () => {
+  const leftSamples = Array.from({ length: 14 }, (_, index) => ({ targetTime: index * 0.04 }));
+  const rightSamples = Array.from({ length: 9 }, (_, index) => ({ targetTime: 0.12 + index * 0.04 }));
+  const matches = Array.from({ length: 9 }, (_, index) => ({ left: index + 3, right: index }));
+
+  const span = matchedTemporalSpanRatio(leftSamples, rightSamples, matches);
+  assert.ok(span.ratio >= 0.8);
+  assert.ok(Math.abs(span.leftSpan - span.rightSpan) < 1e-9);
+});
+
+test('matched temporal span rejects a time-compressed substitution despite identical ordered states', () => {
+  const leftSamples = Array.from({ length: 9 }, (_, index) => ({ targetTime: index * 0.03 }));
+  const rightSamples = Array.from({ length: 9 }, (_, index) => ({ targetTime: index * 0.04 }));
+  const matches = Array.from({ length: 9 }, (_, index) => ({ left: index, right: index }));
+
+  const span = matchedTemporalSpanRatio(leftSamples, rightSamples, matches);
+  assert.equal(span.ratio, 0.75);
+  assert.ok(span.ratio < 0.8);
 });
