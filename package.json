@@ -21,7 +21,7 @@
     "proof:ai-council-visual-system": "node ./scripts/ai-council-visual-system-v1-proof.mjs && node ./scripts/finalize-ai-council-visual-system-v1-proof.mjs",
     "proof:ai-council-motion": "node ./scripts/ai-council-motion-system-v1-proof.mjs",
     "proof:ai-council-motion-review": "node ./scripts/ai-council-motion-system-v1-human-review-proof.mjs",
-    "test:motion-authority-final": "node --test test/motion-proof-final-authority-hardening.test.mjs",
+    "test:motion-authority-final": "node --test test/motion-proof-final-authority-hardening.test.mjs test/motion-proof-terminal-anchor-stability.test.mjs",
     "proof:motion-creative": "npm run test:motion-authority-final && node ./scripts/motion-creative-intelligence-proof.mjs",
     "proof:ai-council-drawing-intelligence-authority": "node ./scripts/ai-council-drawing-intelligence-authority-proof.mjs",
     "fonts:sync": "node ./scripts/sync-google-fonts.mjs",
