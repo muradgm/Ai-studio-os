@@ -274,8 +274,12 @@ export function buildMotionCreativeExploration(input = {}) {
   const review = reviewMotionCreativeExploration(exploration);
   return {
     ...exploration,
-    ...review,
+    findings: review.findings,
+    pass: review.pass,
+    reviewReady: review.reviewReady,
+    status: review.status,
     hypotheses: review.normalizedHypotheses,
+    normalizedHypotheses: review.normalizedHypotheses,
     worldAuthority: review.worldAuthority,
     truth: {
       ...(exploration.truth ?? {}),
