@@ -107,7 +107,7 @@ const AUTHORITY_STATUS_VALUES = new Set([
   'ready-for-technical-planning'
 ]);
 
-const AUTHORITYISH_KEY = /(approv|authori|select|canonical|production|technicalplanning)/i;
+const UNKNOWN_AUTHORITY_CLAIM_KEY = /(can.*(approve|select|authoriz)|(?:is|has).*(approved|selected|canonical|authorized)|production.*approved|technicalplanning.*authorized)/i;
 
 function authorityClaims(object = {}) {
   const claims = [];
@@ -115,10 +115,10 @@ function authorityClaims(object = {}) {
     if (object?.[key] === true || object?.truth?.[key] === true) claims.push(key);
   }
   for (const [key, value] of Object.entries(object && typeof object === 'object' ? object : {})) {
-    if (key !== 'truth' && value === true && AUTHORITYISH_KEY.test(key)) claims.push(key);
+    if (key !== 'truth' && value === true && UNKNOWN_AUTHORITY_CLAIM_KEY.test(key)) claims.push(key);
   }
   for (const [key, value] of Object.entries(object?.truth && typeof object.truth === 'object' ? object.truth : {})) {
-    if (value === true && AUTHORITYISH_KEY.test(key)) claims.push(`truth.${key}`);
+    if (value === true && UNKNOWN_AUTHORITY_CLAIM_KEY.test(key)) claims.push(`truth.${key}`);
   }
   const status = text(object?.status).toLowerCase();
   if (AUTHORITY_STATUS_VALUES.has(status)) claims.push(`status:${status}`);
@@ -425,7 +425,16 @@ export function buildCreativeKnowledgeLibrary({ entries = [] } = {}) {
     }
   };
   const review = reviewCreativeKnowledgeLibrary(library);
-  return { ...library, ...review, entries: review.entries, truth: { ...library.truth, ...review.truth } };
+  return {
+    ...library,
+    review,
+    pass: review.pass,
+    reviewReady: review.reviewReady,
+    status: review.status,
+    findings: review.findings,
+    entries: review.entries,
+    truth: { ...library.truth, ...review.truth }
+  };
 }
 
 export function reviewCreativeIntelligenceFoundation(foundation = {}) {
