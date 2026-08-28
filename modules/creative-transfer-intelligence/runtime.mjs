@@ -68,26 +68,17 @@ function authorityClaims(object = {}) {
 
 function normalizeProjectTruth(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
-  return {
-    id: text(source.id),
-    statement: text(source.statement)
-  };
+  return { id: text(source.id), statement: text(source.statement) };
 }
 
 function normalizeResponse(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
-  return {
-    rule: text(source.rule),
-    action: text(source.action)
-  };
+  return { rule: text(source.rule), action: text(source.action) };
 }
 
 function normalizeRiskMitigation(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
-  return {
-    risk: text(source.risk),
-    mitigation: text(source.mitigation)
-  };
+  return { risk: text(source.risk), mitigation: text(source.mitigation) };
 }
 
 function normalizedCopyText(value) {
@@ -126,10 +117,6 @@ const EVIDENCE_KEYS = Object.freeze([
 ]);
 const FIREWALL_KEYS = Object.freeze([
   'sourceSurfaceSignatures', 'requiredStripSignatures', 'adaptationRules', 'copyRisks'
-]);
-const BRIEF_RECEIPT_KEYS = Object.freeze([
-  'schema', 'briefSnapshotFingerprint', 'retrievalSnapshotFingerprint', 'graphSnapshotFingerprint',
-  'foundationSnapshotFingerprint', 'reviewReady', 'truth'
 ]);
 
 function canonicalBriefTruth() {
@@ -283,14 +270,14 @@ function briefFingerprint(value = {}) {
   });
 }
 
-function briefReceipt(brief, retrievalProvenanceReview) {
+function briefReceipt(brief, retrievalProvenanceReview, reviewReady) {
   return {
     schema: 'ai-studio-os/creative-transfer-brief-provenance-receipt@1',
-    briefSnapshotFingerprint: text(brief.snapshotFingerprint),
+    briefSnapshotFingerprint: text(brief?.snapshotFingerprint),
     retrievalSnapshotFingerprint: text(retrievalProvenanceReview?.sourceReceipt?.retrievalSnapshotFingerprint) || text(brief?.sourceBinding?.retrievalSnapshotFingerprint),
     graphSnapshotFingerprint: text(retrievalProvenanceReview?.sourceReceipt?.graphSnapshotFingerprint),
     foundationSnapshotFingerprint: text(retrievalProvenanceReview?.sourceReceipt?.foundationSnapshotFingerprint),
-    reviewReady: retrievalProvenanceReview?.reviewReady === true,
+    reviewReady: reviewReady === true && retrievalProvenanceReview?.reviewReady === true,
     truth: {
       receiptContainsSourceKnowledge: false,
       hashIsSignature: false,
@@ -303,11 +290,11 @@ function briefReceipt(brief, retrievalProvenanceReview) {
 function canonicalBriefCore({ retrieval, graph, foundation, target, projectTruths, constraints }) {
   const retrievalProvenanceReview = reviewCreativeKnowledgeRetrievalProvenance({ retrieval, graph, foundation });
   const sourceBinding = buildSourceBinding(retrieval ?? {}, retrievalProvenanceReview);
-  const retrievalReady = retrievalProvenanceReview.reviewReady === true;
-  const primaryEvidence = retrievalReady
+  const sourceReady = retrievalProvenanceReview.reviewReady === true;
+  const primaryEvidence = sourceReady
     ? (Array.isArray(retrieval?.results) ? retrieval.results : []).map((item) => evidenceProjection(item, false))
     : [];
-  const conflictEvidence = retrievalReady
+  const conflictEvidence = sourceReady
     ? (Array.isArray(retrieval?.conflictContext) ? retrieval.conflictContext : []).map((item) => evidenceProjection(item, true))
     : [];
   const brief = {
@@ -362,7 +349,7 @@ export function reviewCreativeTransferBrief(brief = {}) {
   if (!sameValue(brief?.constraints ?? [], constraints)) findings.push(finding('blocker', 'creative-transfer-constraints-contract-drift', 'Transfer constraints must equal the canonical normalized constraint list.'));
 
   const bindingUnknown = unknownKeys(sourceBinding, SOURCE_BINDING_KEYS);
-  if (bindingUnknown.length) findings.push(finding('blocker', 'creative-transfer-source-binding-shape-invalid', 'Transfer source binding may contain only the canonical provenance receipt fields.', { unknownKeys: bindingUnknown }));
+  if (bindingUnknown.length) findings.push(finding('blocker', 'creative-transfer-source-binding-shape-invalid', 'Transfer source binding may contain only canonical provenance receipt fields.', { unknownKeys: bindingUnknown }));
   if (sourceBinding?.schema !== 'ai-studio-os/creative-transfer-source-binding@1') findings.push(finding('blocker', 'creative-transfer-source-binding-schema-invalid', 'Transfer Brief requires the canonical Graph retrieval binding.'));
   for (const key of ['retrievalSnapshotFingerprint', 'retrievalContractFingerprint', 'graphSnapshotFingerprint', 'foundationSnapshotFingerprint', 'retrievalProvenanceReceiptFingerprint']) {
     if (!isSha256(sourceBinding?.[key])) findings.push(finding('blocker', 'creative-transfer-source-binding-fingerprint-invalid', 'Transfer source binding requires exact SHA-256 drift fingerprints.', { key }));
@@ -442,51 +429,35 @@ export function reviewCreativeTransferBriefProvenance({ brief, retrieval, graph,
   if (text(brief?.projectId) !== text(retrieval?.query?.projectId)) findings.push(finding('blocker', 'creative-transfer-brief-provenance-project-drift', 'Transfer Brief project identity must match the source retrieval project identity.'));
   if (text(brief?.sourceBinding?.retrievalSnapshotFingerprint) !== creativeKnowledgeRetrievalFingerprint(retrieval ?? {})) findings.push(finding('blocker', 'creative-transfer-brief-provenance-retrieval-fingerprint-drift', 'Transfer Brief retrieval fingerprint must match the exact supplied retrieval contract.'));
 
-  const rebuilt = canonicalBriefCore({
-    retrieval,
-    graph,
-    foundation,
-    target: brief?.target,
-    projectTruths: brief?.projectTruths,
-    constraints: brief?.constraints
-  }).brief;
-  if (!sameValue({
-    projectId: brief?.projectId,
-    target: brief?.target,
-    projectTruths: brief?.projectTruths,
-    constraints: brief?.constraints,
-    sourceBinding: brief?.sourceBinding,
-    primaryEvidence: brief?.primaryEvidence,
-    conflictEvidence: brief?.conflictEvidence,
-    transferFirewall: brief?.transferFirewall,
-    snapshotFingerprint: brief?.snapshotFingerprint,
-    truth: brief?.truth
-  }, {
-    projectId: rebuilt.projectId,
-    target: rebuilt.target,
-    projectTruths: rebuilt.projectTruths,
-    constraints: rebuilt.constraints,
-    sourceBinding: rebuilt.sourceBinding,
-    primaryEvidence: rebuilt.primaryEvidence,
-    conflictEvidence: rebuilt.conflictEvidence,
-    transferFirewall: rebuilt.transferFirewall,
-    snapshotFingerprint: rebuilt.snapshotFingerprint,
-    truth: rebuilt.truth
-  })) findings.push(finding('blocker', 'creative-transfer-brief-provenance-rebuild-drift', 'Transfer Brief differs from the deterministic brief rebuilt from the supplied retrieval, Graph and Foundation.'));
+  const rebuilt = canonicalBriefCore({ retrieval, graph, foundation, target: brief?.target, projectTruths: brief?.projectTruths, constraints: brief?.constraints }).brief;
+  const briefPayload = (value) => ({
+    projectId: value?.projectId,
+    target: value?.target,
+    projectTruths: value?.projectTruths,
+    constraints: value?.constraints,
+    sourceBinding: value?.sourceBinding,
+    primaryEvidence: value?.primaryEvidence,
+    conflictEvidence: value?.conflictEvidence,
+    transferFirewall: value?.transferFirewall,
+    snapshotFingerprint: value?.snapshotFingerprint,
+    truth: value?.truth
+  });
+  if (!sameValue(briefPayload(brief), briefPayload(rebuilt))) findings.push(finding('blocker', 'creative-transfer-brief-provenance-rebuild-drift', 'Transfer Brief differs from the deterministic brief rebuilt from the supplied retrieval, Graph and Foundation.'));
 
-  const expectedReceipt = briefReceipt(brief ?? {}, retrievalProvenanceReview);
+  const expectedReady = briefReview.reviewReady && retrievalProvenanceReview.reviewReady;
+  const expectedReceipt = briefReceipt(brief ?? {}, retrievalProvenanceReview, briefReview.reviewReady);
   if (Object.hasOwn(brief ?? {}, 'provenanceReceipt') && !sameValue(brief.provenanceReceipt, expectedReceipt)) findings.push(finding('blocker', 'creative-transfer-brief-provenance-receipt-drift', 'Attached Transfer Brief provenance receipt must equal the independently recomputed compact receipt.'));
-  if (Object.hasOwn(brief ?? {}, 'provenanceReady') && brief.provenanceReady !== (briefReview.reviewReady && retrievalProvenanceReview.reviewReady)) findings.push(finding('blocker', 'creative-transfer-brief-provenance-ready-drift', 'Attached Transfer Brief provenanceReady flag must equal fresh independent verification.'));
+  if (Object.hasOwn(brief ?? {}, 'provenanceReady') && brief.provenanceReady !== expectedReady) findings.push(finding('blocker', 'creative-transfer-brief-provenance-ready-drift', 'Attached Transfer Brief provenanceReady flag must equal fresh independent verification.'));
+  if (retrievalProvenanceReview.reviewReady && Object.hasOwn(brief ?? {}, 'findings') && !sameValue(brief.findings, briefReview.findings)) findings.push(finding('blocker', 'creative-transfer-brief-provenance-findings-drift', 'Attached Transfer Brief diagnostics must equal fresh structural review when source provenance is valid.'));
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
-  const receipt = briefReceipt(brief ?? {}, retrievalProvenanceReview);
   return {
     schema: 'ai-studio-os/creative-transfer-brief-provenance-review@1',
     pass: blockers.length === 0,
     reviewReady: blockers.length === 0,
     status: blockers.length ? 'blocked' : 'verified-transfer-brief-provenance',
     findings,
-    sourceReceipt: receipt,
+    sourceReceipt: expectedReceipt,
     truth: {
       retrievalGraphFoundationSuppliedSeparately: true,
       deterministicBriefRecomputed: true,
@@ -501,21 +472,20 @@ export function reviewCreativeTransferBriefProvenance({ brief, retrieval, graph,
 export function buildCreativeTransferBrief({ retrieval, graph, foundation, target, projectTruths = [], constraints = [] } = {}) {
   const { brief, retrievalProvenanceReview } = canonicalBriefCore({ retrieval, graph, foundation, target, projectTruths, constraints });
   const review = reviewCreativeTransferBrief(brief);
-  const provenanceReady = review.reviewReady && retrievalProvenanceReview.reviewReady;
-  const receipt = briefReceipt(brief, retrievalProvenanceReview);
   const findings = [...review.findings];
   if (!retrievalProvenanceReview.reviewReady) findings.push(finding('blocker', 'creative-transfer-brief-source-provenance-blocked', 'Transfer Brief source retrieval failed independent Graph + Foundation provenance. No source evidence was emitted.', { findingCodes: retrievalProvenanceReview.findings.map((item) => item.code) }));
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
+  const reviewReady = blockers.length === 0 && majors.length === 0;
+  const provenanceReady = reviewReady && retrievalProvenanceReview.reviewReady;
   return {
     ...brief,
     findings,
     pass: blockers.length === 0,
-    reviewReady: blockers.length === 0 && majors.length === 0,
+    reviewReady,
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-transfer-hypotheses',
-    provenanceReceipt: receipt,
-    provenanceReady,
-    truth: { ...brief.truth, sourceRetrievalProvenanceSatisfied: provenanceReady, productionApproved: false }
+    provenanceReceipt: briefReceipt(brief, retrievalProvenanceReview, reviewReady),
+    provenanceReady
   };
 }
 
@@ -531,13 +501,11 @@ const HYPOTHESIS_BINDING_KEYS = Object.freeze([
   'briefProvenanceReceiptFingerprint', 'sourceBriefProvenanceReady', 'bindingFingerprint'
 ]);
 const SOURCE_PRINCIPLE_KEYS = Object.freeze(['knowledgeId', 'principles']);
+const RESPONSE_KEYS = Object.freeze(['rule', 'action']);
+const RISK_KEYS = Object.freeze(['risk', 'mitigation']);
 const COPY_ASSESSMENT_KEYS = Object.freeze([
   'requiredStripSignatures', 'copyProbeSignatures', 'requiredAdaptationRules', 'requiredCopyRisks',
   'requiredVisibleCounterevidenceIds', 'sourceHasWithheldCounterevidence', 'exactSurfaceCopyHits'
-]);
-const HYPOTHESIS_RECEIPT_KEYS = Object.freeze([
-  'schema', 'hypothesisSnapshotFingerprint', 'briefSnapshotFingerprint', 'retrievalSnapshotFingerprint',
-  'graphSnapshotFingerprint', 'foundationSnapshotFingerprint', 'reviewReady', 'truth'
 ]);
 
 function canonicalHypothesisTruth() {
@@ -565,7 +533,7 @@ function hypothesisBindingFingerprint(binding = {}) {
   });
 }
 
-function buildHypothesisBinding(brief = {}) {
+function buildHypothesisBinding(brief = {}, sourceBriefProvenanceReady = brief?.provenanceReady === true) {
   const binding = {
     schema: 'ai-studio-os/creative-transfer-hypothesis-binding@1',
     briefSnapshotFingerprint: text(brief.snapshotFingerprint),
@@ -573,14 +541,18 @@ function buildHypothesisBinding(brief = {}) {
     projectId: text(brief.projectId),
     targetDomain: text(brief?.target?.domain),
     briefProvenanceReceiptFingerprint: fingerprintCreativeValue(brief?.provenanceReceipt ?? {}),
-    sourceBriefProvenanceReady: brief?.provenanceReady === true
+    sourceBriefProvenanceReady: sourceBriefProvenanceReady === true
   };
   return { ...binding, bindingFingerprint: hypothesisBindingFingerprint(binding) };
 }
 
-function evidenceById(brief = {}) {
+function allEvidenceById(brief = {}) {
   const all = [...(Array.isArray(brief.primaryEvidence) ? brief.primaryEvidence : []), ...(Array.isArray(brief.conflictEvidence) ? brief.conflictEvidence : [])];
   return new Map(all.map((item) => [text(item.knowledgeId), evidenceContract(item)]));
+}
+
+function primaryEvidenceById(brief = {}) {
+  return new Map((Array.isArray(brief.primaryEvidence) ? brief.primaryEvidence : []).map((item) => [text(item.knowledgeId), evidenceContract(item)]));
 }
 
 function sourcePrinciplesFor(ids, byId) {
@@ -607,12 +579,8 @@ function requirementsFor(ids, byId) {
 }
 
 function candidateCorpus(value = {}) {
-  return [
-    value.transferClaim,
-    value.causalBridge,
-    value.targetConsequence,
-    ...(Array.isArray(value.adaptationActions) ? value.adaptationActions : [])
-  ].map(text).filter(Boolean).join(' ');
+  return [value.transferClaim, value.causalBridge, value.targetConsequence, ...(Array.isArray(value.adaptationActions) ? value.adaptationActions : [])]
+    .map(text).filter(Boolean).join(' ');
 }
 
 function copyAssessment(value, requirements) {
@@ -645,7 +613,7 @@ function hypothesisFingerprint(value = {}) {
   });
 }
 
-function hypothesisReceipt(hypothesis, briefProvenanceReview) {
+function hypothesisReceipt(hypothesis, briefProvenanceReview, reviewReady) {
   return {
     schema: 'ai-studio-os/creative-transfer-hypothesis-provenance-receipt@1',
     hypothesisSnapshotFingerprint: text(hypothesis?.snapshotFingerprint),
@@ -653,7 +621,7 @@ function hypothesisReceipt(hypothesis, briefProvenanceReview) {
     retrievalSnapshotFingerprint: text(briefProvenanceReview?.sourceReceipt?.retrievalSnapshotFingerprint),
     graphSnapshotFingerprint: text(briefProvenanceReview?.sourceReceipt?.graphSnapshotFingerprint),
     foundationSnapshotFingerprint: text(briefProvenanceReview?.sourceReceipt?.foundationSnapshotFingerprint),
-    reviewReady: briefProvenanceReview?.reviewReady === true,
+    reviewReady: reviewReady === true && briefProvenanceReview?.reviewReady === true,
     truth: {
       receiptContainsSourceKnowledge: false,
       semanticOriginalityVerified: false,
@@ -666,12 +634,13 @@ function hypothesisReceipt(hypothesis, briefProvenanceReview) {
 export function reviewCreativeTransferHypothesis(hypothesis = {}, { brief } = {}) {
   const findings = [];
   const briefReview = reviewCreativeTransferBrief(brief ?? {});
-  const byId = evidenceById(brief ?? {});
+  const allById = allEvidenceById(brief ?? {});
+  const primaryById = primaryEvidenceById(brief ?? {});
   const sourceKnowledgeIds = sortedList(hypothesis.sourceKnowledgeIds);
   const projectTruthRefs = sortedList(hypothesis.projectTruthRefs);
   const counterevidenceKnowledgeIds = sortedList(hypothesis.counterevidenceKnowledgeIds);
-  const sourcePrinciples = sourcePrinciplesFor(sourceKnowledgeIds, byId);
-  const requirements = requirementsFor(sourceKnowledgeIds, byId);
+  const sourcePrinciples = sourcePrinciplesFor(sourceKnowledgeIds, primaryById);
+  const requirements = requirementsFor(sourceKnowledgeIds, primaryById);
   const expectedAssessment = copyAssessment(hypothesis, requirements);
   const computedFingerprint = hypothesisFingerprint({ ...hypothesis, sourceKnowledgeIds, sourcePrinciples, projectTruthRefs, counterevidenceKnowledgeIds, copyFirewallAssessment: expectedAssessment });
 
@@ -688,9 +657,9 @@ export function reviewCreativeTransferHypothesis(hypothesis = {}, { brief } = {}
   if (bindingUnknown.length || !sameValue(binding, expectedBinding)) findings.push(finding('blocker', 'creative-transfer-hypothesis-binding-drift', 'Transfer Hypothesis must bind the exact source brief and its compact provenance receipt.', { unknownKeys: bindingUnknown }));
   if (text(binding?.bindingFingerprint) !== hypothesisBindingFingerprint(binding)) findings.push(finding('blocker', 'creative-transfer-hypothesis-binding-fingerprint-drift', 'Transfer Hypothesis binding fingerprint must match its exact compact receipt.'));
 
-  if (!sourceKnowledgeIds.length) findings.push(finding('blocker', 'creative-transfer-source-evidence-missing', 'Transfer Hypothesis requires at least one explicit source knowledge item.'));
-  const unknownSourceIds = sourceKnowledgeIds.filter((id) => !byId.has(id));
-  if (unknownSourceIds.length) findings.push(finding('blocker', 'creative-transfer-source-evidence-invalid', 'Transfer Hypothesis may cite only evidence present in its bound project-safe brief.', { unknownSourceIds }));
+  if (!sourceKnowledgeIds.length) findings.push(finding('blocker', 'creative-transfer-source-evidence-missing', 'Transfer Hypothesis requires at least one explicit primary source knowledge item.'));
+  const unknownSourceIds = sourceKnowledgeIds.filter((id) => !primaryById.has(id));
+  if (unknownSourceIds.length) findings.push(finding('blocker', 'creative-transfer-source-evidence-invalid', 'Transfer Hypothesis may use as source only primary evidence selected by the bound retrieval; unranked conflict context cannot be promoted into source evidence.', { unknownSourceIds }));
   if (!sameValue(hypothesis?.sourceKnowledgeIds ?? [], sourceKnowledgeIds)) findings.push(finding('blocker', 'creative-transfer-source-id-order-drift', 'Transfer source IDs must use canonical locale-independent ordering.'));
 
   const rawSourcePrinciples = Array.isArray(hypothesis.sourcePrinciples) ? hypothesis.sourcePrinciples : [];
@@ -706,14 +675,14 @@ export function reviewCreativeTransferHypothesis(hypothesis = {}, { brief } = {}
   if (unknownTruthRefs.length) findings.push(finding('blocker', 'creative-transfer-project-grounding-invalid', 'Transfer Hypothesis may cite only project truths present in its bound brief.', { unknownTruthRefs }));
   if (!sameValue(hypothesis?.projectTruthRefs ?? [], projectTruthRefs)) findings.push(finding('blocker', 'creative-transfer-project-truth-ref-order-drift', 'Project truth references must use canonical ordering.'));
 
-  const selectedEvidence = sourceKnowledgeIds.map((id) => byId.get(id)).filter(Boolean);
-  if (selectedEvidence.length && selectedEvidence.every((item) => item.sourceDomain === text(brief?.target?.domain))) findings.push(finding('blocker', 'creative-transfer-cross-domain-source-missing', 'Creative Transfer requires at least one source whose domain differs from the target domain; same-domain application is not treated as cross-domain transfer.'));
+  const selectedEvidence = sourceKnowledgeIds.map((id) => primaryById.get(id)).filter(Boolean);
+  if (selectedEvidence.length && selectedEvidence.every((item) => item.sourceDomain === text(brief?.target?.domain))) findings.push(finding('blocker', 'creative-transfer-cross-domain-source-missing', 'Creative Transfer requires at least one source whose domain differs from the target domain; same-domain application is not cross-domain transfer.'));
 
-  const payloadEvidenceIds = new Set(byId.keys());
+  const payloadEvidenceIds = new Set(allById.keys());
   const invalidCounterevidence = counterevidenceKnowledgeIds.filter((id) => !payloadEvidenceIds.has(id));
   if (invalidCounterevidence.length) findings.push(finding('blocker', 'creative-transfer-counterevidence-invalid', 'Counterevidence may reference only visible evidence present in the bound brief.', { invalidCounterevidence }));
   const missingCounterevidence = requirements.requiredVisibleCounterevidenceIds.filter((id) => !counterevidenceKnowledgeIds.includes(id));
-  if (missingCounterevidence.length) findings.push(finding('blocker', 'creative-transfer-visible-counterevidence-omitted', 'Transfer cannot silently omit visible conflicts attached to the selected source evidence.', { missingCounterevidence }));
+  if (missingCounterevidence.length) findings.push(finding('blocker', 'creative-transfer-visible-counterevidence-omitted', 'Transfer cannot silently omit visible conflicts attached to selected source evidence.', { missingCounterevidence }));
   if (!sameValue(hypothesis?.counterevidenceKnowledgeIds ?? [], counterevidenceKnowledgeIds)) findings.push(finding('blocker', 'creative-transfer-counterevidence-order-drift', 'Counterevidence IDs must use canonical ordering.'));
   if (requirements.sourceHasWithheldCounterevidence && hypothesis?.hiddenCounterevidenceAcknowledged !== true) findings.push(finding('blocker', 'creative-transfer-hidden-counterevidence-unacknowledged', 'Transfer must explicitly acknowledge when selected evidence has a withheld cross-scope conflict.'));
 
@@ -721,25 +690,34 @@ export function reviewCreativeTransferHypothesis(hypothesis = {}, { brief } = {}
   if (!text(hypothesis.causalBridge)) findings.push(finding('blocker', 'creative-transfer-causal-bridge-missing', 'Transfer Hypothesis must explain how the source causal principle maps into the target domain.'));
   if (!text(hypothesis.targetConsequence)) findings.push(finding('major', 'creative-transfer-target-consequence-missing', 'Transfer Hypothesis should state the intended target-domain consequence.'));
   if (!list(hypothesis.adaptationActions).length) findings.push(finding('major', 'creative-transfer-adaptation-actions-missing', 'Transfer Hypothesis should specify project-grounded adaptation actions rather than only naming a source principle.'));
-  if (!text(hypothesis.uncertainty)) findings.push(finding('major', 'creative-transfer-uncertainty-missing', 'Transfer Hypothesis must keep meaningful uncertainty explicit.'));
+  if (!text(hypothesis.uncertainty)) findings.push(finding('blocker', 'creative-transfer-uncertainty-missing', 'Transfer Hypothesis must keep meaningful uncertainty explicit.'));
   if (!text(hypothesis.falsifier)) findings.push(finding('blocker', 'creative-transfer-falsifier-missing', 'Transfer Hypothesis requires an explicit falsifier or rejection condition.'));
 
   const stripped = sortedList(hypothesis.strippedSurfaceSignatures);
-  const missingStrips = requirements.requiredStripSignatures.filter((rule) => !stripped.includes(rule));
-  if (missingStrips.length) findings.push(finding('blocker', 'creative-transfer-required-strip-omitted', 'Transfer Hypothesis must explicitly acknowledge every source mustStrip rule used by selected evidence.', { missingStrips }));
+  if (!sameValue(stripped, requirements.requiredStripSignatures)) findings.push(finding('blocker', 'creative-transfer-strip-set-drift', 'Stripped surface signatures must equal the exact mustStrip set derived from selected primary source evidence.', { expected: requirements.requiredStripSignatures, actual: stripped }));
   if (!sameValue(hypothesis?.strippedSurfaceSignatures ?? [], stripped)) findings.push(finding('blocker', 'creative-transfer-strip-order-drift', 'Stripped surface-signature list must use canonical ordering.'));
 
-  const ruleResponses = (Array.isArray(hypothesis.adaptationRuleResponses) ? hypothesis.adaptationRuleResponses : []).map(normalizeResponse);
-  const responseRuleSet = new Set(ruleResponses.filter((item) => item.action).map((item) => item.rule));
-  const missingRuleResponses = requirements.requiredAdaptationRules.filter((rule) => !responseRuleSet.has(rule));
-  if (missingRuleResponses.length) findings.push(finding('blocker', 'creative-transfer-adaptation-rule-unanswered', 'Every selected source adaptation rule requires an explicit target-domain response.', { missingRuleResponses }));
-  if (!sameValue(hypothesis?.adaptationRuleResponses ?? [], ruleResponses)) findings.push(finding('blocker', 'creative-transfer-adaptation-response-contract-drift', 'Adaptation-rule responses must use the exact canonical rule/action contract.'));
+  const rawRuleResponses = Array.isArray(hypothesis.adaptationRuleResponses) ? hypothesis.adaptationRuleResponses : [];
+  const ruleResponses = rawRuleResponses.map(normalizeResponse);
+  rawRuleResponses.forEach((raw, index) => {
+    const unknown = unknownKeys(raw, RESPONSE_KEYS);
+    if (unknown.length) findings.push(finding('blocker', 'creative-transfer-adaptation-response-shape-invalid', 'Adaptation-rule responses may contain only rule and action.', { index, unknownKeys: unknown }));
+  });
+  const responseRules = ruleResponses.map((item) => item.rule);
+  if (new Set(responseRules).size !== responseRules.length || ruleResponses.some((item) => !item.rule || !item.action)) findings.push(finding('blocker', 'creative-transfer-adaptation-response-invalid', 'Adaptation-rule responses require unique source rules and non-empty target actions.'));
+  if (!sameValue(sortedList(responseRules), requirements.requiredAdaptationRules)) findings.push(finding('blocker', 'creative-transfer-adaptation-rule-set-drift', 'Adaptation responses must cover exactly the rules declared by selected source evidence.', { expected: requirements.requiredAdaptationRules, actual: sortedList(responseRules) }));
+  if (!sameValue(rawRuleResponses, ruleResponses)) findings.push(finding('blocker', 'creative-transfer-adaptation-response-contract-drift', 'Adaptation-rule responses must use the exact canonical rule/action contract.'));
 
-  const riskMitigations = (Array.isArray(hypothesis.copyRiskMitigations) ? hypothesis.copyRiskMitigations : []).map(normalizeRiskMitigation);
-  const mitigationRiskSet = new Set(riskMitigations.filter((item) => item.mitigation).map((item) => item.risk));
-  const missingRiskMitigations = requirements.requiredCopyRisks.filter((risk) => !mitigationRiskSet.has(risk));
-  if (missingRiskMitigations.length) findings.push(finding('blocker', 'creative-transfer-copy-risk-unmitigated', 'Every selected source copy risk requires an explicit mitigation.', { missingRiskMitigations }));
-  if (!sameValue(hypothesis?.copyRiskMitigations ?? [], riskMitigations)) findings.push(finding('blocker', 'creative-transfer-copy-risk-contract-drift', 'Copy-risk mitigations must use the exact canonical risk/mitigation contract.'));
+  const rawRiskMitigations = Array.isArray(hypothesis.copyRiskMitigations) ? hypothesis.copyRiskMitigations : [];
+  const riskMitigations = rawRiskMitigations.map(normalizeRiskMitigation);
+  rawRiskMitigations.forEach((raw, index) => {
+    const unknown = unknownKeys(raw, RISK_KEYS);
+    if (unknown.length) findings.push(finding('blocker', 'creative-transfer-copy-risk-shape-invalid', 'Copy-risk mitigations may contain only risk and mitigation.', { index, unknownKeys: unknown }));
+  });
+  const mitigationRisks = riskMitigations.map((item) => item.risk);
+  if (new Set(mitigationRisks).size !== mitigationRisks.length || riskMitigations.some((item) => !item.risk || !item.mitigation)) findings.push(finding('blocker', 'creative-transfer-copy-risk-invalid', 'Copy-risk mitigations require unique source risks and non-empty mitigations.'));
+  if (!sameValue(sortedList(mitigationRisks), requirements.requiredCopyRisks)) findings.push(finding('blocker', 'creative-transfer-copy-risk-set-drift', 'Copy-risk mitigations must cover exactly the risks declared by selected source evidence.', { expected: requirements.requiredCopyRisks, actual: sortedList(mitigationRisks) }));
+  if (!sameValue(rawRiskMitigations, riskMitigations)) findings.push(finding('blocker', 'creative-transfer-copy-risk-contract-drift', 'Copy-risk mitigations must use the exact canonical risk/mitigation contract.'));
 
   const assessmentUnknown = unknownKeys(hypothesis?.copyFirewallAssessment, COPY_ASSESSMENT_KEYS);
   if (assessmentUnknown.length || !sameValue(hypothesis?.copyFirewallAssessment ?? {}, expectedAssessment)) findings.push(finding('blocker', 'creative-transfer-copy-firewall-assessment-drift', 'Copy-firewall assessment must be derived exactly from selected source evidence and target-facing hypothesis text.', { unknownKeys: assessmentUnknown }));
@@ -771,7 +749,39 @@ export function reviewCreativeTransferHypothesis(hypothesis = {}, { brief } = {}
     truth: {
       projectGroundingRequired: true,
       visibleCounterevidenceRequired: true,
+      conflictContextCannotBecomeSourceBypass: true,
       surfaceCopyFirewallRequired: true,
+      semanticOriginalityVerified: false,
+      transferAuthorityGranted: false,
+      productionApproved: false
+    }
+  };
+}
+
+export function reviewCreativeTransferHypothesisProvenance({ hypothesis, brief, retrieval, graph, foundation } = {}) {
+  const findings = [];
+  const briefProvenanceReview = reviewCreativeTransferBriefProvenance({ brief, retrieval, graph, foundation });
+  const hypothesisReview = reviewCreativeTransferHypothesis(hypothesis ?? {}, { brief });
+  if (!briefProvenanceReview.reviewReady) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-brief-not-verified', 'Transfer Hypothesis provenance requires the bound Transfer Brief to be independently verified to its retrieval, Graph and Foundation.', { findingCodes: briefProvenanceReview.findings.map((item) => item.code) }));
+  if (!hypothesisReview.reviewReady) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-hypothesis-not-ready', 'Transfer Hypothesis must pass fresh structural review before provenance can be established.', { findingCodes: hypothesisReview.findings.map((item) => item.code) }));
+  const expectedBinding = buildHypothesisBinding(brief ?? {}, briefProvenanceReview.reviewReady);
+  if (!sameValue(hypothesis?.briefBinding ?? {}, expectedBinding)) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-binding-drift', 'Transfer Hypothesis must bind the exact independently verified Transfer Brief.'));
+  const expectedReady = briefProvenanceReview.reviewReady && hypothesisReview.reviewReady;
+  const expectedReceipt = hypothesisReceipt(hypothesis ?? {}, briefProvenanceReview, hypothesisReview.reviewReady);
+  if (Object.hasOwn(hypothesis ?? {}, 'provenanceReceipt') && !sameValue(hypothesis.provenanceReceipt, expectedReceipt)) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-receipt-drift', 'Attached hypothesis provenance receipt must equal the independently recomputed compact receipt.'));
+  if (Object.hasOwn(hypothesis ?? {}, 'provenanceReady') && hypothesis.provenanceReady !== expectedReady) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-ready-drift', 'Attached hypothesis provenanceReady flag must equal fresh independent verification.'));
+  if (briefProvenanceReview.reviewReady && Object.hasOwn(hypothesis ?? {}, 'findings') && !sameValue(hypothesis.findings, hypothesisReview.findings)) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-findings-drift', 'Attached hypothesis diagnostics must equal fresh structural review when source provenance is valid.'));
+  const blockers = findings.filter((item) => item.severity === 'blocker');
+  return {
+    schema: 'ai-studio-os/creative-transfer-hypothesis-provenance-review@1',
+    pass: blockers.length === 0,
+    reviewReady: blockers.length === 0,
+    status: blockers.length ? 'blocked' : 'verified-transfer-hypothesis-provenance',
+    findings,
+    sourceReceipt: expectedReceipt,
+    truth: {
+      briefRetrievalGraphFoundationSuppliedSeparately: true,
+      structuralTransferRecomputed: true,
       semanticOriginalityVerified: false,
       transferAuthorityGranted: false,
       productionApproved: false
@@ -781,6 +791,9 @@ export function reviewCreativeTransferHypothesis(hypothesis = {}, { brief } = {}
 
 export function buildCreativeTransferHypothesis({
   brief,
+  retrieval,
+  graph,
+  foundation,
   sourceKnowledgeIds = [],
   projectTruthRefs = [],
   counterevidenceKnowledgeIds = [],
@@ -795,14 +808,16 @@ export function buildCreativeTransferHypothesis({
   uncertainty,
   falsifier
 } = {}) {
-  const byId = evidenceById(brief ?? {});
-  const normalizedSourceIds = sortedList(sourceKnowledgeIds);
-  const sourcePrinciples = sourcePrinciplesFor(normalizedSourceIds, byId);
-  const requirements = requirementsFor(normalizedSourceIds, byId);
+  const briefProvenanceReview = reviewCreativeTransferBriefProvenance({ brief, retrieval, graph, foundation });
+  const sourceReady = briefProvenanceReview.reviewReady === true;
+  const primaryById = sourceReady ? primaryEvidenceById(brief ?? {}) : new Map();
+  const normalizedSourceIds = sourceReady ? sortedList(sourceKnowledgeIds) : [];
+  const sourcePrinciples = sourcePrinciplesFor(normalizedSourceIds, primaryById);
+  const requirements = requirementsFor(normalizedSourceIds, primaryById);
   const hypothesis = {
     schema: 'ai-studio-os/creative-transfer-hypothesis@1',
     stage: 'creative-transfer-hypothesis',
-    briefBinding: buildHypothesisBinding(brief ?? {}),
+    briefBinding: buildHypothesisBinding(brief ?? {}, sourceReady),
     sourceKnowledgeIds: normalizedSourceIds,
     sourcePrinciples,
     projectTruthRefs: sortedList(projectTruthRefs),
@@ -823,60 +838,22 @@ export function buildCreativeTransferHypothesis({
   hypothesis.copyFirewallAssessment = copyAssessment(hypothesis, requirements);
   hypothesis.snapshotFingerprint = hypothesisFingerprint(hypothesis);
   const review = reviewCreativeTransferHypothesis(hypothesis, { brief });
-  return {
-    ...hypothesis,
-    findings: review.findings,
-    pass: review.pass,
-    reviewReady: review.reviewReady,
-    status: review.status
-  };
-}
-
-export function reviewCreativeTransferHypothesisProvenance({ hypothesis, brief, retrieval, graph, foundation } = {}) {
-  const findings = [];
-  const briefProvenanceReview = reviewCreativeTransferBriefProvenance({ brief, retrieval, graph, foundation });
-  const hypothesisReview = reviewCreativeTransferHypothesis(hypothesis ?? {}, { brief });
-  if (!briefProvenanceReview.reviewReady) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-brief-not-verified', 'Transfer Hypothesis provenance requires the bound Transfer Brief to be independently verified to its retrieval, Graph and Foundation.', { findingCodes: briefProvenanceReview.findings.map((item) => item.code) }));
-  if (!hypothesisReview.reviewReady) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-hypothesis-not-ready', 'Transfer Hypothesis must pass fresh structural review before provenance can be established.', { findingCodes: hypothesisReview.findings.map((item) => item.code) }));
-  const expectedBinding = buildHypothesisBinding(brief ?? {});
-  if (!sameValue(hypothesis?.briefBinding ?? {}, expectedBinding)) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-binding-drift', 'Transfer Hypothesis must bind the exact independently supplied Transfer Brief.'));
-  const expectedReceipt = hypothesisReceipt(hypothesis ?? {}, briefProvenanceReview);
-  if (Object.hasOwn(hypothesis ?? {}, 'provenanceReceipt') && !sameValue(hypothesis.provenanceReceipt, expectedReceipt)) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-receipt-drift', 'Attached hypothesis provenance receipt must equal the independently recomputed compact receipt.'));
-  if (Object.hasOwn(hypothesis ?? {}, 'provenanceReady') && hypothesis.provenanceReady !== (briefProvenanceReview.reviewReady && hypothesisReview.reviewReady)) findings.push(finding('blocker', 'creative-transfer-hypothesis-provenance-ready-drift', 'Attached hypothesis provenanceReady flag must equal fresh independent verification.'));
+  const findings = [...review.findings];
+  if (!sourceReady) findings.push(finding('blocker', 'creative-transfer-hypothesis-source-provenance-blocked', 'Default Transfer Hypothesis construction requires independently verified Brief → Retrieval → Graph → Foundation provenance. Source evidence was not consumed.', { findingCodes: briefProvenanceReview.findings.map((item) => item.code) }));
   const blockers = findings.filter((item) => item.severity === 'blocker');
-  return {
-    schema: 'ai-studio-os/creative-transfer-hypothesis-provenance-review@1',
-    pass: blockers.length === 0,
-    reviewReady: blockers.length === 0,
-    status: blockers.length ? 'blocked' : 'verified-transfer-hypothesis-provenance',
-    findings,
-    sourceReceipt: expectedReceipt,
-    truth: {
-      briefRetrievalGraphFoundationSuppliedSeparately: true,
-      structuralTransferRecomputed: true,
-      semanticOriginalityVerified: false,
-      transferAuthorityGranted: false,
-      productionApproved: false
-    }
-  };
-}
-
-export function buildCreativeTransferHypothesisWithProvenance(input = {}) {
-  const hypothesis = buildCreativeTransferHypothesis(input);
-  const provenanceReview = reviewCreativeTransferHypothesisProvenance({
-    hypothesis,
-    brief: input.brief,
-    retrieval: input.retrieval,
-    graph: input.graph,
-    foundation: input.foundation
-  });
-  const provenanceReady = hypothesis.reviewReady && provenanceReview.reviewReady;
-  return {
+  const majors = findings.filter((item) => item.severity === 'major');
+  const reviewReady = blockers.length === 0 && majors.length === 0;
+  const provenanceReady = reviewReady && briefProvenanceReview.reviewReady;
+  const result = {
     ...hypothesis,
-    provenanceReceipt: provenanceReview.sourceReceipt,
-    provenanceReady,
-    truth: { ...hypothesis.truth, independentSourceProvenanceSatisfied: provenanceReady, productionApproved: false }
+    findings,
+    pass: blockers.length === 0,
+    reviewReady,
+    status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-as-advisory-transfer-hypothesis',
+    provenanceReceipt: hypothesisReceipt(hypothesis, briefProvenanceReview, reviewReady),
+    provenanceReady
   };
+  return result;
 }
 
 export function creativeTransferBriefFingerprint(brief = {}) {
