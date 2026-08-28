@@ -18,6 +18,10 @@ function finiteConfidence(value) {
     : null;
 }
 
+function isSha256(value) {
+  return /^[a-f0-9]{64}$/.test(text(value));
+}
+
 export const CREATIVE_KNOWLEDGE_KINDS = Object.freeze([
   'principle',
   'historical-precedent',
@@ -197,7 +201,36 @@ function foundationFingerprint(constitution, libraryFingerprint) {
   });
 }
 
-function contextFingerprint({ projectId, purpose, projectTruths, constraints, entryRefs }, foundationSnapshotFingerprint) {
+function foundationBindingFingerprint(binding) {
+  return fingerprintCreativeValue({
+    schema: 'ai-studio-os/creative-intelligence-foundation-binding@1',
+    foundationSnapshotFingerprint: text(binding?.foundationSnapshotFingerprint),
+    knowledgeLibraryFingerprint: text(binding?.knowledgeLibraryFingerprint),
+    constitution: binding?.constitution && typeof binding.constitution === 'object' ? binding.constitution : {},
+    sourceFoundationReviewReady: binding?.sourceFoundationReviewReady === true
+  });
+}
+
+function normalizeContextEntryRef(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    knowledgeId: text(source.knowledgeId),
+    role: text(source.role),
+    relevance: text(source.relevance),
+    projectFit: text(source.projectFit),
+    caution: text(source.caution)
+  };
+}
+
+function normalizeScopeRejection(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    knowledgeId: text(source.knowledgeId),
+    reason: text(source.reason)
+  };
+}
+
+function contextFingerprint({ projectId, purpose, projectTruths, constraints, entryRefs, selectedEvidence, scopeRejections, foundationBinding }) {
   return fingerprintCreativeValue({
     schema: 'ai-studio-os/creative-intelligence-context@1',
     projectId,
@@ -205,7 +238,9 @@ function contextFingerprint({ projectId, purpose, projectTruths, constraints, en
     projectTruths,
     constraints,
     entryRefs,
-    foundationSnapshotFingerprint
+    selectedEvidence,
+    scopeRejections,
+    foundationBindingFingerprint: foundationBindingFingerprint(foundationBinding)
   });
 }
 
@@ -434,45 +469,104 @@ export function buildCreativeIntelligenceFoundation({ entries = [] } = {}) {
   };
 }
 
-function normalizeContextEntryRef(value = {}) {
-  const source = value && typeof value === 'object' ? value : {};
+function buildFoundationBinding(foundationReview) {
+  const binding = {
+    schema: 'ai-studio-os/creative-intelligence-foundation-binding@1',
+    foundationSnapshotFingerprint: foundationReview.computedFingerprint,
+    knowledgeLibraryFingerprint: foundationReview.libraryReview?.computedFingerprint ?? '',
+    constitution: { ...CREATIVE_INTELLIGENCE_CONSTITUTION },
+    sourceFoundationReviewReady: foundationReview.reviewReady === true
+  };
   return {
-    knowledgeId: text(source.knowledgeId),
-    role: text(source.role),
-    relevance: text(source.relevance),
-    projectFit: text(source.projectFit),
-    caution: text(source.caution)
+    ...binding,
+    bindingFingerprint: foundationBindingFingerprint(binding)
+  };
+}
+
+function reviewFoundationBinding(binding = {}) {
+  const findings = [];
+  const normalizedConstitution = binding?.constitution && typeof binding.constitution === 'object'
+    ? binding.constitution
+    : {};
+  const computedFingerprint = foundationBindingFingerprint(binding);
+
+  if (binding?.schema !== 'ai-studio-os/creative-intelligence-foundation-binding@1') findings.push(finding('blocker', 'creative-intelligence-foundation-binding-schema-invalid', 'Project reasoning requires a canonical Foundation binding.'));
+  if (!isSha256(binding?.foundationSnapshotFingerprint) || !isSha256(binding?.knowledgeLibraryFingerprint)) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-fingerprint-invalid', 'Foundation binding requires SHA-256 fingerprints for the source Foundation and knowledge library.'));
+  if (binding?.sourceFoundationReviewReady !== true) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-source-not-ready', 'A project context cannot be authored from a Foundation that failed its source review.'));
+  if (text(binding?.bindingFingerprint) !== computedFingerprint) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-drift', 'Foundation binding fingerprint must match the exact source fingerprints and constitutional boundary.', { expected: computedFingerprint, actual: binding?.bindingFingerprint ?? null }));
+  for (const [key, expected] of Object.entries(CREATIVE_INTELLIGENCE_CONSTITUTION)) {
+    if (normalizedConstitution?.[key] !== expected) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-constitution-drift', 'Project context cannot weaken Foundation constitutional rules.', { key, expected, actual: normalizedConstitution?.[key] ?? null }));
+  }
+  const claims = authorityClaims(binding);
+  if (claims.length) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-authority-fabricated', 'A Foundation binding carries provenance, not creative authority.', { claims }));
+
+  const blockers = findings.filter((item) => item.severity === 'blocker');
+  return {
+    pass: blockers.length === 0,
+    reviewReady: blockers.length === 0,
+    computedFingerprint,
+    findings,
+    truth: {
+      bindingIsProvenanceNotAuthority: true,
+      fullSharedFoundationExcludedFromProjectPayload: true
+    }
   };
 }
 
 export function reviewCreativeIntelligenceContext(context = {}) {
   const findings = [];
-  const foundationReview = reviewCreativeIntelligenceFoundation(context?.foundation ?? {});
   const projectId = text(context?.projectId);
   const purpose = text(context?.purpose);
   const projectTruths = list(context?.projectTruths);
   const constraints = list(context?.constraints);
   const entryRefs = (Array.isArray(context?.entryRefs) ? context.entryRefs : []).map(normalizeContextEntryRef);
+  const selectedEvidenceRaw = Array.isArray(context?.selectedEvidence) ? context.selectedEvidence : [];
+  const selectedEvidence = selectedEvidenceRaw.map(normalizeKnowledgeEntry);
+  const scopeRejections = (Array.isArray(context?.scopeRejections) ? context.scopeRejections : []).map(normalizeScopeRejection);
   const entryIds = entryRefs.map((ref) => ref.knowledgeId);
-  const entries = foundationReview.libraryReview?.entries ?? [];
-  const entriesById = new Map(entries.map((entry) => [entry.id, entry]));
-  const computedFingerprint = contextFingerprint({ projectId, purpose, projectTruths, constraints, entryRefs }, foundationReview.computedFingerprint);
+  const selectedIds = selectedEvidence.map((entry) => entry.id);
+  const selectedById = new Map(selectedEvidence.map((entry) => [entry.id, entry]));
+  const bindingReview = reviewFoundationBinding(context?.foundationBinding ?? {});
+  const normalizedForFingerprint = {
+    projectId,
+    purpose,
+    projectTruths,
+    constraints,
+    entryRefs,
+    selectedEvidence,
+    scopeRejections,
+    foundationBinding: context?.foundationBinding ?? {}
+  };
+  const computedFingerprint = contextFingerprint(normalizedForFingerprint);
 
   if (context?.schema !== 'ai-studio-os/creative-intelligence-context@1') findings.push(finding('blocker', 'creative-intelligence-context-schema-invalid', 'Creative Intelligence context requires creative-intelligence-context@1.'));
   if (!projectId) findings.push(finding('blocker', 'creative-intelligence-project-missing', 'Creative reasoning must be bound to a project.'));
   if (!purpose) findings.push(finding('major', 'creative-intelligence-purpose-missing', 'Creative reasoning requires an explicit purpose or decision question.'));
   if (!projectTruths.length) findings.push(finding('major', 'creative-intelligence-project-truth-missing', 'Creative reasoning must include project truth so retrieved knowledge cannot become the project itself.'));
-  if (!foundationReview.reviewReady) findings.push(finding('blocker', 'creative-intelligence-foundation-not-ready', 'Creative reasoning requires a review-ready Creative Intelligence Foundation.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
+  if (!bindingReview.reviewReady) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-not-ready', 'Creative reasoning requires a valid source-Foundation binding.', { findingCodes: bindingReview.findings.map((item) => item.code) }));
   if (!entryRefs.length) findings.push(finding('major', 'creative-intelligence-evidence-selection-missing', 'Creative reasoning should explicitly select which knowledge is relevant to the current purpose.'));
   if (entryIds.some((id) => !id)) findings.push(finding('blocker', 'creative-intelligence-evidence-ref-id-missing', 'Every selected evidence reference requires a knowledge ID.'));
   if (new Set(entryIds).size !== entryIds.length) findings.push(finding('blocker', 'creative-intelligence-evidence-ref-duplicate', 'A project context should select each knowledge entry at most once.', { entryIds }));
-  if (text(context?.snapshotFingerprint) !== computedFingerprint) findings.push(finding('blocker', 'creative-intelligence-context-fingerprint-mismatch', 'Creative Intelligence context fingerprint must bind project truth, purpose, constraints, selected evidence and the exact Foundation snapshot.', { expected: computedFingerprint, actual: context?.snapshotFingerprint ?? null }));
+  if (selectedIds.some((id) => !id)) findings.push(finding('blocker', 'creative-intelligence-selected-evidence-id-missing', 'Every selected evidence snapshot requires a stable knowledge ID.'));
+  if (new Set(selectedIds).size !== selectedIds.length) findings.push(finding('blocker', 'creative-intelligence-selected-evidence-duplicate', 'Selected evidence snapshot cannot duplicate knowledge contracts.', { selectedIds }));
+  if (text(context?.snapshotFingerprint) !== computedFingerprint) findings.push(finding('blocker', 'creative-intelligence-context-fingerprint-mismatch', 'Creative Intelligence context fingerprint must bind project truth, purpose, constraints, selected evidence and the exact Foundation binding.', { expected: computedFingerprint, actual: context?.snapshotFingerprint ?? null }));
+
+  selectedEvidence.forEach((entry, index) => {
+    const review = reviewNormalizedKnowledgeEntry(entry, selectedEvidenceRaw[index] ?? entry);
+    if (!review.reviewReady) findings.push(finding(review.pass ? 'major' : 'blocker', 'creative-intelligence-selected-evidence-not-ready', 'Every evidence item entering a project reasoning payload must pass fresh knowledge review.', { knowledgeId: entry.id, findingCodes: review.findings.map((item) => item.code) }));
+    if (entry.scope === 'project' && entry.projectId !== projectId) findings.push(finding('blocker', 'creative-intelligence-project-knowledge-drift', 'Project-scoped evidence cannot enter a different project reasoning payload.', { knowledgeId: entry.id }));
+  });
 
   for (const ref of entryRefs) {
-    const entry = entriesById.get(ref.knowledgeId);
-    if (!entry) findings.push(finding('blocker', 'creative-intelligence-evidence-ref-invalid', 'Context references knowledge not present in the bound foundation.', { knowledgeId: ref.knowledgeId }));
+    const entry = selectedById.get(ref.knowledgeId);
+    const rejected = scopeRejections.find((item) => item.knowledgeId === ref.knowledgeId);
+    if (rejected?.reason === 'project-scope-mismatch') findings.push(finding('blocker', 'creative-intelligence-project-knowledge-drift', 'Project-scoped knowledge was rejected before payload construction because it belongs to another project.', { knowledgeId: ref.knowledgeId }));
+    if (!entry) findings.push(finding('blocker', 'creative-intelligence-evidence-snapshot-missing', 'Every selected knowledge reference must resolve to an exact evidence snapshot inside the isolated project payload.', { knowledgeId: ref.knowledgeId }));
     if (!ref.role || !ref.relevance || !ref.projectFit) findings.push(finding('major', 'creative-intelligence-evidence-ref-thin', 'Each selected knowledge entry needs a role, relevance and project-fit explanation.', { knowledgeId: ref.knowledgeId }));
-    if (entry?.scope === 'project' && entry.projectId !== projectId) findings.push(finding('blocker', 'creative-intelligence-project-knowledge-drift', 'Project-scoped knowledge may exist in the shared foundation but cannot be selected across project boundaries.', { knowledgeId: entry.id, knowledgeProjectId: entry.projectId, contextProjectId: projectId }));
+  }
+
+  for (const entry of selectedEvidence) {
+    if (!entryIds.includes(entry.id)) findings.push(finding('blocker', 'creative-intelligence-unreferenced-evidence-injected', 'Project payload cannot contain evidence that was not explicitly selected by an entry reference.', { knowledgeId: entry.id }));
   }
 
   const claims = authorityClaims(context);
@@ -487,13 +581,14 @@ export function reviewCreativeIntelligenceContext(context = {}) {
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-creative-reasoning',
     computedFingerprint,
     findings,
-    foundationReview,
-    normalized: { projectId, purpose, projectTruths, constraints, entryRefs },
+    bindingReview,
+    normalized: { projectId, purpose, projectTruths, constraints, entryRefs, selectedEvidence, scopeRejections },
     truth: {
       knowledgeIsAuthority: false,
       exactSnapshotBound: text(context?.snapshotFingerprint) === computedFingerprint,
       projectTruthDominatesRetrievedKnowledge: true,
-      onlySelectedProjectKnowledgeIsScopeChecked: true,
+      projectPayloadContainsSelectedEvidenceOnly: true,
+      fullSharedFoundationExcludedFromProjectPayload: true,
       projectScopedKnowledgeCannotCrossProjects: true,
       humanApprovalGranted: false,
       productionApproved: false
@@ -509,20 +604,40 @@ export function buildCreativeIntelligenceContext({
   foundation,
   entryRefs = []
 } = {}) {
+  const normalizedProjectId = text(projectId) || null;
+  const normalizedRefs = (Array.isArray(entryRefs) ? entryRefs : []).map(normalizeContextEntryRef);
+  const foundationReview = reviewCreativeIntelligenceFoundation(foundation ?? {});
+  const sourceEntries = foundationReview.libraryReview?.entries ?? [];
+  const sourceById = new Map(sourceEntries.map((entry) => [entry.id, entry]));
+  const selectedEvidence = [];
+  const scopeRejections = [];
+
+  for (const ref of normalizedRefs) {
+    const entry = sourceById.get(ref.knowledgeId);
+    if (!entry) continue;
+    if (entry.scope === 'project' && entry.projectId !== normalizedProjectId) {
+      scopeRejections.push({ knowledgeId: ref.knowledgeId, reason: 'project-scope-mismatch' });
+      continue;
+    }
+    selectedEvidence.push(normalizeKnowledgeEntry(entry));
+  }
+
+  const foundationBinding = buildFoundationBinding(foundationReview);
   const normalized = {
-    projectId: text(projectId) || null,
+    projectId: normalizedProjectId,
     purpose: text(purpose),
     projectTruths: list(projectTruths),
     constraints: list(constraints),
-    entryRefs: (Array.isArray(entryRefs) ? entryRefs : []).map(normalizeContextEntryRef)
+    entryRefs: normalizedRefs,
+    selectedEvidence,
+    scopeRejections,
+    foundationBinding
   };
-  const foundationReview = reviewCreativeIntelligenceFoundation(foundation ?? {});
   const context = {
     schema: 'ai-studio-os/creative-intelligence-context@1',
     stage: 'creative-intelligence-context',
     ...normalized,
-    foundation: foundation ?? null,
-    snapshotFingerprint: contextFingerprint(normalized, foundationReview.computedFingerprint),
+    snapshotFingerprint: contextFingerprint(normalized),
     truth: {
       knowledgeOnly: true,
       authorityGranted: false,
