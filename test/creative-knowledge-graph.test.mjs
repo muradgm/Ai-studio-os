@@ -105,7 +105,6 @@ function foundation(entries) {
 test('graph represents a review-ready Foundation as an exact advisory snapshot', () => {
   const source = foundation([principle('a'), principle('b')]);
   const graph = buildCreativeKnowledgeGraph({ foundation: source });
-
   assert.equal(graph.reviewReady, true);
   assert.equal(graph.nodes.length, 2);
   assert.equal(graph.truth.graphIsCreativeAuthority, false);
@@ -143,7 +142,10 @@ test('current trends require explicit capturedAt and graph-level freshUntil boun
   const ready = buildCreativeKnowledgeGraph({
     foundation: source,
     nodeAnnotations: {
-      'trend-a': { freshUntil: '2026-09-01T00:00:00Z' }
+      'trend-a': {
+        freshUntil: '2026-09-01T00:00:00Z',
+        evidenceRefs: ['policy://trend-freshness-v1']
+      }
     }
   });
   assert.equal(ready.reviewReady, true);
@@ -161,7 +163,10 @@ test('current trend capturedAt must be timezone-qualified and precede freshUntil
   const graph = buildCreativeKnowledgeGraph({
     foundation: source,
     nodeAnnotations: {
-      'trend-a': { freshUntil: '2026-08-01T00:00:00Z' }
+      'trend-a': {
+        freshUntil: '2026-08-01T00:00:00Z',
+        evidenceRefs: ['policy://trend-freshness-v1']
+      }
     }
   });
   assert.equal(graph.reviewReady, false);
@@ -172,12 +177,24 @@ test('unknown graph annotations cannot invent nodes outside the source Foundatio
   const source = foundation([principle('a')]);
   const graph = buildCreativeKnowledgeGraph({
     foundation: source,
-    nodeAnnotations: {
-      missing: { status: 'active' }
-    }
+    nodeAnnotations: { missing: { status: 'active' } }
   });
   assert.equal(graph.reviewReady, false);
   assert.ok(graph.findings.some((item) => item.code === 'creative-knowledge-graph-annotation-node-missing'));
+});
+
+test('non-active status and freshness boundaries require representation evidence refs', () => {
+  const source = foundation([principle('a'), currentTrend('trend-a')]);
+  const graph = buildCreativeKnowledgeGraph({
+    foundation: source,
+    nodeAnnotations: {
+      a: { status: 'disputed', statusReason: 'Conflicting benchmark evidence remains unresolved.' },
+      'trend-a': { freshUntil: '2026-09-01T00:00:00Z' }
+    }
+  });
+  assert.equal(graph.reviewReady, false);
+  assert.ok(graph.findings.some((item) => item.code === 'creative-knowledge-graph-node-status-evidence-missing'));
+  assert.ok(graph.findings.some((item) => item.code === 'creative-knowledge-graph-freshness-evidence-missing'));
 });
 
 test('superseded status requires explicit replacement lineage with evidence', () => {
@@ -185,7 +202,12 @@ test('superseded status requires explicit replacement lineage with evidence', ()
   const missingEdge = buildCreativeKnowledgeGraph({
     foundation: source,
     nodeAnnotations: {
-      old: { status: 'superseded', statusReason: 'Replaced by stronger evidence.', supersededBy: 'new' }
+      old: {
+        status: 'superseded',
+        statusReason: 'Replaced by stronger evidence.',
+        supersededBy: 'new',
+        evidenceRefs: ['benchmark://replacement-evidence']
+      }
     }
   });
   assert.equal(missingEdge.reviewReady, false);
@@ -194,7 +216,12 @@ test('superseded status requires explicit replacement lineage with evidence', ()
   const ready = buildCreativeKnowledgeGraph({
     foundation: source,
     nodeAnnotations: {
-      old: { status: 'superseded', statusReason: 'Replaced by stronger evidence.', supersededBy: 'new' }
+      old: {
+        status: 'superseded',
+        statusReason: 'Replaced by stronger evidence.',
+        supersededBy: 'new',
+        evidenceRefs: ['benchmark://replacement-evidence']
+      }
     },
     supplementalEdges: [{
       id: 'lineage:new:old',
