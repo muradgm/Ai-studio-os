@@ -28,12 +28,21 @@ function parseInstant(value) {
   return Number.isFinite(timestamp) ? timestamp : null;
 }
 
+function sameValue(left, right) {
+  return fingerprintCreativeValue(left) === fingerprintCreativeValue(right);
+}
+
+function unknownKeys(object, allowed) {
+  if (!object || typeof object !== 'object' || Array.isArray(object)) return [];
+  const allowedSet = new Set(allowed);
+  return Object.keys(object).filter((key) => !allowedSet.has(key)).sort();
+}
+
 const KNOWN_AUTHORITY_KEYS = Object.freeze([
   'selected', 'approved', 'canonical', 'authorityGranted', 'creativeAuthorityGranted',
   'humanApproved', 'humanSelected', 'creativeDirectionSelected',
   'creativeDirectionApproved', 'productionApproved', 'technicalPlanningAuthorized'
 ]);
-
 const UNKNOWN_AUTHORITY_KEY = /(can.*(approve|select|authoriz)|(?:is|has).*(approved|selected|canonical|authorized)|creative.*authority|production.*approved|technicalplanning.*authorized)/i;
 
 function authorityClaims(object = {}) {
@@ -52,17 +61,8 @@ function authorityClaims(object = {}) {
   return [...new Set(claims)];
 }
 
-function unknownKeys(object, allowed) {
-  if (!object || typeof object !== 'object' || Array.isArray(object)) return [];
-  const allowedSet = new Set(allowed);
-  return Object.keys(object).filter((key) => !allowedSet.has(key)).sort();
-}
-
 export const CREATIVE_GRAPH_NODE_STATUSES = Object.freeze([
-  'active',
-  'disputed',
-  'superseded',
-  'deprecated'
+  'active', 'disputed', 'superseded', 'deprecated'
 ]);
 
 export const CREATIVE_GRAPH_EDGE_TYPES = Object.freeze([
@@ -77,15 +77,15 @@ const SUPPLEMENTAL_EDGE_KEYS = Object.freeze(['id', 'type', 'fromId', 'toId', 'r
 const NODE_KEYS = Object.freeze(['schema', 'id', 'knowledgeFingerprint', 'entry', 'annotation', 'truth']);
 const EDGE_KEYS = Object.freeze(['schema', 'id', 'type', 'fromId', 'toId', 'rationale', 'evidenceRefs', 'origin', 'truth']);
 const SOURCE_BINDING_KEYS = Object.freeze(['schema', 'foundationSnapshotFingerprint', 'knowledgeLibraryFingerprint', 'sourceFoundationReviewReady', 'bindingFingerprint']);
+const GRAPH_KEYS = Object.freeze(['schema', 'stage', 'sourceBinding', 'nodes', 'edges', 'snapshotFingerprint', 'truth', 'findings', 'pass', 'reviewReady', 'status']);
 
-function normalizeAnnotation(value = {}) {
-  const source = value && typeof value === 'object' ? value : {};
+function canonicalGraphTruth() {
   return {
-    status: text(source.status) || 'active',
-    statusReason: text(source.statusReason),
-    freshUntil: text(source.freshUntil) || null,
-    supersededBy: text(source.supersededBy) || null,
-    representationNotes: list(source.representationNotes)
+    knowledgeOnly: true,
+    graphIsCreativeAuthority: false,
+    retrievalRankIsCreativeAuthority: false,
+    independentFoundationProvenanceRequired: true,
+    productionApproved: false
   };
 }
 
@@ -106,16 +106,29 @@ function canonicalEdgeTruth() {
   };
 }
 
+function normalizeAnnotation(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    status: text(source.status) || 'active',
+    statusReason: text(source.statusReason),
+    freshUntil: text(source.freshUntil) || null,
+    supersededBy: text(source.supersededBy) || null,
+    representationNotes: list(source.representationNotes)
+  };
+}
+
 function normalizeSupplementalEdge(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
   return {
+    schema: 'ai-studio-os/creative-knowledge-graph-edge@1',
     id: text(source.id),
     type: text(source.type),
     fromId: text(source.fromId),
     toId: text(source.toId),
     rationale: text(source.rationale),
     evidenceRefs: list(source.evidenceRefs),
-    origin: 'representation-lineage'
+    origin: 'representation-lineage',
+    truth: canonicalEdgeTruth()
   };
 }
 
@@ -146,39 +159,14 @@ function normalizeNode(entry, annotation = {}) {
 
 function normalizedClaimedNode(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
-  const normalizedEntry = entryContract(source.entry);
   return {
     schema: 'ai-studio-os/creative-knowledge-graph-node@1',
     id: text(source.id),
     knowledgeFingerprint: text(source.knowledgeFingerprint),
-    entry: normalizedEntry,
+    entry: entryContract(source.entry),
     annotation: normalizeAnnotation(source.annotation),
     truth: canonicalNodeTruth()
   };
-}
-
-function foundationEdgeId(fromId, type, toId) {
-  return `foundation:${fromId}:${type}:${toId}`;
-}
-
-function foundationEdges(nodes = []) {
-  const edges = [];
-  for (const node of nodes) {
-    for (const relationship of node?.entry?.relationships ?? []) {
-      edges.push({
-        schema: 'ai-studio-os/creative-knowledge-graph-edge@1',
-        id: foundationEdgeId(node.id, relationship.type, relationship.targetId),
-        type: relationship.type,
-        fromId: node.id,
-        toId: relationship.targetId,
-        rationale: relationship.rationale,
-        evidenceRefs: [node.entry.provenance?.sourceId].filter(Boolean),
-        origin: 'foundation-relationship',
-        truth: canonicalEdgeTruth()
-      });
-    }
-  }
-  return edges;
 }
 
 function normalizeEdge(value = {}) {
@@ -207,6 +195,15 @@ function normalizeSourceBinding(value = {}) {
   };
 }
 
+function sourceBindingFingerprint(binding = {}) {
+  return fingerprintCreativeValue({
+    schema: 'ai-studio-os/creative-knowledge-graph-source-binding@1',
+    foundationSnapshotFingerprint: text(binding.foundationSnapshotFingerprint),
+    knowledgeLibraryFingerprint: text(binding.knowledgeLibraryFingerprint),
+    sourceFoundationReviewReady: binding.sourceFoundationReviewReady === true
+  });
+}
+
 function nodeContract(node = {}) {
   return {
     schema: node.schema,
@@ -232,15 +229,6 @@ function edgeContract(edge = {}) {
   };
 }
 
-function sourceBindingFingerprint(binding = {}) {
-  return fingerprintCreativeValue({
-    schema: 'ai-studio-os/creative-knowledge-graph-source-binding@1',
-    foundationSnapshotFingerprint: text(binding?.foundationSnapshotFingerprint),
-    knowledgeLibraryFingerprint: text(binding?.knowledgeLibraryFingerprint),
-    sourceFoundationReviewReady: binding?.sourceFoundationReviewReady === true
-  });
-}
-
 function graphFingerprint({ sourceBinding, nodes, edges }) {
   return fingerprintCreativeValue({
     schema: 'ai-studio-os/creative-knowledge-graph@1',
@@ -250,8 +238,28 @@ function graphFingerprint({ sourceBinding, nodes, edges }) {
   });
 }
 
-function sameValue(left, right) {
-  return fingerprintCreativeValue(left) === fingerprintCreativeValue(right);
+function foundationEdgeId(fromId, type, toId) {
+  return `foundation:${fromId}:${type}:${toId}`;
+}
+
+function foundationEdges(nodes = []) {
+  const edges = [];
+  for (const node of nodes) {
+    for (const relationship of node?.entry?.relationships ?? []) {
+      edges.push({
+        schema: 'ai-studio-os/creative-knowledge-graph-edge@1',
+        id: foundationEdgeId(node.id, relationship.type, relationship.targetId),
+        type: relationship.type,
+        fromId: node.id,
+        toId: relationship.targetId,
+        rationale: relationship.rationale,
+        evidenceRefs: [node.entry.provenance?.sourceId].filter(Boolean),
+        origin: 'foundation-relationship',
+        truth: canonicalEdgeTruth()
+      });
+    }
+  }
+  return edges;
 }
 
 function expectedFoundationEdges(nodes) {
@@ -272,6 +280,11 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
   const computedFingerprint = graphFingerprint({ sourceBinding, nodes, edges });
 
   if (graph?.schema !== 'ai-studio-os/creative-knowledge-graph@1') findings.push(finding('blocker', 'creative-knowledge-graph-schema-invalid', 'Creative Knowledge Graph requires creative-knowledge-graph@1.'));
+  if (graph?.stage !== 'creative-knowledge-representation') findings.push(finding('blocker', 'creative-knowledge-graph-stage-invalid', 'Creative Knowledge Graph requires the canonical representation stage.'));
+  const graphUnknownKeys = unknownKeys(graph, GRAPH_KEYS);
+  if (graphUnknownKeys.length) findings.push(finding('blocker', 'creative-knowledge-graph-shape-invalid', 'Graph top level may contain only canonical artifact and derived review fields.', { unknownKeys: graphUnknownKeys }));
+  if (!sameValue(graph?.truth ?? {}, canonicalGraphTruth())) findings.push(finding('blocker', 'creative-knowledge-graph-truth-drift', 'Graph truth boundary is fixed and cannot carry hidden or permissive fields.'));
+
   if (!nodes.length) findings.push(finding('major', 'creative-knowledge-graph-empty', 'Creative Knowledge Graph requires at least one qualified node.'));
   if (nodeIds.some((id) => !id)) findings.push(finding('blocker', 'creative-knowledge-graph-node-id-missing', 'Every graph node requires a stable knowledge ID.'));
   if (new Set(nodeIds).size !== nodeIds.length) findings.push(finding('blocker', 'creative-knowledge-graph-node-id-duplicate', 'Graph node IDs must be unique.', { nodeIds }));
@@ -280,9 +293,9 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
 
   if (rawSourceBinding?.schema !== 'ai-studio-os/creative-knowledge-graph-source-binding@1') findings.push(finding('blocker', 'creative-knowledge-graph-source-binding-schema-invalid', 'Graph requires a canonical Foundation source binding.'));
   const sourceBindingUnknownKeys = unknownKeys(rawSourceBinding, SOURCE_BINDING_KEYS);
-  if (sourceBindingUnknownKeys.length) findings.push(finding('blocker', 'creative-knowledge-graph-source-binding-shape-invalid', 'Graph source binding may contain only the canonical compact receipt fields.', { unknownKeys: sourceBindingUnknownKeys }));
+  if (sourceBindingUnknownKeys.length) findings.push(finding('blocker', 'creative-knowledge-graph-source-binding-shape-invalid', 'Graph source binding may contain only canonical compact receipt fields.', { unknownKeys: sourceBindingUnknownKeys }));
   if (!isSha256(sourceBinding.foundationSnapshotFingerprint) || !isSha256(sourceBinding.knowledgeLibraryFingerprint)) findings.push(finding('blocker', 'creative-knowledge-graph-source-fingerprint-invalid', 'Graph source binding requires Foundation and knowledge-library SHA-256 fingerprints.'));
-  if (sourceBinding.sourceFoundationReviewReady !== true) findings.push(finding('blocker', 'creative-knowledge-graph-source-not-ready', 'Graph cannot be built from a Foundation that failed fresh source review.'));
+  if (sourceBinding.sourceFoundationReviewReady !== true) findings.push(finding('blocker', 'creative-knowledge-graph-source-not-ready', 'Graph cannot use a Foundation that failed fresh source review.'));
   if (sourceBinding.bindingFingerprint !== sourceBindingFingerprint(sourceBinding)) findings.push(finding('blocker', 'creative-knowledge-graph-source-binding-drift', 'Graph source binding fingerprint must match its exact source receipt.'));
   const sourceBindingClaims = authorityClaims(rawSourceBinding);
   if (sourceBindingClaims.length) findings.push(finding('blocker', 'creative-knowledge-graph-source-binding-authority-fabricated', 'Source binding proves no creative authority.', { claims: sourceBindingClaims }));
@@ -299,18 +312,18 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
 
     const knowledgeReview = reviewCreativeKnowledgeEntry(rawNode?.entry ?? {});
     if (!knowledgeReview.reviewReady) findings.push(finding(knowledgeReview.pass ? 'major' : 'blocker', 'creative-knowledge-graph-node-entry-not-ready', 'Every graph node must carry a freshly reviewable knowledge contract.', { nodeId, findingCodes: knowledgeReview.findings.map((item) => item.code) }));
-    if (!node.entry || !sameValue(rawNode?.entry ?? {}, node.entry)) findings.push(finding('blocker', 'creative-knowledge-graph-node-entry-contract-drift', 'Graph node must carry the exact normalized Creative Knowledge contract with no hidden or caller-added payload fields.', { nodeId }));
+    if (!node.entry || !sameValue(rawNode?.entry ?? {}, node.entry)) findings.push(finding('blocker', 'creative-knowledge-graph-node-entry-contract-drift', 'Graph node must carry the exact normalized Creative Knowledge contract with no hidden caller fields.', { nodeId }));
     if (node.id !== node.entry?.id) findings.push(finding('blocker', 'creative-knowledge-graph-node-id-drift', 'Graph node ID must equal its embedded Creative Knowledge ID.', { nodeId, knowledgeId: node.entry?.id ?? null }));
     const expectedKnowledgeFingerprint = node.entry ? knowledgeFingerprint(node.entry) : null;
-    if (!expectedKnowledgeFingerprint || text(rawNode?.knowledgeFingerprint) !== expectedKnowledgeFingerprint) findings.push(finding('blocker', 'creative-knowledge-graph-node-fingerprint-mismatch', 'Node knowledge fingerprint must bind the exact embedded knowledge contract.', { nodeId }));
-    if (!sameValue(rawNode?.annotation ?? {}, node.annotation)) findings.push(finding('blocker', 'creative-knowledge-graph-annotation-contract-drift', 'Graph annotation must be the exact normalized representation contract.', { nodeId }));
-    if (!sameValue(rawNode?.truth ?? {}, canonicalNodeTruth())) findings.push(finding('blocker', 'creative-knowledge-graph-node-truth-drift', 'Graph node truth boundary is fixed and cannot be extended or weakened by callers.', { nodeId }));
+    if (!expectedKnowledgeFingerprint || text(rawNode?.knowledgeFingerprint) !== expectedKnowledgeFingerprint) findings.push(finding('blocker', 'creative-knowledge-graph-node-fingerprint-mismatch', 'Node knowledge fingerprint must bind exact embedded knowledge.', { nodeId }));
+    if (!sameValue(rawNode?.annotation ?? {}, node.annotation)) findings.push(finding('blocker', 'creative-knowledge-graph-annotation-contract-drift', 'Graph annotation must equal its exact normalized contract.', { nodeId }));
+    if (!sameValue(rawNode?.truth ?? {}, canonicalNodeTruth())) findings.push(finding('blocker', 'creative-knowledge-graph-node-truth-drift', 'Graph node truth boundary is fixed and cannot be extended or weakened.', { nodeId }));
 
     if (!NODE_STATUS_SET.has(node.annotation.status)) findings.push(finding('blocker', 'creative-knowledge-graph-node-status-invalid', 'Graph node requires a supported representation status.', { nodeId, status: node.annotation.status }));
     if (node.annotation.status !== 'active' && !node.annotation.statusReason) findings.push(finding('major', 'creative-knowledge-graph-node-status-reason-missing', 'Non-active graph nodes require an explicit status reason.', { nodeId, status: node.annotation.status }));
     if (node.annotation.status === 'superseded' && !node.annotation.supersededBy) findings.push(finding('blocker', 'creative-knowledge-graph-superseded-target-missing', 'Superseded nodes must identify the replacement knowledge ID.', { nodeId }));
-    if (node.annotation.supersededBy && !nodeById.has(node.annotation.supersededBy)) findings.push(finding('blocker', 'creative-knowledge-graph-superseded-target-invalid', 'supersededBy must resolve to a node in the same graph snapshot.', { nodeId, supersededBy: node.annotation.supersededBy }));
-    if (node.annotation.freshUntil && parseInstant(node.annotation.freshUntil) === null) findings.push(finding('blocker', 'creative-knowledge-graph-fresh-until-invalid', 'freshUntil must be timezone-qualified when supplied.', { nodeId, freshUntil: node.annotation.freshUntil }));
+    if (node.annotation.supersededBy && !nodeById.has(node.annotation.supersededBy)) findings.push(finding('blocker', 'creative-knowledge-graph-superseded-target-invalid', 'supersededBy must resolve in the same graph snapshot.', { nodeId, supersededBy: node.annotation.supersededBy }));
+    if (node.annotation.freshUntil && parseInstant(node.annotation.freshUntil) === null) findings.push(finding('blocker', 'creative-knowledge-graph-fresh-until-invalid', 'freshUntil must be timezone-qualified when supplied.', { nodeId }));
 
     if (node.entry?.kind === 'current-trend') {
       const capturedAt = parseInstant(node.entry.provenance?.capturedAt);
@@ -335,21 +348,21 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
     if (!nodeById.has(edge.fromId) || !nodeById.has(edge.toId)) findings.push(finding('blocker', 'creative-knowledge-graph-edge-target-invalid', 'Every graph edge endpoint must resolve in the same snapshot.', { edgeId, fromId: edge.fromId, toId: edge.toId }));
     if (edge.fromId && edge.fromId === edge.toId) findings.push(finding('major', 'creative-knowledge-graph-self-edge', 'Graph edges should not relate a knowledge node to itself.', { edgeId }));
     if (!edge.rationale) findings.push(finding('major', 'creative-knowledge-graph-edge-rationale-missing', 'Every graph relation requires an explicit rationale.', { edgeId }));
-    if (!['foundation-relationship', 'representation-lineage'].includes(edge.origin)) findings.push(finding('blocker', 'creative-knowledge-graph-edge-origin-invalid', 'Graph edge must declare whether it came from Foundation knowledge or representation lineage.', { edgeId, origin: edge.origin }));
-    if (edge.origin === 'representation-lineage' && edge.type !== 'supersedes') findings.push(finding('blocker', 'creative-knowledge-graph-lineage-edge-type-invalid', 'V1 representation-lineage edges are limited to supersedes so graph storage cannot invent arbitrary creative relationships.', { edgeId, type: edge.type }));
-    if (edge.origin === 'representation-lineage' && !edge.evidenceRefs.length) findings.push(finding('major', 'creative-knowledge-graph-lineage-evidence-missing', 'Supersession lineage requires at least one provenance/evidence reference.', { edgeId }));
+    if (!['foundation-relationship', 'representation-lineage'].includes(edge.origin)) findings.push(finding('blocker', 'creative-knowledge-graph-edge-origin-invalid', 'Graph edge must declare its canonical origin.', { edgeId, origin: edge.origin }));
+    if (edge.origin === 'representation-lineage' && edge.type !== 'supersedes') findings.push(finding('blocker', 'creative-knowledge-graph-lineage-edge-type-invalid', 'V1 representation-lineage edges are limited to supersedes.', { edgeId, type: edge.type }));
+    if (edge.origin === 'representation-lineage' && !edge.evidenceRefs.length) findings.push(finding('major', 'creative-knowledge-graph-lineage-evidence-missing', 'Supersession lineage requires evidence/provenance references.', { edgeId }));
     const claims = authorityClaims(rawEdge);
     if (claims.length) findings.push(finding('blocker', 'creative-knowledge-graph-edge-authority-fabricated', 'Graph relations are advisory evidence, not creative authority.', { edgeId, claims }));
   });
 
   const claimedFoundationEdges = edges.filter((edge) => edge.origin === 'foundation-relationship').sort((a, b) => a.id.localeCompare(b.id));
   const expectedEdges = expectedFoundationEdges(nodes);
-  if (!sameValue(claimedFoundationEdges, expectedEdges)) findings.push(finding('blocker', 'creative-knowledge-graph-foundation-edge-drift', 'Foundation relationship edges must be exactly reconstructed from embedded knowledge contracts; graph storage cannot add, omit or rewrite them.'));
+  if (!sameValue(claimedFoundationEdges, expectedEdges)) findings.push(finding('blocker', 'creative-knowledge-graph-foundation-edge-drift', 'Foundation relationship edges must be exactly reconstructed from embedded knowledge.'));
 
   const lineageByTarget = new Map();
   for (const edge of edges.filter((item) => item.origin === 'representation-lineage' && item.type === 'supersedes')) {
     const target = nodeById.get(edge.toId);
-    if (!target || target.annotation.status !== 'superseded' || target.annotation.supersededBy !== edge.fromId) findings.push(finding('blocker', 'creative-knowledge-graph-lineage-status-mismatch', 'A supersedes edge must agree with the target node superseded status and supersededBy identity.', { edgeId: edge.id, toId: edge.toId, fromId: edge.fromId }));
+    if (!target || target.annotation.status !== 'superseded' || target.annotation.supersededBy !== edge.fromId) findings.push(finding('blocker', 'creative-knowledge-graph-lineage-status-mismatch', 'A supersedes edge must agree with target status and supersededBy identity.', { edgeId: edge.id }));
     const existing = lineageByTarget.get(edge.toId) ?? [];
     existing.push(edge.id);
     lineageByTarget.set(edge.toId, existing);
@@ -359,11 +372,20 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
   }
   for (const node of nodes.filter((item) => item.annotation.status === 'superseded')) {
     const lineage = edges.find((edge) => edge.origin === 'representation-lineage' && edge.type === 'supersedes' && edge.fromId === node.annotation.supersededBy && edge.toId === node.id);
-    if (!lineage) findings.push(finding('blocker', 'creative-knowledge-graph-supersession-edge-missing', 'Every superseded node must have a matching replacement -> superseded lineage edge.', { nodeId: node.id, supersededBy: node.annotation.supersededBy }));
+    if (!lineage) findings.push(finding('blocker', 'creative-knowledge-graph-supersession-edge-missing', 'Every superseded node must have a matching replacement lineage edge.', { nodeId: node.id, supersededBy: node.annotation.supersededBy }));
   }
 
   const claims = authorityClaims(graph);
   if (claims.length) findings.push(finding('blocker', 'creative-knowledge-graph-authority-fabricated', 'Creative Knowledge Graph is advisory representation and cannot declare creative or production authority.', { claims }));
+
+  const coreBlockers = findings.filter((item) => item.severity === 'blocker');
+  const coreMajors = findings.filter((item) => item.severity === 'major');
+  const expectedPass = coreBlockers.length === 0;
+  const expectedReviewReady = coreBlockers.length === 0 && coreMajors.length === 0;
+  const expectedStatus = coreBlockers.length ? 'blocked' : coreMajors.length ? 'provisional' : 'ready-as-advisory-knowledge-graph';
+  if (Object.hasOwn(graph, 'pass') && graph.pass !== expectedPass) findings.push(finding('blocker', 'creative-knowledge-graph-pass-claim-drift', 'Cached graph pass flag must match fresh structural review.'));
+  if (Object.hasOwn(graph, 'reviewReady') && graph.reviewReady !== expectedReviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-ready-claim-drift', 'Cached graph reviewReady flag must match fresh structural review.'));
+  if (Object.hasOwn(graph, 'status') && graph.status !== expectedStatus) findings.push(finding('blocker', 'creative-knowledge-graph-status-claim-drift', 'Cached graph status must match fresh structural review.', { expected: expectedStatus, actual: graph.status }));
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -379,11 +401,12 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
     truth: {
       graphIsCreativeAuthority: false,
       exactSnapshotBound: text(graph?.snapshotFingerprint) === computedFingerprint,
+      topLevelShapeLocked: graphUnknownKeys.length === 0,
+      topLevelTruthLocked: sameValue(graph?.truth ?? {}, canonicalGraphTruth()),
       rawContractsReviewedBeforeSanitization: true,
       foundationRelationshipsRecomputed: sameValue(claimedFoundationEdges, expectedEdges),
       currentTrendFreshnessBounded: true,
       conflictsRemainExplicitRelations: true,
-      rankingAuthorityGranted: false,
       independentFoundationProvenanceStillRequired: true,
       humanApprovalGranted: false,
       productionApproved: false
@@ -393,10 +416,11 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
 
 export function buildCreativeKnowledgeGraph({ foundation, nodeAnnotations = {}, supplementalEdges = [] } = {}) {
   const foundationReview = reviewCreativeIntelligenceFoundation(foundation ?? {});
-  const sourceEntries = foundationReview.libraryReview?.entries ?? [];
   const annotations = nodeAnnotations && typeof nodeAnnotations === 'object' ? nodeAnnotations : {};
   const rawSupplementalEdges = Array.isArray(supplementalEdges) ? supplementalEdges : [];
+  const sourceEntries = foundationReview.reviewReady ? (foundationReview.libraryReview?.entries ?? []) : [];
   const nodes = sourceEntries.map((entry) => normalizeNode(entry, annotations[entry.id]));
+
   const sourceBinding = {
     schema: 'ai-studio-os/creative-knowledge-graph-source-binding@1',
     foundationSnapshotFingerprint: foundationReview.computedFingerprint ?? '',
@@ -405,21 +429,27 @@ export function buildCreativeKnowledgeGraph({ foundation, nodeAnnotations = {}, 
   };
   sourceBinding.bindingFingerprint = sourceBindingFingerprint(sourceBinding);
 
-  const baseEdges = foundationEdges(nodes).map(normalizeEdge);
-  const lineageEdges = rawSupplementalEdges.map(normalizeSupplementalEdge).map(normalizeEdge);
-  const edges = [...baseEdges, ...lineageEdges];
-  const unknownAnnotationIds = Object.keys(annotations).filter((id) => !nodes.some((node) => node.id === id));
   const annotationInputIssues = [];
+  const unknownAnnotationIds = Object.keys(annotations).filter((id) => !nodes.some((node) => node.id === id));
   for (const [id, annotation] of Object.entries(annotations)) {
     const extras = unknownKeys(annotation, ANNOTATION_KEYS);
     const claims = authorityClaims(annotation);
     if (extras.length || claims.length) annotationInputIssues.push({ id, unknownKeys: extras, authorityClaims: claims });
   }
+
   const supplementalInputIssues = rawSupplementalEdges.map((edge, index) => ({
     index,
     unknownKeys: unknownKeys(edge, SUPPLEMENTAL_EDGE_KEYS),
     authorityClaims: authorityClaims(edge)
   })).filter((issue) => issue.unknownKeys.length || issue.authorityClaims.length);
+  const invalidSupplementalIndexes = new Set(supplementalInputIssues.map((issue) => issue.index));
+
+  const baseEdges = foundationEdges(nodes).map(normalizeEdge);
+  const lineageEdges = rawSupplementalEdges
+    .filter((_, index) => !invalidSupplementalIndexes.has(index))
+    .map(normalizeSupplementalEdge)
+    .map(normalizeEdge);
+  const edges = [...baseEdges, ...lineageEdges];
 
   const graph = {
     schema: 'ai-studio-os/creative-knowledge-graph@1',
@@ -427,32 +457,25 @@ export function buildCreativeKnowledgeGraph({ foundation, nodeAnnotations = {}, 
     sourceBinding,
     nodes,
     edges,
-    buildDiagnostics: { unknownAnnotationIds, annotationInputIssues, supplementalInputIssues },
     snapshotFingerprint: graphFingerprint({ sourceBinding, nodes, edges }),
-    truth: {
-      knowledgeOnly: true,
-      graphIsCreativeAuthority: false,
-      retrievalRankIsCreativeAuthority: false,
-      independentFoundationProvenanceRequired: true,
-      productionApproved: false
-    }
+    truth: canonicalGraphTruth()
   };
+
   const review = reviewCreativeKnowledgeGraph(graph);
   const findings = [...review.findings];
-  if (!foundationReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-foundation-not-ready', 'Graph construction requires a freshly review-ready Creative Intelligence Foundation.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
+  if (!foundationReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-foundation-not-ready', 'Graph construction requires a freshly review-ready Creative Intelligence Foundation. No Foundation-derived nodes were emitted.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
   if (unknownAnnotationIds.length) findings.push(finding('blocker', 'creative-knowledge-graph-annotation-node-missing', 'Graph annotations may target only knowledge IDs present in the source Foundation.', { unknownAnnotationIds }));
   if (annotationInputIssues.length) findings.push(finding('blocker', 'creative-knowledge-graph-annotation-input-invalid', 'Graph annotation input may not carry unknown fields or authority-shaped claims.', { issues: annotationInputIssues }));
   if (supplementalInputIssues.length) findings.push(finding('blocker', 'creative-knowledge-graph-lineage-input-invalid', 'Supplemental lineage input may not carry unknown fields or authority-shaped claims.', { issues: supplementalInputIssues }));
+
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
   return {
     ...graph,
-    review: { ...review, findings },
+    findings,
     pass: blockers.length === 0,
     reviewReady: blockers.length === 0 && majors.length === 0,
-    status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-as-advisory-knowledge-graph',
-    findings,
-    truth: { ...graph.truth, ...review.truth }
+    status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-as-advisory-knowledge-graph'
   };
 }
 
