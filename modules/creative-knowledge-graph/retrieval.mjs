@@ -32,6 +32,13 @@ function sameValue(left, right) {
   return fingerprintCreativeValue(left) === fingerprintCreativeValue(right);
 }
 
+function compareText(left, right) {
+  const a = text(left);
+  const b = text(right);
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+}
+
 const KNOWN_AUTHORITY_KEYS = Object.freeze([
   'selected', 'approved', 'canonical', 'authorityGranted', 'creativeAuthorityGranted',
   'humanApproved', 'humanSelected', 'creativeDirectionSelected',
@@ -207,7 +214,7 @@ function normalizeExcludedCounts(value = {}) {
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   return Object.fromEntries(Object.entries(source)
     .filter(([key, count]) => EXCLUDED_REASON_KEYS.has(key) && Number.isInteger(count) && count >= 0)
-    .sort(([a], [b]) => a.localeCompare(b)));
+    .sort(([a], [b]) => compareText(a, b)));
 }
 
 function statsContract(value = {}) {
@@ -287,7 +294,7 @@ function stablePrimarySort(left, right) {
   const rightStatus = right.node.annotation.status === 'active' ? 0 : 1;
   if (leftStatus !== rightStatus) return leftStatus - rightStatus;
   if (left.termMatches !== right.termMatches) return right.termMatches - left.termMatches;
-  return left.node.id.localeCompare(right.node.id);
+  return compareText(left.node.id, right.node.id);
 }
 
 function canonicalRetrievalTruth() {
@@ -528,7 +535,7 @@ export function buildCreativeKnowledgeRetrieval({ graph, projectId, asOf, purpos
           conflictContextById.set(counterpartId, existing);
         }
       }
-      visibleConflictsByPrimary.set(primaryId, [...visibleIds].sort());
+      visibleConflictsByPrimary.set(primaryId, [...visibleIds].sort(compareText));
       withheldConflictByPrimary.set(primaryId, withheldConflictPresent);
     }
 
@@ -546,11 +553,11 @@ export function buildCreativeKnowledgeRetrieval({ graph, projectId, asOf, purpos
     }));
 
     conflictContext = [...conflictContextById.values()]
-      .sort((a, b) => a.node.id.localeCompare(b.node.id))
+      .sort((a, b) => compareText(a.node.id, b.node.id))
       .map((item) => retrievalItem(item.node, {
         rank: null,
         termMatches: 0,
-        conflictsWithPrimaryIds: [...item.primaryIds].sort(),
+        conflictsWithPrimaryIds: [...item.primaryIds].sort(compareText),
         conflictContext: true,
         matchReasons: ['explicit-conflict-context']
       }));
@@ -559,7 +566,7 @@ export function buildCreativeKnowledgeRetrieval({ graph, projectId, asOf, purpos
       scopeVisibleNodeCount: visibleNodes.length,
       primaryResultCount: results.length,
       conflictContextCount: conflictContext.length,
-      excludedCounts: Object.fromEntries(Object.entries(exclusionCounts).sort(([a], [b]) => a.localeCompare(b))),
+      excludedCounts: Object.fromEntries(Object.entries(exclusionCounts).sort(([a], [b]) => compareText(a, b))),
       unavailableVisibleConflictCount
     };
   }
