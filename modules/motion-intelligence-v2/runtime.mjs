@@ -90,7 +90,7 @@ function normalizeProjectTruth(value = {}) {
 
 function normalizeKnowledgeProjection(item = {}) {
   const entry = item?.entry && typeof item.entry === 'object' ? item.entry : item;
-  const transfer = entry?.transfer && typeof entry.transfer === 'object' ? entry.transfer : {};
+  const transfer = entry?.transfer && typeof entry.transfer === 'object' ? entry.transfer : entry;
   return {
     knowledgeId: text(item?.knowledgeId ?? entry?.id),
     kind: text(entry?.kind),
