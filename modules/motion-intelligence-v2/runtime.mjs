@@ -302,6 +302,11 @@ function synthesisInputs(value = null) {
   return value && typeof value === 'object' ? value : null;
 }
 
+function canonicalAuthorityProjectId(authorityInputs = {}) {
+  const canonical = authorityInputs?.canonicalCreativeAuthority ?? {};
+  return text(canonical?.projectId ?? canonical?.creativeThesis?.projectId ?? canonical?.creativeWorldExploration?.projectId);
+}
+
 function rebuildWorldReview(projectId, authorityInputs = {}) {
   return reviewMotionCreativeWorldAuthority({
     projectId,
@@ -328,23 +333,49 @@ function rebuildSynthesisReview(authorityInputs = {}) {
   });
 }
 
-function expectedKnowledgeEvidence(authorityInputs = {}, provenance = rebuildKnowledgeProvenance(authorityInputs)) {
+function rawVerifiedKnowledgeEvidence(authorityInputs = {}, provenance = rebuildKnowledgeProvenance(authorityInputs)) {
   if (!provenance.reviewReady) return [];
   const retrieval = authorityInputs?.knowledge?.retrieval ?? {};
   return (Array.isArray(retrieval?.results) ? retrieval.results : []).map(normalizeKnowledgeProjection);
 }
 
-function expectedSynthesisCandidates(authorityInputs = {}, review = rebuildSynthesisReview(authorityInputs)) {
+function expectedKnowledgeEvidence(authorityInputs = {}, provenance = rebuildKnowledgeProvenance(authorityInputs)) {
+  const evidence = rawVerifiedKnowledgeEvidence(authorityInputs, provenance);
+  if (!provenance.reviewReady) return [];
+  const sourceProjectId = text(authorityInputs?.knowledge?.retrieval?.query?.projectId);
+  const expectedProjectId = canonicalAuthorityProjectId(authorityInputs);
+  if (!expectedProjectId || sourceProjectId !== expectedProjectId) return [];
+  if (evidence.some((item) => item.domain !== 'motion')) return [];
+  return evidence;
+}
+
+function synthesisProjectId(authorityInputs = {}) {
+  return text(authorityInputs?.synthesis?.brief?.projectId ?? authorityInputs?.synthesis?.synthesis?.projectId);
+}
+
+function rawVerifiedSynthesisCandidates(authorityInputs = {}, review = rebuildSynthesisReview(authorityInputs)) {
   if (!review?.reviewReady) return [];
   const artifact = authorityInputs?.synthesis?.candidateArtifact ?? {};
   return (Array.isArray(artifact?.candidates) ? artifact.candidates : []).map(normalizeSynthesisProjection);
 }
 
+function expectedSynthesisCandidates(authorityInputs = {}, review = rebuildSynthesisReview(authorityInputs)) {
+  const candidates = rawVerifiedSynthesisCandidates(authorityInputs, review);
+  if (!review?.reviewReady) return [];
+  const expectedProjectId = canonicalAuthorityProjectId(authorityInputs);
+  if (!expectedProjectId || synthesisProjectId(authorityInputs) !== expectedProjectId) return [];
+  return candidates;
+}
+
 function knowledgeBinding(authorityInputs, provenance, evidence) {
   const retrieval = authorityInputs?.knowledge?.retrieval ?? {};
+  const sourceProjectId = text(retrieval?.query?.projectId);
+  const expectedProjectId = canonicalAuthorityProjectId(authorityInputs);
+  const sourceEligible = provenance?.reviewReady === true && expectedProjectId && sourceProjectId === expectedProjectId
+    && evidence.length > 0;
   return {
     schema: 'ai-studio-os/motion-intelligence-knowledge-binding@1',
-    projectId: text(retrieval?.query?.projectId),
+    projectId: sourceEligible ? sourceProjectId : expectedProjectId,
     asOf: text(retrieval?.query?.asOf),
     retrievalSnapshotFingerprint: text(retrieval?.snapshotFingerprint),
     provenanceReceiptFingerprint: fingerprintCreativeValue(provenance?.sourceReceipt ?? {}),
@@ -355,9 +386,13 @@ function knowledgeBinding(authorityInputs, provenance, evidence) {
 
 function synthesisBinding(authorityInputs, review, candidates) {
   if (!authorityInputs?.synthesis) return null;
+  const expectedProjectId = canonicalAuthorityProjectId(authorityInputs);
+  const sourceProjectId = synthesisProjectId(authorityInputs);
+  const sourceEligible = review?.reviewReady === true && expectedProjectId && sourceProjectId === expectedProjectId
+    && candidates.length > 0;
   return {
     schema: 'ai-studio-os/motion-intelligence-synthesis-binding@1',
-    projectId: text(authorityInputs?.synthesis?.brief?.projectId ?? authorityInputs?.synthesis?.synthesis?.projectId),
+    projectId: sourceEligible ? sourceProjectId : expectedProjectId,
     candidateSetSnapshotFingerprint: text(authorityInputs?.synthesis?.candidateArtifact?.snapshotFingerprint),
     candidateIds: candidates.map((item) => item.id),
     candidateCount: candidates.length
@@ -416,6 +451,7 @@ export function reviewMotionIntelligenceV2Brief(brief = {}) {
   const worldReview = rebuildWorldReview(brief?.projectId, authorityInputs);
   const knowledgeProvenance = rebuildKnowledgeProvenance(authorityInputs);
   const synthesisReview = rebuildSynthesisReview(authorityInputs);
+  const rawVerifiedKnowledge = rawVerifiedKnowledgeEvidence(authorityInputs, knowledgeProvenance);
   const expectedKnowledge = expectedKnowledgeEvidence(authorityInputs, knowledgeProvenance);
   const expectedSynthesis = expectedSynthesisCandidates(authorityInputs, synthesisReview);
   const expectedKnowledgeBinding = knowledgeBinding(authorityInputs, knowledgeProvenance, expectedKnowledge);
@@ -440,7 +476,7 @@ export function reviewMotionIntelligenceV2Brief(brief = {}) {
 
   if (!knowledgeProvenance.reviewReady) findings.push(finding('blocker', 'motion-v2-knowledge-provenance-invalid', 'Motion V2 requires independently rebuilt Creative Knowledge retrieval provenance before exposing knowledge to motion reasoning.', { findingCodes: knowledgeProvenance.findings.map((item) => item.code) }));
   if (knowledgeProvenance.reviewReady && text(authorityInputs?.knowledge?.retrieval?.query?.projectId) !== text(brief?.projectId)) findings.push(finding('blocker', 'motion-v2-knowledge-project-drift', 'Motion V2 knowledge retrieval must be scoped to the same project as the Motion Brief.'));
-  if (expectedKnowledge.some((item) => item.domain !== 'motion')) findings.push(finding('blocker', 'motion-v2-non-motion-knowledge-injected', 'Motion V2 primary knowledge evidence must be explicitly scoped to the motion domain.', { knowledgeIds: expectedKnowledge.filter((item) => item.domain !== 'motion').map((item) => item.knowledgeId) }));
+  if (rawVerifiedKnowledge.some((item) => item.domain !== 'motion')) findings.push(finding('blocker', 'motion-v2-non-motion-knowledge-injected', 'Motion V2 primary knowledge evidence must be explicitly scoped to the motion domain.', { count: rawVerifiedKnowledge.filter((item) => item.domain !== 'motion').length }));
   if (expectedKnowledge.length < 8) findings.push(finding('major', 'motion-v2-knowledge-coverage-thin', 'Deep Motion reasoning should begin from a sufficiently broad qualified motion evidence set; V2 requires at least eight independently verified motion principles for a review-ready brief.', { count: expectedKnowledge.length }));
 
   const knowledgeBindingUnknown = unknownKeys(brief?.knowledgeBinding, KNOWLEDGE_BINDING_KEYS);
@@ -450,12 +486,12 @@ export function reviewMotionIntelligenceV2Brief(brief = {}) {
     const unknown = unknownKeys(item, KNOWLEDGE_PROJECTION_KEYS);
     if (unknown.length || !sameValue(item, normalizeKnowledgeProjection(item))) findings.push(finding('blocker', 'motion-v2-knowledge-projection-drift', 'Motion V2 may expose only the canonical project-safe knowledge projection.', { index, unknownKeys: unknown }));
   });
-  if (!sameValue(rawKnowledge, expectedKnowledge)) findings.push(finding('blocker', knowledgeProvenance.reviewReady ? 'motion-v2-knowledge-evidence-drift' : 'motion-v2-blocked-knowledge-leak', knowledgeProvenance.reviewReady ? 'Motion V2 visible knowledge must equal the independently verified retrieval projection.' : 'Failed knowledge provenance must expose no project reasoning evidence.'));
+  if (!sameValue(rawKnowledge, expectedKnowledge)) findings.push(finding('blocker', expectedKnowledge.length ? 'motion-v2-knowledge-evidence-drift' : 'motion-v2-blocked-knowledge-leak', expectedKnowledge.length ? 'Motion V2 visible knowledge must equal the independently verified retrieval projection.' : 'Failed or ineligible knowledge sources must expose no project reasoning evidence.'));
 
   if (authorityInputs?.synthesis) {
     if (!synthesisReview?.reviewReady) findings.push(finding('blocker', 'motion-v2-synthesis-provenance-invalid', 'When Synthesis evidence is supplied, Motion V2 must independently reverify the complete Synthesis Candidate egress chain.', { findingCodes: synthesisReview?.findings?.map((item) => item.code) ?? [] }));
-    const synthesisProjectId = text(authorityInputs?.synthesis?.brief?.projectId ?? authorityInputs?.synthesis?.synthesis?.projectId);
-    if (synthesisReview?.reviewReady && synthesisProjectId !== text(brief?.projectId)) findings.push(finding('blocker', 'motion-v2-synthesis-project-drift', 'Supplied Synthesis evidence must belong to the same project as Motion V2.'));
+    const sourceSynthesisProjectId = synthesisProjectId(authorityInputs);
+    if (synthesisReview?.reviewReady && sourceSynthesisProjectId !== text(brief?.projectId)) findings.push(finding('blocker', 'motion-v2-synthesis-project-drift', 'Supplied Synthesis evidence must belong to the same project as Motion V2.'));
   }
   const synthesisBindingUnknown = brief?.synthesisBinding === null ? [] : unknownKeys(brief?.synthesisBinding, SYNTHESIS_BINDING_KEYS);
   if (synthesisBindingUnknown.length || !sameValue(brief?.synthesisBinding ?? null, expectedSynthesisBinding)) findings.push(finding('blocker', 'motion-v2-synthesis-binding-drift', 'Motion V2 Synthesis binding must exactly match independently reverified Synthesis candidate egress.', { unknownKeys: synthesisBindingUnknown }));
@@ -464,7 +500,7 @@ export function reviewMotionIntelligenceV2Brief(brief = {}) {
     const unknown = unknownKeys(item, SYNTHESIS_PROJECTION_KEYS);
     if (unknown.length || !sameValue(item, normalizeSynthesisProjection(item))) findings.push(finding('blocker', 'motion-v2-synthesis-projection-drift', 'Motion V2 may expose only the canonical safe Synthesis candidate projection.', { index, unknownKeys: unknown }));
   });
-  if (!sameValue(rawSynthesis, expectedSynthesis)) findings.push(finding('blocker', synthesisReview?.reviewReady ? 'motion-v2-synthesis-evidence-drift' : 'motion-v2-blocked-synthesis-leak', synthesisReview?.reviewReady ? 'Motion V2 visible Synthesis candidates must equal the independently reverified candidate egress.' : 'Failed Synthesis provenance must expose no Synthesis candidate content.'));
+  if (!sameValue(rawSynthesis, expectedSynthesis)) findings.push(finding('blocker', expectedSynthesis.length ? 'motion-v2-synthesis-evidence-drift' : 'motion-v2-blocked-synthesis-leak', expectedSynthesis.length ? 'Motion V2 visible Synthesis candidates must equal the independently reverified candidate egress.' : 'Failed or cross-project Synthesis evidence must expose no Synthesis candidate content.'));
 
   const rawTruths = Array.isArray(brief?.projectTruths) ? brief.projectTruths : [];
   rawTruths.forEach((item, index) => {
