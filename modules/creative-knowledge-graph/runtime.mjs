@@ -72,7 +72,7 @@ export const CREATIVE_GRAPH_EDGE_TYPES = Object.freeze([
 
 const NODE_STATUS_SET = new Set(CREATIVE_GRAPH_NODE_STATUSES);
 const GRAPH_EDGE_TYPE_SET = new Set(CREATIVE_GRAPH_EDGE_TYPES);
-const ANNOTATION_KEYS = Object.freeze(['status', 'statusReason', 'freshUntil', 'supersededBy', 'representationNotes']);
+const ANNOTATION_KEYS = Object.freeze(['status', 'statusReason', 'freshUntil', 'supersededBy', 'representationNotes', 'evidenceRefs']);
 const SUPPLEMENTAL_EDGE_KEYS = Object.freeze(['id', 'type', 'fromId', 'toId', 'rationale', 'evidenceRefs']);
 const NODE_KEYS = Object.freeze(['schema', 'id', 'knowledgeFingerprint', 'entry', 'annotation', 'truth']);
 const EDGE_KEYS = Object.freeze(['schema', 'id', 'type', 'fromId', 'toId', 'rationale', 'evidenceRefs', 'origin', 'truth']);
@@ -84,6 +84,7 @@ function canonicalGraphTruth() {
     knowledgeOnly: true,
     graphIsCreativeAuthority: false,
     retrievalRankIsCreativeAuthority: false,
+    representationProvenanceReferencesRequired: true,
     independentFoundationProvenanceRequired: true,
     productionApproved: false
   };
@@ -113,7 +114,8 @@ function normalizeAnnotation(value = {}) {
     statusReason: text(source.statusReason),
     freshUntil: text(source.freshUntil) || null,
     supersededBy: text(source.supersededBy) || null,
-    representationNotes: list(source.representationNotes)
+    representationNotes: list(source.representationNotes),
+    evidenceRefs: list(source.evidenceRefs)
   };
 }
 
@@ -138,10 +140,7 @@ function entryContract(entry = {}) {
 }
 
 function knowledgeFingerprint(entry) {
-  return fingerprintCreativeValue({
-    schema: 'ai-studio-os/creative-knowledge-entry@1',
-    entry
-  });
+  return fingerprintCreativeValue({ schema: 'ai-studio-os/creative-knowledge-entry@1', entry });
 }
 
 function normalizeNode(entry, annotation = {}) {
@@ -321,9 +320,11 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
 
     if (!NODE_STATUS_SET.has(node.annotation.status)) findings.push(finding('blocker', 'creative-knowledge-graph-node-status-invalid', 'Graph node requires a supported representation status.', { nodeId, status: node.annotation.status }));
     if (node.annotation.status !== 'active' && !node.annotation.statusReason) findings.push(finding('major', 'creative-knowledge-graph-node-status-reason-missing', 'Non-active graph nodes require an explicit status reason.', { nodeId, status: node.annotation.status }));
+    if (node.annotation.status !== 'active' && !node.annotation.evidenceRefs.length) findings.push(finding('blocker', 'creative-knowledge-graph-node-status-evidence-missing', 'Non-active representation status must retain at least one evidence/provenance reference.', { nodeId, status: node.annotation.status }));
     if (node.annotation.status === 'superseded' && !node.annotation.supersededBy) findings.push(finding('blocker', 'creative-knowledge-graph-superseded-target-missing', 'Superseded nodes must identify the replacement knowledge ID.', { nodeId }));
     if (node.annotation.supersededBy && !nodeById.has(node.annotation.supersededBy)) findings.push(finding('blocker', 'creative-knowledge-graph-superseded-target-invalid', 'supersededBy must resolve in the same graph snapshot.', { nodeId, supersededBy: node.annotation.supersededBy }));
     if (node.annotation.freshUntil && parseInstant(node.annotation.freshUntil) === null) findings.push(finding('blocker', 'creative-knowledge-graph-fresh-until-invalid', 'freshUntil must be timezone-qualified when supplied.', { nodeId }));
+    if (node.annotation.freshUntil && !node.annotation.evidenceRefs.length) findings.push(finding('blocker', 'creative-knowledge-graph-freshness-evidence-missing', 'An explicit freshness boundary must retain at least one evidence/policy reference.', { nodeId }));
 
     if (node.entry?.kind === 'current-trend') {
       const capturedAt = parseInstant(node.entry.provenance?.capturedAt);
@@ -405,6 +406,7 @@ export function reviewCreativeKnowledgeGraph(graph = {}) {
       topLevelTruthLocked: sameValue(graph?.truth ?? {}, canonicalGraphTruth()),
       rawContractsReviewedBeforeSanitization: true,
       foundationRelationshipsRecomputed: sameValue(claimedFoundationEdges, expectedEdges),
+      representationProvenanceReferencesRequired: true,
       currentTrendFreshnessBounded: true,
       conflictsRemainExplicitRelations: true,
       independentFoundationProvenanceStillRequired: true,
