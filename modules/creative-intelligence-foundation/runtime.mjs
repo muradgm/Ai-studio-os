@@ -107,14 +107,40 @@ const AUTHORITY_STATUS_VALUES = new Set([
   'ready-for-technical-planning'
 ]);
 
+const AUTHORITYISH_KEY = /(approv|authori|select|canonical|production|technicalplanning)/i;
+
 function authorityClaims(object = {}) {
   const claims = [];
   for (const key of AUTHORITY_CLAIM_KEYS) {
     if (object?.[key] === true || object?.truth?.[key] === true) claims.push(key);
   }
+  for (const [key, value] of Object.entries(object && typeof object === 'object' ? object : {})) {
+    if (key !== 'truth' && value === true && AUTHORITYISH_KEY.test(key)) claims.push(key);
+  }
+  for (const [key, value] of Object.entries(object?.truth && typeof object.truth === 'object' ? object.truth : {})) {
+    if (value === true && AUTHORITYISH_KEY.test(key)) claims.push(`truth.${key}`);
+  }
   const status = text(object?.status).toLowerCase();
   if (AUTHORITY_STATUS_VALUES.has(status)) claims.push(`status:${status}`);
   return [...new Set(claims)];
+}
+
+function constitutionDiff(constitution = {}) {
+  const expected = CREATIVE_INTELLIGENCE_CONSTITUTION;
+  const actual = constitution && typeof constitution === 'object' ? constitution : {};
+  const expectedKeys = Object.keys(expected).sort();
+  const actualKeys = Object.keys(actual).sort();
+  const missingKeys = expectedKeys.filter((key) => !Object.hasOwn(actual, key));
+  const extraKeys = actualKeys.filter((key) => !Object.hasOwn(expected, key));
+  const changedValues = expectedKeys
+    .filter((key) => Object.hasOwn(actual, key) && actual[key] !== expected[key])
+    .map((key) => ({ key, expected: expected[key], actual: actual[key] }));
+  return {
+    exact: missingKeys.length === 0 && extraKeys.length === 0 && changedValues.length === 0,
+    missingKeys,
+    extraKeys,
+    changedValues
+  };
 }
 
 function normalizeProvenance(value = {}) {
@@ -408,15 +434,13 @@ export function reviewCreativeIntelligenceFoundation(foundation = {}) {
   const constitution = foundation?.constitution && typeof foundation.constitution === 'object'
     ? foundation.constitution
     : {};
+  const constitutionReview = constitutionDiff(constitution);
   const computedFingerprint = foundationFingerprint(constitution, libraryReview.computedFingerprint);
 
   if (foundation?.schema !== 'ai-studio-os/creative-intelligence-foundation@1') findings.push(finding('blocker', 'creative-intelligence-foundation-schema-invalid', 'Creative Intelligence Foundation requires creative-intelligence-foundation@1.'));
   if (!libraryReview.reviewReady) findings.push(finding('blocker', 'creative-intelligence-foundation-library-not-ready', 'Foundation requires a review-ready knowledge library.', { findingCodes: libraryReview.findings.map((item) => item.code) }));
   if (text(foundation?.snapshotFingerprint) !== computedFingerprint) findings.push(finding('blocker', 'creative-intelligence-foundation-fingerprint-mismatch', 'Foundation snapshot fingerprint must bind the exact constitution and knowledge-library snapshot.', { expected: computedFingerprint, actual: foundation?.snapshotFingerprint ?? null }));
-
-  for (const [key, expected] of Object.entries(CREATIVE_INTELLIGENCE_CONSTITUTION)) {
-    if (constitution?.[key] !== expected) findings.push(finding('blocker', 'creative-intelligence-constitution-drift', 'Creative Intelligence constitutional boundaries cannot be weakened by callers.', { key, expected, actual: constitution?.[key] ?? null }));
-  }
+  if (!constitutionReview.exact) findings.push(finding('blocker', 'creative-intelligence-constitution-drift', 'Creative Intelligence constitution must match the canonical key set and values exactly; callers cannot add permissive rules.', constitutionReview));
 
   const claims = authorityClaims(foundation);
   if (claims.length) findings.push(finding('blocker', 'creative-intelligence-foundation-authority-fabricated', 'Creative Intelligence Foundation is a reasoning substrate and cannot declare creative or production authority.', { claims }));
@@ -433,7 +457,7 @@ export function reviewCreativeIntelligenceFoundation(foundation = {}) {
     truth: {
       knowledgeIsAuthority: false,
       exactSnapshotBound: text(foundation?.snapshotFingerprint) === computedFingerprint,
-      authorityBoundariesConstitutional: true,
+      authorityBoundariesConstitutional: constitutionReview.exact,
       foundationIsSharedSubstrate: true,
       humanApprovalGranted: false,
       productionApproved: false
@@ -488,15 +512,14 @@ function reviewFoundationBinding(binding = {}) {
   const normalizedConstitution = binding?.constitution && typeof binding.constitution === 'object'
     ? binding.constitution
     : {};
+  const constitutionReview = constitutionDiff(normalizedConstitution);
   const computedFingerprint = foundationBindingFingerprint(binding);
 
   if (binding?.schema !== 'ai-studio-os/creative-intelligence-foundation-binding@1') findings.push(finding('blocker', 'creative-intelligence-foundation-binding-schema-invalid', 'Project reasoning requires a canonical Foundation binding.'));
   if (!isSha256(binding?.foundationSnapshotFingerprint) || !isSha256(binding?.knowledgeLibraryFingerprint)) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-fingerprint-invalid', 'Foundation binding requires SHA-256 fingerprints for the source Foundation and knowledge library.'));
   if (binding?.sourceFoundationReviewReady !== true) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-source-not-ready', 'A project context cannot be authored from a Foundation that failed its source review.'));
   if (text(binding?.bindingFingerprint) !== computedFingerprint) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-drift', 'Foundation binding fingerprint must match the exact source fingerprints and constitutional boundary.', { expected: computedFingerprint, actual: binding?.bindingFingerprint ?? null }));
-  for (const [key, expected] of Object.entries(CREATIVE_INTELLIGENCE_CONSTITUTION)) {
-    if (normalizedConstitution?.[key] !== expected) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-constitution-drift', 'Project context cannot weaken Foundation constitutional rules.', { key, expected, actual: normalizedConstitution?.[key] ?? null }));
-  }
+  if (!constitutionReview.exact) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-constitution-drift', 'Project context Foundation binding must preserve the exact canonical constitution without extra permissive keys.', constitutionReview));
   const claims = authorityClaims(binding);
   if (claims.length) findings.push(finding('blocker', 'creative-intelligence-foundation-binding-authority-fabricated', 'A Foundation binding carries provenance, not creative authority.', { claims }));
 
@@ -508,6 +531,7 @@ function reviewFoundationBinding(binding = {}) {
     findings,
     truth: {
       bindingIsProvenanceNotAuthority: true,
+      exactConstitutionBound: constitutionReview.exact,
       fullSharedFoundationExcludedFromProjectPayload: true
     }
   };
