@@ -62,25 +62,44 @@ export const CREATIVE_INTELLIGENCE_CONSTITUTION = Object.freeze({
   criticScoreIsSelection: false
 });
 
-const AUTHORITY_CLAIM_KEYS = Object.freeze([
-  'selected',
-  'approved',
-  'canonical',
-  'humanApproved',
-  'humanSelected',
-  'creativeDirectionApproved',
-  'productionApproved',
-  'technicalPlanningAuthorized'
-]);
-
 const KNOWLEDGE_KIND_SET = new Set(CREATIVE_KNOWLEDGE_KINDS);
 const SCOPE_SET = new Set(CREATIVE_KNOWLEDGE_SCOPES);
 const RELATIONSHIP_SET = new Set(CREATIVE_RELATIONSHIP_TYPES);
 const REASONING_MOVE_SET = new Set(CREATIVE_REASONING_MOVE_TYPES);
 const REFERENCE_LIKE_KINDS = new Set(['historical-precedent', 'current-trend']);
 
+const AUTHORITY_CLAIM_KEYS = Object.freeze([
+  'selected',
+  'approved',
+  'canonical',
+  'authorityGranted',
+  'humanApproved',
+  'humanSelected',
+  'creativeDirectionSelected',
+  'creativeDirectionApproved',
+  'productionApproved',
+  'technicalPlanningAuthorized'
+]);
+
+const AUTHORITY_STATUS_VALUES = new Set([
+  'approved',
+  'selected',
+  'canonical',
+  'authoritative',
+  'production-ready',
+  'production-approved',
+  'ready-for-production',
+  'ready-for-technical-planning'
+]);
+
 function authorityClaims(object = {}) {
-  return AUTHORITY_CLAIM_KEYS.filter((key) => object?.[key] === true || object?.truth?.[key] === true);
+  const claims = [];
+  for (const key of AUTHORITY_CLAIM_KEYS) {
+    if (object?.[key] === true || object?.truth?.[key] === true) claims.push(key);
+  }
+  const status = text(object?.status).toLowerCase();
+  if (AUTHORITY_STATUS_VALUES.has(status)) claims.push(`status:${status}`);
+  return [...new Set(claims)];
 }
 
 function normalizeProvenance(value = {}) {
@@ -152,44 +171,45 @@ function normalizeKnowledgeEntry(value = {}, index = 0) {
   };
 }
 
-function knowledgeReview(entry = {}) {
+function reviewNormalizedKnowledgeEntry(entry = {}, claimed = entry) {
   const findings = [];
 
-  if (entry?.schema !== 'ai-studio-os/creative-knowledge-entry@1') {
-    findings.push(finding('blocker', 'creative-knowledge-schema-invalid', 'Creative knowledge must use creative-knowledge-entry@1.'));
+  if (claimed?.schema !== 'ai-studio-os/creative-knowledge-entry@1') {
+    findings.push(finding('blocker', 'creative-knowledge-schema-invalid', 'Creative knowledge must use creative-knowledge-entry@1.', { schema: claimed?.schema ?? null }));
   }
-  if (!text(entry?.id)) findings.push(finding('blocker', 'creative-knowledge-id-missing', 'Creative knowledge requires a stable ID.'));
-  if (!KNOWLEDGE_KIND_SET.has(entry?.kind)) findings.push(finding('blocker', 'creative-knowledge-kind-invalid', 'Creative knowledge requires a supported evidence kind.', { kind: entry?.kind ?? null }));
-  if (!text(entry?.domain)) findings.push(finding('major', 'creative-knowledge-domain-missing', 'Creative knowledge should name the domain in which the principle or evidence applies.'));
-  if (!text(entry?.definition)) findings.push(finding('major', 'creative-knowledge-definition-missing', 'Creative knowledge requires a clear definition or claim.'));
-  if (!text(entry?.causalRationale)) findings.push(finding('major', 'creative-knowledge-causal-rationale-missing', 'Creative knowledge must explain why the principle or observation works rather than storing a label alone.'));
-  if (!Array.isArray(entry?.worksWhen) || !entry.worksWhen.length) findings.push(finding('major', 'creative-knowledge-conditions-missing', 'Creative knowledge must state conditions where it is useful.'));
-  if (!Array.isArray(entry?.failsWhen) || !entry.failsWhen.length) findings.push(finding('major', 'creative-knowledge-failure-conditions-missing', 'Creative knowledge must state conditions where it fails or becomes inappropriate.'));
-  if (!Array.isArray(entry?.failureModes) || !entry.failureModes.length) findings.push(finding('major', 'creative-knowledge-failure-modes-missing', 'Creative knowledge must include at least one failure mode.'));
-  if (!Array.isArray(entry?.counterexamples) || !entry.counterexamples.length) findings.push(finding('major', 'creative-knowledge-counterexample-missing', 'Creative knowledge must include a counterexample or boundary case.'));
-  if (!Array.isArray(entry?.diagnostics) || !entry.diagnostics.length) findings.push(finding('major', 'creative-knowledge-diagnostics-missing', 'Creative knowledge needs a way to diagnose whether it applies.'));
-  if (!SCOPE_SET.has(entry?.scope)) findings.push(finding('blocker', 'creative-knowledge-scope-invalid', 'Creative knowledge requires a supported scope.', { scope: entry?.scope ?? null }));
-  if (entry?.scope === 'project' && !text(entry?.projectId)) findings.push(finding('blocker', 'creative-knowledge-project-scope-unbound', 'Project-scoped knowledge must be bound to a project identity.'));
-  if (entry?.scope !== 'project' && text(entry?.projectId)) findings.push(finding('major', 'creative-knowledge-project-binding-ambiguous', 'Only project-scoped knowledge should carry project identity.'));
-  if (entry?.confidence === null || entry?.confidence === undefined) findings.push(finding('blocker', 'creative-knowledge-confidence-invalid', 'Creative knowledge confidence must be a number from 0 to 1.'));
-  if (!text(entry?.confidenceBasis)) findings.push(finding('major', 'creative-knowledge-confidence-basis-missing', 'Confidence requires an explicit evidence basis.'));
-  if (!text(entry?.provenance?.sourceId) || !text(entry?.provenance?.sourceType)) findings.push(finding('blocker', 'creative-knowledge-provenance-missing', 'Creative knowledge requires source identity and source type.'));
-  if (!text(entry?.transferability)) findings.push(finding('major', 'creative-knowledge-transferability-missing', 'Creative knowledge should state how broadly it can transfer.'));
+  if (!text(entry.id)) findings.push(finding('blocker', 'creative-knowledge-id-missing', 'Creative knowledge requires a stable ID.'));
+  if (!KNOWLEDGE_KIND_SET.has(entry.kind)) findings.push(finding('blocker', 'creative-knowledge-kind-invalid', 'Creative knowledge requires a supported evidence kind.', { kind: entry.kind || null }));
+  if (!text(entry.domain)) findings.push(finding('major', 'creative-knowledge-domain-missing', 'Creative knowledge should name the domain in which the principle or evidence applies.'));
+  if (!text(entry.definition)) findings.push(finding('major', 'creative-knowledge-definition-missing', 'Creative knowledge requires a clear definition or claim.'));
+  if (!text(entry.causalRationale)) findings.push(finding('major', 'creative-knowledge-causal-rationale-missing', 'Creative knowledge must explain why the principle or observation works rather than storing a label alone.'));
+  if (!entry.worksWhen.length) findings.push(finding('major', 'creative-knowledge-conditions-missing', 'Creative knowledge must state conditions where it is useful.'));
+  if (!entry.failsWhen.length) findings.push(finding('major', 'creative-knowledge-failure-conditions-missing', 'Creative knowledge must state conditions where it fails or becomes inappropriate.'));
+  if (!entry.failureModes.length) findings.push(finding('major', 'creative-knowledge-failure-modes-missing', 'Creative knowledge must include at least one failure mode.'));
+  if (!entry.counterexamples.length) findings.push(finding('major', 'creative-knowledge-counterexample-missing', 'Creative knowledge must include a counterexample or boundary case.'));
+  if (!entry.diagnostics.length) findings.push(finding('major', 'creative-knowledge-diagnostics-missing', 'Creative knowledge needs a way to diagnose whether it applies.'));
+  if (!SCOPE_SET.has(entry.scope)) findings.push(finding('blocker', 'creative-knowledge-scope-invalid', 'Creative knowledge requires a supported scope.', { scope: entry.scope || null }));
+  if (entry.scope === 'project' && !text(entry.projectId)) findings.push(finding('blocker', 'creative-knowledge-project-scope-unbound', 'Project-scoped knowledge must be bound to a project identity.'));
+  if (entry.scope !== 'project' && text(entry.projectId)) findings.push(finding('major', 'creative-knowledge-project-binding-ambiguous', 'Only project-scoped knowledge should carry project identity.'));
+  if (entry.confidence === null) findings.push(finding('blocker', 'creative-knowledge-confidence-invalid', 'Creative knowledge confidence must be a number from 0 to 1.'));
+  if (!text(entry.confidenceBasis)) findings.push(finding('major', 'creative-knowledge-confidence-basis-missing', 'Confidence requires an explicit evidence basis.'));
+  if (!text(entry.provenance.sourceId) || !text(entry.provenance.sourceType)) findings.push(finding('blocker', 'creative-knowledge-provenance-missing', 'Creative knowledge requires source identity and source type.'));
+  if (REFERENCE_LIKE_KINDS.has(entry.kind) && !text(entry.provenance.sourceRef)) findings.push(finding('major', 'creative-reference-source-ref-missing', 'Historical precedents and current trends should retain a concrete source reference.'));
+  if (!text(entry.transferability)) findings.push(finding('major', 'creative-knowledge-transferability-missing', 'Creative knowledge should state how broadly it can transfer.'));
 
-  for (const relationship of Array.isArray(entry?.relationships) ? entry.relationships : []) {
+  for (const relationship of entry.relationships) {
     if (!RELATIONSHIP_SET.has(relationship.type) || !relationship.targetId || !relationship.rationale) {
       findings.push(finding('major', 'creative-knowledge-relationship-invalid', 'Knowledge relationships require a supported type, target ID and rationale.', { relationship }));
     }
   }
 
-  if (REFERENCE_LIKE_KINDS.has(entry?.kind)) {
-    if (!entry?.transfer?.transferablePrinciples?.length) findings.push(finding('major', 'creative-reference-transfer-principle-missing', 'References and trends must be decomposed into transferable principles rather than stored as surface style.'));
-    if (!entry?.transfer?.surfaceSignature?.length) findings.push(finding('major', 'creative-reference-surface-signature-missing', 'References and trends must identify their surface signature so it can be separated from transferable logic.'));
-    if (!entry?.transfer?.mustStrip?.length) findings.push(finding('major', 'creative-reference-strip-rule-missing', 'References and trends must state which surface signatures may not be copied into a new project.'));
-    if (!entry?.transfer?.copyRisks?.length) findings.push(finding('major', 'creative-reference-copy-risk-missing', 'References and trends must identify imitation risk.'));
+  if (REFERENCE_LIKE_KINDS.has(entry.kind)) {
+    if (!entry.transfer.transferablePrinciples.length) findings.push(finding('major', 'creative-reference-transfer-principle-missing', 'References and trends must be decomposed into transferable principles rather than stored as surface style.'));
+    if (!entry.transfer.surfaceSignature.length) findings.push(finding('major', 'creative-reference-surface-signature-missing', 'References and trends must identify their surface signature so it can be separated from transferable logic.'));
+    if (!entry.transfer.mustStrip.length) findings.push(finding('major', 'creative-reference-strip-rule-missing', 'References and trends must state which surface signatures may not be copied into a new project.'));
+    if (!entry.transfer.copyRisks.length) findings.push(finding('major', 'creative-reference-copy-risk-missing', 'References and trends must identify imitation risk.'));
   }
 
-  const claims = authorityClaims(entry);
+  const claims = authorityClaims(claimed);
   if (claims.length) findings.push(finding('blocker', 'creative-knowledge-authority-fabricated', 'Knowledge cannot declare creative or production authority.', { claims }));
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -199,14 +219,16 @@ function knowledgeReview(entry = {}) {
     pass: blockers.length === 0,
     reviewReady: blockers.length === 0 && majors.length === 0,
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'usable-as-creative-evidence',
+    normalizedEntry: entry,
     findings,
     truth: {
       knowledgeIsAuthority: false,
       provenanceRequired: true,
-      confidenceQualified: entry?.confidence !== null && entry?.confidence !== undefined,
+      confidenceQualified: entry.confidence !== null,
       counterexamplesRequired: true,
       failureConditionsRequired: true,
       referenceSurfaceCopyBlocked: true,
+      cachedAuthorityClaimsIgnored: true,
       humanApprovalGranted: false,
       productionApproved: false
     }
@@ -214,12 +236,13 @@ function knowledgeReview(entry = {}) {
 }
 
 export function reviewCreativeKnowledgeEntry(entry = {}) {
-  return knowledgeReview(normalizeKnowledgeEntry(entry));
+  const normalized = normalizeKnowledgeEntry(entry);
+  return reviewNormalizedKnowledgeEntry(normalized, entry);
 }
 
 export function buildCreativeKnowledgeEntry(input = {}) {
   const entry = normalizeKnowledgeEntry(input);
-  const review = knowledgeReview(entry);
+  const review = reviewNormalizedKnowledgeEntry(entry, entry);
   return {
     ...entry,
     review,
@@ -233,21 +256,22 @@ export function buildCreativeKnowledgeEntry(input = {}) {
 
 export function reviewCreativeKnowledgeLibrary(library = {}) {
   const findings = [];
-  const entries = (Array.isArray(library?.entries) ? library.entries : []).map(normalizeKnowledgeEntry);
+  const rawEntries = Array.isArray(library?.entries) ? library.entries : [];
+  const entries = rawEntries.map(normalizeKnowledgeEntry);
   const ids = entries.map((entry) => entry.id);
 
   if (library?.schema !== 'ai-studio-os/creative-knowledge-library@1') findings.push(finding('blocker', 'creative-knowledge-library-schema-invalid', 'Creative knowledge library requires creative-knowledge-library@1.'));
   if (!entries.length) findings.push(finding('major', 'creative-knowledge-library-empty', 'Creative Intelligence requires at least one qualified knowledge entry.'));
   if (new Set(ids).size !== ids.length) findings.push(finding('blocker', 'creative-knowledge-library-id-duplicate', 'Creative knowledge IDs must be unique.', { ids }));
 
-  for (const entry of entries) {
-    const review = knowledgeReview(entry);
+  entries.forEach((entry, index) => {
+    const review = reviewNormalizedKnowledgeEntry(entry, rawEntries[index] ?? entry);
     if (!review.reviewReady) findings.push(finding('major', 'creative-knowledge-library-entry-not-ready', 'Every active knowledge entry must be review-ready before the library can be used as a reasoning substrate.', { entryId: entry.id, findingCodes: review.findings.map((item) => item.code) }));
     for (const relationship of entry.relationships) {
       if (relationship.targetId && !ids.includes(relationship.targetId)) findings.push(finding('blocker', 'creative-knowledge-relationship-target-missing', 'Knowledge relationship target must exist in the same library snapshot.', { entryId: entry.id, targetId: relationship.targetId }));
       if (relationship.targetId === entry.id) findings.push(finding('major', 'creative-knowledge-self-relationship', 'Knowledge relationships should not point back to the same entry.', { entryId: entry.id, type: relationship.type }));
     }
-  }
+  });
 
   const claims = authorityClaims(library);
   if (claims.length) findings.push(finding('blocker', 'creative-knowledge-library-authority-fabricated', 'A knowledge library cannot become creative authority.', { claims }));
@@ -264,6 +288,7 @@ export function reviewCreativeKnowledgeLibrary(library = {}) {
     truth: {
       knowledgeIsAuthority: false,
       allRelationshipsResolve: blockers.every((item) => item.code !== 'creative-knowledge-relationship-target-missing'),
+      projectScopesMayCoexistInLibrary: true,
       humanApprovalGranted: false,
       productionApproved: false
     }
@@ -285,6 +310,63 @@ export function buildCreativeKnowledgeLibrary({ entries = [] } = {}) {
   return { ...library, ...review, entries: review.entries, truth: { ...library.truth, ...review.truth } };
 }
 
+export function reviewCreativeIntelligenceFoundation(foundation = {}) {
+  const findings = [];
+  const libraryReview = reviewCreativeKnowledgeLibrary(foundation?.knowledgeLibrary ?? {});
+
+  if (foundation?.schema !== 'ai-studio-os/creative-intelligence-foundation@1') findings.push(finding('blocker', 'creative-intelligence-foundation-schema-invalid', 'Creative Intelligence Foundation requires creative-intelligence-foundation@1.'));
+  if (!libraryReview.reviewReady) findings.push(finding('blocker', 'creative-intelligence-foundation-library-not-ready', 'Foundation requires a review-ready knowledge library.', { findingCodes: libraryReview.findings.map((item) => item.code) }));
+
+  for (const [key, expected] of Object.entries(CREATIVE_INTELLIGENCE_CONSTITUTION)) {
+    if (foundation?.constitution?.[key] !== expected) findings.push(finding('blocker', 'creative-intelligence-constitution-drift', 'Creative Intelligence constitutional boundaries cannot be weakened by callers.', { key, expected, actual: foundation?.constitution?.[key] ?? null }));
+  }
+
+  const claims = authorityClaims(foundation);
+  if (claims.length) findings.push(finding('blocker', 'creative-intelligence-foundation-authority-fabricated', 'Creative Intelligence Foundation is a reasoning substrate and cannot declare creative or production authority.', { claims }));
+
+  const blockers = findings.filter((item) => item.severity === 'blocker');
+  return {
+    schema: 'ai-studio-os/creative-intelligence-foundation-review@1',
+    pass: blockers.length === 0,
+    reviewReady: blockers.length === 0,
+    status: blockers.length ? 'blocked' : 'ready-as-shared-reasoning-substrate',
+    findings,
+    libraryReview,
+    truth: {
+      knowledgeIsAuthority: false,
+      authorityBoundariesConstitutional: true,
+      foundationIsSharedSubstrate: true,
+      humanApprovalGranted: false,
+      productionApproved: false
+    }
+  };
+}
+
+export function buildCreativeIntelligenceFoundation({ entries = [] } = {}) {
+  const foundation = {
+    schema: 'ai-studio-os/creative-intelligence-foundation@1',
+    stage: 'creative-intelligence-foundation',
+    constitution: { ...CREATIVE_INTELLIGENCE_CONSTITUTION },
+    knowledgeLibrary: buildCreativeKnowledgeLibrary({ entries }),
+    truth: {
+      knowledgeOnly: true,
+      authorityGranted: false,
+      creativeDirectionSelected: false,
+      productionApproved: false
+    }
+  };
+  const review = reviewCreativeIntelligenceFoundation(foundation);
+  return {
+    ...foundation,
+    review,
+    pass: review.pass,
+    reviewReady: review.reviewReady,
+    status: review.status,
+    findings: review.findings,
+    truth: { ...foundation.truth, ...review.truth }
+  };
+}
+
 function normalizeContextEntryRef(value = {}) {
   const source = value && typeof value === 'object' ? value : {};
   return {
@@ -298,28 +380,27 @@ function normalizeContextEntryRef(value = {}) {
 
 export function reviewCreativeIntelligenceContext(context = {}) {
   const findings = [];
-  const libraryReview = reviewCreativeKnowledgeLibrary(context?.knowledgeLibrary ?? {});
+  const foundationReview = reviewCreativeIntelligenceFoundation(context?.foundation ?? {});
   const projectId = text(context?.projectId);
   const purpose = text(context?.purpose);
   const projectTruths = list(context?.projectTruths);
   const constraints = list(context?.constraints);
   const entryRefs = (Array.isArray(context?.entryRefs) ? context.entryRefs : []).map(normalizeContextEntryRef);
-  const libraryIds = new Set(libraryReview.entries.map((entry) => entry.id));
+  const entries = foundationReview.libraryReview?.entries ?? [];
+  const entriesById = new Map(entries.map((entry) => [entry.id, entry]));
 
   if (context?.schema !== 'ai-studio-os/creative-intelligence-context@1') findings.push(finding('blocker', 'creative-intelligence-context-schema-invalid', 'Creative Intelligence context requires creative-intelligence-context@1.'));
   if (!projectId) findings.push(finding('blocker', 'creative-intelligence-project-missing', 'Creative reasoning must be bound to a project.'));
   if (!purpose) findings.push(finding('major', 'creative-intelligence-purpose-missing', 'Creative reasoning requires an explicit purpose or decision question.'));
   if (!projectTruths.length) findings.push(finding('major', 'creative-intelligence-project-truth-missing', 'Creative reasoning must include project truth so retrieved knowledge cannot become the project itself.'));
-  if (!libraryReview.reviewReady) findings.push(finding('blocker', 'creative-intelligence-library-not-ready', 'Creative reasoning requires a review-ready knowledge library snapshot.', { findingCodes: libraryReview.findings.map((item) => item.code) }));
+  if (!foundationReview.reviewReady) findings.push(finding('blocker', 'creative-intelligence-foundation-not-ready', 'Creative reasoning requires a review-ready Creative Intelligence Foundation.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
   if (!entryRefs.length) findings.push(finding('major', 'creative-intelligence-evidence-selection-missing', 'Creative reasoning should explicitly select which knowledge is relevant to the current purpose.'));
 
   for (const ref of entryRefs) {
-    if (!libraryIds.has(ref.knowledgeId)) findings.push(finding('blocker', 'creative-intelligence-evidence-ref-invalid', 'Context references knowledge not present in the bound library.', { knowledgeId: ref.knowledgeId }));
+    const entry = entriesById.get(ref.knowledgeId);
+    if (!entry) findings.push(finding('blocker', 'creative-intelligence-evidence-ref-invalid', 'Context references knowledge not present in the bound foundation.', { knowledgeId: ref.knowledgeId }));
     if (!ref.role || !ref.relevance || !ref.projectFit) findings.push(finding('major', 'creative-intelligence-evidence-ref-thin', 'Each selected knowledge entry needs a role, relevance and project-fit explanation.', { knowledgeId: ref.knowledgeId }));
-  }
-
-  for (const entry of libraryReview.entries) {
-    if (entry.scope === 'project' && entry.projectId !== projectId) findings.push(finding('blocker', 'creative-intelligence-project-knowledge-drift', 'Project-scoped knowledge cannot cross project boundaries.', { knowledgeId: entry.id, knowledgeProjectId: entry.projectId, contextProjectId: projectId }));
+    if (entry?.scope === 'project' && entry.projectId !== projectId) findings.push(finding('blocker', 'creative-intelligence-project-knowledge-drift', 'Project-scoped knowledge may exist in the shared foundation but cannot be selected across project boundaries.', { knowledgeId: entry.id, knowledgeProjectId: entry.projectId, contextProjectId: projectId }));
   }
 
   const claims = authorityClaims(context);
@@ -333,17 +414,12 @@ export function reviewCreativeIntelligenceContext(context = {}) {
     reviewReady: blockers.length === 0 && majors.length === 0,
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-for-creative-reasoning',
     findings,
-    libraryReview,
-    normalized: {
-      projectId,
-      purpose,
-      projectTruths,
-      constraints,
-      entryRefs
-    },
+    foundationReview,
+    normalized: { projectId, purpose, projectTruths, constraints, entryRefs },
     truth: {
       knowledgeIsAuthority: false,
       projectTruthDominatesRetrievedKnowledge: true,
+      onlySelectedProjectKnowledgeIsScopeChecked: true,
       projectScopedKnowledgeCannotCrossProjects: true,
       humanApprovalGranted: false,
       productionApproved: false
@@ -356,7 +432,7 @@ export function buildCreativeIntelligenceContext({
   purpose,
   projectTruths = [],
   constraints = [],
-  knowledgeLibrary,
+  foundation,
   entryRefs = []
 } = {}) {
   const context = {
@@ -366,7 +442,7 @@ export function buildCreativeIntelligenceContext({
     purpose: text(purpose),
     projectTruths: list(projectTruths),
     constraints: list(constraints),
-    knowledgeLibrary: knowledgeLibrary ?? null,
+    foundation: foundation ?? null,
     entryRefs: (Array.isArray(entryRefs) ? entryRefs : []).map(normalizeContextEntryRef),
     truth: {
       knowledgeOnly: true,
