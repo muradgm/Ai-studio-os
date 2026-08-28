@@ -131,7 +131,12 @@ test('current trend is included while fresh and excluded after explicit freshUnt
   const foundation = makeFoundation([trend('trend-a')]);
   const graph = buildCreativeKnowledgeGraph({
     foundation,
-    nodeAnnotations: { 'trend-a': { freshUntil: '2026-09-01T00:00:00Z' } }
+    nodeAnnotations: {
+      'trend-a': {
+        freshUntil: '2026-09-01T00:00:00Z',
+        evidenceRefs: ['policy://trend-freshness-v1']
+      }
+    }
   });
   assert.equal(graph.reviewReady, true);
 
@@ -227,9 +232,22 @@ test('disputed evidence stays visible while superseded and deprecated evidence s
   const graph = buildCreativeKnowledgeGraph({
     foundation,
     nodeAnnotations: {
-      disputed: { status: 'disputed', statusReason: 'Reliable evidence conflicts.' },
-      old: { status: 'superseded', statusReason: 'Replaced by active knowledge.', supersededBy: 'active' },
-      deprecated: { status: 'deprecated', statusReason: 'No longer suitable for use.' }
+      disputed: {
+        status: 'disputed',
+        statusReason: 'Reliable evidence conflicts.',
+        evidenceRefs: ['review://disputed-evidence']
+      },
+      old: {
+        status: 'superseded',
+        statusReason: 'Replaced by active knowledge.',
+        supersededBy: 'active',
+        evidenceRefs: ['benchmark://replacement']
+      },
+      deprecated: {
+        status: 'deprecated',
+        statusReason: 'No longer suitable for use.',
+        evidenceRefs: ['review://deprecation']
+      }
     },
     supplementalEdges: [{
       id: 'lineage:active:old',
