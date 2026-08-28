@@ -19,6 +19,22 @@ function sameValue(left, right) {
   return fingerprintCreativeValue(left) === fingerprintCreativeValue(right);
 }
 
+function sourceFoundationReceipt(foundationReview, foundation) {
+  return {
+    schema: 'ai-studio-os/creative-intelligence-foundation-provenance-receipt@1',
+    reviewReady: foundationReview.reviewReady === true,
+    foundationSnapshotFingerprint: text(foundationReview.computedFingerprint) || null,
+    knowledgeLibraryFingerprint: text(foundationReview.libraryReview?.computedFingerprint) || null,
+    constitutionFingerprint: fingerprintCreativeValue(foundation?.constitution ?? {}),
+    findingCodes: (foundationReview.findings ?? []).map((item) => item.code),
+    truth: {
+      receiptContainsFoundationKnowledge: false,
+      receiptGrantsCreativeAuthority: false,
+      productionApproved: false
+    }
+  };
+}
+
 export function reviewCreativeIntelligenceContextProvenance({ context, foundation } = {}) {
   const findings = [];
   const contextReview = reviewCreativeIntelligenceContext(context ?? {});
@@ -108,13 +124,14 @@ export function reviewCreativeIntelligenceContextProvenance({ context, foundatio
     status: blockers.length ? 'blocked' : 'verified-advisory-context-provenance',
     findings,
     contextReview,
-    foundationReview,
+    sourceFoundationReceipt: sourceFoundationReceipt(foundationReview, foundation),
     truth: {
       hashIsSignature: false,
       sourceFoundationSuppliedSeparately: true,
       sourceFoundationFreshlyReviewed: foundationReview.reviewReady === true,
       selectedEvidenceMembershipRecomputed: true,
       selectedEvidenceContentRecomputed: true,
+      provenanceReceiptContainsFoundationKnowledge: false,
       provenanceVerificationGrantsCreativeAuthority: false,
       humanApprovalGranted: false,
       productionApproved: false
@@ -136,6 +153,7 @@ export function buildCreativeIntelligenceContextWithProvenance(input = {}) {
       ...(context.truth ?? {}),
       independentFoundationProvenanceRequired: true,
       independentFoundationProvenanceSatisfied: provenanceReview.reviewReady,
+      fullSharedFoundationExcludedFromProvenanceReceipt: true,
       productionApproved: false
     }
   };
@@ -180,6 +198,7 @@ export function reviewCreativeReasoningFrameProvenance({ frame, foundation } = {
       reasoningRemainsAdvisory: true,
       sourceFoundationRecomputedAtVerificationBoundary: true,
       hashIsSignature: false,
+      provenanceReceiptContainsFoundationKnowledge: false,
       provenanceVerificationGrantsCreativeAuthority: false,
       humanApprovalGranted: false,
       productionApproved: false
@@ -198,6 +217,7 @@ export function buildCreativeReasoningFrameWithProvenance({ context, foundation,
       ...(frame.truth ?? {}),
       independentFoundationProvenanceRequired: true,
       independentFoundationProvenanceSatisfied: provenanceReview.reviewReady,
+      fullSharedFoundationExcludedFromProvenanceReceipt: true,
       productionApproved: false
     }
   };
