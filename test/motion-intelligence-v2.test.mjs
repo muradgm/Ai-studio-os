@@ -343,6 +343,7 @@ test('valid Motion Intelligence V2 compiles deep knowledge-grounded hypotheses i
   assert.equal(reasoningSet.truth.noWinnerOrRecommendationProduced, true);
   assert.equal(reasoningSet.truth.semanticMotionQualityVerified, false);
   assert.equal(reasoningSet.truth.humanMotionSelectionStillRequired, true);
+  assert.equal(Object.hasOwn(reasoningSet.brief, 'authorityInputs'), false);
 
   const review = reviewMotionIntelligenceV2Set(reasoningSet);
   assert.equal(review.reviewReady, true, review.findings.map((item) => item.code).join(', '));
@@ -357,6 +358,23 @@ test('valid Motion Intelligence V2 compiles deep knowledge-grounded hypotheses i
   assert.equal(handoff.truth.humanMotionSelectionRequired, true);
   const handoffReview = reviewMotionIntelligenceV2ExplorationHandoff(handoff, { reasoningSet });
   assert.equal(handoffReview.reviewReady, true);
+});
+
+test('a serialized Motion V2 Brief excludes full provenance sources and supports explicit fresh re-review', () => {
+  const { canonical, knowledge, brief } = baseline();
+  const serialized = JSON.parse(JSON.stringify(brief));
+  assert.equal(Object.hasOwn(serialized, 'authorityInputs'), false);
+  assert.equal(serialized.truth.fullProvenanceSourcesExcludedFromArtifact, true);
+
+  const withoutSources = reviewMotionIntelligenceV2Brief(serialized);
+  assert.equal(withoutSources.reviewReady, false);
+
+  const withSources = reviewMotionIntelligenceV2Brief(serialized, {
+    canonicalCreativeAuthority: canonical,
+    knowledge,
+    synthesis: null
+  });
+  assert.equal(withSources.reviewReady, true, withSources.findings.map((item) => item.code).join(', '));
 });
 
 test('tampering the Motion Foundation after retrieval invalidates provenance and redacts all Motion V2 knowledge content', () => {
@@ -374,13 +392,15 @@ test('tampering the Motion Foundation after retrieval invalidates provenance and
   assert.ok(brief.findings.some((item) => item.code === 'motion-v2-knowledge-provenance-invalid'));
 });
 
-test('a valid retrieval from another project cannot leak evidence into the Motion V2 Brief', () => {
+test('a valid retrieval from another project cannot leak evidence or raw provenance sources into the Motion V2 Brief', () => {
   const canonical = buildCanonicalMotionAuthorityFixture(PROJECT_ID);
   const foreignKnowledge = buildKnowledge('foreign-project');
   const brief = buildBrief({ canonical, knowledge: foreignKnowledge, projectId: PROJECT_ID });
   assert.equal(brief.reviewReady, false);
   assert.deepEqual(brief.knowledgeEvidence, []);
   assert.equal(brief.knowledgeBinding.knowledgeCount, 0);
+  assert.equal(Object.hasOwn(brief, 'authorityInputs'), false);
+  assert.equal(JSON.stringify(brief).includes('foreign-project'), false);
   assert.ok(brief.findings.some((item) => item.code === 'motion-v2-knowledge-project-drift'));
 });
 
@@ -455,14 +475,20 @@ test('missing stillness, mobile/touch reinterpretation or reduced-motion equival
 });
 
 test('a V2 handoff cannot survive later tampering of its reasoning or Creative World authority', () => {
-  const { reasoningSet } = baseline();
+  const { reasoningSet, canonical, knowledge } = baseline();
   const handoff = buildMotionIntelligenceV2ExplorationHandoff({ reasoningSet });
   assert.equal(handoff.reviewReady, true);
 
-  const tamperedSet = structuredClone(reasoningSet);
-  tamperedSet.brief.authorityInputs.canonicalCreativeAuthority.creativeDirection.provisional = true;
-  tamperedSet.reviewReady = true;
-  const review = reviewMotionIntelligenceV2ExplorationHandoff(handoff, { reasoningSet: tamperedSet });
+  const tamperedAuthorityInputs = {
+    canonicalCreativeAuthority: structuredClone(canonical),
+    knowledge,
+    synthesis: null
+  };
+  tamperedAuthorityInputs.canonicalCreativeAuthority.creativeDirection.provisional = true;
+  const review = reviewMotionIntelligenceV2ExplorationHandoff(handoff, {
+    reasoningSet,
+    authorityInputs: tamperedAuthorityInputs
+  });
   assert.equal(review.reviewReady, false);
   assert.ok(review.findings.some((item) => item.code === 'motion-v2-handoff-source-invalid'));
 });
