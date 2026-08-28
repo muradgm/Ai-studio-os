@@ -4,7 +4,7 @@
 
 Implementation architecture for the deterministic Creative Knowledge representation and retrieval layer that follows Creative Intelligence Foundation V1.
 
-This slice makes qualified creative knowledge persistable, related, freshness-aware and safely retrievable without creating a new creative-authority path.
+This slice makes qualified creative knowledge persistable, related, freshness-aware, provenance-aware and safely retrievable without creating a new creative-authority path.
 
 ## Position in the roadmap
 
@@ -32,7 +32,7 @@ TECHNOLOGY != CONCEPT
 CRITIC SCORE != SELECTION
 ```
 
-Graph storage, graph relations, freshness, retrieval rank and provenance verification are evidence infrastructure only.
+Graph storage, graph relations, representation status, freshness, retrieval rank and provenance verification are evidence infrastructure only.
 
 They cannot:
 
@@ -50,6 +50,8 @@ reviewed Creative Intelligence Foundation
         ↓ exact source binding
 Creative Knowledge Graph
         ↓ exact graph snapshot
+representation state + evidence refs
+        ↓
 project + explicit asOf query
         ↓
 scope / status / freshness / deterministic lexical filtering
@@ -74,6 +76,8 @@ Before adding probabilistic retrieval, Studio needs deterministic answers to har
 - What is one unit of creative knowledge?
 - Which relations are authored in the Foundation and which belong only to representation lineage?
 - How is contradictory evidence preserved?
+- Why was evidence disputed, deprecated or superseded?
+- Why does a freshness boundary exist?
 - When is evidence stale?
 - How is project-scoped knowledge isolated?
 - How is an exact project retrieval reconstructed from its source graph?
@@ -91,14 +95,39 @@ The graph binds:
 
 - exact Foundation snapshot fingerprint;
 - exact Foundation knowledge-library fingerprint;
-- one graph node for every Foundation knowledge entry;
+- one graph node for every review-ready Foundation knowledge entry;
 - exact Foundation-authored relationships;
 - narrowly scoped representation lineage;
 - graph-level status and freshness annotations;
+- representation evidence/policy references;
 - deterministic graph snapshot fingerprint;
 - explicit non-authority truth.
 
-Graph V1 represents the exact Foundation knowledge ID set. It does not silently invent extra knowledge nodes or omit difficult evidence.
+Graph V1 represents the exact review-ready Foundation knowledge ID set. It does not silently invent extra knowledge nodes or omit difficult evidence.
+
+If the source Foundation is not review-ready, construction fails closed and emits no Foundation-derived graph nodes.
+
+### Canonical graph envelope
+
+The top-level graph shape is locked. Hidden caller fields are not permitted beside otherwise valid graph data.
+
+The canonical artifact contains only the graph contract plus derived review fields:
+
+```text
+schema
+stage
+sourceBinding
+nodes
+edges
+snapshotFingerprint
+truth
+findings
+pass
+reviewReady
+status
+```
+
+Its truth contract is also fixed and explicitly states that representation provenance references are required and that neither graph structure nor retrieval rank grants creative authority.
 
 ## Nodes
 
@@ -109,6 +138,17 @@ ai-studio-os/creative-knowledge-graph-node@1
 ```
 
 A node contains the exact normalized Foundation knowledge contract plus representation metadata.
+
+Representation annotation fields are intentionally narrow:
+
+```text
+status
+statusReason
+freshUntil
+supersededBy
+representationNotes[]
+evidenceRefs[]
+```
 
 Representation states:
 
@@ -125,9 +165,19 @@ Usable evidence under its declared scope and freshness constraints.
 
 ### disputed
 
-Still visible evidence whose reliability, applicability or interpretation has a meaningful unresolved conflict.
+Still-visible evidence whose reliability, applicability or interpretation has a meaningful unresolved conflict.
 
 Disputed evidence is not silently discarded merely because it complicates a clean answer.
+
+A non-active status requires:
+
+```text
+statusReason
++
+evidenceRefs[]
+```
+
+The graph therefore preserves not only *that* a representation changed, but at least one reference for *why* that state exists.
 
 ### superseded
 
@@ -170,6 +220,30 @@ old.supersededBy = replacement
 
 Supersession also requires evidence/provenance references.
 
+## Representation-state provenance
+
+Representation metadata can change what later reasoning sees, so representation changes cannot be provenance-free administrative flags.
+
+Any non-active status must retain at least one evidence/provenance reference:
+
+```text
+status != active
+→ evidenceRefs.length >= 1
+```
+
+Any explicit freshness boundary must also retain at least one evidence or policy reference:
+
+```text
+freshUntil != null
+→ evidenceRefs.length >= 1
+```
+
+Examples of legitimate refs include review evidence, benchmark evidence, policy decisions, source-refresh records or other stable provenance references.
+
+These refs are fingerprint-bound with the graph representation. They do **not** act as signatures and they do **not** grant authority.
+
+Project retrieval intentionally omits representation provenance refs from its compact project-safe annotation projection; independent provenance is performed against the separately supplied graph.
+
 ## Freshness
 
 Freshness belongs to the representation/query layer rather than mutating Foundation knowledge contracts.
@@ -180,6 +254,8 @@ For `current-trend` knowledge:
 Foundation provenance.capturedAt
 +
 Graph annotation.freshUntil
++
+Graph annotation.evidenceRefs[]
 +
 Retrieval query.asOf
 ```
@@ -296,7 +372,7 @@ source graph reviewReady = false
 → no graph-derived knowledge text / IDs / conflict metadata
 ```
 
-The artifact may retain opaque fingerprints and safe diagnostic finding codes, but no graph-derived project evidence.
+The artifact may retain opaque source fingerprints and safe structural diagnostics, but no graph-derived project evidence.
 
 This prevents blocked output from becoming an accidental exfiltration channel.
 
@@ -312,9 +388,12 @@ Independent graph provenance recomputes:
 - Foundation snapshot fingerprint;
 - knowledge-library fingerprint;
 - exact knowledge node ID membership;
-- exact node content.
+- exact node content;
+- graph structural diagnostics when attached.
 
 The returned receipt contains fingerprints and verification state, not Foundation knowledge.
+
+A caller-modified `findings` array cannot ride beside an otherwise valid graph and still pass independent provenance; attached diagnostics must equal the fresh graph review diagnostics.
 
 ## Retrieval provenance
 
@@ -331,6 +410,10 @@ source Foundation supplied separately
 Verification first re-establishes graph → Foundation provenance, then deterministically rebuilds the retrieval from the exact graph and query.
 
 The claimed and rebuilt retrieval contracts must match exactly.
+
+If the project artifact carries a compact `provenanceReceipt` or `provenanceReady` claim, those are independently recomputed as well. A modified receipt cannot be ignored merely because the underlying result set still matches.
+
+Attached retrieval diagnostics are likewise rebound to a fresh structural review during independent provenance.
 
 ### Provenance failure rule
 
@@ -359,6 +442,8 @@ They must not embed:
 
 Diagnostic review functions remain available separately for engineering inspection.
 
+The compact receipt is part of the verified project envelope when present: independent provenance recomputes it rather than trusting cached receipt bytes.
+
 ## Truth boundary
 
 Graph and retrieval artifacts remain advisory.
@@ -371,7 +456,7 @@ creativeDirectionSelected = false
 productionApproved = false
 ```
 
-Neither higher confidence, newer evidence, more incoming edges, nor first retrieval rank can change those facts.
+Neither higher confidence, newer evidence, more incoming edges, representation status, provenance readiness nor first retrieval rank can change those facts.
 
 ## V1 regression requirements
 
@@ -380,22 +465,27 @@ The slice should prove at least:
 1. graph snapshot determinism;
 2. Foundation relationship reconstruction;
 3. raw node/edge schema and authority tampering fails before normalization can hide it;
-4. hidden extra graph fields fail closed;
-5. trend freshness requires capturedAt, freshUntil and explicit asOf;
-6. stale trends are excluded deterministically;
-7. disputed evidence remains visible;
-8. superseded/deprecated evidence stays out of project retrieval;
-9. supersession lineage is bidirectionally consistent;
-10. foreign project knowledge does not enter project payloads or visible counts;
-11. source relationships are stripped from retrieved entries;
-12. visible conflicts are preserved as unranked context;
-13. hidden-scope conflicts expose no ID/content/count;
-14. structurally blocked graphs emit zero graph-derived project evidence;
-15. same-ID Foundation drift fails independent graph provenance;
-16. provenance failure emits zero graph-derived project evidence;
-17. deterministic retrieval can be independently rebuilt;
-18. reordered or altered results fail provenance;
-19. rank, graph status and provenance cannot manufacture creative approval.
+4. hidden extra graph fields and top-level payload fields fail closed;
+5. graph truth and derived review state cannot be caller-forged;
+6. an invalid Foundation emits no Foundation-derived graph nodes;
+7. trend freshness requires capturedAt, freshUntil, evidenceRefs and explicit asOf;
+8. non-active representation states require reason + evidenceRefs;
+9. stale trends are excluded deterministically;
+10. disputed evidence remains visible;
+11. superseded/deprecated evidence stays out of project retrieval;
+12. supersession lineage is bidirectionally consistent;
+13. foreign project knowledge does not enter project payloads or visible counts;
+14. source relationships are stripped from retrieved entries;
+15. visible conflicts are preserved as unranked context;
+16. hidden-scope conflicts expose no ID/content/count;
+17. structurally blocked graphs emit zero graph-derived project evidence;
+18. same-ID Foundation drift fails independent graph provenance;
+19. provenance failure emits zero graph-derived project evidence;
+20. deterministic retrieval can be independently rebuilt;
+21. reordered or altered results fail provenance;
+22. compact provenance receipt/provenanceReady drift fails independent provenance;
+23. caller-modified graph/retrieval diagnostics fail independent provenance;
+24. rank, graph status and provenance cannot manufacture creative approval.
 
 ## V1 non-goals
 
@@ -416,4 +506,4 @@ Do not add yet:
 
 After Graph V1 is stable and its project-isolation/provenance boundaries are proven, proceed to **Creative Transfer Intelligence**.
 
-Transfer should consume qualified, scope-safe evidence and learn how to move causal principles across domains without copying source surface signatures. It must build on this graph rather than bypass its provenance, freshness and conflict boundaries.
+Transfer should consume qualified, scope-safe evidence and learn how to move causal principles across domains without copying source surface signatures. It must build on this graph rather than bypass its provenance, freshness, conflict and representation-state boundaries.
