@@ -48,7 +48,7 @@ function worldBinding(projectId, inputs = {}) {
   return {
     schema: 'ai-studio-os/motion-intelligence-creative-world-binding@1',
     projectId: valid ? text(worldReview?.authority?.projectId) : text(projectId),
-    creativeWorldId: valid ? text(worldReview?.authority?.creativeWorldId) : text(world?.id),
+    creativeWorldId: valid ? text(worldReview?.authority?.creativeWorldId) : '',
     selectedWorldFingerprint: valid ? fingerprintCreativeValue(world) : ''
   };
 }

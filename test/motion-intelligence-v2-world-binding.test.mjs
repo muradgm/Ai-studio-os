@@ -93,3 +93,14 @@ test('Motion V2 binds exact selected Creative World content so same-ID semantic 
   assert.equal(review.reviewReady, false);
   assert.ok(review.findings.some((item) => item.code === 'motion-v2-world-content-binding-drift'));
 });
+
+test('Motion V2 world binding emits no world identity when canonical Creative World authority is cross-project or invalid', () => {
+  const foreignAuthority = buildCanonicalMotionAuthorityFixture('foreign-motion-v2-world-project');
+  const knowledge = buildKnowledge();
+  const brief = buildBrief(foreignAuthority, knowledge);
+
+  assert.equal(brief.reviewReady, false);
+  assert.equal(brief.creativeWorldBinding.projectId, PROJECT_ID);
+  assert.equal(brief.creativeWorldBinding.creativeWorldId, '');
+  assert.equal(brief.creativeWorldBinding.selectedWorldFingerprint, '');
+});
