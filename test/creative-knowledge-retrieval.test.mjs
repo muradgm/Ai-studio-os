@@ -131,25 +131,15 @@ test('current trend is included while fresh and excluded after explicit freshUnt
   const foundation = makeFoundation([trend('trend-a')]);
   const graph = buildCreativeKnowledgeGraph({
     foundation,
-    nodeAnnotations: {
-      'trend-a': { freshUntil: '2026-09-01T00:00:00Z' }
-    }
+    nodeAnnotations: { 'trend-a': { freshUntil: '2026-09-01T00:00:00Z' } }
   });
   assert.equal(graph.reviewReady, true);
 
-  const fresh = query(graph, {
-    projectId: 'project-a',
-    asOf: '2026-08-28T10:00:00Z',
-    kinds: ['current-trend']
-  });
+  const fresh = query(graph, { asOf: '2026-08-28T10:00:00Z', kinds: ['current-trend'] });
   assert.equal(fresh.reviewReady, true);
   assert.deepEqual(fresh.results.map((item) => item.knowledgeId), ['trend-a']);
 
-  const stale = query(graph, {
-    projectId: 'project-a',
-    asOf: '2026-09-03T10:00:00Z',
-    kinds: ['current-trend']
-  });
+  const stale = query(graph, { asOf: '2026-09-03T10:00:00Z', kinds: ['current-trend'] });
   assert.equal(stale.reviewReady, true);
   assert.equal(stale.results.length, 0);
   assert.equal(stale.stats.excludedCounts['trend-stale'], 1);
@@ -164,7 +154,7 @@ test('retrieval asOf must be explicit and timezone-qualified', () => {
   assert.ok(retrieval.findings.some((item) => item.code === 'creative-knowledge-retrieval-as-of-invalid'));
 });
 
-test('cross-project scoped knowledge is excluded before retrieval payload creation', () => {
+test('cross-project knowledge is absent before payload construction and does not affect visible counts', () => {
   const privateB = 'PROJECT-B-PRIVATE-GRAPH-CONTENT-MUST-NOT-LEAK';
   const foundation = makeFoundation([
     projectEntry('a', 'Project A evidence.'),
@@ -175,11 +165,13 @@ test('cross-project scoped knowledge is excluded before retrieval payload creati
 
   assert.equal(retrieval.reviewReady, true);
   assert.deepEqual(retrieval.results.map((item) => item.knowledgeId), ['project-a']);
+  assert.equal(retrieval.stats.scopeVisibleNodeCount, 1);
+  assert.equal(Object.hasOwn(retrieval.stats.excludedCounts, 'project-scope-mismatch'), false);
+  assert.equal(JSON.stringify(retrieval).includes('project-b'), false);
   assert.equal(JSON.stringify(retrieval).includes(privateB), false);
-  assert.equal(retrieval.stats.excludedCounts['project-scope-mismatch'], 1);
 });
 
-test('same-scope conflicts are preserved as unranked context even when they do not match the query terms', () => {
+test('project-safe projection strips source relationships and preserves same-scope conflict as unranked context', () => {
   const a = baseEntry('a', {
     title: 'Focused contrast hierarchy',
     relationships: [{
@@ -198,13 +190,16 @@ test('same-scope conflicts are preserved as unranked context even when they do n
 
   assert.equal(retrieval.reviewReady, true);
   assert.deepEqual(retrieval.results.map((item) => item.knowledgeId), ['a']);
+  assert.deepEqual(retrieval.results[0].entry.relationships, []);
+  assert.deepEqual(retrieval.results[0].visibleConflictIds, ['b']);
   assert.deepEqual(retrieval.conflictContext.map((item) => item.knowledgeId), ['b']);
   assert.equal(retrieval.conflictContext[0].rank, null);
+  assert.deepEqual(retrieval.conflictContext[0].entry.relationships, []);
   assert.deepEqual(retrieval.conflictContext[0].conflictsWithPrimaryIds, ['a']);
   assert.equal(retrieval.truth.conflictEvidencePreserved, true);
 });
 
-test('cross-project conflicts are counted but their IDs and content are redacted', () => {
+test('cross-project conflict exposes only a withheld boolean, never foreign ID content or count', () => {
   const privateB = 'PROJECT-B-CONFLICT-PRIVATE-CONTENT';
   const a = projectEntry('a', 'Project A scoped evidence.');
   a.relationships = [{
@@ -218,13 +213,16 @@ test('cross-project conflicts are counted but their IDs and content are redacted
   const retrieval = query(graph, { projectId: 'a', terms: ['project'] });
 
   assert.equal(retrieval.reviewReady, true);
-  assert.equal(retrieval.stats.redactedConflictCount, 1);
+  assert.deepEqual(retrieval.results.map((item) => item.knowledgeId), ['project-a']);
+  assert.equal(retrieval.results[0].withheldConflictPresent, true);
+  assert.deepEqual(retrieval.results[0].visibleConflictIds, []);
   assert.equal(retrieval.conflictContext.length, 0);
+  assert.equal(Object.hasOwn(retrieval.stats, 'redactedConflictCount'), false);
   assert.equal(JSON.stringify(retrieval).includes('project-b'), false);
   assert.equal(JSON.stringify(retrieval).includes(privateB), false);
 });
 
-test('disputed evidence stays visible while superseded and deprecated evidence stay out of primary retrieval', () => {
+test('disputed evidence stays visible while superseded and deprecated evidence stay out', () => {
   const foundation = makeFoundation([baseEntry('active'), baseEntry('disputed'), baseEntry('old'), baseEntry('deprecated')]);
   const graph = buildCreativeKnowledgeGraph({
     foundation,
@@ -252,7 +250,29 @@ test('disputed evidence stays visible while superseded and deprecated evidence s
   assert.equal(retrieval.stats.excludedCounts['status:deprecated'], 1);
 });
 
-test('retrieval provenance reconstructs the exact deterministic result from graph and Foundation', () => {
+test('structurally blocked graph emits zero graph-derived project evidence', () => {
+  const secret = 'UNTRUSTED-GRAPH-CONTENT-MUST-NOT-ENTER-RETRIEVAL';
+  const foundation = makeFoundation([baseEntry('a', { definition: secret })]);
+  const graph = buildCreativeKnowledgeGraph({ foundation });
+  const forged = structuredClone(graph);
+  forged.nodes[0].schema = 'attacker/graph-node@1';
+
+  const retrieval = query(forged);
+  assert.equal(retrieval.reviewReady, false);
+  assert.deepEqual(retrieval.results, []);
+  assert.deepEqual(retrieval.conflictContext, []);
+  assert.deepEqual(retrieval.stats, {
+    scopeVisibleNodeCount: 0,
+    primaryResultCount: 0,
+    conflictContextCount: 0,
+    excludedCounts: {},
+    unavailableVisibleConflictCount: 0
+  });
+  assert.equal(JSON.stringify(retrieval).includes(secret), false);
+  assert.ok(retrieval.findings.some((item) => item.code === 'creative-knowledge-retrieval-graph-not-ready'));
+});
+
+test('provenance-enabled retrieval reconstructs exact deterministic evidence and returns a compact receipt', () => {
   const foundation = makeFoundation([baseEntry('a'), baseEntry('b')]);
   const graph = buildCreativeKnowledgeGraph({ foundation });
   const retrieval = buildCreativeKnowledgeRetrievalWithProvenance({
@@ -265,8 +285,33 @@ test('retrieval provenance reconstructs the exact deterministic result from grap
 
   assert.equal(retrieval.reviewReady, true);
   assert.equal(retrieval.provenanceReady, true);
-  assert.equal(retrieval.provenanceReview.truth.deterministicRetrievalRecomputed, true);
-  assert.equal(retrieval.provenanceReview.truth.retrievalRankIsCreativeAuthority, false);
+  assert.equal(retrieval.provenanceReceipt.truth.receiptContainsGraphKnowledge, false);
+  assert.equal(retrieval.provenanceReceipt.truth.receiptContainsFoundationKnowledge, false);
+  assert.equal(Object.hasOwn(retrieval, 'provenanceReview'), false);
+});
+
+test('provenance mismatch redacts all graph-derived project evidence before returning payload', () => {
+  const secret = 'GRAPH-A-SOURCE-CONTENT-MUST-BE-REDACTED-ON-PROVENANCE-FAILURE';
+  const foundationA = makeFoundation([baseEntry('same-id', { definition: secret })]);
+  const graph = buildCreativeKnowledgeGraph({ foundation: foundationA });
+  const foundationB = makeFoundation([baseEntry('same-id', {
+    definition: 'Different independently supplied Foundation content under the same ID.'
+  })]);
+
+  const retrieval = buildCreativeKnowledgeRetrievalWithProvenance({
+    graph,
+    foundation: foundationB,
+    projectId: 'project-a',
+    asOf: '2026-08-28T10:00:00Z',
+    purpose: 'Attempt retrieval from a provenance-mismatched graph.'
+  });
+
+  assert.equal(retrieval.provenanceReady, false);
+  assert.deepEqual(retrieval.results, []);
+  assert.deepEqual(retrieval.conflictContext, []);
+  assert.equal(retrieval.stats.scopeVisibleNodeCount, 0);
+  assert.equal(JSON.stringify(retrieval).includes(secret), false);
+  assert.equal(Object.hasOwn(retrieval, 'provenanceReview'), false);
 });
 
 test('reordered results with repaired ranks fail independent retrieval provenance', () => {
