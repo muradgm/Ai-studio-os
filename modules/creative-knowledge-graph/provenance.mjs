@@ -45,23 +45,13 @@ export function reviewCreativeKnowledgeGraphProvenance({ graph, foundation } = {
   const graphReview = reviewCreativeKnowledgeGraph(graph ?? {});
   const foundationReview = reviewCreativeIntelligenceFoundation(foundation ?? {});
 
-  if (!graphReview.reviewReady) {
-    findings.push(finding('blocker', 'creative-knowledge-graph-provenance-graph-not-ready', 'Independent graph provenance requires a structurally review-ready graph.', { findingCodes: graphReview.findings.map((item) => item.code) }));
-  }
-  if (!foundationReview.reviewReady) {
-    findings.push(finding('blocker', 'creative-knowledge-graph-provenance-foundation-not-ready', 'Independent graph provenance requires the source Foundation to pass a fresh review.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
-  }
+  if (!graphReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-graph-not-ready', 'Independent graph provenance requires a structurally review-ready graph.', { findingCodes: graphReview.findings.map((item) => item.code) }));
+  if (!foundationReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-foundation-not-ready', 'Independent graph provenance requires the source Foundation to pass a fresh review.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
 
   const sourceBinding = graph?.sourceBinding ?? {};
-  if (text(sourceBinding.foundationSnapshotFingerprint) !== text(foundationReview.computedFingerprint)) {
-    findings.push(finding('blocker', 'creative-knowledge-graph-provenance-foundation-fingerprint-mismatch', 'Graph must bind the exact independently supplied Foundation snapshot.'));
-  }
-  if (text(sourceBinding.knowledgeLibraryFingerprint) !== text(foundationReview.libraryReview?.computedFingerprint)) {
-    findings.push(finding('blocker', 'creative-knowledge-graph-provenance-library-fingerprint-mismatch', 'Graph must bind the exact knowledge-library snapshot of the independently supplied Foundation.'));
-  }
-  if (text(sourceBinding.bindingFingerprint) !== creativeKnowledgeGraphSourceBindingFingerprint(sourceBinding)) {
-    findings.push(finding('blocker', 'creative-knowledge-graph-provenance-source-binding-drift', 'Graph source binding must remain internally exact before external provenance can be established.'));
-  }
+  if (text(sourceBinding.foundationSnapshotFingerprint) !== text(foundationReview.computedFingerprint)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-foundation-fingerprint-mismatch', 'Graph must bind the exact independently supplied Foundation snapshot.'));
+  if (text(sourceBinding.knowledgeLibraryFingerprint) !== text(foundationReview.libraryReview?.computedFingerprint)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-library-fingerprint-mismatch', 'Graph must bind the exact knowledge-library snapshot of the independently supplied Foundation.'));
+  if (text(sourceBinding.bindingFingerprint) !== creativeKnowledgeGraphSourceBindingFingerprint(sourceBinding)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-source-binding-drift', 'Graph source binding must remain internally exact before external provenance can be established.'));
 
   const sourceEntries = foundationReview.libraryReview?.entries ?? [];
   const graphNodes = graphReview.nodes ?? [];
@@ -69,16 +59,11 @@ export function reviewCreativeKnowledgeGraphProvenance({ graph, foundation } = {
   const graphById = new Map(graphNodes.map((node) => [node.id, node]));
   const sourceIds = [...sourceById.keys()].sort();
   const graphIds = [...graphById.keys()].sort();
-  if (!sameValue(sourceIds, graphIds)) {
-    findings.push(finding('blocker', 'creative-knowledge-graph-provenance-node-set-drift', 'Graph V1 must represent the exact source Foundation knowledge ID set; missing or injected nodes are not allowed.'));
-  }
+  if (!sameValue(sourceIds, graphIds)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-node-set-drift', 'Graph V1 must represent the exact source Foundation knowledge ID set; missing or injected nodes are not allowed.'));
 
   for (const sourceEntry of sourceEntries) {
     const node = graphById.get(sourceEntry.id);
-    if (!node) continue;
-    if (!sameValue(node.entry, sourceEntry)) {
-      findings.push(finding('blocker', 'creative-knowledge-graph-provenance-node-content-drift', 'Graph node content must exactly match the corresponding independently supplied Foundation knowledge contract.', { knowledgeId: sourceEntry.id }));
-    }
+    if (node && !sameValue(node.entry, sourceEntry)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-node-content-drift', 'Graph node content must exactly match the corresponding independently supplied Foundation knowledge contract.', { knowledgeId: sourceEntry.id }));
   }
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -102,10 +87,10 @@ export function reviewCreativeKnowledgeGraphProvenance({ graph, foundation } = {
   };
 }
 
-function retrievalReceipt(retrievalReview, graphProvenanceReview) {
+function retrievalReceipt(retrievalReview, graphProvenanceReview, reviewReady) {
   return {
     schema: 'ai-studio-os/creative-knowledge-retrieval-provenance-receipt@1',
-    reviewReady: retrievalReview.reviewReady === true && graphProvenanceReview.reviewReady === true,
+    reviewReady: reviewReady === true,
     retrievalSnapshotFingerprint: text(retrievalReview.computedFingerprint) || null,
     graphSnapshotFingerprint: graphProvenanceReview.sourceReceipt?.graphSnapshotFingerprint ?? null,
     foundationSnapshotFingerprint: graphProvenanceReview.sourceReceipt?.foundationSnapshotFingerprint ?? null,
@@ -125,21 +110,13 @@ export function reviewCreativeKnowledgeRetrievalProvenance({ retrieval, graph, f
   const retrievalReview = reviewCreativeKnowledgeRetrieval(retrieval ?? {});
   const graphProvenanceReview = reviewCreativeKnowledgeGraphProvenance({ graph, foundation });
 
-  if (!retrievalReview.reviewReady) {
-    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-retrieval-not-ready', 'Independent retrieval provenance requires a structurally review-ready isolated retrieval payload.', { findingCodes: retrievalReview.findings.map((item) => item.code) }));
-  }
-  if (!graphProvenanceReview.reviewReady) {
-    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-graph-not-verified', 'Retrieval provenance requires the source graph to be independently rebound to its separately supplied Foundation.'));
-  }
+  if (!retrievalReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-retrieval-not-ready', 'Independent retrieval provenance requires a structurally review-ready isolated retrieval payload.', { findingCodes: retrievalReview.findings.map((item) => item.code) }));
+  if (!graphProvenanceReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-graph-not-verified', 'Retrieval provenance requires the source graph to be independently rebound to its separately supplied Foundation.'));
 
   const binding = retrieval?.graphBinding ?? {};
   const graphReview = reviewCreativeKnowledgeGraph(graph ?? {});
-  if (text(binding.graphSnapshotFingerprint) !== text(graphReview.computedFingerprint)) {
-    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-graph-fingerprint-mismatch', 'Retrieval must bind the exact graph supplied at the verification boundary.'));
-  }
-  if (text(binding.foundationSnapshotFingerprint) !== text(graph?.sourceBinding?.foundationSnapshotFingerprint)) {
-    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-foundation-binding-mismatch', 'Retrieval graph binding must preserve the graph source Foundation fingerprint.'));
-  }
+  if (text(binding.graphSnapshotFingerprint) !== text(graphReview.computedFingerprint)) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-graph-fingerprint-mismatch', 'Retrieval must bind the exact graph supplied at the verification boundary.'));
+  if (text(binding.foundationSnapshotFingerprint) !== text(graph?.sourceBinding?.foundationSnapshotFingerprint)) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-foundation-binding-mismatch', 'Retrieval graph binding must preserve the graph source Foundation fingerprint.'));
 
   if (graphProvenanceReview.reviewReady) {
     const query = retrievalReview.normalizedQuery ?? {};
@@ -160,18 +137,29 @@ export function reviewCreativeKnowledgeRetrievalProvenance({ retrieval, graph, f
     }
   }
 
+  const baseReady = findings.every((item) => item.severity !== 'blocker');
+  const expectedClaimReceipt = retrievalReceipt(retrievalReview, graphProvenanceReview, baseReady);
+  if (Object.hasOwn(retrieval ?? {}, 'provenanceReceipt') && !sameValue(retrieval.provenanceReceipt, expectedClaimReceipt)) {
+    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-receipt-drift', 'Attached provenance receipt must exactly equal the compact receipt independently recomputed from the supplied graph and Foundation.'));
+  }
+  if (Object.hasOwn(retrieval ?? {}, 'provenanceReady') && retrieval.provenanceReady !== baseReady) {
+    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-ready-claim-drift', 'Attached provenanceReady must match independently recomputed provenance state.', { expected: baseReady, actual: retrieval.provenanceReady }));
+  }
+
   const blockers = findings.filter((item) => item.severity === 'blocker');
-  const receipt = retrievalReceipt(retrievalReview, graphProvenanceReview);
+  const finalReady = blockers.length === 0;
+  const returnedReceipt = retrievalReceipt(retrievalReview, graphProvenanceReview, finalReady);
   return {
     schema: 'ai-studio-os/creative-knowledge-retrieval-provenance-review@1',
-    pass: blockers.length === 0,
-    reviewReady: blockers.length === 0,
-    status: blockers.length ? 'blocked' : 'verified-advisory-retrieval-provenance',
+    pass: finalReady,
+    reviewReady: finalReady,
+    status: finalReady ? 'verified-advisory-retrieval-provenance' : 'blocked',
     findings,
-    sourceReceipt: receipt,
+    sourceReceipt: returnedReceipt,
     truth: {
       deterministicRetrievalRecomputed: graphProvenanceReview.reviewReady === true,
       graphAndFoundationSuppliedSeparately: true,
+      attachedReceiptRecomputedWhenPresent: true,
       provenanceFailureMustRedactProjectEvidence: true,
       fullGraphExcludedFromReceipt: true,
       fullFoundationExcludedFromReceipt: true,
