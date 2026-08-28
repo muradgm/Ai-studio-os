@@ -31,7 +31,7 @@ const TECHNOLOGY_TERMS = /\b(three\.?js|webgl|webgpu|gsap|scrolltrigger|rive|ble
 const BRIEF_KEYS = Object.freeze([
   'schema', 'stage', 'projectId', 'creativeWorldId', 'projectTruths', 'constraints',
   'knowledgeBinding', 'knowledgeEvidence', 'synthesisBinding', 'synthesisCandidates',
-  'authorityInputs', 'snapshotFingerprint', 'truth', 'findings', 'pass', 'reviewReady', 'status'
+  'snapshotFingerprint', 'truth', 'findings', 'pass', 'reviewReady', 'status'
 ]);
 const AUTHORITY_INPUT_KEYS = Object.freeze(['canonicalCreativeAuthority', 'knowledge', 'synthesis']);
 const KNOWLEDGE_INPUT_KEYS = Object.freeze(['retrieval', 'graph', 'foundation']);
@@ -83,6 +83,27 @@ const HANDOFF_KEYS = Object.freeze([
   'schema', 'stage', 'reasoningSetSnapshotFingerprint', 'exploration', 'snapshotFingerprint',
   'truth', 'findings', 'pass', 'reviewReady', 'status'
 ]);
+
+const BRIEF_REVIEW_INPUTS = new WeakMap();
+
+function normalizeAuthorityInputs(value = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  return {
+    canonicalCreativeAuthority: source.canonicalCreativeAuthority ?? null,
+    knowledge: source.knowledge ?? null,
+    synthesis: source.synthesis ?? null
+  };
+}
+
+function rememberBriefReviewInputs(brief, authorityInputs) {
+  if (brief && typeof brief === 'object') BRIEF_REVIEW_INPUTS.set(brief, normalizeAuthorityInputs(authorityInputs));
+  return brief;
+}
+
+function reviewInputsForBrief(brief, suppliedAuthorityInputs = null) {
+  if (suppliedAuthorityInputs && typeof suppliedAuthorityInputs === 'object') return normalizeAuthorityInputs(suppliedAuthorityInputs);
+  return BRIEF_REVIEW_INPUTS.get(brief) ?? {};
+}
 
 function normalizeProjectTruth(value = {}) {
   return { id: text(value?.id), statement: text(value?.statement) };
@@ -142,6 +163,7 @@ function canonicalBriefTruth() {
     humanMotionSelectionStillRequired: true,
     structuralCoverageIsNotCreativeQuality: true,
     technologyIsNotMotionConcept: true,
+    fullProvenanceSourcesExcludedFromArtifact: true,
     creativeDirectionSelected: false,
     productionApproved: false
   };
@@ -415,11 +437,7 @@ function briefFingerprint(value = {}) {
 }
 
 function canonicalBriefCore({ projectId, canonicalCreativeAuthority, knowledge, synthesis = null, projectTruths = [], constraints = [] } = {}) {
-  const authorityInputs = {
-    canonicalCreativeAuthority: canonicalCreativeAuthority ?? null,
-    knowledge: knowledge ?? null,
-    synthesis: synthesis ?? null
-  };
+  const authorityInputs = normalizeAuthorityInputs({ canonicalCreativeAuthority, knowledge, synthesis });
   const worldReview = rebuildWorldReview(projectId, authorityInputs);
   const knowledgeProvenance = rebuildKnowledgeProvenance(authorityInputs);
   const synthesisReview = rebuildSynthesisReview(authorityInputs);
@@ -436,18 +454,17 @@ function canonicalBriefCore({ projectId, canonicalCreativeAuthority, knowledge, 
     knowledgeEvidence,
     synthesisBinding: synthesisBinding(authorityInputs, synthesisReview, synthesisCandidates),
     synthesisCandidates,
-    authorityInputs,
     truth: canonicalBriefTruth()
   };
   brief.snapshotFingerprint = briefFingerprint(brief);
-  return { brief, worldReview, knowledgeProvenance, synthesisReview };
+  return { brief, authorityInputs, worldReview, knowledgeProvenance, synthesisReview };
 }
 
-export function reviewMotionIntelligenceV2Brief(brief = {}) {
+export function reviewMotionIntelligenceV2Brief(brief = {}, suppliedAuthorityInputs = null) {
   const findings = [];
   const projectTruths = (Array.isArray(brief?.projectTruths) ? brief.projectTruths : []).map(normalizeProjectTruth);
   const constraints = list(brief?.constraints);
-  const authorityInputs = brief?.authorityInputs && typeof brief.authorityInputs === 'object' ? brief.authorityInputs : {};
+  const authorityInputs = reviewInputsForBrief(brief, suppliedAuthorityInputs);
   const worldReview = rebuildWorldReview(brief?.projectId, authorityInputs);
   const knowledgeProvenance = rebuildKnowledgeProvenance(authorityInputs);
   const synthesisReview = rebuildSynthesisReview(authorityInputs);
@@ -462,12 +479,12 @@ export function reviewMotionIntelligenceV2Brief(brief = {}) {
   const topUnknown = unknownKeys(brief, BRIEF_KEYS);
   if (topUnknown.length) findings.push(finding('blocker', 'motion-v2-brief-shape-invalid', 'Motion V2 Brief may contain only canonical fields and derived review state.', { unknownKeys: topUnknown }));
   const authorityUnknown = unknownKeys(authorityInputs, AUTHORITY_INPUT_KEYS);
-  if (authorityUnknown.length) findings.push(finding('blocker', 'motion-v2-authority-input-shape-invalid', 'Motion V2 authority inputs may contain only canonical Creative World, knowledge and optional Synthesis evidence.', { unknownKeys: authorityUnknown }));
+  if (authorityUnknown.length) findings.push(finding('blocker', 'motion-v2-authority-input-shape-invalid', 'Motion V2 review inputs may contain only canonical Creative World, knowledge and optional Synthesis evidence.', { unknownKeys: authorityUnknown }));
   const knowledgeUnknown = unknownKeys(authorityInputs?.knowledge, KNOWLEDGE_INPUT_KEYS);
-  if (knowledgeUnknown.length) findings.push(finding('blocker', 'motion-v2-knowledge-input-shape-invalid', 'Motion V2 knowledge authority input may contain only retrieval, graph and Foundation.', { unknownKeys: knowledgeUnknown }));
+  if (knowledgeUnknown.length) findings.push(finding('blocker', 'motion-v2-knowledge-input-shape-invalid', 'Motion V2 knowledge review input may contain only retrieval, graph and Foundation.', { unknownKeys: knowledgeUnknown }));
   if (authorityInputs?.synthesis) {
     const synthesisUnknown = unknownKeys(authorityInputs.synthesis, SYNTHESIS_INPUT_KEYS);
-    if (synthesisUnknown.length) findings.push(finding('blocker', 'motion-v2-synthesis-input-shape-invalid', 'Motion V2 Synthesis authority input may contain only candidate artifact and its full provenance inputs.', { unknownKeys: synthesisUnknown }));
+    if (synthesisUnknown.length) findings.push(finding('blocker', 'motion-v2-synthesis-input-shape-invalid', 'Motion V2 Synthesis review input may contain only candidate artifact and its full provenance inputs.', { unknownKeys: synthesisUnknown }));
   }
 
   if (!text(brief?.projectId)) findings.push(finding('blocker', 'motion-v2-project-missing', 'Motion V2 requires explicit project identity.'));
@@ -540,15 +557,18 @@ export function reviewMotionIntelligenceV2Brief(brief = {}) {
 }
 
 export function buildMotionIntelligenceV2Brief(input = {}) {
-  const { brief } = canonicalBriefCore(input);
-  const review = reviewMotionIntelligenceV2Brief(brief);
-  return {
+  const { brief, authorityInputs } = canonicalBriefCore(input);
+  rememberBriefReviewInputs(brief, authorityInputs);
+  const review = reviewMotionIntelligenceV2Brief(brief, authorityInputs);
+  const artifact = {
     ...brief,
     findings: review.findings,
     pass: review.pass,
     reviewReady: review.reviewReady,
     status: review.status
   };
+  rememberBriefReviewInputs(artifact, authorityInputs);
+  return artifact;
 }
 
 function inspectNestedShape(raw, normalized, findingPrefix, findings, hypothesisId) {
@@ -670,10 +690,10 @@ function v1HypothesisFromV2(hypothesis) {
   };
 }
 
-function buildDerivedV1Exploration(brief, hypotheses) {
+function buildDerivedV1Exploration(brief, hypotheses, authorityInputs = reviewInputsForBrief(brief)) {
   return buildMotionCreativeExploration({
     projectId: brief?.projectId,
-    canonicalCreativeAuthority: brief?.authorityInputs?.canonicalCreativeAuthority,
+    canonicalCreativeAuthority: authorityInputs?.canonicalCreativeAuthority,
     hypotheses: hypotheses.map(v1HypothesisFromV2)
   });
 }
@@ -687,10 +707,11 @@ function setFingerprint(value = {}) {
   });
 }
 
-export function reviewMotionIntelligenceV2Set(reasoningSet = {}) {
+export function reviewMotionIntelligenceV2Set(reasoningSet = {}, suppliedAuthorityInputs = null) {
   const findings = [];
   const brief = reasoningSet?.brief ?? {};
-  const briefReview = reviewMotionIntelligenceV2Brief(brief);
+  const authorityInputs = reviewInputsForBrief(brief, suppliedAuthorityInputs);
+  const briefReview = reviewMotionIntelligenceV2Brief(brief, authorityInputs);
   const rawHypotheses = Array.isArray(reasoningSet?.hypotheses) ? reasoningSet.hypotheses : [];
   const hypotheses = rawHypotheses.map(normalizeHypothesis);
 
@@ -764,7 +785,7 @@ export function reviewMotionIntelligenceV2Set(reasoningSet = {}) {
 
   let derivedExploration = null;
   if (briefReview.reviewReady) {
-    derivedExploration = buildDerivedV1Exploration(brief, hypotheses);
+    derivedExploration = buildDerivedV1Exploration(brief, hypotheses, authorityInputs);
     if (!derivedExploration.reviewReady) {
       const blockers = derivedExploration.findings.filter((item) => item.severity === 'blocker').map((item) => item.code);
       const majors = derivedExploration.findings.filter((item) => item.severity === 'major').map((item) => item.code);
@@ -799,7 +820,7 @@ export function reviewMotionIntelligenceV2Set(reasoningSet = {}) {
   };
 }
 
-export function buildMotionIntelligenceV2Set({ brief, hypotheses = [] } = {}) {
+export function buildMotionIntelligenceV2Set({ brief, hypotheses = [] } = {}, suppliedAuthorityInputs = null) {
   const reasoningSet = {
     schema: 'ai-studio-os/motion-intelligence-reasoning-set@2',
     stage: 'motion-intelligence-v2-reasoning',
@@ -808,7 +829,7 @@ export function buildMotionIntelligenceV2Set({ brief, hypotheses = [] } = {}) {
     truth: canonicalSetTruth()
   };
   reasoningSet.snapshotFingerprint = setFingerprint(reasoningSet);
-  const review = reviewMotionIntelligenceV2Set(reasoningSet);
+  const review = reviewMotionIntelligenceV2Set(reasoningSet, suppliedAuthorityInputs);
   return {
     ...reasoningSet,
     findings: review.findings,
@@ -827,14 +848,15 @@ function handoffFingerprint(value = {}) {
   });
 }
 
-export function buildMotionIntelligenceV2ExplorationHandoff({ reasoningSet } = {}) {
-  const review = reviewMotionIntelligenceV2Set(reasoningSet ?? {});
+export function buildMotionIntelligenceV2ExplorationHandoff({ reasoningSet, authorityInputs: suppliedAuthorityInputs = null } = {}) {
+  const authorityInputs = reviewInputsForBrief(reasoningSet?.brief, suppliedAuthorityInputs);
+  const review = reviewMotionIntelligenceV2Set(reasoningSet ?? {}, authorityInputs);
   const findings = [];
   let exploration = null;
   if (!review.reviewReady) {
     findings.push(finding('blocker', 'motion-v2-handoff-reasoning-not-ready', 'Motion V2 may hand off to Motion V1 only after fresh deep-reasoning review passes without blocker or major findings.', { findingCodes: review.findings.map((item) => item.code) }));
   } else {
-    exploration = buildDerivedV1Exploration(reasoningSet.brief, review.normalizedHypotheses);
+    exploration = buildDerivedV1Exploration(reasoningSet.brief, review.normalizedHypotheses, authorityInputs);
     if (!exploration.reviewReady) findings.push(finding('blocker', 'motion-v2-handoff-v1-exploration-not-ready', 'The derived Motion V1 exploration must remain review-ready; V2 cannot bypass or weaken the existing exploration authority contract.', { findingCodes: exploration.findings.map((item) => item.code) }));
   }
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -855,9 +877,9 @@ export function buildMotionIntelligenceV2ExplorationHandoff({ reasoningSet } = {
   };
 }
 
-export function reviewMotionIntelligenceV2ExplorationHandoff(handoff = {}, { reasoningSet } = {}) {
+export function reviewMotionIntelligenceV2ExplorationHandoff(handoff = {}, { reasoningSet, authorityInputs: suppliedAuthorityInputs = null } = {}) {
   const findings = [];
-  const expected = buildMotionIntelligenceV2ExplorationHandoff({ reasoningSet });
+  const expected = buildMotionIntelligenceV2ExplorationHandoff({ reasoningSet, authorityInputs: suppliedAuthorityInputs });
   if (handoff?.schema !== 'ai-studio-os/motion-intelligence-v2-exploration-handoff@1') findings.push(finding('blocker', 'motion-v2-handoff-schema-invalid', 'Motion V2 handoff requires the canonical exploration-handoff schema.'));
   if (handoff?.stage !== 'motion-intelligence-v2-to-v1-handoff') findings.push(finding('blocker', 'motion-v2-handoff-stage-invalid', 'Motion V2 handoff requires the canonical V2→V1 stage.'));
   const unknown = unknownKeys(handoff, HANDOFF_KEYS);
