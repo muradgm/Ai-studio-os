@@ -47,6 +47,7 @@ export function reviewCreativeKnowledgeGraphProvenance({ graph, foundation } = {
 
   if (!graphReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-graph-not-ready', 'Independent graph provenance requires a structurally review-ready graph.', { findingCodes: graphReview.findings.map((item) => item.code) }));
   if (!foundationReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-foundation-not-ready', 'Independent graph provenance requires the source Foundation to pass a fresh review.', { findingCodes: foundationReview.findings.map((item) => item.code) }));
+  if (Object.hasOwn(graph ?? {}, 'findings') && !sameValue(graph.findings, graphReview.findings)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-diagnostics-drift', 'Attached graph diagnostics must exactly match fresh structural graph review diagnostics.'));
 
   const sourceBinding = graph?.sourceBinding ?? {};
   if (text(sourceBinding.foundationSnapshotFingerprint) !== text(foundationReview.computedFingerprint)) findings.push(finding('blocker', 'creative-knowledge-graph-provenance-foundation-fingerprint-mismatch', 'Graph must bind the exact independently supplied Foundation snapshot.'));
@@ -79,6 +80,7 @@ export function reviewCreativeKnowledgeGraphProvenance({ graph, foundation } = {
       sourceFoundationFreshlyReviewed: foundationReview.reviewReady === true,
       exactNodeMembershipRecomputed: true,
       exactNodeContentRecomputed: true,
+      attachedDiagnosticsRecomputedWhenPresent: true,
       hashIsSignature: false,
       provenanceGrantsCreativeAuthority: false,
       humanApprovalGranted: false,
@@ -112,6 +114,7 @@ export function reviewCreativeKnowledgeRetrievalProvenance({ retrieval, graph, f
 
   if (!retrievalReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-retrieval-not-ready', 'Independent retrieval provenance requires a structurally review-ready isolated retrieval payload.', { findingCodes: retrievalReview.findings.map((item) => item.code) }));
   if (!graphProvenanceReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-graph-not-verified', 'Retrieval provenance requires the source graph to be independently rebound to its separately supplied Foundation.'));
+  if (Object.hasOwn(retrieval ?? {}, 'findings') && !sameValue(retrieval.findings, retrievalReview.findings)) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-diagnostics-drift', 'Attached retrieval diagnostics must exactly match fresh structural retrieval review diagnostics.'));
 
   const binding = retrieval?.graphBinding ?? {};
   const graphReview = reviewCreativeKnowledgeGraph(graph ?? {});
@@ -139,12 +142,8 @@ export function reviewCreativeKnowledgeRetrievalProvenance({ retrieval, graph, f
 
   const baseReady = findings.every((item) => item.severity !== 'blocker');
   const expectedClaimReceipt = retrievalReceipt(retrievalReview, graphProvenanceReview, baseReady);
-  if (Object.hasOwn(retrieval ?? {}, 'provenanceReceipt') && !sameValue(retrieval.provenanceReceipt, expectedClaimReceipt)) {
-    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-receipt-drift', 'Attached provenance receipt must exactly equal the compact receipt independently recomputed from the supplied graph and Foundation.'));
-  }
-  if (Object.hasOwn(retrieval ?? {}, 'provenanceReady') && retrieval.provenanceReady !== baseReady) {
-    findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-ready-claim-drift', 'Attached provenanceReady must match independently recomputed provenance state.', { expected: baseReady, actual: retrieval.provenanceReady }));
-  }
+  if (Object.hasOwn(retrieval ?? {}, 'provenanceReceipt') && !sameValue(retrieval.provenanceReceipt, expectedClaimReceipt)) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-receipt-drift', 'Attached provenance receipt must exactly equal the compact receipt independently recomputed from the supplied graph and Foundation.'));
+  if (Object.hasOwn(retrieval ?? {}, 'provenanceReady') && retrieval.provenanceReady !== baseReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-provenance-ready-claim-drift', 'Attached provenanceReady must match independently recomputed provenance state.', { expected: baseReady, actual: retrieval.provenanceReady }));
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const finalReady = blockers.length === 0;
@@ -159,6 +158,7 @@ export function reviewCreativeKnowledgeRetrievalProvenance({ retrieval, graph, f
     truth: {
       deterministicRetrievalRecomputed: graphProvenanceReview.reviewReady === true,
       graphAndFoundationSuppliedSeparately: true,
+      attachedDiagnosticsRecomputedWhenPresent: true,
       attachedReceiptRecomputedWhenPresent: true,
       provenanceFailureMustRedactProjectEvidence: true,
       fullGraphExcludedFromReceipt: true,
@@ -202,10 +202,7 @@ export function buildCreativeKnowledgeRetrievalWithProvenance(input = {}) {
   });
 
   const rawRetrieval = buildCreativeKnowledgeRetrieval(input);
-  const retrieval = graphProvenanceReview.reviewReady
-    ? rawRetrieval
-    : zeroRetrievalEvidence(rawRetrieval);
-
+  const retrieval = graphProvenanceReview.reviewReady ? rawRetrieval : zeroRetrievalEvidence(rawRetrieval);
   const provenanceReview = reviewCreativeKnowledgeRetrievalProvenance({
     retrieval,
     graph: input.graph,
