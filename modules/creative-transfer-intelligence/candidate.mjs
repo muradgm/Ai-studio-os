@@ -24,6 +24,7 @@ function normalizedCopyText(value) {
   return text(value)
     .normalize('NFKC')
     .toLowerCase()
+    .replace(/\p{Cf}+/gu, '')
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim()
     .replace(/\s+/g, ' ');
