@@ -117,8 +117,8 @@ const QUERY_KEYS = Object.freeze(['projectId', 'asOf', 'purpose', 'domains', 'ki
 const BINDING_KEYS = Object.freeze(['schema', 'graphSnapshotFingerprint', 'graphSourceBindingFingerprint', 'foundationSnapshotFingerprint', 'sourceGraphReviewReady', 'bindingFingerprint']);
 const ITEM_KEYS = Object.freeze(['schema', 'knowledgeId', 'knowledgeFingerprint', 'entryProjectionFingerprint', 'entry', 'annotation', 'rank', 'termMatches', 'matchReasons', 'visibleConflictIds', 'conflictsWithPrimaryIds', 'includedAsConflictContext', 'withheldConflictPresent', 'truth']);
 const ANNOTATION_KEYS = Object.freeze(['status', 'statusReason', 'freshUntil', 'supersededBy', 'representationNotes']);
-const STATS_KEYS = Object.freeze(['scopeVisibleNodeCount', 'primaryResultCount', 'conflictContextCount', 'excludedCounts', 'unavailableVisibleConflictCount', 'withheldConflictPresent']);
-const TOP_LEVEL_KEYS = Object.freeze(['schema', 'stage', 'query', 'graphBinding', 'results', 'conflictContext', 'stats', 'snapshotFingerprint', 'truth', 'pass', 'reviewReady', 'status', 'provenanceReceipt', 'provenanceReady']);
+const STATS_KEYS = Object.freeze(['scopeVisibleNodeCount', 'primaryResultCount', 'conflictContextCount', 'excludedCounts', 'unavailableVisibleConflictCount']);
+const TOP_LEVEL_KEYS = Object.freeze(['schema', 'stage', 'query', 'graphBinding', 'results', 'conflictContext', 'stats', 'snapshotFingerprint', 'truth', 'pass', 'reviewReady', 'status', 'findings', 'provenanceReceipt', 'provenanceReady']);
 const EXCLUDED_REASON_KEYS = new Set([
   'query-as-of-invalid', 'trend-freshness-unqualified', 'trend-not-yet-observed', 'trend-stale', 'evidence-expired',
   'domain-filter', 'kind-filter', 'term-filter', 'status:active', 'status:disputed', 'status:superseded', 'status:deprecated', 'status:unknown'
@@ -152,17 +152,7 @@ function normalizeAnnotation(value = {}) {
 function projectEntryProjection(entry = {}) {
   const review = reviewCreativeKnowledgeEntry(entry);
   const normalized = review.normalizedEntry ?? {};
-  return {
-    ...normalized,
-    relationships: []
-  };
-}
-
-function sourceKnowledgeFingerprint(entry = {}) {
-  return fingerprintCreativeValue({
-    schema: 'ai-studio-os/creative-knowledge-entry@1',
-    entry
-  });
+  return { ...normalized, relationships: [] };
 }
 
 function projectionFingerprint(entry = {}) {
@@ -227,8 +217,17 @@ function statsContract(value = {}) {
     primaryResultCount: Number(source.primaryResultCount),
     conflictContextCount: Number(source.conflictContextCount),
     excludedCounts: normalizeExcludedCounts(source.excludedCounts),
-    unavailableVisibleConflictCount: Number(source.unavailableVisibleConflictCount),
-    withheldConflictPresent: source.withheldConflictPresent === true
+    unavailableVisibleConflictCount: Number(source.unavailableVisibleConflictCount)
+  };
+}
+
+function zeroStats() {
+  return {
+    scopeVisibleNodeCount: 0,
+    primaryResultCount: 0,
+    conflictContextCount: 0,
+    excludedCounts: {},
+    unavailableVisibleConflictCount: 0
   };
 }
 
@@ -351,11 +350,14 @@ export function reviewCreativeKnowledgeRetrieval(retrieval = {}) {
   const excludedKeys = Object.keys(stats?.excludedCounts && typeof stats.excludedCounts === 'object' ? stats.excludedCounts : {});
   const invalidExcludedKeys = excludedKeys.filter((key) => !EXCLUDED_REASON_KEYS.has(key));
   const invalidExcludedValues = excludedKeys.filter((key) => !Number.isInteger(stats.excludedCounts[key]) || stats.excludedCounts[key] < 0);
-  if (statsUnknownKeys.length || invalidExcludedKeys.length || invalidExcludedValues.length || !sameValue(stats, canonicalStats)) findings.push(finding('blocker', 'creative-knowledge-retrieval-stats-contract-drift', 'Retrieval stats are a fixed privacy-safe aggregate contract and cannot carry hidden IDs or arbitrary metadata.', { unknownKeys: statsUnknownKeys, invalidExcludedKeys, invalidExcludedValues }));
+  if (statsUnknownKeys.length || invalidExcludedKeys.length || invalidExcludedValues.length || !sameValue(stats, canonicalStats)) findings.push(finding('blocker', 'creative-knowledge-retrieval-stats-contract-drift', 'Retrieval stats are a fixed scope-safe aggregate contract and cannot carry hidden IDs or arbitrary metadata.', { unknownKeys: statsUnknownKeys, invalidExcludedKeys, invalidExcludedValues }));
   for (const key of ['scopeVisibleNodeCount', 'primaryResultCount', 'conflictContextCount', 'unavailableVisibleConflictCount']) {
     if (!Number.isInteger(canonicalStats[key]) || canonicalStats[key] < 0) findings.push(finding('blocker', 'creative-knowledge-retrieval-stats-value-invalid', 'Retrieval aggregate counts must be non-negative integers.', { key, value: canonicalStats[key] }));
   }
   if (canonicalStats.primaryResultCount !== results.length || canonicalStats.conflictContextCount !== conflictContext.length) findings.push(finding('blocker', 'creative-knowledge-retrieval-stats-count-drift', 'Retrieval aggregate counts must equal the visible payload counts.'));
+  if (binding?.sourceGraphReviewReady !== true && (results.length || conflictContext.length || canonicalStats.scopeVisibleNodeCount || canonicalStats.primaryResultCount || canonicalStats.conflictContextCount || Object.keys(canonicalStats.excludedCounts).length || canonicalStats.unavailableVisibleConflictCount)) {
+    findings.push(finding('blocker', 'creative-knowledge-retrieval-blocked-source-leak', 'A structurally blocked source graph must yield zero graph-derived project evidence and zero source-derived aggregates.'));
+  }
 
   if (text(retrieval?.snapshotFingerprint) !== computedFingerprint) findings.push(finding('blocker', 'creative-knowledge-retrieval-fingerprint-mismatch', 'Retrieval snapshot fingerprint must bind the exact query and isolated evidence payload.', { expected: computedFingerprint, actual: retrieval?.snapshotFingerprint ?? null }));
   if (new Set(resultIds).size !== resultIds.length || resultIds.some((id) => !id)) findings.push(finding('blocker', 'creative-knowledge-retrieval-result-id-invalid', 'Primary retrieval result IDs must be non-empty and unique.', { resultIds }));
@@ -434,9 +436,9 @@ export function reviewCreativeKnowledgeRetrieval(retrieval = {}) {
   const expectedPass = coreBlockers.length === 0;
   const expectedReviewReady = coreBlockers.length === 0 && coreMajors.length === 0;
   const expectedStatus = coreBlockers.length ? 'blocked' : coreMajors.length ? 'provisional' : 'ready-as-advisory-retrieval';
-  if (Object.hasOwn(retrieval, 'pass') && retrieval.pass !== expectedPass) findings.push(finding('blocker', 'creative-knowledge-retrieval-pass-claim-drift', 'Cached retrieval pass flag must match fresh review.'));
-  if (Object.hasOwn(retrieval, 'reviewReady') && retrieval.reviewReady !== expectedReviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-ready-claim-drift', 'Cached retrieval reviewReady flag must match fresh review.'));
-  if (Object.hasOwn(retrieval, 'status') && retrieval.status !== expectedStatus) findings.push(finding('blocker', 'creative-knowledge-retrieval-status-claim-drift', 'Cached retrieval status must match fresh review.', { expected: expectedStatus, actual: retrieval.status }));
+  if (Object.hasOwn(retrieval, 'pass') && retrieval.pass !== expectedPass) findings.push(finding('blocker', 'creative-knowledge-retrieval-pass-claim-drift', 'Cached retrieval pass flag must match fresh structural review.'));
+  if (Object.hasOwn(retrieval, 'reviewReady') && retrieval.reviewReady !== expectedReviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-ready-claim-drift', 'Cached retrieval reviewReady flag must match fresh structural review.'));
+  if (Object.hasOwn(retrieval, 'status') && retrieval.status !== expectedStatus) findings.push(finding('blocker', 'creative-knowledge-retrieval-status-claim-drift', 'Cached retrieval status must match fresh structural review.', { expected: expectedStatus, actual: retrieval.status }));
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -451,6 +453,7 @@ export function reviewCreativeKnowledgeRetrieval(retrieval = {}) {
     truth: {
       retrievalIsCreativeAuthority: false,
       retrievalRankIsCreativeAuthority: false,
+      blockedSourceProducesNoGraphDerivedEvidence: true,
       exactProjectPayloadShapeRequired: true,
       projectSafeKnowledgeProjectionRequired: true,
       sourceRelationshipsStripped: true,
@@ -469,92 +472,98 @@ export function reviewCreativeKnowledgeRetrieval(retrieval = {}) {
 export function buildCreativeKnowledgeRetrieval({ graph, projectId, asOf, purpose, domains = [], kinds = [], terms = [], limit = 10 } = {}) {
   const graphReview = reviewCreativeKnowledgeGraph(graph ?? {});
   const query = normalizeQuery({ projectId, asOf, purpose, domains, kinds, terms, limit });
-  const asOfMs = parseInstant(query.asOf);
-  const nodes = graphReview.nodes ?? [];
-  const edges = graphReview.edges ?? [];
-  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const binding = graphBinding(graphReview, graph ?? {});
 
-  const visibleNodes = nodes.filter((node) => visibleInProject(node, query.projectId));
-  const exclusionCounts = {};
-  const candidates = [];
-  for (const node of visibleNodes) {
-    const eligibility = visibleEligibility(node, query, asOfMs, true);
-    if (!eligibility.eligible) {
-      exclusionCounts[eligibility.reason] = (exclusionCounts[eligibility.reason] ?? 0) + 1;
-      continue;
-    }
-    candidates.push({ node, termMatches: eligibility.termMatches });
-  }
-  candidates.sort(stablePrimarySort);
-  const selected = candidates.slice(0, query.limit);
-  const primaryIds = new Set(selected.map((item) => item.node.id));
+  let results = [];
+  let conflictContext = [];
+  let stats = zeroStats();
 
-  const visibleConflictsByPrimary = new Map();
-  const withheldConflictByPrimary = new Map();
-  const conflictContextById = new Map();
-  let unavailableVisibleConflictCount = 0;
+  if (graphReview.reviewReady) {
+    const asOfMs = parseInstant(query.asOf);
+    const nodes = graphReview.nodes ?? [];
+    const edges = graphReview.edges ?? [];
+    const nodeById = new Map(nodes.map((node) => [node.id, node]));
+    const visibleNodes = nodes.filter((node) => visibleInProject(node, query.projectId));
+    const exclusionCounts = {};
+    const candidates = [];
 
-  for (const selectedItem of selected) {
-    const primaryId = selectedItem.node.id;
-    const visibleIds = new Set();
-    let withheldConflictPresent = false;
-    for (const edge of edges) {
-      const counterpartId = conflictCounterpart(edge, primaryId);
-      if (!counterpartId) continue;
-      const counterpart = nodeById.get(counterpartId);
-      if (!counterpart) continue;
-      if (!visibleInProject(counterpart, query.projectId)) {
-        withheldConflictPresent = true;
-        continue;
-      }
-      const eligibility = visibleEligibility(counterpart, query, asOfMs, false);
+    for (const node of visibleNodes) {
+      const eligibility = visibleEligibility(node, query, asOfMs, true);
       if (!eligibility.eligible) {
-        unavailableVisibleConflictCount += 1;
+        exclusionCounts[eligibility.reason] = (exclusionCounts[eligibility.reason] ?? 0) + 1;
         continue;
       }
-      visibleIds.add(counterpartId);
-      if (!primaryIds.has(counterpartId)) {
-        const existing = conflictContextById.get(counterpartId) ?? { node: counterpart, primaryIds: new Set() };
-        existing.primaryIds.add(primaryId);
-        conflictContextById.set(counterpartId, existing);
-      }
+      candidates.push({ node, termMatches: eligibility.termMatches });
     }
-    visibleConflictsByPrimary.set(primaryId, [...visibleIds].sort());
-    withheldConflictByPrimary.set(primaryId, withheldConflictPresent);
-  }
+    candidates.sort(stablePrimarySort);
+    const selected = candidates.slice(0, query.limit);
+    const primaryIds = new Set(selected.map((item) => item.node.id));
+    const visibleConflictsByPrimary = new Map();
+    const withheldConflictByPrimary = new Map();
+    const conflictContextById = new Map();
+    let unavailableVisibleConflictCount = 0;
 
-  const results = selected.map((selectedItem, index) => retrievalItem(selectedItem.node, {
-    rank: index + 1,
-    termMatches: selectedItem.termMatches,
-    matchReasons: [
-      ...(query.domains.length ? [`domain:${selectedItem.node.entry.domain}`] : []),
-      ...(query.kinds.length ? [`kind:${selectedItem.node.entry.kind}`] : []),
-      ...(selectedItem.termMatches ? [`term-matches:${selectedItem.termMatches}`] : []),
-      ...(selectedItem.node.annotation.status === 'disputed' ? ['status:disputed'] : ['status:active'])
-    ],
-    visibleConflictIds: visibleConflictsByPrimary.get(selectedItem.node.id) ?? [],
-    withheldConflictPresent: withheldConflictByPrimary.get(selectedItem.node.id) === true
-  }));
+    for (const selectedItem of selected) {
+      const primaryId = selectedItem.node.id;
+      const visibleIds = new Set();
+      let withheldConflictPresent = false;
+      for (const edge of edges) {
+        const counterpartId = conflictCounterpart(edge, primaryId);
+        if (!counterpartId) continue;
+        const counterpart = nodeById.get(counterpartId);
+        if (!counterpart) continue;
+        if (!visibleInProject(counterpart, query.projectId)) {
+          withheldConflictPresent = true;
+          continue;
+        }
+        const eligibility = visibleEligibility(counterpart, query, asOfMs, false);
+        if (!eligibility.eligible) {
+          unavailableVisibleConflictCount += 1;
+          continue;
+        }
+        visibleIds.add(counterpartId);
+        if (!primaryIds.has(counterpartId)) {
+          const existing = conflictContextById.get(counterpartId) ?? { node: counterpart, primaryIds: new Set() };
+          existing.primaryIds.add(primaryId);
+          conflictContextById.set(counterpartId, existing);
+        }
+      }
+      visibleConflictsByPrimary.set(primaryId, [...visibleIds].sort());
+      withheldConflictByPrimary.set(primaryId, withheldConflictPresent);
+    }
 
-  const conflictContext = [...conflictContextById.values()]
-    .sort((a, b) => a.node.id.localeCompare(b.node.id))
-    .map((item) => retrievalItem(item.node, {
-      rank: null,
-      termMatches: 0,
-      conflictsWithPrimaryIds: [...item.primaryIds].sort(),
-      conflictContext: true,
-      matchReasons: ['explicit-conflict-context']
+    results = selected.map((selectedItem, index) => retrievalItem(selectedItem.node, {
+      rank: index + 1,
+      termMatches: selectedItem.termMatches,
+      matchReasons: [
+        ...(query.domains.length ? [`domain:${selectedItem.node.entry.domain}`] : []),
+        ...(query.kinds.length ? [`kind:${selectedItem.node.entry.kind}`] : []),
+        ...(selectedItem.termMatches ? [`term-matches:${selectedItem.termMatches}`] : []),
+        ...(selectedItem.node.annotation.status === 'disputed' ? ['status:disputed'] : ['status:active'])
+      ],
+      visibleConflictIds: visibleConflictsByPrimary.get(selectedItem.node.id) ?? [],
+      withheldConflictPresent: withheldConflictByPrimary.get(selectedItem.node.id) === true
     }));
 
-  const stats = {
-    scopeVisibleNodeCount: visibleNodes.length,
-    primaryResultCount: results.length,
-    conflictContextCount: conflictContext.length,
-    excludedCounts: Object.fromEntries(Object.entries(exclusionCounts).sort(([a], [b]) => a.localeCompare(b))),
-    unavailableVisibleConflictCount,
-    withheldConflictPresent: [...withheldConflictByPrimary.values()].some(Boolean)
-  };
-  const binding = graphBinding(graphReview, graph ?? {});
+    conflictContext = [...conflictContextById.values()]
+      .sort((a, b) => a.node.id.localeCompare(b.node.id))
+      .map((item) => retrievalItem(item.node, {
+        rank: null,
+        termMatches: 0,
+        conflictsWithPrimaryIds: [...item.primaryIds].sort(),
+        conflictContext: true,
+        matchReasons: ['explicit-conflict-context']
+      }));
+
+    stats = {
+      scopeVisibleNodeCount: visibleNodes.length,
+      primaryResultCount: results.length,
+      conflictContextCount: conflictContext.length,
+      excludedCounts: Object.fromEntries(Object.entries(exclusionCounts).sort(([a], [b]) => a.localeCompare(b))),
+      unavailableVisibleConflictCount
+    };
+  }
+
   const retrieval = {
     schema: 'ai-studio-os/creative-knowledge-retrieval@1',
     stage: 'creative-knowledge-retrieval',
@@ -566,13 +575,15 @@ export function buildCreativeKnowledgeRetrieval({ graph, projectId, asOf, purpos
     snapshotFingerprint: retrievalFingerprint({ query, graphBinding: binding, results, conflictContext, stats }),
     truth: canonicalRetrievalTruth()
   };
+
   const review = reviewCreativeKnowledgeRetrieval(retrieval);
   const findings = [...review.findings];
-  if (!graphReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-graph-not-ready', 'Retrieval requires a structurally review-ready Creative Knowledge Graph.', { findingCodes: graphReview.findings.map((item) => item.code) }));
+  if (!graphReview.reviewReady) findings.push(finding('blocker', 'creative-knowledge-retrieval-graph-not-ready', 'Retrieval requires a structurally review-ready Creative Knowledge Graph. No graph-derived evidence was emitted.', { findingCodes: graphReview.findings.map((item) => item.code) }));
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
   return {
     ...retrieval,
+    findings,
     pass: blockers.length === 0,
     reviewReady: blockers.length === 0 && majors.length === 0,
     status: blockers.length ? 'blocked' : majors.length ? 'provisional' : 'ready-as-advisory-retrieval'
