@@ -6,6 +6,23 @@ Locked sequencing decision for AI Studio OS after Motion Creative Intelligence V
 
 This roadmap does **not** replace the canonical creative authority architecture already established on `main`. It strengthens the intelligence and knowledge substrate that feeds Creative Thesis, Creative World, Drawing Intelligence, Motion Intelligence and later Spatial Creative Intelligence.
 
+### Progress checkpoint — 2026-08-28
+
+The substrate sequence through Creative Synthesis is now implemented on `main`:
+
+```text
+Motion Creative Intelligence V1        COMPLETE
+Creative Intelligence Foundation V1    COMPLETE
+Creative Knowledge representation      COMPLETE
+Creative Transfer Intelligence          COMPLETE
+Creative Synthesis Intelligence         COMPLETE
+Motion Intelligence V2                  CURRENT
+```
+
+Creative Synthesis Intelligence V1 merged through PR #67 at `0d20dfbf7588c9a2f0298c66aa5e9f480810341a` after exact-head CI run #510 completed successfully.
+
+The current implementation frontier is therefore **Motion Intelligence V2 / deep motion knowledge**, followed by serious motion benchmarks and dogfood before Spatial Creative Intelligence V1.
+
 ## Core decision
 
 Do not stop or rewrite the existing system.
@@ -342,11 +359,20 @@ Do not build:
 
 ## Current execution gate
 
-Do not start Creative Intelligence Foundation implementation until Motion Creative Intelligence V1 has:
+The prerequisite chain through Creative Synthesis is complete on `main`.
 
-- exact-head CI evidence
-- exact-head adversarial review
-- all blocking findings resolved
-- merge authority satisfied
+Motion Intelligence V2 may now deepen motion reasoning, but it must preserve the existing Motion Creative Intelligence V1 authority skeleton:
 
-Once Motion V1 is merged, Creative Intelligence Foundation V1 becomes the next implementation branch before Spatial Creative Intelligence V1.
+```text
+Creative World authority
+-> Motion creative exploration
+-> temporal proof
+-> Motion Critic
+-> explicit human evidence review / selection
+-> canonical Motion Direction
+-> technical-planning handoff
+```
+
+V2 must consume Creative Intelligence Foundation / Knowledge / Transfer / Synthesis as advisory reasoning substrate. Those layers must not become a hidden motion selector, score-based authority path, or bypass around Motion Critic and human selection.
+
+After Motion Intelligence V2 reaches its own exact-head validation gate, the next mandatory stage is **serious motion benchmarks / dogfood**. Spatial Creative Intelligence V1 starts only after those benchmarks establish that the deeper motion brain materially improves project-specific output rather than merely adding schemas or vocabulary.
