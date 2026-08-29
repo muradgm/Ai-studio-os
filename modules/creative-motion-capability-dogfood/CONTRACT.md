@@ -20,7 +20,7 @@ DOGFOOD RESULT != CREATIVE DIRECTION
 DOGFOOD RESULT != PRODUCTION APPROVAL
 ```
 
-The module may bind an experiment, blind candidate identities, collect independent qualitative review and expose diagnostic differences between conditions.
+The module may bind an experiment, verify condition execution, blind candidate identities, collect independent qualitative review and expose diagnostic differences between conditions.
 
 It cannot:
 
@@ -75,6 +75,54 @@ Each condition requires replicates `1`, `2`, and `3` exactly once.
 
 The harness rejects budget drift, brief drift, project drift, duplicate trial IDs and missing evidence.
 
+Independent replicates are allowed to converge on identical output. Replication tests execution variability; it must not force artificial output diversity.
+
+## Condition execution authority
+
+A condition label is not evidence that the named architecture actually ran.
+
+Before capability interpretation, Dogfood V1 freshly verifies condition-specific source artifacts:
+
+```text
+A
+Motion V1 exploration
+→ fresh Motion V1 review
+→ exact real temporal proof
+
+B / C / D
+Motion V2 reasoning set
+→ fresh V2 review with original authority inputs
+→ exact V2→V1 exploration handoff review
+→ exact real temporal proof
+
+E
+isolated direct-model hypothesis generation
+→ V1-shaped exploration contract validation only
+→ exact same real temporal proof harness
+```
+
+For B/C/D the knowledge profile is locked:
+
+- B uses the declared eight-principle core profile;
+- C uses the complete qualified Motion V2 corpus;
+- D uses the same complete corpus plus non-empty verified Synthesis evidence.
+
+B and C fail if Synthesis evidence leaks into the condition.
+
+D fails if the existing V2 provenance chain cannot freshly reverify the supplied Synthesis evidence.
+
+## Direct-model control boundary
+
+Condition E is a creative-generation control, not an escape from evidence requirements.
+
+The model receives the same frozen brief and Creative World and authors hypotheses directly without Creative Knowledge, Transfer, Synthesis or Motion V2 reasoning.
+
+After generation, those hypotheses may use only the common V1 contract-validation and temporal-proof machinery so the rendered comparison receives the same browser/media authority as the Studio conditions.
+
+Until AI Studio OS has a first-class isolated direct-model runner, the fact that upstream Studio reasoning was bypassed remains explicitly operator-attested rather than cryptographically proven.
+
+That limitation stays visible in the execution receipt.
+
 ## Required evidence per trial
 
 Every trial must expose:
@@ -88,15 +136,45 @@ Every trial must expose:
 - a unique runtime-trace reference;
 - an exact source/reasoning snapshot fingerprint.
 
-The harness does not create or fake these artifacts. Missing real evidence blocks the experiment.
+For A/B/C/D, the existing Motion proof verifier must freshly confirm exact browser-temporal evidence and bind it to the exact exploration being tested.
+
+For E, the same V1 temporal proof verifier is used after direct-model hypothesis generation.
+
+Fixture-only Motion proof cannot qualify as dogfood capability evidence.
+
+The harness does not create or fake these artifacts. Missing real evidence blocks capability interpretation.
+
+## Protocol review versus capability review
+
+Dogfood V1 deliberately separates two things:
+
+### Protocol review
+
+Proves that:
+
+- the experiment shape is fixed;
+- candidates are blinded;
+- condition mapping is not exposed to reviewers;
+- every qualitative dimension is reviewed;
+- packet/mapping drift is rejected.
+
+A protocol review alone is **not capability evidence**.
+
+### Capability review
+
+Requires protocol review **plus** a freshly recomputed execution receipt proving that each A/B/C/D/E trial is bound to the correct source architecture and rendered evidence.
+
+Only capability review may support the later human roadmap decision.
 
 ## Blind review
 
-A review-ready experiment can produce a deterministic blind packet.
+A structurally review-ready experiment can produce a deterministic blind packet.
 
 The public reviewer packet exposes opaque candidate IDs and neutral evidence aliases only. Condition identity, trial ID, runtime trace, source fingerprint and original evidence reference stay in a separate unblinding map.
 
 Review order is deterministic from the bound blind seed so it can be reproduced without presenting A/B/C/D/E ordering to reviewers.
+
+The final capability interpretation freshly rebuilds the private mapping from the original experiment and blind seed. A caller-supplied relabelled mapping is not trusted.
 
 ## Qualitative dimensions
 
