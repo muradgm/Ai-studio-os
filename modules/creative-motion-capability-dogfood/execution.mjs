@@ -141,22 +141,40 @@ function reviewDirectControlTrial(trial, source = {}) {
   };
 }
 
+function canonicalReceiptTruth() {
+  return {
+    conditionExecutionFreshlyReviewedWhereSupported: true,
+    directModelIsolationUsesOperatorAttestation: true,
+    directModelIsolationCryptographicallyProven: false,
+    identicalOutputsAcrossIndependentReplicatesAllowed: true,
+    receiptIsNotCreativeQuality: true,
+    receiptIsNotWinnerSelection: true,
+    productionApproved: false
+  };
+}
+
+function normalizedReceiptTrials(value = {}) {
+  return Array.isArray(value?.trials) ? value.trials.map((item) => ({
+    trialId: text(item?.trialId),
+    conditionId: text(item?.conditionId),
+    sourceKind: text(item?.sourceKind),
+    sourceSnapshotFingerprint: text(item?.sourceSnapshotFingerprint),
+    verifiedKnowledgeIds: sorted(item?.verifiedKnowledgeIds),
+    synthesisCandidateCount: Number(item?.synthesisCandidateCount ?? 0),
+    isolationAttestationRequired: item?.isolationAttestationRequired === true,
+    independentControlIsolationProven: item?.independentControlIsolationProven === true,
+    reviewReady: item?.reviewReady === true
+  })) : [];
+}
+
 function receiptFingerprint(value = {}) {
   return fingerprintCreativeValue({
     schema: 'ai-studio-os/creative-motion-dogfood-execution-receipt@1',
+    stage: 'creative-motion-dogfood-execution-verification',
     experimentId: text(value?.experimentId),
     experimentSnapshotFingerprint: text(value?.experimentSnapshotFingerprint),
-    trials: Array.isArray(value?.trials) ? value.trials.map((item) => ({
-      trialId: text(item?.trialId),
-      conditionId: text(item?.conditionId),
-      sourceKind: text(item?.sourceKind),
-      sourceSnapshotFingerprint: text(item?.sourceSnapshotFingerprint),
-      verifiedKnowledgeIds: sorted(item?.verifiedKnowledgeIds),
-      synthesisCandidateCount: Number(item?.synthesisCandidateCount ?? 0),
-      isolationAttestationRequired: item?.isolationAttestationRequired === true,
-      independentControlIsolationProven: item?.independentControlIsolationProven === true,
-      reviewReady: item?.reviewReady === true
-    })) : []
+    trials: normalizedReceiptTrials(value),
+    truth: canonicalReceiptTruth()
   });
 }
 
@@ -191,9 +209,7 @@ export function buildCreativeMotionDogfoodExecutionReceipt(experiment = {}, { tr
     });
   }
 
-  if (trials.length !== 15 || trials.some((item) => !item.reviewReady)) findings.push(finding('blocker', 'dogfood-execution-coverage-incomplete', 'All 15 dogfood trials must have condition-appropriate execution evidence before blinding.'));
-  const fingerprints = trials.map((item) => item.sourceSnapshotFingerprint).filter(Boolean);
-  if (fingerprints.length !== trials.length || new Set(fingerprints).size !== fingerprints.length) findings.push(finding('blocker', 'dogfood-execution-source-reused', 'Dogfood replicates must bind distinct source/reasoning snapshots; one execution cannot be aliased as multiple trials.'));
+  if (trials.length !== 15 || trials.some((item) => !item.reviewReady)) findings.push(finding('blocker', 'dogfood-execution-coverage-incomplete', 'All 15 dogfood trials must have condition-appropriate execution evidence before capability interpretation.'));
 
   const receipt = {
     schema: 'ai-studio-os/creative-motion-dogfood-execution-receipt@1',
@@ -201,14 +217,7 @@ export function buildCreativeMotionDogfoodExecutionReceipt(experiment = {}, { tr
     experimentId: text(experiment?.experimentId),
     experimentSnapshotFingerprint: text(experiment?.snapshotFingerprint),
     trials,
-    truth: {
-      conditionExecutionFreshlyReviewedWhereSupported: true,
-      directModelIsolationUsesOperatorAttestation: true,
-      directModelIsolationCryptographicallyProven: false,
-      receiptIsNotCreativeQuality: true,
-      receiptIsNotWinnerSelection: true,
-      productionApproved: false
-    }
+    truth: canonicalReceiptTruth()
   };
   receipt.snapshotFingerprint = receiptFingerprint(receipt);
   const blockers = findings.filter((item) => item.severity === 'blocker');
@@ -225,8 +234,9 @@ export function reviewCreativeMotionDogfoodExecutionReceipt(receipt = {}, experi
   const expected = buildCreativeMotionDogfoodExecutionReceipt(experiment, { trialSources });
   const findings = [];
   if (receipt?.schema !== 'ai-studio-os/creative-motion-dogfood-execution-receipt@1') findings.push(finding('blocker', 'dogfood-execution-receipt-schema-invalid', 'Execution receipt requires the canonical V1 schema.'));
+  if (receipt?.stage !== 'creative-motion-dogfood-execution-verification') findings.push(finding('blocker', 'dogfood-execution-receipt-stage-invalid', 'Execution receipt requires the canonical execution-verification stage.'));
   if (text(receipt?.experimentId) !== text(expected.experimentId) || text(receipt?.experimentSnapshotFingerprint) !== text(expected.experimentSnapshotFingerprint)) findings.push(finding('blocker', 'dogfood-execution-receipt-experiment-drift', 'Execution receipt must bind the exact current dogfood experiment snapshot.'));
-  if (!sameValue(receipt?.trials ?? [], expected.trials) || text(receipt?.snapshotFingerprint) !== text(expected.snapshotFingerprint)) findings.push(finding('blocker', 'dogfood-execution-receipt-drift', 'Execution receipt must exactly match fresh condition-specific source review.'));
+  if (!sameValue(normalizedReceiptTrials(receipt), normalizedReceiptTrials(expected)) || !sameValue(receipt?.truth ?? {}, canonicalReceiptTruth()) || text(receipt?.snapshotFingerprint) !== text(expected.snapshotFingerprint)) findings.push(finding('blocker', 'dogfood-execution-receipt-drift', 'Execution receipt must exactly match fresh condition-specific source review and the fixed non-authoritative truth boundary.'));
   if (!expected.reviewReady) findings.push(finding('blocker', 'dogfood-execution-source-review-blocked', 'Fresh execution-source review is not ready.', { findingCodes: expected.findings.map((item) => item.code) }));
   const blockers = findings.filter((item) => item.severity === 'blocker');
   return {
@@ -240,6 +250,7 @@ export function reviewCreativeMotionDogfoodExecutionReceipt(receipt = {}, experi
       callerConditionLabelsInsufficient: true,
       freshSourceReviewRequired: true,
       directModelIsolationUsesOperatorAttestation: true,
+      identicalOutputsAcrossIndependentReplicatesAllowed: true,
       productionApproved: false
     }
   };
