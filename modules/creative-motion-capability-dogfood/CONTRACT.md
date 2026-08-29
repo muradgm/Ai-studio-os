@@ -190,20 +190,27 @@ requested model, provider resource name/version, advertised generation methods,
 token limits and metadata fingerprint. Mutable `*-latest` aliases are rejected
 for formal execution.
 
-The execution plan binds exactly A1–E3, one explicit source-material bundle per
-condition, a fixed one-request model/temperature/token/time policy, and unique
-runtime trace/evidence references. It runs trials serially with no automatic
-retry, fallback model or manual result substitution. A produced run remains
-pre-proof evidence only: condition-specific source validation, rendered temporal
-proof, blind packet construction and human review still occur afterwards.
+The execution plan binds exactly A1–E3, the exact selected Creative World object
+and canonical authority bundle, one explicit source-material bundle per
+condition, a fixed model/temperature/token/time policy, and unique runtime
+trace/evidence references. It runs the frozen balanced schedule serially with no
+automatic retry, fallback model or manual result substitution. A produced run
+remains pre-proof evidence only: condition-specific source validation, rendered
+temporal proof, blind packet construction and human review still occur
+afterwards.
 
 Before any provider call, the executor freshly re-verifies all five condition
 sources from their real upstream artifacts and derives each source fingerprint
-and Gemini instruction internally. A condition label, caller-supplied
-fingerprint, evidence reference, prompt, or architecture declaration cannot
-qualify a source bundle. Condition E retains the existing explicit operator
-isolation attestation because independent cryptographic isolation is not yet
-available.
+internally. A is the reviewed Motion V1 exploration; B/C/D are the reviewed
+Motion V2-to-V1 exploration handoffs. Those architecture outputs are never sent
+to Gemini for a second transformation. E alone uses the direct-model transport,
+with an internally derived task/output envelope containing the same exact frozen
+Creative World object. Its response must then pass the shared V1 exploration
+validator; arbitrary JSON is not a produced trial. A condition label,
+caller-supplied fingerprint, evidence reference, prompt, or architecture
+declaration cannot qualify a source bundle. Condition E retains the existing
+explicit operator isolation attestation because independent cryptographic
+isolation is not yet available.
 
 The plan also binds a deterministic balanced schedule from a frozen seed: every
 replicate block contains A/B/C/D/E exactly once. Gemini identity is inspected

@@ -1,5 +1,5 @@
 import { fingerprintCreativeValue } from '../creative-intelligence-foundation/fingerprint.mjs';
-import { reviewMotionCreativeExploration } from '../motion-creative-intelligence/runtime.mjs';
+import { buildMotionCreativeExploration, reviewMotionCreativeExploration } from '../motion-creative-intelligence/runtime.mjs';
 import { reviewMotionProofEvidence } from '../motion-creative-intelligence/proof.mjs';
 import {
   reviewMotionIntelligenceV2Set,
@@ -259,7 +259,27 @@ function canonicalize(value) {
   return value;
 }
 
-export function buildCreativeMotionDogfoodGenerationSource({ trial = {}, brief = {}, source = {} } = {}) {
+function selectedWorld(authority = {}) {
+  return authority?.selectedCreativeWorld ?? authority?.creativeWorldExploration?.selectedWorld ?? null;
+}
+
+function sharedWorldReview({ trial = {}, selectedCreativeWorld: expectedWorld = null, canonicalCreativeAuthority = null, source = {} } = {}) {
+  const findings = [];
+  const expectedFingerprint = fingerprintCreativeValue(expectedWorld ?? null);
+  const expectedRef = text(expectedWorld?.id);
+  const authorityWorld = selectedWorld(canonicalCreativeAuthority ?? {});
+  const sourceWorld = text(trial?.conditionId).toUpperCase() === 'A'
+    ? selectedWorld(source?.exploration?.authorityInputs?.canonicalCreativeAuthority)
+    : ['B', 'C', 'D'].includes(text(trial?.conditionId).toUpperCase())
+      ? selectedWorld(source?.authorityInputs?.canonicalCreativeAuthority)
+      : null;
+  if (!expectedWorld || !expectedRef || !canonicalCreativeAuthority) findings.push(finding('blocker', 'dogfood-generation-source-shared-world-missing', 'Formal execution requires the exact selected Creative World and its canonical authority bundle.'));
+  if (!sameValue(authorityWorld, expectedWorld)) findings.push(finding('blocker', 'dogfood-generation-source-canonical-world-drift', 'The canonical Creative World authority must contain the exact frozen selected Creative World object.'));
+  if (sourceWorld && !sameValue(sourceWorld, expectedWorld)) findings.push(finding('blocker', 'dogfood-generation-source-world-drift', 'Condition source artifacts must embed the exact frozen selected Creative World content, not only the same ID or reference.'));
+  return { selectedCreativeWorldFingerprint: expectedFingerprint, selectedCreativeWorldRef: expectedRef, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
+export function buildCreativeMotionDogfoodGenerationSource({ trial = {}, brief = {}, source = {}, selectedCreativeWorld = null, canonicalCreativeAuthority = null } = {}) {
   const conditionId = text(trial?.conditionId).toUpperCase();
   let review;
   let payload;
@@ -268,10 +288,21 @@ export function buildCreativeMotionDogfoodGenerationSource({ trial = {}, brief =
   else if (conditionId === 'E') { review = reviewDirectControlPreProofSource(trial, source); payload = { directControlRequest: source?.directControlRequest ?? null }; }
   else review = { sourceKind: '', sourceSnapshotFingerprint: '', findings: [finding('blocker', 'dogfood-execution-condition-invalid', 'Generation source encountered an unsupported dogfood condition.', { conditionId })], reviewReady: false }, payload = {};
   const briefFingerprint = fingerprintCreativeValue(brief ?? {});
-  const findings = [...review.findings];
+  const world = sharedWorldReview({ trial, selectedCreativeWorld, canonicalCreativeAuthority, source });
+  const findings = [...review.findings, ...world.findings];
   if (briefFingerprint !== text(trial?.briefFingerprint)) findings.push(finding('blocker', 'dogfood-generation-source-brief-drift', 'Generation source must receive the exact frozen brief bound to the trial.'));
-  const instruction = JSON.stringify(canonicalize({ schema: 'ai-studio-os/creative-motion-dogfood-generation-instruction@1', conditionId, projectId: text(trial?.projectId), brief, briefFingerprint, sourceKind: review.sourceKind, sourceSnapshotFingerprint: review.sourceSnapshotFingerprint, source: payload }));
-  return { schema: 'ai-studio-os/creative-motion-dogfood-generation-source@1', conditionId, sourceKind: review.sourceKind, sourceSnapshotFingerprint: review.sourceSnapshotFingerprint, generationInstruction: instruction, generationInstructionFingerprint: fingerprintCreativeValue(instruction), findings, reviewReady: findings.every((item) => item.severity !== 'blocker'), truth: { sourceFreshlyReviewed: true, operatorIsolationAttestationUsedOnlyWhereExistingArchitectureRequiresIt: review.isolationAttestationRequired === true, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
+  const executionMode = conditionId === 'E' ? 'direct-model-generation' : 'architecture-output';
+  const conditionArtifact = conditionId === 'A' ? source?.exploration ?? null : ['B', 'C', 'D'].includes(conditionId) ? source?.handoff?.exploration ?? null : null;
+  const instruction = conditionId === 'E' ? JSON.stringify(canonicalize({ schema: 'ai-studio-os/creative-motion-dogfood-direct-model-task@2', projectId: text(trial?.projectId), brief, briefFingerprint, selectedCreativeWorld, selectedCreativeWorldRef: world.selectedCreativeWorldRef, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, output: { schema: 'ai-studio-os/motion-hypotheses@1', minimumHypotheses: 3, v1ValidationRequired: true }, directControlRequest: payload.directControlRequest })) : '';
+  return { schema: 'ai-studio-os/creative-motion-dogfood-generation-source@2', conditionId, sourceKind: review.sourceKind, executionMode, sourceSnapshotFingerprint: review.sourceSnapshotFingerprint, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, conditionArtifact, generationInstruction: instruction, generationInstructionFingerprint: instruction ? fingerprintCreativeValue(instruction) : '', findings, reviewReady: findings.every((item) => item.severity !== 'blocker'), truth: { sourceFreshlyReviewed: true, operatorIsolationAttestationUsedOnlyWhereExistingArchitectureRequiresIt: review.isolationAttestationRequired === true, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
+}
+
+export function buildCreativeMotionDogfoodDirectControlExploration({ projectId, canonicalCreativeAuthority, selectedCreativeWorld, generatedDraft } = {}) {
+  const findings = [];
+  if (!sameValue(selectedWorld(canonicalCreativeAuthority ?? {}), selectedCreativeWorld ?? null)) findings.push(finding('blocker', 'dogfood-direct-output-world-drift', 'Direct-model output must be validated against the exact frozen Creative World authority.'));
+  const exploration = buildMotionCreativeExploration({ projectId, canonicalCreativeAuthority, hypotheses: generatedDraft?.hypotheses });
+  if (!exploration.reviewReady) findings.push(finding('blocker', 'dogfood-direct-output-hypotheses-invalid', 'Direct-model output must contain complete V1-valid Motion hypotheses; arbitrary JSON is not a produced trial.', { findingCodes: exploration.findings?.map((item) => item.code) ?? [] }));
+  return { exploration, findings, produced: findings.every((item) => item.severity !== 'blocker'), truth: { reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
 }
 
 function reviewDirectControlTrial(trial, source = {}) {
