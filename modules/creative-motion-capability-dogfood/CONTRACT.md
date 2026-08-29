@@ -153,6 +153,35 @@ Fixture-only Motion proof cannot qualify as dogfood capability evidence.
 
 The harness does not create or fake these artifacts. Missing real evidence blocks capability interpretation.
 
+## Gemini prototype transport
+
+`gemini-runner.mjs` is a deliberately narrow, developer-only transport for one
+bounded Gemini request. It exists to establish traceable execution before the
+formal 15-trial experiment; it is not a Tool Gateway expansion or a new Motion
+authority path.
+
+The runner:
+
+- reads `GEMINI_API_KEY` and `GEMINI_FREE_MODEL` only from its execution
+  environment;
+- sends the key only as an `x-goog-api-key` request header and excludes it from
+  result records;
+- accepts one request per invocation, with a fixed temperature policy and an
+  explicit token/time budget;
+- requires an upstream condition-specific instruction and an operator-supplied
+  architecture declaration rather than inferring reasoning-layer participation;
+- emits request/response fingerprints, model, usage metadata and the canonical
+  runtime-control record; and
+- returns `prototypeOnly: true`, `reviewReady: false`, and
+  `capabilityEvidenceReady: false` on every result.
+
+`npm run preflight:after-matter-gemini` makes one unscored direct-model
+Condition E transport request and writes its local record below `artifacts/`.
+That record is intentionally ignored by Git. It is neither a formal Condition E
+trial nor a substitute for V1-shaped exploration validation, browser-temporal
+proof, mobile/reduced-motion evidence, blind review, or capability
+interpretation.
+
 ## Protocol review versus capability review
 
 Dogfood V1 deliberately separates two things:
