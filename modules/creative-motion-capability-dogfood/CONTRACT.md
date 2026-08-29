@@ -182,6 +182,51 @@ trial nor a substitute for V1-shaped exploration validation, browser-temporal
 proof, mobile/reduced-motion evidence, blind review, or capability
 interpretation.
 
+## Formal execution runner
+
+The formal 15-trial executor is a separate pre-proof layer. It first enrolls a
+Gemini model by snapshotting the provider Model resource, including the
+requested model, provider resource name/version, advertised generation methods,
+token limits and metadata fingerprint. Mutable `*-latest` aliases are rejected
+for formal execution.
+
+The execution plan binds exactly A1–E3, the exact selected Creative World object
+and canonical authority bundle, and one explicit source-execution bundle per
+trial. Each bundle binds its scheduled trial ID, condition, native/direct
+execution instance, runtime trace and trace fingerprint, source-evidence
+reference, and the freshly recomputed source/output artifact fingerprint. A
+single source execution or runtime trace cannot be reused across replicates.
+
+Independent replicates may still produce byte-for-byte identical creative
+content. Output equality is not proof of repeated execution; independence is
+proven by the distinct source-execution and runtime provenance records. The
+fixed model/temperature/token/time policy and frozen balanced schedule remain
+shared. The executor has no automatic retry, fallback model or manual result
+substitution. A produced run remains pre-proof evidence only: condition-specific
+source validation, rendered temporal proof, blind packet construction and human
+review still occur afterwards.
+
+Before any provider call, the executor freshly re-verifies all five condition
+sources from their real upstream artifacts and derives each source fingerprint
+internally. A is the reviewed Motion V1 exploration; B/C/D are the reviewed
+Motion V2-to-V1 exploration handoffs. Those architecture outputs are never sent
+to Gemini for a second transformation. E alone uses the direct-model transport,
+with an internally derived task/output envelope containing the same exact frozen
+Creative World object. Its response must then pass the shared V1 exploration
+validator; arbitrary JSON is not a produced trial. A condition label,
+caller-supplied fingerprint, evidence reference, prompt, or architecture
+declaration cannot qualify a source bundle. Condition E retains the existing
+explicit operator isolation attestation because independent cryptographic
+isolation is not yet available.
+
+The plan also binds a deterministic balanced schedule from a frozen seed: every
+replicate block contains A/B/C/D/E exactly once. Gemini identity is inspected
+immediately before and after the batch and must match the enrolled
+model/resource/version/metadata binding. Any provider failure, source drift,
+identity drift, or result-binding drift invalidates the entire batch, stops
+further calls, and makes the partial record non-resumable for capability
+evidence.
+
 ## Protocol review versus capability review
 
 Dogfood V1 deliberately separates two things:

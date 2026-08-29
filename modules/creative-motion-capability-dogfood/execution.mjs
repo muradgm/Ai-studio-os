@@ -1,5 +1,5 @@
 import { fingerprintCreativeValue } from '../creative-intelligence-foundation/fingerprint.mjs';
-import { reviewMotionCreativeExploration } from '../motion-creative-intelligence/runtime.mjs';
+import { buildMotionCreativeExploration, reviewMotionCreativeExploration } from '../motion-creative-intelligence/runtime.mjs';
 import { reviewMotionProofEvidence } from '../motion-creative-intelligence/proof.mjs';
 import {
   reviewMotionIntelligenceV2Set,
@@ -148,13 +148,12 @@ function reviewRuntimeControlBinding(trial, source = {}) {
   };
 }
 
-function reviewV1Trial(trial, source = {}) {
+function reviewV1Source(trial, source = {}) {
   const findings = [];
   const exploration = source?.exploration ?? null;
   const isolation = normalizeV1Isolation(source?.v1Isolation ?? {});
   const review = reviewMotionCreativeExploration(exploration ?? {});
   const sourceFingerprint = v1BaselineFingerprint(exploration, isolation);
-  const proof = reviewTemporalProofBinding(trial, exploration, source);
 
   if (!review.reviewReady) findings.push(finding('blocker', 'dogfood-v1-exploration-invalid', 'Condition A requires a freshly review-ready Motion V1 exploration.', { findingCodes: review.findings?.map((item) => item.code) ?? [] }));
   if (text(exploration?.projectId) !== text(trial?.projectId)) findings.push(finding('blocker', 'dogfood-v1-project-drift', 'Condition A exploration must belong to the trial project.'));
@@ -162,14 +161,9 @@ function reviewV1Trial(trial, source = {}) {
   if (!isolation.isolationAttestedBy || !isolation.isolationEvidenceRef) findings.push(finding('blocker', 'dogfood-v1-isolation-attestation-missing', 'Condition A requires explicit operator isolation attestation and evidence until V1-only generation has a first-class trace boundary.'));
   if (isolation.explorationFingerprint !== fingerprintCreativeValue(exploration ?? null)) findings.push(finding('blocker', 'dogfood-v1-isolation-exploration-drift', 'Condition A isolation evidence must bind the exact supplied Motion V1 exploration.'));
   if (isolation.truth.motionV1CreativeGeneration !== true || isolation.truth.aiStudioKnowledgeUsed || isolation.truth.aiStudioTransferUsed || isolation.truth.aiStudioSynthesisUsed || isolation.truth.aiStudioMotionV2Used) findings.push(finding('blocker', 'dogfood-v1-baseline-contaminated', 'Condition A must use Motion V1-only creative generation without Knowledge, Transfer, Synthesis or Motion V2 participation.'));
-  if (text(trial?.sourceSnapshotFingerprint) !== sourceFingerprint) findings.push(finding('blocker', 'dogfood-v1-source-binding-drift', 'Condition A trial source fingerprint must bind the exact supplied Motion V1 exploration and V1-only isolation evidence.'));
-  findings.push(...proof.findings);
-
   return {
     sourceKind: 'motion-v1-exploration',
     sourceSnapshotFingerprint: sourceFingerprint,
-    proofEvidenceFingerprint: proof.proofEvidenceFingerprint,
-    proofEvidenceRef: proof.proofEvidenceRef,
     verifiedKnowledgeIds: [],
     synthesisCandidateCount: 0,
     isolationAttestationRequired: true,
@@ -179,7 +173,15 @@ function reviewV1Trial(trial, source = {}) {
   };
 }
 
-function reviewV2Trial(trial, source = {}) {
+function reviewV1Trial(trial, source = {}) {
+  const review = reviewV1Source(trial, source);
+  const proof = reviewTemporalProofBinding(trial, source?.exploration ?? null, source);
+  const findings = [...review.findings, ...proof.findings];
+  if (text(trial?.sourceSnapshotFingerprint) !== review.sourceSnapshotFingerprint) findings.push(finding('blocker', 'dogfood-v1-source-binding-drift', 'Condition A trial source fingerprint must bind the exact supplied Motion V1 exploration and V1-only isolation evidence.'));
+  return { ...review, proofEvidenceFingerprint: proof.proofEvidenceFingerprint, proofEvidenceRef: proof.proofEvidenceRef, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
+function reviewV2Source(trial, source = {}) {
   const findings = [];
   const reasoningSet = source?.reasoningSet ?? null;
   const handoff = source?.handoff ?? null;
@@ -193,12 +195,11 @@ function reviewV2Trial(trial, source = {}) {
   const synthesisBinding = reasoningSet?.brief?.synthesisBinding ?? null;
   const synthesisCandidates = Array.isArray(reasoningSet?.brief?.synthesisCandidates) ? reasoningSet.brief.synthesisCandidates : [];
   const sourceFingerprint = text(reasoningSet?.snapshotFingerprint);
-  const proof = reviewTemporalProofBinding(trial, exploration, source);
 
   if (!setReview.reviewReady) findings.push(finding('blocker', 'dogfood-v2-reasoning-set-invalid', 'Conditions B/C/D require a freshly review-ready Motion V2 reasoning set with its original authority inputs.', { conditionId, findingCodes: setReview.findings?.map((item) => item.code) ?? [] }));
   if (!handoffReview.reviewReady || !exploration) findings.push(finding('blocker', 'dogfood-v2-handoff-invalid', 'Conditions B/C/D require the exact freshly reviewed V2→V1 exploration handoff used for temporal proof.', { conditionId, findingCodes: handoffReview.findings?.map((item) => item.code) ?? [] }));
   if (text(reasoningSet?.brief?.projectId) !== text(trial?.projectId)) findings.push(finding('blocker', 'dogfood-v2-project-drift', 'Motion V2 reasoning set must belong to the trial project.', { conditionId }));
-  if (!sourceFingerprint || text(trial?.sourceSnapshotFingerprint) !== sourceFingerprint) findings.push(finding('blocker', 'dogfood-v2-source-binding-drift', 'V2 trial source fingerprint must bind the exact public Motion V2 reasoning-set snapshot.', { conditionId }));
+  if (!sourceFingerprint) findings.push(finding('blocker', 'dogfood-v2-source-binding-missing', 'V2 source requires the exact public Motion V2 reasoning-set snapshot fingerprint.', { conditionId }));
   if (!sameValue(actualKnowledgeIds, expectedIds)) findings.push(finding('blocker', 'dogfood-v2-knowledge-profile-drift', 'Motion V2 trial must use the exact locked knowledge profile for its dogfood condition.', { conditionId, expectedKnowledgeIds: expectedIds, actualKnowledgeIds }));
 
   if (conditionId === 'D') {
@@ -206,18 +207,102 @@ function reviewV2Trial(trial, source = {}) {
   } else if (synthesisBinding !== null || synthesisCandidates.length) {
     findings.push(finding('blocker', 'dogfood-v2-synthesis-contamination', 'Conditions B and C must not receive Synthesis evidence.', { conditionId }));
   }
-  findings.push(...proof.findings);
-
   return {
     sourceKind: 'motion-v2-reasoning-set-v1-proof-handoff',
     sourceSnapshotFingerprint: sourceFingerprint,
-    proofEvidenceFingerprint: proof.proofEvidenceFingerprint,
-    proofEvidenceRef: proof.proofEvidenceRef,
     verifiedKnowledgeIds: actualKnowledgeIds,
     synthesisCandidateCount: Number(synthesisBinding?.candidateCount ?? 0),
     findings,
     reviewReady: findings.every((item) => item.severity !== 'blocker')
   };
+}
+
+function reviewV2Trial(trial, source = {}) {
+  const review = reviewV2Source(trial, source);
+  const proof = reviewTemporalProofBinding(trial, source?.handoff?.exploration ?? null, source);
+  const findings = [...review.findings, ...proof.findings];
+  if (text(trial?.sourceSnapshotFingerprint) !== review.sourceSnapshotFingerprint) findings.push(finding('blocker', 'dogfood-v2-source-binding-drift', 'V2 trial source fingerprint must bind the exact public Motion V2 reasoning-set snapshot.', { conditionId: text(trial?.conditionId).toUpperCase() }));
+  return { ...review, proofEvidenceFingerprint: proof.proofEvidenceFingerprint, proofEvidenceRef: proof.proofEvidenceRef, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
+function normalizeDirectControlRequest(value = {}) {
+  return {
+    schema: text(value?.schema),
+    projectId: text(value?.projectId),
+    briefFingerprint: text(value?.briefFingerprint),
+    isolationAttestedBy: text(value?.isolationAttestedBy),
+    isolationEvidenceRef: text(value?.isolationEvidenceRef),
+    truth: {
+      directModelCreativeGeneration: value?.truth?.directModelCreativeGeneration === true,
+      aiStudioKnowledgeUsed: value?.truth?.aiStudioKnowledgeUsed === true,
+      aiStudioTransferUsed: value?.truth?.aiStudioTransferUsed === true,
+      aiStudioSynthesisUsed: value?.truth?.aiStudioSynthesisUsed === true,
+      aiStudioMotionV2Used: value?.truth?.aiStudioMotionV2Used === true
+    }
+  };
+}
+
+function reviewDirectControlPreProofSource(trial, source = {}) {
+  const findings = [];
+  const request = normalizeDirectControlRequest(source?.directControlRequest ?? {});
+  const sourceFingerprint = fingerprintCreativeValue(request);
+  if (request.schema !== 'ai-studio-os/direct-model-motion-control-request@1') findings.push(finding('blocker', 'dogfood-direct-control-request-schema-invalid', 'Condition E pre-proof execution requires the canonical direct-model request contract.'));
+  if (request.projectId !== text(trial?.projectId) || request.briefFingerprint !== text(trial?.briefFingerprint)) findings.push(finding('blocker', 'dogfood-direct-control-request-context-drift', 'Condition E request must bind the exact experiment project and frozen brief.'));
+  if (!request.isolationAttestedBy || !request.isolationEvidenceRef) findings.push(finding('blocker', 'dogfood-direct-control-isolation-attestation-missing', 'Condition E requires explicit operator isolation attestation until a first-class isolated direct-model runner exists.'));
+  if (request.truth.directModelCreativeGeneration !== true || request.truth.aiStudioKnowledgeUsed || request.truth.aiStudioTransferUsed || request.truth.aiStudioSynthesisUsed || request.truth.aiStudioMotionV2Used) findings.push(finding('blocker', 'dogfood-direct-control-contaminated', 'Condition E pre-proof source must bypass AI Studio creative reasoning layers.'));
+  return { sourceKind: 'direct-model-pre-proof-request', sourceSnapshotFingerprint: sourceFingerprint, verifiedKnowledgeIds: [], synthesisCandidateCount: 0, isolationAttestationRequired: true, independentControlIsolationProven: false, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
+  return value;
+}
+
+function selectedWorld(authority = {}) {
+  return authority?.selectedCreativeWorld ?? authority?.creativeWorldExploration?.selectedWorld ?? null;
+}
+
+function sharedWorldReview({ trial = {}, selectedCreativeWorld: expectedWorld = null, canonicalCreativeAuthority = null, source = {} } = {}) {
+  const findings = [];
+  const expectedFingerprint = fingerprintCreativeValue(expectedWorld ?? null);
+  const expectedRef = text(expectedWorld?.id);
+  const authorityWorld = selectedWorld(canonicalCreativeAuthority ?? {});
+  const sourceWorld = text(trial?.conditionId).toUpperCase() === 'A'
+    ? selectedWorld(source?.exploration?.authorityInputs?.canonicalCreativeAuthority)
+    : ['B', 'C', 'D'].includes(text(trial?.conditionId).toUpperCase())
+      ? selectedWorld(source?.authorityInputs?.canonicalCreativeAuthority)
+      : null;
+  if (!expectedWorld || !expectedRef || !canonicalCreativeAuthority) findings.push(finding('blocker', 'dogfood-generation-source-shared-world-missing', 'Formal execution requires the exact selected Creative World and its canonical authority bundle.'));
+  if (!sameValue(authorityWorld, expectedWorld)) findings.push(finding('blocker', 'dogfood-generation-source-canonical-world-drift', 'The canonical Creative World authority must contain the exact frozen selected Creative World object.'));
+  if (sourceWorld && !sameValue(sourceWorld, expectedWorld)) findings.push(finding('blocker', 'dogfood-generation-source-world-drift', 'Condition source artifacts must embed the exact frozen selected Creative World content, not only the same ID or reference.'));
+  return { selectedCreativeWorldFingerprint: expectedFingerprint, selectedCreativeWorldRef: expectedRef, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
+export function buildCreativeMotionDogfoodGenerationSource({ trial = {}, brief = {}, source = {}, selectedCreativeWorld = null, canonicalCreativeAuthority = null } = {}) {
+  const conditionId = text(trial?.conditionId).toUpperCase();
+  let review;
+  let payload;
+  if (conditionId === 'A') { review = reviewV1Source(trial, source); payload = { exploration: source?.exploration ?? null, v1Isolation: source?.v1Isolation ?? null }; }
+  else if (['B', 'C', 'D'].includes(conditionId)) { review = reviewV2Source(trial, source); payload = { reasoningSet: source?.reasoningSet ?? null, handoff: source?.handoff ?? null, authorityInputs: source?.authorityInputs ?? null }; }
+  else if (conditionId === 'E') { review = reviewDirectControlPreProofSource(trial, source); payload = { directControlRequest: source?.directControlRequest ?? null }; }
+  else review = { sourceKind: '', sourceSnapshotFingerprint: '', findings: [finding('blocker', 'dogfood-execution-condition-invalid', 'Generation source encountered an unsupported dogfood condition.', { conditionId })], reviewReady: false }, payload = {};
+  const briefFingerprint = fingerprintCreativeValue(brief ?? {});
+  const world = sharedWorldReview({ trial, selectedCreativeWorld, canonicalCreativeAuthority, source });
+  const findings = [...review.findings, ...world.findings];
+  if (briefFingerprint !== text(trial?.briefFingerprint)) findings.push(finding('blocker', 'dogfood-generation-source-brief-drift', 'Generation source must receive the exact frozen brief bound to the trial.'));
+  const executionMode = conditionId === 'E' ? 'direct-model-generation' : 'architecture-output';
+  const conditionArtifact = conditionId === 'A' ? source?.exploration ?? null : ['B', 'C', 'D'].includes(conditionId) ? source?.handoff?.exploration ?? null : null;
+  const instruction = conditionId === 'E' ? JSON.stringify(canonicalize({ schema: 'ai-studio-os/creative-motion-dogfood-direct-model-task@2', projectId: text(trial?.projectId), brief, briefFingerprint, selectedCreativeWorld, selectedCreativeWorldRef: world.selectedCreativeWorldRef, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, output: { schema: 'ai-studio-os/motion-hypotheses@1', minimumHypotheses: 3, v1ValidationRequired: true }, directControlRequest: payload.directControlRequest })) : '';
+  return { schema: 'ai-studio-os/creative-motion-dogfood-generation-source@2', conditionId, sourceKind: review.sourceKind, executionMode, sourceSnapshotFingerprint: review.sourceSnapshotFingerprint, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, conditionArtifact, generationInstruction: instruction, generationInstructionFingerprint: instruction ? fingerprintCreativeValue(instruction) : '', findings, reviewReady: findings.every((item) => item.severity !== 'blocker'), truth: { sourceFreshlyReviewed: true, operatorIsolationAttestationUsedOnlyWhereExistingArchitectureRequiresIt: review.isolationAttestationRequired === true, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
+}
+
+export function buildCreativeMotionDogfoodDirectControlExploration({ projectId, canonicalCreativeAuthority, selectedCreativeWorld, generatedDraft } = {}) {
+  const findings = [];
+  if (!sameValue(selectedWorld(canonicalCreativeAuthority ?? {}), selectedCreativeWorld ?? null)) findings.push(finding('blocker', 'dogfood-direct-output-world-drift', 'Direct-model output must be validated against the exact frozen Creative World authority.'));
+  const exploration = buildMotionCreativeExploration({ projectId, canonicalCreativeAuthority, hypotheses: generatedDraft?.hypotheses });
+  if (!exploration.reviewReady) findings.push(finding('blocker', 'dogfood-direct-output-hypotheses-invalid', 'Direct-model output must contain complete V1-valid Motion hypotheses; arbitrary JSON is not a produced trial.', { findingCodes: exploration.findings?.map((item) => item.code) ?? [] }));
+  return { exploration, findings, produced: findings.every((item) => item.severity !== 'blocker'), truth: { reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
 }
 
 function reviewDirectControlTrial(trial, source = {}) {
