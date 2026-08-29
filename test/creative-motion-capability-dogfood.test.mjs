@@ -6,9 +6,9 @@ import {
   CREATIVE_MOTION_DOGFOOD_DIMENSIONS,
   buildCreativeMotionCapabilityDogfood,
   buildCreativeMotionBlindReviewPacket,
-  buildCreativeMotionUnblindingMap,
-  reviewCreativeMotionDogfoodResults
+  buildCreativeMotionUnblindingMap
 } from '../modules/creative-motion-capability-dogfood/runtime.mjs';
+import { reviewCreativeMotionDogfoodResultsFresh } from '../modules/creative-motion-capability-dogfood/review.mjs';
 
 function dogfoodBrief() {
   return {
@@ -178,12 +178,11 @@ test('private unblinding map is separate and resolves all blind candidates', () 
   assert.deepEqual(new Set(map.mapping.map((item) => item.conditionId)), new Set(['A', 'B', 'C', 'D', 'E']));
 });
 
-test('qualitative results expose per-dimension diagnostics without an overall score or automatic winner', () => {
+test('fresh qualitative review exposes per-dimension diagnostics without an overall score or automatic winner', () => {
   const experiment = buildValidExperiment();
   const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
-  const map = buildCreativeMotionUnblindingMap(experiment, { blindSeed: 'private-seed-011' });
-  const results = reviewCreativeMotionDogfoodResults(packet, {
-    unblindingMap: map,
+  const results = reviewCreativeMotionDogfoodResultsFresh(experiment, packet, {
+    blindSeed: 'private-seed-011',
     reviewers: [completeReviewer(packet)]
   });
   assert.equal(results.pass, true);
@@ -195,6 +194,8 @@ test('qualitative results expose per-dimension diagnostics without an overall sc
   assert.equal(Object.hasOwn(results, 'winner'), false);
   assert.equal(results.truth.noOverallCreativeScore, true);
   assert.equal(results.truth.comparisonDeltasAreNotWinnerSelection, true);
+  assert.equal(results.truth.freshExperimentRecomputationRequired, true);
+  assert.equal(results.truth.callerSuppliedConditionMappingTrusted, false);
   assert.equal(results.truth.creativeDirectionSelected, false);
   assert.equal(results.truth.productionApproved, false);
 });
@@ -202,9 +203,11 @@ test('qualitative results expose per-dimension diagnostics without an overall sc
 test('review must remain blinded and independent', () => {
   const experiment = buildValidExperiment();
   const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
-  const map = buildCreativeMotionUnblindingMap(experiment, { blindSeed: 'private-seed-011' });
   const reviewer = completeReviewer(packet, { blinded: false });
-  const results = reviewCreativeMotionDogfoodResults(packet, { unblindingMap: map, reviewers: [reviewer] });
+  const results = reviewCreativeMotionDogfoodResultsFresh(experiment, packet, {
+    blindSeed: 'private-seed-011',
+    reviewers: [reviewer]
+  });
   assert.equal(results.pass, false);
   assert.ok(results.findings.some((item) => item.code === 'dogfood-review-not-blind-independent'));
 });
@@ -212,9 +215,8 @@ test('review must remain blinded and independent', () => {
 test('dogfood roadmap decision cannot manufacture creative or production authority', () => {
   const experiment = buildValidExperiment();
   const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
-  const map = buildCreativeMotionUnblindingMap(experiment, { blindSeed: 'private-seed-011' });
-  const results = reviewCreativeMotionDogfoodResults(packet, {
-    unblindingMap: map,
+  const results = reviewCreativeMotionDogfoodResultsFresh(experiment, packet, {
+    blindSeed: 'private-seed-011',
     reviewers: [completeReviewer(packet)],
     humanDecision: {
       outcome: 'productize-next',
@@ -227,16 +229,27 @@ test('dogfood roadmap decision cannot manufacture creative or production authori
   assert.ok(results.findings.some((item) => item.code === 'dogfood-human-decision-authority-fabricated'));
 });
 
-test('tampered blind packet fingerprint blocks result interpretation', () => {
+test('fresh result interpretation rejects a packet rebuilt or changed outside the bound experiment', () => {
   const experiment = buildValidExperiment();
   const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
-  const map = buildCreativeMotionUnblindingMap(experiment, { blindSeed: 'private-seed-011' });
   const tampered = structuredClone(packet);
   tampered.candidates[0].hypothesisCount = 99;
-  const results = reviewCreativeMotionDogfoodResults(tampered, {
-    unblindingMap: map,
+  const results = reviewCreativeMotionDogfoodResultsFresh(experiment, tampered, {
+    blindSeed: 'private-seed-011',
     reviewers: [completeReviewer(packet)]
   });
   assert.equal(results.pass, false);
-  assert.ok(results.findings.some((item) => item.code === 'dogfood-review-packet-invalid'));
+  assert.ok(results.findings.some((item) => item.code === 'dogfood-fresh-review-packet-drift'));
+});
+
+test('fresh result interpretation fails closed when the blind seed is wrong', () => {
+  const experiment = buildValidExperiment();
+  const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
+  const results = reviewCreativeMotionDogfoodResultsFresh(experiment, packet, {
+    blindSeed: 'wrong-seed',
+    reviewers: [completeReviewer(packet)]
+  });
+  assert.equal(results.pass, false);
+  assert.equal(results.status, 'blocked');
+  assert.ok(results.findings.some((item) => item.code === 'dogfood-fresh-review-source-invalid'));
 });
