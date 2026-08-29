@@ -36,16 +36,16 @@ function directControl(overrides = {}) {
     requestFingerprint: 'r'.repeat(64),
     responseFingerprint: 'q'.repeat(64),
     runtimeTraceRef: 'trace://e-1',
-    renderEvidenceRef: 'evidence://direct-control/render/e-1',
-    renderEvidenceFingerprint: 'v'.repeat(64),
+    explorationFingerprint: 'x'.repeat(64),
     isolationAttestedBy: 'operator-01',
     isolationEvidenceRef: 'evidence://direct-control/isolation/e-1',
     truth: {
-      directModelControl: true,
-      aiStudioMotionV1Used: false,
-      aiStudioMotionV2Used: false,
+      directModelCreativeGeneration: true,
+      aiStudioKnowledgeUsed: false,
+      aiStudioTransferUsed: false,
       aiStudioSynthesisUsed: false,
-      renderEvidenceIndependentlyVerified: true
+      aiStudioMotionV2Used: false,
+      v1ContractValidationAndProofOnly: true
     },
     ...overrides
   };
@@ -75,7 +75,7 @@ test('condition execution fails closed when a claimed V2 trial has no real reaso
   assert.ok(receipt.findings.some((item) => item.code === 'dogfood-execution-coverage-incomplete'));
 });
 
-test('direct-model control requires an isolated request/response and independently verified rendered-evidence envelope', () => {
+test('direct-model control cannot qualify from request-response attestation alone; it must share the real V1 temporal proof harness', () => {
   const control = directControl();
   const trial = {
     trialId: 'trial-e-1',
@@ -83,28 +83,33 @@ test('direct-model control requires an isolated request/response and independent
     projectId: control.projectId,
     briefFingerprint: control.briefFingerprint,
     generationBudget: budget(),
-    evidenceBundleRef: control.renderEvidenceRef,
+    evidenceBundleRef: 'evidence://direct-control/proof/e-1',
+    temporalStudyCount: 15,
+    realBrowserEvidence: true,
+    mobileEvidence: true,
+    reducedMotionEvidence: true,
     runtimeTraceRef: control.runtimeTraceRef,
     sourceSnapshotFingerprint: fingerprintCreativeValue(control)
   };
   const receipt = buildCreativeMotionDogfoodExecutionReceipt(experimentWithTrial(trial), {
     trialSources: { 'trial-e-1': { directControl: control } }
   });
-  assert.equal(receipt.trials[0].reviewReady, true);
-  assert.equal(receipt.trials[0].sourceKind, 'operator-attested-direct-model-control');
-  assert.equal(receipt.trials[0].proofEvidenceRef, control.renderEvidenceRef);
+  assert.equal(receipt.trials[0].reviewReady, false);
+  assert.equal(receipt.trials[0].sourceKind, 'direct-model-generation-v1-validation-proof');
   assert.equal(receipt.trials[0].independentControlIsolationProven, false);
-  assert.equal(receipt.reviewReady, false, 'single-trial probe must not qualify as a complete 15-trial experiment');
+  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-direct-control-exploration-invalid'));
+  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-temporal-proof-invalid'));
 });
 
-test('direct-model control is blocked if AI Studio Motion or Synthesis was used', () => {
+test('direct-model control is blocked if AI Studio Motion V2 or upstream creative intelligence was used during generation', () => {
   const control = directControl({
     truth: {
-      directModelControl: true,
-      aiStudioMotionV1Used: false,
-      aiStudioMotionV2Used: true,
+      directModelCreativeGeneration: true,
+      aiStudioKnowledgeUsed: false,
+      aiStudioTransferUsed: false,
       aiStudioSynthesisUsed: false,
-      renderEvidenceIndependentlyVerified: true
+      aiStudioMotionV2Used: true,
+      v1ContractValidationAndProofOnly: true
     }
   });
   const trial = {
@@ -113,7 +118,11 @@ test('direct-model control is blocked if AI Studio Motion or Synthesis was used'
     projectId: control.projectId,
     briefFingerprint: control.briefFingerprint,
     generationBudget: budget(),
-    evidenceBundleRef: control.renderEvidenceRef,
+    evidenceBundleRef: 'evidence://direct-control/proof/e-1',
+    temporalStudyCount: 15,
+    realBrowserEvidence: true,
+    mobileEvidence: true,
+    reducedMotionEvidence: true,
     runtimeTraceRef: control.runtimeTraceRef,
     sourceSnapshotFingerprint: fingerprintCreativeValue(control)
   };
@@ -122,31 +131,4 @@ test('direct-model control is blocked if AI Studio Motion or Synthesis was used'
   });
   assert.equal(receipt.trials[0].reviewReady, false);
   assert.ok(receipt.findings.some((item) => item.code === 'dogfood-direct-control-contaminated'));
-});
-
-test('direct-model control cannot enter review without independently verified rendered comparison evidence', () => {
-  const control = directControl({
-    truth: {
-      directModelControl: true,
-      aiStudioMotionV1Used: false,
-      aiStudioMotionV2Used: false,
-      aiStudioSynthesisUsed: false,
-      renderEvidenceIndependentlyVerified: false
-    }
-  });
-  const trial = {
-    trialId: 'trial-e-1',
-    conditionId: 'E',
-    projectId: control.projectId,
-    briefFingerprint: control.briefFingerprint,
-    generationBudget: budget(),
-    evidenceBundleRef: control.renderEvidenceRef,
-    runtimeTraceRef: control.runtimeTraceRef,
-    sourceSnapshotFingerprint: fingerprintCreativeValue(control)
-  };
-  const receipt = buildCreativeMotionDogfoodExecutionReceipt(experimentWithTrial(trial), {
-    trialSources: { 'trial-e-1': { directControl: control } }
-  });
-  assert.equal(receipt.trials[0].reviewReady, false);
-  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-direct-control-render-unverified'));
 });
