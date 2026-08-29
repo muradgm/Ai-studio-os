@@ -21,6 +21,10 @@ function scheduleFor(seed = '') {
   return [1, 2, 3].flatMap((replicate) => CONDITION_IDS.map((conditionId) => ({ conditionId, replicate, orderKey: fingerprintCreativeValue({ seed: normalizedSeed, replicate, conditionId, purpose: 'balanced-dogfood-schedule' }) })).sort((left, right) => left.orderKey === right.orderKey ? left.conditionId.localeCompare(right.conditionId) : left.orderKey.localeCompare(right.orderKey)).map(({ conditionId }) => ({ replicate, conditionId })));
 }
 
+export function buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed = '') {
+  return scheduleFor(scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
+}
+
 function sourceBundle(value = {}) { return { trialId: text(value?.trialId), conditionId: text(value?.conditionId).toUpperCase(), sourceKind: text(value?.sourceKind), executionMode: text(value?.executionMode), sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint), sourceArtifactFingerprint: text(value?.sourceArtifactFingerprint), sourceExecutionFingerprint: text(value?.sourceExecutionFingerprint), executionInstanceRef: text(value?.executionInstanceRef), runtimeTraceRef: text(value?.runtimeTraceRef), runtimeTraceFingerprint: text(value?.runtimeTraceFingerprint), sourceEvidenceRef: text(value?.sourceEvidenceRef), selectedCreativeWorldFingerprint: text(value?.selectedCreativeWorldFingerprint), conditionArtifact: value?.conditionArtifact ?? null, generationInstruction: text(value?.generationInstruction), generationInstructionFingerprint: text(value?.generationInstructionFingerprint) }; }
 function expectedTruth() { return { experimentOnly: true, protocolPlanOnly: true, noAutomaticRetry: true, noFallbackModel: true, noManualCherryPicking: true, partialRunsNonResumable: true, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false }; }
 
@@ -61,7 +65,7 @@ export function buildCreativeMotionDogfoodExecutionPlan({ experimentId, projectI
   const briefFingerprint = fingerprintCreativeValue(frozenBrief ?? {});
   const identity = normalizeIdentity(modelIdentity);
   const generationBudget = buildGeminiMotionDogfoodBudget(identity.requestedModel, budget);
-  const schedule = scheduleFor(scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
+  const schedule = buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed);
   const sources = (Array.isArray(trialSources) ? trialSources : []).map(normalizeSourceEntry);
   const bundles = deriveBundles({ projectId, brief: frozenBrief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources: sources });
   const plan = { schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@4', stage: 'creative-motion-dogfood-pre-proof-execution', experimentId: text(experimentId), projectId: text(projectId), frozenBrief: frozenBrief ?? null, briefFingerprint, selectedCreativeWorld: selectedCreativeWorld ?? null, canonicalCreativeAuthority: canonicalCreativeAuthority ?? null, modelIdentity: identity, generationBudget, scheduleSeed: text(scheduleSeed), schedule, trialSources: sources, conditionBundles: bundles, trials: plannedTrials({ projectId, briefFingerprint, schedule, bundles, generationBudget }), truth: expectedTruth() };
@@ -80,7 +84,7 @@ export function reviewCreativeMotionDogfoodExecutionPlan(plan = {}) {
   if (identity.schema !== 'ai-studio-os/gemini-model-identity@1' || !identity.requestedModel || !identity.providerModelName || !identity.providerVersion || !identity.providerMetadataFingerprint || !identity.capturedAt || !identity.supportedGenerationMethods.includes('generateContent') || /(?:^|-)latest$/i.test(identity.requestedModel)) findings.push(finding('blocker', 'dogfood-executor-provider-identity-invalid', 'Formal execution requires an enrolled immutable provider model name, version, capability and metadata binding.'));
   const canonicalWorld = core.canonicalCreativeAuthority?.selectedCreativeWorld ?? core.canonicalCreativeAuthority?.creativeWorldExploration?.selectedWorld ?? null;
   if (!core.selectedCreativeWorld || !sameValue(core.selectedCreativeWorld, canonicalWorld)) findings.push(finding('blocker', 'dogfood-executor-shared-world-drift', 'The exact selected Creative World must be frozen and freshly match the canonical authority bundle.'));
-  const expectedSchedule = scheduleFor(core.scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
+  const expectedSchedule = buildCreativeMotionDogfoodExecutionSchedule(core.scheduleSeed);
   if (!sameValue(core.schedule, expectedSchedule)) findings.push(finding('blocker', 'dogfood-executor-schedule-drift', 'Execution must use the frozen deterministic balanced schedule.'));
   if (core.trialSources.length !== expectedSchedule.length) findings.push(finding('blocker', 'dogfood-executor-source-coverage-invalid', 'Execution plan requires one independently produced source/output bundle for every A1–E3 trial.'));
   const derivedBundles = deriveBundles({ projectId: core.projectId, brief: core.frozenBrief, briefFingerprint: core.briefFingerprint, selectedCreativeWorld: core.selectedCreativeWorld, canonicalCreativeAuthority: core.canonicalCreativeAuthority, schedule: expectedSchedule, trialSources: core.trialSources });
