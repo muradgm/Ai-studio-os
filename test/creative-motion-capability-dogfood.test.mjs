@@ -105,6 +105,7 @@ function completeReviewer(packet, overrides = {}) {
     reviewerType: 'human',
     independent: true,
     blinded: true,
+    blindSubmissionPrecedesUnblindingAttested: true,
     candidateReviews,
     topChoiceBlindId: packet.candidates[0].blindId,
     topChoiceRationale: 'The strongest overall qualitative balance in the blinded evidence.',
@@ -154,7 +155,7 @@ test('condition definitions cannot be relabelled after evidence exists', () => {
   assert.ok(experiment.findings.some((item) => item.code === 'dogfood-condition-profile-drift'));
 });
 
-test('public blind packet contains no condition, trial or runtime identity', () => {
+test('public blind packet contains only blind IDs and neutral evidence aliases per candidate', () => {
   const experiment = buildValidExperiment();
   const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
   const serialized = JSON.stringify(packet);
@@ -166,6 +167,16 @@ test('public blind packet contains no condition, trial or runtime identity', () 
   assert.equal(serialized.includes('motion-v1-baseline'), false);
   assert.equal(serialized.includes('direct-model-control'), false);
   assert.equal(serialized.includes('evidenceBundleRef'), false);
+  assert.equal(serialized.includes('hypothesisCount'), false);
+  assert.equal(serialized.includes('temporalStudyCount'), false);
+  assert.equal(serialized.includes('realBrowserEvidence'), false);
+  assert.equal(serialized.includes('mobileEvidence'), false);
+  assert.equal(serialized.includes('reducedMotionEvidence'), false);
+  assert.deepEqual(Object.keys(packet.candidates[0]).sort(), ['blindId', 'evidenceAlias']);
+  assert.equal(packet.truth.blindReviewProtocolEnforced, true);
+  assert.equal(packet.truth.reviewerConditionIdentityHidden, true);
+  assert.equal(packet.truth.unblindingMappingSeparated, true);
+  assert.equal(packet.truth.blindSequenceCryptographicallyProven, false);
 });
 
 test('private unblinding map is separate and resolves all blind candidates', () => {
@@ -198,6 +209,8 @@ test('fresh qualitative review exposes per-dimension diagnostics without an over
   assert.equal(results.truth.callerSuppliedConditionMappingTrusted, false);
   assert.equal(results.truth.creativeDirectionSelected, false);
   assert.equal(results.truth.productionApproved, false);
+  assert.equal(results.truth.blindSubmissionPrecedesUnblindingAttested, true);
+  assert.equal(results.truth.blindSequenceCryptographicallyProven, false);
 });
 
 test('review must remain blinded and independent', () => {
@@ -210,6 +223,18 @@ test('review must remain blinded and independent', () => {
   });
   assert.equal(results.pass, false);
   assert.ok(results.findings.some((item) => item.code === 'dogfood-review-not-blind-independent'));
+});
+
+test('review cannot claim a complete blind sequence without explicit submission-order attestation', () => {
+  const experiment = buildValidExperiment();
+  const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
+  const reviewer = completeReviewer(packet, { blindSubmissionPrecedesUnblindingAttested: false });
+  const results = reviewCreativeMotionDogfoodResultsFresh(experiment, packet, {
+    blindSeed: 'private-seed-011',
+    reviewers: [reviewer]
+  });
+  assert.equal(results.pass, false);
+  assert.ok(results.findings.some((item) => item.code === 'dogfood-review-submission-sequence-unattested'));
 });
 
 test('dogfood roadmap decision cannot manufacture creative or production authority', () => {
@@ -233,7 +258,7 @@ test('fresh result interpretation rejects a packet rebuilt or changed outside th
   const experiment = buildValidExperiment();
   const packet = buildCreativeMotionBlindReviewPacket(experiment, { blindSeed: 'private-seed-011' });
   const tampered = structuredClone(packet);
-  tampered.candidates[0].hypothesisCount = 99;
+  tampered.candidates[0].evidenceAlias = 'dogfood://tampered';
   const results = reviewCreativeMotionDogfoodResultsFresh(experiment, tampered, {
     blindSeed: 'private-seed-011',
     reviewers: [completeReviewer(packet)]

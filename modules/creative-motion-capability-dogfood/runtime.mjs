@@ -300,12 +300,7 @@ export function buildCreativeMotionBlindReviewPacket(experiment = {}, { blindSee
 
   const candidates = blindEntries(experiment, blindSeed).map(({ trial, blindId }) => ({
     blindId,
-    evidenceAlias: `dogfood://${text(experiment.experimentId)}/blind/${blindId}`,
-    hypothesisCount: trial.hypothesisCount,
-    temporalStudyCount: trial.temporalStudyCount,
-    realBrowserEvidence: trial.realBrowserEvidence,
-    mobileEvidence: trial.mobileEvidence,
-    reducedMotionEvidence: trial.reducedMotionEvidence
+    evidenceAlias: `dogfood://${text(experiment.experimentId)}/blind/${blindId}`
   }));
 
   const packet = {
@@ -317,7 +312,17 @@ export function buildCreativeMotionBlindReviewPacket(experiment = {}, { blindSee
     dimensions: [...CREATIVE_MOTION_DOGFOOD_DIMENSIONS],
     ratingScale: [...CREATIVE_MOTION_DOGFOOD_RATINGS],
     candidates,
-    truth: { reviewerPacketContainsConditionIdentity: false, unblindingRequiresSeparateMap: true, ratingsAreDiagnosticNotAuthority: true, noAutomaticWinner: true, noCreativeDirectionSelected: true, noProductionAuthority: true }
+    truth: {
+      reviewerPacketContainsConditionIdentity: false,
+      blindReviewProtocolEnforced: true,
+      reviewerConditionIdentityHidden: true,
+      unblindingMappingSeparated: true,
+      blindSequenceCryptographicallyProven: false,
+      ratingsAreDiagnosticNotAuthority: true,
+      noAutomaticWinner: true,
+      noCreativeDirectionSelected: true,
+      noProductionAuthority: true
+    }
   };
   packet.snapshotFingerprint = blindPacketFingerprint(packet);
   return { ...packet, findings: [], pass: true, reviewReady: true, status: 'ready-for-blind-review' };
@@ -363,6 +368,7 @@ function normalizeReviewer(value = {}) {
     reviewerType: text(value?.reviewerType),
     independent: value?.independent === true,
     blinded: value?.blinded === true,
+    blindSubmissionPrecedesUnblindingAttested: value?.blindSubmissionPrecedesUnblindingAttested === true,
     candidateReviews: (Array.isArray(value?.candidateReviews) ? value.candidateReviews : []).map(normalizeCandidateReview),
     topChoiceBlindId: text(value?.topChoiceBlindId) || null,
     topChoiceRationale: text(value?.topChoiceRationale)
@@ -393,6 +399,7 @@ export function reviewCreativeMotionDogfoodResults(packet = {}, { unblindingMap 
 
   for (const reviewer of normalizedReviewers) {
     if (reviewer.independent !== true || reviewer.blinded !== true) findings.push(finding('blocker', 'dogfood-review-not-blind-independent', 'Reviewer evidence must explicitly state independent blinded review.', { reviewerId: reviewer.reviewerId }));
+    if (reviewer.blindSubmissionPrecedesUnblindingAttested !== true) findings.push(finding('blocker', 'dogfood-review-submission-sequence-unattested', 'Reviewer evidence must explicitly attest that blind review submission preceded access to the unblinding map; this is process evidence, not cryptographic proof.', { reviewerId: reviewer.reviewerId }));
     if (reviewer.candidateReviews.length !== candidates.length) findings.push(finding('blocker', 'dogfood-review-coverage-incomplete', 'Each reviewer must review every blinded trial.', { reviewerId: reviewer.reviewerId, count: reviewer.candidateReviews.length }));
     const reviewedBlindIds = reviewer.candidateReviews.map((item) => item.blindId);
     if (new Set(reviewedBlindIds).size !== reviewedBlindIds.length || reviewedBlindIds.some((id) => !blindIds.has(id))) findings.push(finding('blocker', 'dogfood-review-candidate-invalid', 'Reviewer candidate IDs must match the blind packet exactly.', { reviewerId: reviewer.reviewerId }));
@@ -482,6 +489,11 @@ export function reviewCreativeMotionDogfoodResults(packet = {}, { unblindingMap 
       diagnosticMeansAreNotAuthority: true,
       comparisonDeltasAreNotWinnerSelection: true,
       humanInterpretationRequiredForRoadmapDecision: true,
+      blindReviewProtocolEnforced: true,
+      reviewerConditionIdentityHidden: true,
+      unblindingMappingSeparated: true,
+      blindSubmissionPrecedesUnblindingAttested: normalizedReviewers.length > 0 && normalizedReviewers.every((item) => item.blindSubmissionPrecedesUnblindingAttested === true),
+      blindSequenceCryptographicallyProven: false,
       creativeDirectionSelected: false,
       productionApproved: false
     }

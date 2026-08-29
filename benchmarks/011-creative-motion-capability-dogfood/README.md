@@ -55,11 +55,17 @@ Every trial must provide real evidence for:
 - source/reasoning snapshot;
 - runtime trace.
 
+The experiment separately records declared policy parity and trace-bound runtime-control parity. A matching declared budget does not count as verified execution until the supplied runtime-control evidence binds its trace, trace fingerprint, evidence reference, model/sampling policy, attempts, token budget, and wall-clock budget.
+
+Condition A additionally requires an explicit V1-only isolation record bound to its exact exploration. The record declares whether Knowledge, Transfer, Synthesis, or Motion V2 participated. Until an isolated V1 generation runner exists, this boundary is operator-attested rather than cryptographically proven.
+
 No fixture reference may be presented as real capability evidence.
 
 ## Review
 
-Reviewers receive only a blinded packet. They do not see condition IDs, layer names, runtime traces or original artifact names before submitting their review.
+Reviewers receive only a blinded candidate ID, neutral evidence alias, shared brief/context, and evaluation criteria. They do not see condition IDs, layer names, hypothesis counts, temporal-study counts, runtime traces, proof metadata, or original artifact names before submitting their review.
+
+Review submission explicitly attests that it preceded unblinding. This is an enforced protocol requirement, but not cryptographic sequencing proof.
 
 Every candidate is judged independently across the canonical qualitative dimensions defined by `modules/creative-motion-capability-dogfood`.
 

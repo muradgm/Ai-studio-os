@@ -70,9 +70,69 @@ test('condition execution fails closed when a claimed V2 trial has no real reaso
     trialSources: { 'trial-b-1': {} }
   });
   assert.equal(receipt.reviewReady, false);
+  assert.equal(receipt.truth.verifiedRuntimeControlParity, false);
   assert.ok(receipt.findings.some((item) => item.code === 'dogfood-v2-reasoning-set-invalid'));
   assert.ok(receipt.findings.some((item) => item.code === 'dogfood-temporal-proof-invalid'));
   assert.ok(receipt.findings.some((item) => item.code === 'dogfood-execution-coverage-incomplete'));
+  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-runtime-control-evidence-missing'));
+});
+
+test('Condition A requires explicit V1-only isolation evidence instead of treating a V1-shaped exploration as isolated generation', () => {
+  const trial = {
+    trialId: 'trial-a-1',
+    conditionId: 'A',
+    projectId: 'project-dogfood',
+    briefFingerprint: 'b'.repeat(64),
+    generationBudget: budget(),
+    evidenceBundleRef: 'evidence://a-1',
+    temporalStudyCount: 15,
+    realBrowserEvidence: true,
+    mobileEvidence: true,
+    reducedMotionEvidence: true,
+    runtimeTraceRef: 'trace://a-1',
+    sourceSnapshotFingerprint: 's'.repeat(64)
+  };
+  const receipt = buildCreativeMotionDogfoodExecutionReceipt(experimentWithTrial(trial), {
+    trialSources: { 'trial-a-1': {} }
+  });
+  assert.equal(receipt.trials[0].reviewReady, false);
+  assert.equal(receipt.truth.verifiedRuntimeControlParity, false);
+  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-v1-isolation-attestation-missing'));
+  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-runtime-control-evidence-missing'));
+});
+
+test('runtime-control evidence cannot promote declared parity when an observed policy drifts', () => {
+  const trial = {
+    trialId: 'trial-b-1',
+    conditionId: 'B',
+    projectId: 'project-dogfood',
+    briefFingerprint: 'b'.repeat(64),
+    generationBudget: budget(),
+    evidenceBundleRef: 'evidence://b-1',
+    temporalStudyCount: 15,
+    realBrowserEvidence: true,
+    mobileEvidence: true,
+    reducedMotionEvidence: true,
+    runtimeTraceRef: 'trace://b-1',
+    sourceSnapshotFingerprint: 's'.repeat(64)
+  };
+  const receipt = buildCreativeMotionDogfoodExecutionReceipt(experimentWithTrial(trial), {
+    trialSources: {
+      'trial-b-1': {
+        runtimeControl: {
+          schema: 'ai-studio-os/dogfood-runtime-control@1',
+          runtimeTraceRef: trial.runtimeTraceRef,
+          runtimeTraceFingerprint: 't'.repeat(64),
+          runtimeEvidenceRef: 'evidence://runtime/b-1',
+          ...budget(),
+          tokenBudget: 24001
+        }
+      }
+    }
+  });
+  assert.equal(receipt.trials[0].verifiedRuntimeControl, false);
+  assert.equal(receipt.truth.verifiedRuntimeControlParity, false);
+  assert.ok(receipt.findings.some((item) => item.code === 'dogfood-runtime-control-budget-drift'));
 });
 
 test('direct-model control cannot qualify from request-response attestation alone; it must share the real V1 temporal proof harness', () => {

@@ -75,6 +75,13 @@ Each condition requires replicates `1`, `2`, and `3` exactly once.
 
 The harness rejects budget drift, brief drift, project drift, duplicate trial IDs and missing evidence.
 
+It reports two different facts and never upgrades one into the other:
+
+- `declaredControlParity`: every trial declares the same model, sampling, attempts, token and time policy;
+- `verifiedRuntimeControlParity`: every trial supplies trace-bound runtime-control evidence matching those declared values.
+
+Capability interpretation requires both. Runtime-control evidence contains the trace reference and fingerprint, an evidence reference, and the observed policy values. This verifies the supplied runtime evidence binding; it does not claim cryptographic proof of the external runtime.
+
 Independent replicates are allowed to converge on identical output. Replication tests execution variability; it must not force artificial output diversity.
 
 ## Condition execution authority
@@ -100,6 +107,8 @@ isolated direct-model hypothesis generation
 → V1-shaped exploration contract validation only
 → exact same real temporal proof harness
 ```
+
+Condition A additionally requires a V1-only isolation record bound to the exact exploration. It records whether Knowledge, Transfer, Synthesis, or Motion V2 participated. Until V1 generation has a first-class isolated runtime boundary, this is explicit operator-attested evidence rather than cryptographic proof. A V1-shaped exploration by itself is not sufficient.
 
 For B/C/D the knowledge profile is locked:
 
@@ -170,11 +179,23 @@ Only capability review may support the later human roadmap decision.
 
 A structurally review-ready experiment can produce a deterministic blind packet.
 
-The public reviewer packet exposes opaque candidate IDs and neutral evidence aliases only. Condition identity, trial ID, runtime trace, source fingerprint and original evidence reference stay in a separate unblinding map.
+The public reviewer packet exposes only opaque candidate IDs and neutral evidence aliases per candidate. Condition identity, trial ID, runtime trace, source fingerprint, original evidence reference, hypothesis count, temporal-study count, and proof/runtime metadata stay out of the packet and in the separate unblinding map or source evidence.
 
 Review order is deterministic from the bound blind seed so it can be reproduced without presenting A/B/C/D/E ordering to reviewers.
 
 The final capability interpretation freshly rebuilds the private mapping from the original experiment and blind seed. A caller-supplied relabelled mapping is not trusted.
+
+The protocol truth is explicit:
+
+```text
+blindReviewProtocolEnforced = true
+reviewerConditionIdentityHidden = true
+unblindingMappingSeparated = true
+blindSubmissionPrecedesUnblindingAttested = true
+blindSequenceCryptographicallyProven = false
+```
+
+The first three are enforced by packet construction and mapping separation. Submission order remains a required reviewer attestation in V1, not a cryptographically proven event sequence.
 
 ## Qualitative dimensions
 
