@@ -191,13 +191,20 @@ token limits and metadata fingerprint. Mutable `*-latest` aliases are rejected
 for formal execution.
 
 The execution plan binds exactly A1–E3, the exact selected Creative World object
-and canonical authority bundle, one explicit source-material bundle per
-condition, a fixed model/temperature/token/time policy, and unique runtime
-trace/evidence references. It runs the frozen balanced schedule serially with no
-automatic retry, fallback model or manual result substitution. A produced run
-remains pre-proof evidence only: condition-specific source validation, rendered
-temporal proof, blind packet construction and human review still occur
-afterwards.
+and canonical authority bundle, and one explicit source-execution bundle per
+trial. Each bundle binds its scheduled trial ID, condition, native/direct
+execution instance, runtime trace and trace fingerprint, source-evidence
+reference, and the freshly recomputed source/output artifact fingerprint. A
+single source execution or runtime trace cannot be reused across replicates.
+
+Independent replicates may still produce byte-for-byte identical creative
+content. Output equality is not proof of repeated execution; independence is
+proven by the distinct source-execution and runtime provenance records. The
+fixed model/temperature/token/time policy and frozen balanced schedule remain
+shared. The executor has no automatic retry, fallback model or manual result
+substitution. A produced run remains pre-proof evidence only: condition-specific
+source validation, rendered temporal proof, blind packet construction and human
+review still occur afterwards.
 
 Before any provider call, the executor freshly re-verifies all five condition
 sources from their real upstream artifacts and derives each source fingerprint

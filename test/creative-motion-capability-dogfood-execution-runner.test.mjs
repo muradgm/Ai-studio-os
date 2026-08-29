@@ -16,8 +16,16 @@ const identity = { schema: 'ai-studio-os/gemini-model-identity@1', requestedMode
 
 function directControlRequest(overrides = {}) { return { schema: 'ai-studio-os/direct-model-motion-control-request@1', projectId, briefFingerprint, isolationAttestedBy: 'operator-01', isolationEvidenceRef: 'artifact://dogfood/e/isolation', truth: { directModelCreativeGeneration: true, aiStudioKnowledgeUsed: false, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: false }, ...overrides }; }
 function aSource() { return { exploration, v1Isolation: { schema: 'ai-studio-os/motion-v1-dogfood-isolation@1', explorationFingerprint: fingerprintCreativeValue(exploration), isolationAttestedBy: 'operator-01', isolationEvidenceRef: 'artifact://dogfood/a/isolation', truth: { motionV1CreativeGeneration: true, aiStudioKnowledgeUsed: false, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: false } } }; }
-function sources(overrides = {}) { return ['A', 'B', 'C', 'D', 'E'].map((conditionId) => ({ conditionId, source: overrides[conditionId] ?? (conditionId === 'A' ? aSource() : conditionId === 'E' ? { directControlRequest: directControlRequest() } : {}) })); }
-function plan(overrides = {}) { return buildCreativeMotionDogfoodExecutionPlan({ experimentId: 'benchmark-011-after-matter-v1', projectId, frozenBrief: brief, selectedCreativeWorld: canonical.selectedCreativeWorld, canonicalCreativeAuthority: canonical, runRef: 'artifacts/dogfood/after-matter/run-001', modelIdentity: identity, conditionSources: sources(), budget: buildGeminiMotionDogfoodBudget(model), scheduleSeed: 'benchmark-011-schedule-v1', ...overrides }); }
+function sourceExecution(trialId, conditionId, sourceArtifactFingerprint) { return { schema: 'ai-studio-os/creative-motion-dogfood-source-execution@1', trialId, conditionId, executionInstanceRef: `artifact://dogfood/source-executions/${trialId}`, runtimeTraceRef: `artifact://dogfood/traces/${trialId}`, runtimeTraceFingerprint: fingerprintCreativeValue({ trialId, kind: 'trace' }), sourceEvidenceRef: `artifact://dogfood/evidence/${trialId}`, sourceArtifactFingerprint }; }
+function trialSources() {
+  return ['A', 'B', 'C', 'D', 'E'].flatMap((conditionId) => [1, 2, 3].map((replicate) => {
+    const trialId = `trial-${conditionId.toLowerCase()}-${replicate}`;
+    const source = conditionId === 'A' ? aSource() : conditionId === 'E' ? { directControlRequest: directControlRequest() } : {};
+    const sourceArtifactFingerprint = conditionId === 'A' ? fingerprintCreativeValue(exploration) : conditionId === 'E' ? fingerprintCreativeValue({ sourceSnapshotFingerprint: fingerprintCreativeValue(directControlRequest()), generationInstructionFingerprint: '' }) : fingerprintCreativeValue(null);
+    return { trialId, conditionId, sourceExecution: sourceExecution(trialId, conditionId, sourceArtifactFingerprint), source };
+  }));
+}
+function plan(overrides = {}) { return buildCreativeMotionDogfoodExecutionPlan({ experimentId: 'benchmark-011-after-matter-v1', projectId, frozenBrief: brief, selectedCreativeWorld: canonical.selectedCreativeWorld, canonicalCreativeAuthority: canonical, modelIdentity: identity, trialSources: trialSources(), budget: buildGeminiMotionDogfoodBudget(model), scheduleSeed: 'benchmark-011-schedule-v1', ...overrides }); }
 
 test('A stays an architecture output and cannot acquire a post-architecture Gemini instruction', () => {
   const result = buildCreativeMotionDogfoodGenerationSource({ trial: { conditionId: 'A', projectId, briefFingerprint }, brief, selectedCreativeWorld: canonical.selectedCreativeWorld, canonicalCreativeAuthority: canonical, source: { ...aSource(), generationInstruction: 'substituted prompt' } });
@@ -53,6 +61,31 @@ test('a Creative World content mutation with the same ID invalidates the source 
   const result = buildCreativeMotionDogfoodGenerationSource({ trial: { conditionId: 'A', projectId, briefFingerprint }, brief, selectedCreativeWorld: canonical.selectedCreativeWorld, canonicalCreativeAuthority: canonical, source: mutated });
   assert.equal(result.reviewReady, false);
   assert.ok(result.findings.some((item) => item.code === 'dogfood-generation-source-world-drift'));
+});
+
+test('copied A1 provenance cannot be presented as A2/A3 replicate evidence', () => {
+  const sources = trialSources();
+  const a1 = sources.find((item) => item.trialId === 'trial-a-1');
+  const a2 = sources.find((item) => item.trialId === 'trial-a-2');
+  const a3 = sources.find((item) => item.trialId === 'trial-a-3');
+  a2.sourceExecution = structuredClone(a1.sourceExecution);
+  a3.sourceExecution = structuredClone(a1.sourceExecution);
+  const result = plan({ trialSources: sources });
+  assert.equal(result.pass, false);
+  assert.ok(result.findings.some((item) => item.code === 'dogfood-executor-replicate-source-mismatch'));
+  assert.ok(result.findings.some((item) => item.code === 'dogfood-executor-replicate-execution-reused'));
+  assert.ok(result.findings.some((item) => item.code === 'dogfood-executor-replicate-runtime-trace-reused'));
+});
+
+test('independent A executions may have identical creative output without replicate contamination', () => {
+  const result = plan();
+  const aBundles = result.conditionBundles.filter((item) => item.conditionId === 'A');
+  assert.equal(new Set(aBundles.map((item) => item.sourceArtifactFingerprint)).size, 1);
+  assert.equal(new Set(aBundles.map((item) => item.sourceExecutionFingerprint)).size, 3);
+  assert.equal(new Set(aBundles.map((item) => item.runtimeTraceRef)).size, 3);
+  assert.equal(aBundles.every((item) => item.reviewReady), true);
+  assert.equal(result.findings.some((item) => item.code === 'dogfood-executor-replicate-execution-reused'), false);
+  assert.equal(result.findings.some((item) => item.code === 'dogfood-executor-replicate-runtime-trace-reused'), false);
 });
 
 test('arbitrary JSON and incomplete direct hypotheses cannot count as produced output', () => {
