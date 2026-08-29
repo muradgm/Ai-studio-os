@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>After Matter - Phase 0 World Proof</title>
+    <link rel="preload" href="./assets/material-study.png" as="image" />
+    <style>
+      :root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #12191a; color: #f4f0e7; }
+      .notice { position: sticky; top: 0; z-index: 4; padding: 10px 18px; background: #f4f0e7; color: #182022; font: 700 12px/1.3 Arial, sans-serif; letter-spacing: 0; }
+      .world { min-height: 100vh; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr); position: relative; overflow: hidden; border-bottom: 1px solid currentColor; }
+      .media { min-height: 100vh; background: #202526 url('./assets/material-study.png') center / cover no-repeat; position: relative; }
+      .media::after { content: ''; position: absolute; inset: 0; background: rgba(15, 20, 21, 0.24); }
+      .world-copy { min-height: 100vh; display: flex; flex-direction: column; justify-content: space-between; padding: 28px; position: relative; z-index: 1; }
+      .eyebrow, .meta, .world-number { font: 700 12px/1.25 Arial, sans-serif; letter-spacing: 0; text-transform: uppercase; }
+      h1 { margin: 0; max-width: 9ch; font: 400 clamp(54px, 7vw, 122px)/0.9 Georgia, 'Times New Roman', serif; letter-spacing: 0; }
+      .dek { max-width: 38ch; margin: 22px 0 0; font: 400 17px/1.45 Arial, sans-serif; }
+      .route { display: flex; align-items: end; justify-content: space-between; gap: 18px; border-top: 1px solid currentColor; padding-top: 16px; }
+      .route p { margin: 0; max-width: 24ch; font: 400 14px/1.4 Arial, sans-serif; }
+      .reserve { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border: 1px solid currentColor; color: inherit; text-decoration: none; font: 700 13px/1 Arial, sans-serif; white-space: nowrap; }
+      .ledger { position: absolute; inset: 28px auto auto 28px; z-index: 2; width: min(250px, 35vw); padding: 14px; border: 1px solid rgba(244, 240, 231, 0.72); color: #f4f0e7; background: rgba(15, 20, 21, 0.58); font: 400 12px/1.4 Arial, sans-serif; }
+      .ledger strong { display: block; margin-bottom: 6px; font: 700 11px/1.2 Arial, sans-serif; text-transform: uppercase; }
+      .index .media { filter: saturate(0.82) contrast(1.12); }
+      .index .world-copy { background: #1d2929; color: #f5f0e3; }
+      .index h1 em { color: #d95738; font-style: normal; }
+      .ledger-index { border-left: 5px solid #d95738; }
+      .ledger-index span { display: block; padding: 4px 0; border-top: 1px solid rgba(244, 240, 231, 0.3); }
+      .ledger-index span:first-of-type { border-top: 0; }
+      .ledger-index b { color: #d95738; }
+      .ledger-ledger { border-top: 3px solid #b4dbcc; background: rgba(15, 30, 35, 0.66); }
+      .ledger-ledger span { display: block; padding: 5px 0; border-bottom: 1px solid rgba(180, 219, 204, 0.35); }
+      .ledger-ledger span::before { content: 'x'; color: #b4dbcc; margin-right: 7px; }
+      .ledger-pressure { left: auto; right: 28px; width: min(320px, 40vw); border: 0; background: #dc533e; color: #152126; }
+      .ledger-pressure strong { font-size: 14px; }
+      .ledger-pressure div { border-top: 1px solid #152126; margin-top: 9px; padding-top: 9px; }
+      .ledger-pressure b { display: block; font: 400 38px/0.9 Georgia, 'Times New Roman', serif; }
+      .ledger-world { margin: 0; padding-top: 12px; font: 700 11px/1.3 Arial, sans-serif; }
+      .ledger-world::before { content: 'Material study only. No collection photography.'; }
+      .repair .media { filter: hue-rotate(18deg) saturate(0.78) brightness(1.05); }
+      .repair .world-copy { background: #b4dbcc; color: #142a30; }
+      .repair h1 { max-width: 8ch; }
+      .repair h1 em { font-style: normal; text-decoration: underline; text-decoration-thickness: 3px; text-underline-offset: 7px; }
+      .pressure .media { filter: saturate(1.05) contrast(1.22); }
+      .pressure .world-copy { background: #dc533e; color: #142126; }
+      .pressure h1 { max-width: 8ch; }
+      .pressure h1 em { font-style: normal; color: #f4f0e7; }
+      .pressure .reserve { background: #142126; color: #f4f0e7; border-color: #142126; }
+      .proof-moment { padding: 52px 28px 28px; border-bottom: 1px solid #6d7676; background: #edf0e9; color: #172326; }
+      .proof-moment:nth-of-type(even) { background: #d7dedd; }
+      .proof-moment > header { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; margin-bottom: 18px; }
+      .proof-moment h2 { margin: 0; font: 400 clamp(34px, 4vw, 64px)/0.95 Georgia, 'Times New Roman', serif; letter-spacing: 0; }
+      .proof-moment > header p { max-width: 46ch; margin: 0; font: 400 14px/1.4 Arial, sans-serif; }
+      .moment-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #172326; border-left: 1px solid #172326; }
+      .frame { min-height: 510px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; border-right: 1px solid #172326; border-bottom: 1px solid #172326; }
+      .frame h3 { margin: 26px 0 0; max-width: 9ch; font: 400 clamp(38px, 4vw, 62px)/0.92 Georgia, 'Times New Roman', serif; letter-spacing: 0; }
+      .frame p { max-width: 30ch; margin: 10px 0 0; font: 400 14px/1.4 Arial, sans-serif; }
+      .frame .frame-meta { display: flex; justify-content: space-between; gap: 12px; align-items: end; border-top: 1px solid currentColor; padding-top: 12px; font: 700 12px/1.3 Arial, sans-serif; }
+      .frame-index { background: #1e302e; color: #f4f0e7; }
+      .frame-repair { background: #b7dacd; color: #152d32; }
+      .frame-pressure { background: #e35740; color: #152126; }
+      .object-index { background: #1e302e url('./assets/material-study.png') center / cover no-repeat; background-blend-mode: soft-light; }
+      .object-repair { background: #b7dacd url('./assets/material-study.png') center / cover no-repeat; background-blend-mode: luminosity; }
+      .object-pressure { background: #e35740 url('./assets/material-study.png') center / cover no-repeat; background-blend-mode: multiply; color: #f4f0e7; }
+      .reading-index h3 { color: #df5c3d; }
+      .reading-repair h3 { text-decoration: underline; text-underline-offset: 7px; }
+      .reading-pressure h3 { color: #f4f0e7; }
+      .ticket-index .ticket-row { border-left: 5px solid #df5c3d; padding-left: 14px; }
+      .ticket-repair .ticket-row { border-top: 3px solid #152d32; padding-top: 12px; }
+      .ticket-pressure .ticket-row { background: #152126; color: #f4f0e7; padding: 14px; }
+      @media (max-width: 760px) {
+        .world { min-height: 100svh; grid-template-columns: 1fr; grid-template-rows: minmax(46svh, 1fr) auto; }
+        .media, .world-copy { min-height: auto; }
+        .media { min-height: 46svh; }
+        .world-copy { min-height: 54svh; padding: 20px; }
+        h1 { font-size: clamp(50px, 16vw, 88px); }
+        .ledger { left: 18px; top: 18px; width: min(260px, calc(100vw - 36px)); }
+        .ledger-pressure { left: 18px; right: auto; }
+        .route { align-items: start; flex-direction: column; }
+        .proof-moment { padding: 34px 14px 14px; }
+        .proof-moment > header { display: block; }
+        .proof-moment > header p { margin-top: 10px; }
+        .moment-grid { grid-template-columns: 1fr; }
+        .frame { min-height: 400px; }
+      }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; } }
+    </style>
+  </head>
+  <body>
+    <div class="notice">After Matter / Phase 0 / Comparable World Proof / Generated material study is non-documentary</div>
+    <main>
+      <article class="world index" id="friction-index">
+        <div class="media">
+          <aside class="ledger ledger-index"><strong>Object 041 / Tin-glazed bowl</strong><span><b>1911</b> Made for daily use</span><span><b>1932</b> Rim repaired after fracture</span><span><b>1974</b> Glaze darkened by heat</span><span><b>Now</b> Held in public memory</span><p class="ledger-world"></p></aside>
+        </div>
+        <section class="world-copy">
+          <div><p class="eyebrow">World 01 / Friction Index</p><h1>Wear becomes a <em>wayfinding</em> system.</h1><p class="dek">The exhibition is read through accumulated marks. A visitor moves by choosing a trace, not by being carried through a spectacle.</p></div>
+          <div class="route"><p>Signature behavior: each object reveals one material change at a time, then holds. Long-form reading remains still.</p><a class="reserve" href="#ticket">Reserve a visit</a></div>
+        </section>
+      </article>
+      <article class="world repair" id="repair-ledger">
+        <div class="media">
+          <aside class="ledger ledger-ledger"><strong>Conservation ledger</strong><span>Object 041 / handling trace</span><span>Object 041 / repair seam</span><span>Object 041 / maker note</span><span>Object 041 / current care</span><p class="ledger-world"></p></aside>
+        </div>
+        <section class="world-copy">
+          <div><p class="eyebrow">World 02 / Repair Ledger</p><h1>Care is the <em>editorial</em> voice.</h1><p class="dek">The museum does not hide restoration. The interface treats documentation, repair, and curatorial context as equal acts of attention.</p></div>
+          <div class="route"><p>Signature behavior: annotations gather beside an object and settle into an inspectable record. Mobile keeps the record chronological.</p><a class="reserve" href="#ticket">Reserve a visit</a></div>
+        </section>
+      </article>
+      <article class="world pressure" id="pressure-room">
+        <div class="media">
+          <aside class="ledger ledger-pressure"><strong>One object. One altered state.</strong><div><b>03:17</b>of close looking before the record opens</div><p class="ledger-world"></p></aside>
+        </div>
+        <section class="world-copy">
+          <div><p class="eyebrow">World 03 / Pressure Room</p><h1>Time is felt as <em>resistance.</em></h1><p class="dek">Each object receives a concentrated encounter. The experience alternates between pressure and release, making quiet attention the dramatic event.</p></div>
+          <div class="route"><p>Signature behavior: a single, deliberate threshold opens the object history. Essential navigation and tickets stay instantly available.</p><a class="reserve" id="ticket" href="#ticket">Reserve a visit</a></div>
+        </section>
+      </article>
+      <section class="proof-moment" aria-labelledby="object-moment">
+        <header><div><p class="eyebrow">Shared Moment 02</p><h2 id="object-moment">Object detail and material history</h2></div><p>All three worlds expose one object, its change over time, and an immediate route back to exhibition context.</p></header>
+        <div class="moment-grid">
+          <article class="frame frame-index object-index"><div><p class="eyebrow">Friction Index</p><h3>Trace 03 / repair seam</h3><p>One mark becomes the route into history. The object remains visible while the selected trace receives attention.</p></div><div class="frame-meta"><span>1 of 4 material shifts</span><span>Back to object</span></div></article>
+          <article class="frame frame-repair object-repair"><div><p class="eyebrow">Repair Ledger</p><h3>Conservation note / 1974</h3><p>Evidence is written beside the object: repair, caretaker, date, uncertainty, and current condition are legible together.</p></div><div class="frame-meta"><span>Record 4.1</span><span>Read all notes</span></div></article>
+          <article class="frame frame-pressure object-pressure"><div><p class="eyebrow">Pressure Room</p><h3>The record opens after attention.</h3><p>A short deliberate threshold privileges looking first. The return route stays visible from the first frame.</p></div><div class="frame-meta"><span>Object 041</span><span>Open history</span></div></article>
+        </div>
+      </section>
+      <section class="proof-moment" aria-labelledby="reading-moment">
+        <header><div><p class="eyebrow">Shared Moment 03</p><h2 id="reading-moment">Long-form curatorial reading</h2></div><p>All three worlds must make room for unhurried reading without turning the essay into an interruption or a motion stage.</p></header>
+        <div class="moment-grid">
+          <article class="frame frame-index reading-index"><div><p class="eyebrow">Friction Index</p><h3>A chronology of touch.</h3><p>Chapter changes are indexed by a small material cue. The reading body is stable, quiet, and deliberately unanimated.</p></div><div class="frame-meta"><span>Essay / 12 min</span><span>Trace 03 in view</span></div></article>
+          <article class="frame frame-repair reading-repair"><div><p class="eyebrow">Repair Ledger</p><h3>What care makes visible.</h3><p>Marginal records appear as optional, anchored citations. The main argument retains its own line length and pace.</p></div><div class="frame-meta"><span>Essay / 12 min</span><span>4 care notes</span></div></article>
+          <article class="frame frame-pressure reading-pressure"><div><p class="eyebrow">Pressure Room</p><h3>Stillness carries the argument.</h3><p>The essay becomes the release after an object encounter. No movement competes with sustained thought.</p></div><div class="frame-meta"><span>Essay / 12 min</span><span>Return to object</span></div></article>
+        </div>
+      </section>
+      <section class="proof-moment" aria-labelledby="visit-moment">
+        <header><div><p class="eyebrow">Shared Moment 04</p><h2 id="visit-moment">Visit planning and ticketing</h2></div><p>Every world keeps the practical museum task quick, visible, and outside the exhibition's expressive pacing.</p></header>
+        <div class="moment-grid">
+          <article class="frame frame-index ticket-index"><div class="ticket-row"><p class="eyebrow">Friction Index</p><h3>Visit / 14 Oct - 18 Jan</h3><p>Dates, access details, and ticketing remain a plain, high-contrast route. Material logic does not slow a visit.</p></div><div class="frame-meta"><span>Tickets from 12 EUR</span><span>Reserve</span></div></article>
+          <article class="frame frame-repair ticket-repair"><div class="ticket-row"><p class="eyebrow">Repair Ledger</p><h3>Plan the visit.</h3><p>Access information is arranged like a confirmed record: date, route, capacity, and reservation are immediately scanable.</p></div><div class="frame-meta"><span>Open Tue-Sun</span><span>Reserve</span></div></article>
+          <article class="frame frame-pressure ticket-pressure"><div class="ticket-row"><p class="eyebrow">Pressure Room</p><h3>Make a time for looking.</h3><p>The practical CTA is a clear release valve from the concentrated exhibition world, never a hidden reward.</p></div><div class="frame-meta"><span>Same-day slots</span><span>Reserve</span></div></article>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
