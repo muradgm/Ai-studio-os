@@ -197,6 +197,22 @@ retry, fallback model or manual result substitution. A produced run remains
 pre-proof evidence only: condition-specific source validation, rendered temporal
 proof, blind packet construction and human review still occur afterwards.
 
+Before any provider call, the executor freshly re-verifies all five condition
+sources from their real upstream artifacts and derives each source fingerprint
+and Gemini instruction internally. A condition label, caller-supplied
+fingerprint, evidence reference, prompt, or architecture declaration cannot
+qualify a source bundle. Condition E retains the existing explicit operator
+isolation attestation because independent cryptographic isolation is not yet
+available.
+
+The plan also binds a deterministic balanced schedule from a frozen seed: every
+replicate block contains A/B/C/D/E exactly once. Gemini identity is inspected
+immediately before and after the batch and must match the enrolled
+model/resource/version/metadata binding. Any provider failure, source drift,
+identity drift, or result-binding drift invalidates the entire batch, stops
+further calls, and makes the partial record non-resumable for capability
+evidence.
+
 ## Protocol review versus capability review
 
 Dogfood V1 deliberately separates two things:

@@ -1,9 +1,9 @@
 import { fingerprintCreativeValue } from '../creative-intelligence-foundation/fingerprint.mjs';
 import { CREATIVE_MOTION_DOGFOOD_CONDITIONS } from './runtime.mjs';
+import { buildCreativeMotionDogfoodGenerationSource } from './execution.mjs';
 import { buildGeminiMotionDogfoodBudget } from './gemini-runner.mjs';
 
 const CONDITION_IDS = CREATIVE_MOTION_DOGFOOD_CONDITIONS.map((item) => item.id);
-const CONDITION_BY_ID = new Map(CREATIVE_MOTION_DOGFOOD_CONDITIONS.map((item) => [item.id, item]));
 
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function finding(severity, code, message, evidence = {}) { return { severity, code, message, evidence }; }
@@ -11,122 +11,69 @@ function sameValue(left, right) { return fingerprintCreativeValue(left) === fing
 function positiveInteger(value) { return Number.isInteger(value) && value > 0 ? value : null; }
 
 function normalizeIdentity(value = {}) {
-  return {
-    schema: text(value?.schema),
-    requestedModel: text(value?.requestedModel),
-    providerModelName: text(value?.providerModelName),
-    providerBaseModelId: text(value?.providerBaseModelId),
-    providerVersion: text(value?.providerVersion),
-    supportedGenerationMethods: Array.isArray(value?.supportedGenerationMethods) ? value.supportedGenerationMethods.map(text).filter(Boolean).sort() : [],
-    inputTokenLimit: positiveInteger(value?.inputTokenLimit),
-    outputTokenLimit: positiveInteger(value?.outputTokenLimit),
-    providerMetadataFingerprint: text(value?.providerMetadataFingerprint),
-    capturedAt: text(value?.capturedAt)
-  };
+  return { schema: text(value?.schema), requestedModel: text(value?.requestedModel), providerModelName: text(value?.providerModelName), providerBaseModelId: text(value?.providerBaseModelId), providerVersion: text(value?.providerVersion), supportedGenerationMethods: Array.isArray(value?.supportedGenerationMethods) ? value.supportedGenerationMethods.map(text).filter(Boolean).sort() : [], inputTokenLimit: positiveInteger(value?.inputTokenLimit), outputTokenLimit: positiveInteger(value?.outputTokenLimit), providerMetadataFingerprint: text(value?.providerMetadataFingerprint), capturedAt: text(value?.capturedAt) };
 }
 
-function normalizeMaterial(value = {}) {
-  const declaration = value?.architectureDeclaration && typeof value.architectureDeclaration === 'object' && !Array.isArray(value.architectureDeclaration) ? value.architectureDeclaration : null;
-  return {
-    conditionId: text(value?.conditionId).toUpperCase(),
-    generationInstruction: text(value?.generationInstruction),
-    sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint),
-    authorityEvidenceRef: text(value?.authorityEvidenceRef),
-    architectureDeclaration: declaration
-  };
+function identityBinding(value = {}) {
+  const { capturedAt: _capturedAt, ...binding } = normalizeIdentity(value);
+  return binding;
 }
 
-function expectedArchitectureTruth(conditionId) {
-  if (conditionId === 'A') return { motionV1CreativeGeneration: true, aiStudioKnowledgeUsed: false, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: false, directModelCreativeGeneration: false };
-  if (conditionId === 'B' || conditionId === 'C') return { motionV1CreativeGeneration: false, aiStudioKnowledgeUsed: true, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: true, directModelCreativeGeneration: false };
-  if (conditionId === 'D') return { motionV1CreativeGeneration: false, aiStudioKnowledgeUsed: true, aiStudioTransferUsed: true, aiStudioSynthesisUsed: true, aiStudioMotionV2Used: true, directModelCreativeGeneration: false };
-  return { motionV1CreativeGeneration: false, aiStudioKnowledgeUsed: false, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: false, directModelCreativeGeneration: true };
+export function sameCreativeMotionDogfoodProviderIdentity(expected = {}, observed = {}) {
+  return sameValue(identityBinding(expected), identityBinding(observed));
 }
 
-function reviewMaterial(material, expectedConditionId) {
-  const findings = [];
-  const expectedTruth = expectedArchitectureTruth(expectedConditionId);
-  const truth = material.architectureDeclaration?.truth ?? {};
-  if (material.conditionId !== expectedConditionId) findings.push(finding('blocker', 'dogfood-executor-material-condition-drift', 'Condition material must bind the exact requested dogfood condition.', { expectedConditionId, actualConditionId: material.conditionId || null }));
-  if (!material.generationInstruction || !material.sourceSnapshotFingerprint || !material.authorityEvidenceRef || !material.architectureDeclaration) findings.push(finding('blocker', 'dogfood-executor-material-incomplete', 'Every condition needs an instruction, source fingerprint, authority-evidence reference and architecture declaration before execution.'));
-  for (const [key, expected] of Object.entries(expectedTruth)) {
-    if (truth?.[key] !== expected) findings.push(finding('blocker', 'dogfood-executor-architecture-declaration-drift', 'Condition material architecture declaration does not match the locked dogfood condition profile.', { conditionId: expectedConditionId, key, expected, actual: truth?.[key] }));
-  }
-  return findings;
+function normalizeSourceEntry(value = {}) { return { conditionId: text(value?.conditionId).toUpperCase(), source: value?.source && typeof value.source === 'object' && !Array.isArray(value.source) ? value.source : null }; }
+function sourceEntryFor(entries = [], conditionId) { return entries.filter((entry) => entry.conditionId === conditionId); }
+
+function scheduleFor(seed = '') {
+  const normalizedSeed = text(seed);
+  return [1, 2, 3].flatMap((replicate) => CONDITION_IDS
+    .map((conditionId) => ({ conditionId, replicate, orderKey: fingerprintCreativeValue({ seed: normalizedSeed, replicate, conditionId, purpose: 'balanced-dogfood-schedule' }) }))
+    .sort((left, right) => left.orderKey === right.orderKey ? left.conditionId.localeCompare(right.conditionId) : left.orderKey.localeCompare(right.orderKey))
+    .map(({ conditionId }) => ({ replicate, conditionId })));
 }
+
+function sourceBundle(value = {}) { return { conditionId: text(value?.conditionId).toUpperCase(), sourceKind: text(value?.sourceKind), sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint), generationInstruction: text(value?.generationInstruction), generationInstructionFingerprint: text(value?.generationInstructionFingerprint) }; }
+function expectedTruth() { return { experimentOnly: true, protocolPlanOnly: true, noAutomaticRetry: true, noFallbackModel: true, noManualCherryPicking: true, partialRunsNonResumable: true, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false }; }
 
 function normalizePlanCore(value = {}) {
   return {
-    schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@1',
-    stage: 'creative-motion-dogfood-pre-proof-execution',
-    experimentId: text(value?.experimentId),
-    projectId: text(value?.projectId),
-    briefFingerprint: text(value?.briefFingerprint),
-    modelIdentity: normalizeIdentity(value?.modelIdentity),
-    generationBudget: value?.generationBudget ?? null,
-    conditionMaterials: (Array.isArray(value?.conditionMaterials) ? value.conditionMaterials : []).map(normalizeMaterial),
-    trials: Array.isArray(value?.trials) ? value.trials.map((trial) => ({
-      trialId: text(trial?.trialId), conditionId: text(trial?.conditionId).toUpperCase(), replicate: positiveInteger(trial?.replicate), projectId: text(trial?.projectId), briefFingerprint: text(trial?.briefFingerprint),
-      sourceSnapshotFingerprint: text(trial?.sourceSnapshotFingerprint), generationInstructionFingerprint: text(trial?.generationInstructionFingerprint), architectureDeclarationFingerprint: text(trial?.architectureDeclarationFingerprint), runtimeTraceRef: text(trial?.runtimeTraceRef), runtimeEvidenceRef: text(trial?.runtimeEvidenceRef), generationBudget: trial?.generationBudget ?? null
-    })) : [],
-    truth: {
-      experimentOnly: value?.truth?.experimentOnly === true,
-      protocolPlanOnly: value?.truth?.protocolPlanOnly === true,
-      noAutomaticRetry: value?.truth?.noAutomaticRetry === true,
-      noFallbackModel: value?.truth?.noFallbackModel === true,
-      noManualCherryPicking: value?.truth?.noManualCherryPicking === true,
-      reviewReady: value?.truth?.reviewReady === true,
-      capabilityEvidenceReady: value?.truth?.capabilityEvidenceReady === true,
-      productionApproved: value?.truth?.productionApproved === true
-    }
+    schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@2', stage: 'creative-motion-dogfood-pre-proof-execution', experimentId: text(value?.experimentId), projectId: text(value?.projectId), frozenBrief: value?.frozenBrief ?? null, briefFingerprint: text(value?.briefFingerprint), modelIdentity: normalizeIdentity(value?.modelIdentity), generationBudget: value?.generationBudget ?? null, scheduleSeed: text(value?.scheduleSeed),
+    schedule: Array.isArray(value?.schedule) ? value.schedule.map((item) => ({ replicate: positiveInteger(item?.replicate), conditionId: text(item?.conditionId).toUpperCase(), trialId: text(item?.trialId) })) : [],
+    conditionSources: (Array.isArray(value?.conditionSources) ? value.conditionSources : []).map(normalizeSourceEntry), conditionBundles: (Array.isArray(value?.conditionBundles) ? value.conditionBundles : []).map(sourceBundle),
+    trials: Array.isArray(value?.trials) ? value.trials.map((trial) => ({ trialId: text(trial?.trialId), conditionId: text(trial?.conditionId).toUpperCase(), replicate: positiveInteger(trial?.replicate), projectId: text(trial?.projectId), briefFingerprint: text(trial?.briefFingerprint), sourceSnapshotFingerprint: text(trial?.sourceSnapshotFingerprint), generationInstructionFingerprint: text(trial?.generationInstructionFingerprint), runtimeTraceRef: text(trial?.runtimeTraceRef), runtimeEvidenceRef: text(trial?.runtimeEvidenceRef), generationBudget: trial?.generationBudget ?? null })) : [],
+    truth: { experimentOnly: value?.truth?.experimentOnly === true, protocolPlanOnly: value?.truth?.protocolPlanOnly === true, noAutomaticRetry: value?.truth?.noAutomaticRetry === true, noFallbackModel: value?.truth?.noFallbackModel === true, noManualCherryPicking: value?.truth?.noManualCherryPicking === true, partialRunsNonResumable: value?.truth?.partialRunsNonResumable === true, reviewReady: value?.truth?.reviewReady === true, capabilityEvidenceReady: value?.truth?.capabilityEvidenceReady === true, creativeDirectionApproved: value?.truth?.creativeDirectionApproved === true, technicalPlanningApproved: value?.truth?.technicalPlanningApproved === true, productionApproved: value?.truth?.productionApproved === true }
   };
 }
 
 function planFingerprint(value = {}) { return fingerprintCreativeValue(normalizePlanCore(value)); }
 
-export function buildCreativeMotionDogfoodExecutionPlan({ experimentId, projectId, briefFingerprint, runRef, modelIdentity, conditionMaterials = [], budget = {} } = {}) {
+function plannedTrials({ projectId, briefFingerprint, runRef, schedule, bundles, generationBudget }) {
+  const root = text(runRef).replace(/\/+$/, '');
+  return schedule.map((slot) => {
+    const suffix = `${slot.conditionId.toLowerCase()}-${slot.replicate}`;
+    const bundle = bundles.find((item) => item.conditionId === slot.conditionId) ?? sourceBundle();
+    return { trialId: `trial-${suffix}`, conditionId: slot.conditionId, replicate: slot.replicate, projectId: text(projectId), briefFingerprint: text(briefFingerprint), sourceSnapshotFingerprint: bundle.sourceSnapshotFingerprint, generationInstructionFingerprint: bundle.generationInstructionFingerprint, runtimeTraceRef: `artifact://${root}/trials/${suffix}/run.json#trace`, runtimeEvidenceRef: `${root}/trials/${suffix}/run.json`, generationBudget };
+  });
+}
+
+function deriveBundles({ projectId, brief, briefFingerprint, conditionSources }) {
+  return CONDITION_IDS.map((conditionId) => {
+    const entries = sourceEntryFor(conditionSources, conditionId);
+    if (entries.length !== 1) return sourceBundle({ conditionId });
+    return buildCreativeMotionDogfoodGenerationSource({ trial: { conditionId, projectId, briefFingerprint }, brief, source: entries[0].source });
+  });
+}
+
+export function buildCreativeMotionDogfoodExecutionPlan({ experimentId, projectId, frozenBrief, runRef, modelIdentity, conditionSources = [], budget = {}, scheduleSeed } = {}) {
+  const briefFingerprint = fingerprintCreativeValue(frozenBrief ?? {});
   const identity = normalizeIdentity(modelIdentity);
   const generationBudget = buildGeminiMotionDogfoodBudget(identity.requestedModel, budget);
-  const materials = CONDITION_IDS.map((conditionId) => normalizeMaterial((Array.isArray(conditionMaterials) ? conditionMaterials : []).find((item) => text(item?.conditionId).toUpperCase() === conditionId)));
-  const normalizedRunRef = text(runRef).replace(/\/+$/, '');
-  const trials = CONDITION_IDS.flatMap((conditionId) => [1, 2, 3].map((replicate) => {
-    const material = materials.find((item) => item.conditionId === conditionId) ?? normalizeMaterial();
-    const suffix = `${conditionId.toLowerCase()}-${replicate}`;
-    return {
-      trialId: `trial-${suffix}`,
-      conditionId,
-      replicate,
-      projectId: text(projectId),
-      briefFingerprint: text(briefFingerprint),
-      sourceSnapshotFingerprint: material.sourceSnapshotFingerprint,
-      generationInstructionFingerprint: fingerprintCreativeValue(material.generationInstruction),
-      architectureDeclarationFingerprint: fingerprintCreativeValue(material.architectureDeclaration),
-      runtimeTraceRef: `artifact://${normalizedRunRef}/trials/${suffix}/run.json#trace`,
-      runtimeEvidenceRef: `${normalizedRunRef}/trials/${suffix}/run.json`,
-      generationBudget
-    };
-  }));
-  const plan = {
-    schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@1',
-    stage: 'creative-motion-dogfood-pre-proof-execution',
-    experimentId: text(experimentId),
-    projectId: text(projectId),
-    briefFingerprint: text(briefFingerprint),
-    modelIdentity: identity,
-    generationBudget,
-    conditionMaterials: materials,
-    trials,
-    truth: {
-      experimentOnly: true,
-      protocolPlanOnly: true,
-      noAutomaticRetry: true,
-      noFallbackModel: true,
-      noManualCherryPicking: true,
-      reviewReady: false,
-      capabilityEvidenceReady: false,
-      productionApproved: false
-    }
-  };
+  const sources = (Array.isArray(conditionSources) ? conditionSources : []).map(normalizeSourceEntry);
+  const bundles = deriveBundles({ projectId, brief: frozenBrief, briefFingerprint, conditionSources: sources });
+  const schedule = scheduleFor(scheduleSeed).map((slot) => ({ ...slot, trialId: `trial-${slot.conditionId.toLowerCase()}-${slot.replicate}` }));
+  const plan = { schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@2', stage: 'creative-motion-dogfood-pre-proof-execution', experimentId: text(experimentId), projectId: text(projectId), frozenBrief: frozenBrief ?? null, briefFingerprint, modelIdentity: identity, generationBudget, scheduleSeed: text(scheduleSeed), schedule, conditionSources: sources, conditionBundles: bundles, trials: plannedTrials({ projectId, briefFingerprint, runRef, schedule, bundles, generationBudget }), truth: expectedTruth() };
   plan.snapshotFingerprint = planFingerprint(plan);
   const review = reviewCreativeMotionDogfoodExecutionPlan(plan);
   return { ...plan, findings: review.findings, pass: review.pass, status: review.status };
@@ -136,74 +83,57 @@ export function reviewCreativeMotionDogfoodExecutionPlan(plan = {}) {
   const findings = [];
   const core = normalizePlanCore(plan);
   const identity = core.modelIdentity;
-  if (plan?.schema !== core.schema || plan?.stage !== core.stage) findings.push(finding('blocker', 'dogfood-executor-plan-schema-invalid', 'Execution plan requires the canonical pre-proof execution schema and stage.'));
-  if (!core.experimentId || !core.projectId || !core.briefFingerprint) findings.push(finding('blocker', 'dogfood-executor-context-incomplete', 'Execution plan needs experiment, project and frozen brief identities.'));
+  if (plan?.schema !== core.schema || plan?.stage !== core.stage) findings.push(finding('blocker', 'dogfood-executor-plan-schema-invalid', 'Execution plan requires the canonical V2 pre-proof execution schema and stage.'));
+  if (!core.experimentId || !core.projectId || !core.scheduleSeed) findings.push(finding('blocker', 'dogfood-executor-context-incomplete', 'Execution plan needs experiment/project identities and a frozen non-empty schedule seed.'));
+  if (core.briefFingerprint !== fingerprintCreativeValue(core.frozenBrief ?? {})) findings.push(finding('blocker', 'dogfood-executor-brief-fingerprint-drift', 'Execution plan must derive the brief fingerprint from its exact frozen brief.'));
   if (identity.schema !== 'ai-studio-os/gemini-model-identity@1' || !identity.requestedModel || !identity.providerModelName || !identity.providerVersion || !identity.providerMetadataFingerprint || !identity.capturedAt || !identity.supportedGenerationMethods.includes('generateContent')) findings.push(finding('blocker', 'dogfood-executor-provider-identity-invalid', 'Formal execution requires an enrolled provider model name, version, capabilities and metadata fingerprint.'));
   if (/(?:^|-)latest$/i.test(identity.requestedModel)) findings.push(finding('blocker', 'dogfood-executor-provider-model-mutable', 'Formal execution cannot use a mutable latest model alias.'));
-  if (core.conditionMaterials.length !== CONDITION_IDS.length) findings.push(finding('blocker', 'dogfood-executor-material-coverage-invalid', 'Execution plan requires one explicit material bundle for every A/B/C/D/E condition.'));
+  if (core.conditionSources.length !== CONDITION_IDS.length) findings.push(finding('blocker', 'dogfood-executor-source-coverage-invalid', 'Execution plan requires exactly one real upstream source bundle per A/B/C/D/E condition.'));
+  const derivedBundles = deriveBundles({ projectId: core.projectId, brief: core.frozenBrief, briefFingerprint: core.briefFingerprint, conditionSources: core.conditionSources });
   for (const conditionId of CONDITION_IDS) {
-    const materials = core.conditionMaterials.filter((item) => item.conditionId === conditionId);
-    if (materials.length !== 1) findings.push(finding('blocker', 'dogfood-executor-material-duplicate-or-missing', 'Each dogfood condition must have exactly one material bundle.', { conditionId }));
-    else findings.push(...reviewMaterial(materials[0], conditionId));
-  }
-  if (core.trials.length !== 15) findings.push(finding('blocker', 'dogfood-executor-trial-count-invalid', 'Formal execution requires exactly fifteen A1–E3 trials.'));
-  for (const conditionId of CONDITION_IDS) {
-    const replicates = core.trials.filter((trial) => trial.conditionId === conditionId).map((trial) => trial.replicate).sort((a, b) => a - b);
-    if (!sameValue(replicates, [1, 2, 3])) findings.push(finding('blocker', 'dogfood-executor-replicate-coverage-invalid', 'Every condition requires replicates 1, 2 and 3 exactly once.', { conditionId, replicates }));
+    const entries = sourceEntryFor(core.conditionSources, conditionId);
+    if (entries.length !== 1) findings.push(finding('blocker', 'dogfood-executor-source-duplicate-or-missing', 'Each condition must have exactly one upstream source bundle.', { conditionId }));
+    const derived = derivedBundles.find((item) => item.conditionId === conditionId);
+    findings.push(...(derived?.findings ?? []));
+    const bound = core.conditionBundles.find((item) => item.conditionId === conditionId);
+    if (!bound || !sameValue(sourceBundle(bound), sourceBundle(derived))) findings.push(finding('blocker', 'dogfood-executor-source-bundle-drift', 'A condition bundle must be freshly derived from exact verified upstream artifacts; caller-supplied fingerprints, refs, prompts or declarations are not accepted.', { conditionId }));
   }
   const expectedBudget = buildGeminiMotionDogfoodBudget(identity.requestedModel, core.generationBudget ?? {});
-  if (!sameValue(core.generationBudget, expectedBudget) || core.trials.some((trial) => !sameValue(trial.generationBudget, expectedBudget))) findings.push(finding('blocker', 'dogfood-executor-budget-drift', 'Every execution trial must bind the exact one-request Gemini model, temperature, token and wall-clock policy.'));
-  if (core.trials.some((trial) => trial.projectId !== core.projectId || trial.briefFingerprint !== core.briefFingerprint || !trial.runtimeTraceRef || !trial.runtimeEvidenceRef)) findings.push(finding('blocker', 'dogfood-executor-trial-context-drift', 'Every trial must retain the exact project/brief binding and unique runtime evidence references.'));
-  for (const trial of core.trials) {
-    const material = core.conditionMaterials.find((item) => item.conditionId === trial.conditionId);
-    if (!material || trial.sourceSnapshotFingerprint !== material.sourceSnapshotFingerprint || trial.generationInstructionFingerprint !== fingerprintCreativeValue(material.generationInstruction) || trial.architectureDeclarationFingerprint !== fingerprintCreativeValue(material.architectureDeclaration)) {
-      findings.push(finding('blocker', 'dogfood-executor-trial-material-binding-drift', 'Every trial must bind the exact source snapshot, generation instruction and architecture declaration that the executor will submit.', { trialId: trial.trialId }));
-    }
-  }
-  const uniqueIds = new Set(core.trials.map((trial) => trial.trialId));
-  if (uniqueIds.size !== core.trials.length) findings.push(finding('blocker', 'dogfood-executor-trial-id-invalid', 'Every planned execution trial needs a unique stable ID.'));
-  if (new Set(core.trials.map((trial) => trial.runtimeTraceRef)).size !== core.trials.length || new Set(core.trials.map((trial) => trial.runtimeEvidenceRef)).size !== core.trials.length) findings.push(finding('blocker', 'dogfood-executor-runtime-reference-duplicate', 'Every trial must write to its own trace and evidence reference.'));
-  const expectedTruth = { experimentOnly: true, protocolPlanOnly: true, noAutomaticRetry: true, noFallbackModel: true, noManualCherryPicking: true, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false };
-  if (!sameValue(core.truth, expectedTruth)) findings.push(finding('blocker', 'dogfood-executor-truth-drift', 'Execution plans cannot gain review, capability or production authority.'));
-  if (text(plan?.snapshotFingerprint) !== planFingerprint(plan)) findings.push(finding('blocker', 'dogfood-executor-plan-fingerprint-drift', 'Execution plan fingerprint must bind model identity, source material, controls and all fifteen trials.'));
+  if (!sameValue(core.generationBudget, expectedBudget)) findings.push(finding('blocker', 'dogfood-executor-budget-drift', 'Formal execution requires one fixed model/temperature/token/time policy.'));
+  const expectedSchedule = scheduleFor(core.scheduleSeed).map((slot) => ({ ...slot, trialId: `trial-${slot.conditionId.toLowerCase()}-${slot.replicate}` }));
+  if (!sameValue(core.schedule, expectedSchedule)) findings.push(finding('blocker', 'dogfood-executor-schedule-drift', 'Execution must use the frozen deterministic balanced schedule.'));
+  if (core.schedule.length !== 15 || [1, 2, 3].some((replicate) => !sameValue(core.schedule.filter((item) => item.replicate === replicate).map((item) => item.conditionId).sort(), CONDITION_IDS))) findings.push(finding('blocker', 'dogfood-executor-schedule-balance-invalid', 'Each replicate block must contain A/B/C/D/E exactly once.'));
+  const runRef = core.trials[0]?.runtimeEvidenceRef?.replace(/\/trials\/[a-e]-[1-3]\/run\.json$/, '') ?? '';
+  const expectedTrials = plannedTrials({ projectId: core.projectId, briefFingerprint: core.briefFingerprint, runRef, schedule: expectedSchedule, bundles: derivedBundles, generationBudget: expectedBudget });
+  if (!sameValue(core.trials, expectedTrials)) findings.push(finding('blocker', 'dogfood-executor-trial-binding-drift', 'All fifteen trial bindings must be freshly derived from the verified source bundles and frozen schedule.'));
+  if (!sameValue(core.truth, expectedTruth())) findings.push(finding('blocker', 'dogfood-executor-truth-drift', 'Pre-proof execution cannot gain review, capability, direction, planning or production authority.'));
+  if (text(plan?.snapshotFingerprint) !== planFingerprint(plan)) findings.push(finding('blocker', 'dogfood-executor-plan-fingerprint-drift', 'Execution plan fingerprint must bind the frozen brief, sources, provider identity, schedule and every trial.'));
   const blockers = findings.filter((item) => item.severity === 'blocker');
-  return { schema: 'ai-studio-os/creative-motion-dogfood-execution-plan-review@1', findings, pass: blockers.length === 0, status: blockers.length ? 'blocked' : 'ready-for-pre-proof-execution', truth: { reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
+  return { schema: 'ai-studio-os/creative-motion-dogfood-execution-plan-review@2', findings, pass: blockers.length === 0, status: blockers.length ? 'blocked' : 'ready-for-pre-proof-execution', truth: { reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false } };
+}
+
+function invalidRun(plan, trialRuns, findings, reason) {
+  return { schema: 'ai-studio-os/creative-motion-dogfood-pre-proof-run@2', stage: 'creative-motion-dogfood-pre-proof-execution', status: 'invalid', invalidReason: reason, planSnapshotFingerprint: text(plan?.snapshotFingerprint), trialRuns, findings, truth: { experimentOnly: true, partialRunsNonResumable: true, replacementExperimentRequired: true, retryCount: 0, fallbackModelUsed: false, manualCherryPickingAllowed: false, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false } };
 }
 
 export async function executeCreativeMotionDogfoodPlan(plan = {}, { runner } = {}) {
   const planReview = reviewCreativeMotionDogfoodExecutionPlan(plan);
-  if (!planReview.pass || !runner || typeof runner.runPrototype !== 'function') {
-    return { schema: 'ai-studio-os/creative-motion-dogfood-pre-proof-run@1', status: 'blocked', planSnapshotFingerprint: text(plan?.snapshotFingerprint), trialRuns: [], findings: [...planReview.findings, ...(!runner || typeof runner.runPrototype !== 'function' ? [finding('blocker', 'dogfood-executor-runner-missing', 'Pre-proof execution requires the narrow Gemini dogfood runner.')] : [])], truth: { reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
-  }
-  const materials = new Map(plan.conditionMaterials.map((item) => [item.conditionId, normalizeMaterial(item)]));
+  if (!planReview.pass || !runner || typeof runner.runPrototype !== 'function' || typeof runner.inspectModelIdentity !== 'function') return invalidRun(plan, [], [...planReview.findings, ...(!runner || typeof runner.runPrototype !== 'function' || typeof runner.inspectModelIdentity !== 'function' ? [finding('blocker', 'dogfood-executor-runner-incomplete', 'Formal execution requires Gemini generation and model identity inspection capabilities.')] : [])], 'preflight-invalid');
+  const preIdentity = await runner.inspectModelIdentity();
+  if (preIdentity?.status !== 'enrolled' || !sameCreativeMotionDogfoodProviderIdentity(plan.modelIdentity, preIdentity)) return invalidRun(plan, [], [finding('blocker', 'dogfood-executor-provider-identity-drift', 'Immediate pre-batch Gemini identity inspection did not exactly match the frozen model/resource/version/metadata binding.')], 'provider-identity-preflight-drift');
+  const bundles = new Map(plan.conditionBundles.map((item) => [item.conditionId, item]));
   const trialRuns = [];
-  const findings = [];
   for (const trial of plan.trials) {
-    const material = materials.get(trial.conditionId);
-    const result = await runner.runPrototype({
-      trial,
-      generationInstruction: material.generationInstruction,
-      architectureDeclaration: material.architectureDeclaration,
-      runtimeEvidenceRef: trial.runtimeEvidenceRef
-    });
-    const exactBinding = text(result?.trial?.trialId) === trial.trialId
-      && text(result?.trial?.runtimeTraceRef) === trial.runtimeTraceRef
-      && sameValue(result?.trial?.generationBudget, trial.generationBudget)
-      && text(result?.runtimeControl?.runtimeEvidenceRef) === trial.runtimeEvidenceRef;
-    if (!exactBinding) findings.push(finding('blocker', 'dogfood-executor-result-binding-drift', 'A provider result did not bind the exact planned trial controls and evidence references.', { trialId: trial.trialId }));
-    if (result?.status !== 'produced') findings.push(finding('blocker', 'dogfood-executor-trial-not-produced', 'A planned trial did not produce a structured draft; the executor does not retry or substitute a result.', { trialId: trial.trialId, findingCodes: result?.findings?.map((item) => item.code) ?? [] }));
+    const bundle = bundles.get(trial.conditionId);
+    const architectureDeclaration = { schema: 'ai-studio-os/creative-motion-dogfood-verified-source-binding@1', conditionId: trial.conditionId, sourceSnapshotFingerprint: bundle.sourceSnapshotFingerprint };
+    let result;
+    try { result = await runner.runPrototype({ trial, generationInstruction: bundle.generationInstruction, architectureDeclaration, runtimeEvidenceRef: trial.runtimeEvidenceRef }); }
+    catch (error) { return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-executor-provider-system-failure', text(error?.message) || 'Provider execution failed.')], 'provider-system-failure'); }
+    const exactBinding = text(result?.trial?.trialId) === trial.trialId && text(result?.trial?.runtimeTraceRef) === trial.runtimeTraceRef && sameValue(result?.trial?.generationBudget, trial.generationBudget) && text(result?.runtimeControl?.runtimeEvidenceRef) === trial.runtimeEvidenceRef && text(result?.request?.bodyFingerprint) !== '';
     trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: text(result?.status), result, exactBinding });
+    if (result?.status !== 'produced' || !exactBinding) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-executor-trial-invalid', 'A trial failed or drifted; the executor stopped immediately and the partial batch is non-resumable.', { trialId: trial.trialId, findingCodes: result?.findings?.map((item) => item.code) ?? [] })], 'partial-batch-invalid');
   }
-  const blockers = findings.filter((item) => item.severity === 'blocker');
-  return {
-    schema: 'ai-studio-os/creative-motion-dogfood-pre-proof-run@1',
-    stage: 'creative-motion-dogfood-pre-proof-execution',
-    status: blockers.length ? 'blocked' : 'produced',
-    planSnapshotFingerprint: text(plan?.snapshotFingerprint),
-    trialRuns,
-    findings,
-    truth: { experimentOnly: true, retryCount: 0, fallbackModelUsed: false, manualCherryPickingAllowed: false, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false }
-  };
+  const postIdentity = await runner.inspectModelIdentity();
+  if (postIdentity?.status !== 'enrolled' || !sameCreativeMotionDogfoodProviderIdentity(plan.modelIdentity, postIdentity)) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-executor-provider-identity-drift', 'Post-batch Gemini identity inspection did not exactly match the frozen model/resource/version/metadata binding.')], 'provider-identity-postflight-drift');
+  return { schema: 'ai-studio-os/creative-motion-dogfood-pre-proof-run@2', stage: 'creative-motion-dogfood-pre-proof-execution', status: 'produced', planSnapshotFingerprint: text(plan?.snapshotFingerprint), trialRuns, findings: [], truth: { experimentOnly: true, partialRunsNonResumable: true, replacementExperimentRequired: false, retryCount: 0, fallbackModelUsed: false, manualCherryPickingAllowed: false, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false } };
 }
-
-export const DOGFOOD_EXECUTION_CONDITIONS = Object.freeze(CONDITION_IDS.map((id) => CONDITION_BY_ID.get(id)));
