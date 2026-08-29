@@ -1,0 +1,47 @@
+{
+  "schema": "ai-studio-os/creative-motion-dogfood-brief-source@1",
+  "projectId": "benchmark-011-after-matter",
+  "title": "After Matter — 100 Objects That Learned to Age",
+  "challenge": "Create the digital launch experience for a contemporary design museum exhibition about patina, repair, wear and material memory. The experience must make physical time perceptible without turning the site into a cinematic demo or sacrificing reading, wayfinding, ticketing and accessibility.",
+  "audience": "Design-literate museum visitors, architects, product designers, students and culturally curious general visitors using desktop and mobile devices.",
+  "projectTruths": [
+    "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+    "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation.",
+    "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves.",
+    "Mobile is a primary visit-planning surface, not a reduced desktop afterthought.",
+    "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback."
+  ],
+  "contradictions": [
+    "Archival authority versus tactile sensuality.",
+    "Slow contemplative reading versus moments of memorable temporal revelation.",
+    "Material permanence versus digital ephemerality.",
+    "One hundred distinct objects versus one coherent exhibition identity."
+  ],
+  "nonNegotiables": [
+    "Motion must derive from the exhibition idea of accumulated time, material memory, repair or change; technology cannot become the concept.",
+    "Long-form reading states require deliberate stillness and stable hierarchy.",
+    "Primary navigation, exhibition information and ticket reservation must remain immediately usable throughout the experience.",
+    "Desktop and mobile require authored reinterpretation rather than scaled copies.",
+    "Reduced-motion behavior must preserve semantic sequence and state meaning.",
+    "The experience must remain plausible for production performance and accessibility budgets.",
+    "The objects remain the primary visual evidence; generic synthetic hero imagery cannot replace them."
+  ],
+  "antiPatterns": [
+    "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+    "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+    "Continuous camera drift or parallax used only to signal premium aesthetics.",
+    "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+    "Scroll-jacking that delays reading or practical tasks.",
+    "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+  ],
+  "targetExperience": "Quietly radical and materially intelligent: the interface should feel as if traces of use, pressure, time and repair have informed its temporal behavior. It should be memorable because the motion system makes the exhibition thesis perceptible, while large portions of the experience remain deliberately still, precise and easy to inspect.",
+  "requiredPrimaryFlows": [
+    "Understand the exhibition premise.",
+    "Explore representative objects and their histories.",
+    "Move between object detail and exhibition context without losing orientation.",
+    "Read one long-form curatorial essay.",
+    "View event dates and reserve a ticket.",
+    "Use the same core experience on touch/mobile and with reduced motion."
+  ],
+  "phase0Requirement": "Run the canonical Creative Thesis and Creative World process once, obtain explicit human selection, then freeze the exact selected Creative World reference and fingerprint for every A/B/C/D/E trial."
+}
