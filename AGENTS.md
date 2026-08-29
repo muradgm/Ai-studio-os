@@ -1,19 +1,22 @@
 # AI Studio OS agent instructions
 
+## Scope and precedence
+This file defines repository-wide invariants. A nested `AGENTS.md` may add stricter local rules for its subtree, but it must not weaken these invariants.
+
+Domain procedures belong in `.agents/skills/**/SKILL.md` and architecture documents. When a task changes domain semantics, read the relevant skill or architecture contract instead of relying on generic assumptions.
+
 ## Operating rule
-Start from intent. Do not invoke modules because they exist. Invoke them because the task justifies them.
+Start from intent. Do not invoke modules, tools, skills, or workflows because they exist. Invoke the smallest sufficient capability because the task justifies it.
 
 ## Default decision loop
 1. Clarify the intended outcome from available context.
-2. Route to the smallest sufficient workflow.
-3. Separate analysis from recommendation.
-4. Use council only for consequential, uncertain, expensive, or hard-to-reverse decisions.
-5. For creative work, calibrate with inspiration before committing to art direction.
-6. Preserve business/product truth, especially when editing or generating imagery.
-7. Preserve dissent when reviewers disagree.
-8. Distinguish defects from taste preferences.
-9. Evaluate before release.
-10. Observe real outcomes before promoting durable lessons.
+2. Inspect the current implementation before proposing a parallel abstraction.
+3. Route to the smallest sufficient workflow.
+4. Separate analysis from recommendation and evidence from inference.
+5. Use Council only for consequential, uncertain, expensive, or hard-to-reverse decisions.
+6. For creative work, calibrate with inspiration before committing to art direction.
+7. Preserve business/product truth, dissent, and the distinction between defects and taste preferences.
+8. Evaluate before release and observe real outcomes before promoting durable lessons.
 
 ## Command semantics
 - `question`: identify missing information and hidden assumptions.
@@ -24,102 +27,54 @@ Start from intent. Do not invoke modules because they exist. Invoke them because
 - `review`: compare execution against agreed intent and criteria.
 - `improve`: apply only validated improvements.
 
-## Creative runtime rules
-- Inspiration must include direct industry, adjacent industries, trends, anti-references, and opportunity gaps.
-- Do not average contradictory references into generic compromise; choose a direction.
-- For real businesses, prefer real assets and controlled edits. Missing truthful product imagery should trigger new capture before synthetic documentary representation.
-- Motion is designed with reduced-motion and performance constraints from the start.
-- A high average eval score does not override critical failures in authenticity, accessibility, brand fit, or business clarity.
+## Scope discipline
+- Make the smallest coherent change that satisfies the task.
+- Do not refactor adjacent code without a demonstrated need.
+- If requested behavior already exists correctly, do not modify it.
+- Reuse existing canonical validators, builders, adapters, and contracts before adding parallel logic.
+- Stop when the acceptance criteria are satisfied; speculative future generalization is not completion work.
 
-## Creative production v1.1 rules
-- Decompose references into transferable principles; never treat a reference as permission to reproduce its exact composition or style package.
-- Write a Design Read before concept generation so the system states what it understood about the business, emotional target, category expectation, opportunity, memorable idea, and risks.
-- Creative Dials are calibration constraints, not taste scores. Every dial needs a 0–10 value and a rationale.
-- Diverge before converging: serious creative work should explore 3–5 genuinely different concepts, not cosmetic variants of one layout.
-- Concept selection must explain rejected alternatives and define kill criteria.
-- Prototype Mode is explicitly non-final. Production Mode requires strict truth, rights, accessibility, and performance expectations.
-- Production Recipes describe reusable production patterns; they must not hard-code a provider.
-- The Creative Tool Gateway selects adapters by capability, availability, budget, and explicit task priority—not vendor identity.
-- Truth-sensitive real products or people cannot route to synthetic documentary generation. Require real-source editing or new capture.
-- Every generated/edited asset gets a stable asset ID, version, direction reference, continuity reference, provenance/rights state, and dependency record.
-- Regenerate weak assets surgically. Patch only validated blocker/major findings, preserve continuity/direction constraints, and require integration review after replacement.
-- Cap repeated patch attempts; endless regeneration is a process failure, not iteration.
+## Authority integrity
+- Never trust self-asserted `reviewReady`, `selected`, `approved`, `productionReady`, or equivalent flags as consequential authority.
+- Recompute consequential authority from canonical inputs at public consequential boundaries.
+- Human decisions may never be fabricated, inferred from model output, or replaced by optimistic flags.
+- Candidate, review, evidence, human-decision, canonical, and production artifacts must remain semantically distinct.
+- Bind consequential artifacts to exact project/source/candidate identities where identity matters; detect post-review or post-approval drift.
+- A maker cannot self-approve its own output. Independent review is a separate gate.
+- Runtime evidence outranks cached truth flags.
 
-## Logo identity v1.2 rules
-- Every serious logo project must assess all seven types: wordmark, lettermark/monogram, pictorial mark, abstract mark, mascot, combination mark, and emblem. Assessment is mandatory; exploration can shortlist only the types that fit.
-- Logo psychology is a set of testable hypotheses, not a dictionary of universal symbols. Require intended effect, evidence basis, test method, and falsifier.
-- Treat color associations as contextual/cultural. Do not encode one-to-one rules such as blue = trust or black = luxury.
-- Evaluate processing fluency, shape semantics, complexity, harmony, abstraction, typography, figure-ground, and distinctiveness/familiarity.
-- Use LogoLounge for curated/trend intelligence, LogoSystem for type/style/shape/motion filtering, LogoMoose for long-tail identity/packaging context, and Inspiration Logo for wildcard/negative-space exploration.
-- Inspiration references require provenance plus take/reject/transform notes. Copying exact marks, geometry, lockups, or motion is blocked.
-- Explore at least three genuinely different logo concept families before refinement.
-- Generated raster marks are concept sketches only. Final logo masters require vector reconstruction and optical refinement.
-- The canonical mark specification sits above SVG and locks viewBox, stable shape IDs, geometry fingerprints, transforms, bounding boxes, palette tokens, shape-to-layer assignments, layer order, masks/clips, and intended overlap relationships.
-- SVG export cannot reinterpret the design: palette drift, raw unapproved colors, extra/missing shapes, geometry drift, viewBox drift, embedded raster artwork, or non-normalized transforms block approval.
-- Multi-layer marks require an explicit layer manifest. Layer z-order, role, opacity, masks/clips, and shape membership are invariants.
-- Intended overlaps require explicit pair IDs, overlap mode, ownership, and intersection-area signature/tolerance. Unexpected overlaps or layer-occlusion violations block approval.
-- Require render-diff evidence against the canonical master at 16, 32, 64, and 128 px; visible export drift is blocking even if the SVG parses correctly.
-- Build a responsive identity system: primary lockup, secondary lockup, symbol, micro mark, wordmark, favicon.
-- Stress-test monochrome, inverse, 16/32/64/128px, favicon/app icon, web header, social avatar, print, signage, and stamp/embroidery-like reproduction.
-- Block approval on unresolved originality/confusion risk, weak small-size behavior, poor optical quality, or excessive AI-generic risk.
-- Derive logo motion from structural/concept logic; do not animate decoratively.
+## Evidence, truth, and compatibility
+- Plans, prompts, and intended outputs are not execution evidence.
+- Rendered/generated artifacts must exist before they are treated as rendered/generated evidence.
+- Provenance must bind evidence to the artifact and inputs it claims to prove.
+- Preserve existing public behavior unless the task explicitly changes it.
+- Do not silently activate a new execution mode from ambiguous or legacy inputs.
+- Schema changes require explicit compatibility and migration consideration.
+- Truth-sensitive real products, people, measurements, rights, permissions, and business claims fail closed when required evidence is missing.
 
-## Specialist skill architecture rules
-- Specialist skills are divided into four categories: `role`, `task`, `review`, and `recipe`.
-- Role skills own professional judgment; task skills own repeatable operations; review skills judge independently; recipe skills compose workflows without replacing the underlying specialists.
-- Use `kernel/skill-registry.json` as the active catalog and `lib/skill-router.mjs` for minimal deterministic routing.
-- Do not invoke every plausible specialist. Default caps are three role skills and two task skills per routing decision.
-- Low-risk narrow work should stay minimal. Moderate-risk work requires independent review. High-risk creative work additionally requires `creative-skeptic` and Council when decisions are consequential or hard to reverse.
-- A maker skill cannot self-approve its own output. Reviewer findings use `BLOCKER / MAJOR / MINOR / TASTE` and must separate strategic mismatch, execution defect, and preference.
-- Recipes define stage order, gates, required artifacts, and handoffs; they must not become giant prompts that erase specialist boundaries.
-- Every catalogued specialist `SKILL.md` must define Purpose, When to use, Inputs required, Operating principles, Workflow, Deliverables, Review criteria, Failure modes, and Handoffs.
-- Reject skill sprawl. Add a new skill only when a real project demonstrates a recurring judgment gap that cannot be cleanly solved by improving an existing skill.
-- Promote skill changes from validated project failures, Council findings, benchmark regressions, user corrections, or recurring production constraints—not one-off taste preferences.
+## Creative invariants
+- Decompose references into transferable principles; never treat a reference as permission to reproduce its exact composition, geometry, mark, or style package.
+- Do not average contradictory references into generic compromise; choose and justify a direction.
+- Specialists interpret approved upstream creative/product authority while adding domain craft, taste, restraint, and critique. They do not invent a competing upstream creative universe.
+- Technical capability is subordinate to creative and product intent. WebGL, 3D, shaders, motion, generation, or other sophisticated tooling is not a quality score.
+- Motion and immersive work must consider reduced-motion, accessibility, device capability, and performance from the start.
+- A high average evaluation score never overrides critical failures in authenticity, accessibility, brand fit, business clarity, rights, or authority integrity.
 
-## Vector geometry rules
-- `vector-geometry-engineer` owns deterministic vector construction after visual/semantic intent is approved; it does not replace art direction, logo design, or product design.
-- The geometry specification sits above SVG. Record canvas/frame dimensions, viewBox/origin, grid/subgrid, safe area, geometric and optical center, exact anchor/control points, corner/terminal grammar, layers, overlaps, and target-size behavior.
-- Use `x/y` for drawing coordinates. Use logical `z` only for deterministic SVG layer/paint order; real 3D `x/y/z` geometry must be projected by a 3D/motion system before SVG output.
-- Cubic Bézier construction should reason explicitly about anchors, handles, tangents, curvature, inflection points, and C0/C1/C2 continuity.
-- Prefer the fewest meaningful path nodes that preserve intended geometry; reject tracing noise, near-tangent kinks, and accidental inflections.
-- Mathematical centering and optical centering are separate. Optical corrections are allowed when documented and verified at target sizes.
-- Define permitted corner families and terminal families before scale icon production. Do not invent new geometry rules for each difficult icon.
-- Multi-layer assets require stable layer IDs and explicit logical z/paint order. Masks, clips, knockouts, and intended overlaps must remain auditable.
-- Small-size icons may use intentional optical variants/simplifications. Do not blindly scale one master to every pixel target.
-- Icon systems freeze family DNA only after 5–8 calibration icons prove the grammar across difficult geometry/semantic cases.
-- Run `vector-geometry-review` before existing Shape/SVG/Layer/Overlap/Render locks.
-- Static vector construction is primarily geometry. Physics such as spring, damping, mass, momentum, and collision belongs to motion; vector assets should expose pivots, anchors, paths, normals, and constraints for that handoff.
-
-## Engineering runtime rules
-- Classify change risk before implementation; do not infer safety from small diff size.
-- Define invariants and required tests before code review.
-- Code review and security review are separate gates.
-- Missing required tests block review.
+## Engineering and release
+- Classify change risk before implementation; do not infer safety from diff size.
+- Define invariants and required tests before considering a consequential change complete.
+- Code review and security review are distinct when security-sensitive behavior is involved.
 - Permission-sensitive changes require server-side authorization, least privilege, and auditability.
-- State mutations require validation and a transaction/recovery boundary.
-- High-risk changes require explicit rollback and observability plans before release.
+- State mutations require validation and a transaction or recovery boundary appropriate to their risk.
+- High-risk releases require explicit rollback and observability plans.
 - Release readiness is boolean evidence, not an averaged confidence score.
 
-## Multimodal runtime rules
-- Storyboard and timing precede media generation.
-- Storyboard, video, voice, and audio inherit one shared creative direction; cross-modal drift blocks approval.
-- Use a continuity bible for facts and visual decisions that must remain stable across shots.
-- Truth-sensitive real visuals require real-source evidence; unresolved capture remains pending.
-- Voice usage rights are required, and voice cloning requires explicit consent evidence.
-- Commercial music requires concrete rights evidence, not a label alone.
-- Spoken content requires captions and transcript.
-- Aspect-ratio variants require intentional recomposition; do not blindly crop a master.
-- A multimodal plan is approved only when timing, continuity, truth, rights, accessibility, and creative coherence all pass.
-
-## Observation loop rules
-- Metric movement is not evidence quality; require a launch hypothesis and validate source type/provenance, sample, window, baseline, observed values, and threshold justification before interpretation.
-- Use metric-specific meaningful-change thresholds and keep flat movement distinct from improvement.
-- Guardrail regressions are not averaged away by primary metric gains.
-- Default post-launch attribution to correlational; causal language requires evidenced controlled experiments.
-- Unsupported anecdotes do not become reliable feedback themes.
-- Preserve benchmark regression history while distinguishing active failures from recovered ones.
-- Project rules require independent evidence sources in one context; global rules additionally require evidenced recurrence across at least two distinct contexts.
-- Reliable conflicting evidence rejects a candidate learning rather than being averaged into consensus.
+## Validation and completion
+- Run the smallest relevant tests first; broaden validation after focused checks pass.
+- Add regression coverage for corrected invariants and meaningful failure modes.
+- Never weaken a valid assertion merely to make CI green.
+- Use expensive browser/full-system proof when the change requires it or at convergence, not reflexively after every edit.
+- Before finishing, review the diff for unnecessary changes, verify authority/security boundaries touched by the work, run applicable validation, and report remaining uncertainty truthfully.
 
 ## Quality bar
 Prefer explicit tradeoffs, evidence, and testable claims over confident generic prose.
