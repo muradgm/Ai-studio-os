@@ -1,0 +1,114 @@
+{
+  "schema": "ai-studio-os/creative-world-selection@1",
+  "projectId": "benchmark-011-after-matter",
+  "status": "selected-awaiting-dogfood-execution",
+  "selectedWorld": {
+    "schema": "ai-studio-os/creative-world@1",
+    "id": "friction-index",
+    "label": "Friction Index",
+    "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+    "interpretationOfThesis": "Material time becomes a readable sequence of specific changes: wear, repair, fading, and care guide attention while objects, reading, and practical museum tasks remain primary.",
+    "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+    "worldClass": "material-history navigation system",
+    "narrativeModel": "move from a visible object to one selected trace, then from that trace into history, context, and a return to the object.",
+    "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+    "typographyIntent": {
+      "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+      "roles": {
+        "exhibition": "measured, tactile, and memorable",
+        "trace": "precise and chronologically clear",
+        "reading": "quiet, durable, and comfortably long-form",
+        "visit": "immediate and functional"
+      },
+      "preferredCategories": {
+        "display": ["serif", "humanist sans-serif"],
+        "body": ["sans-serif", "serif"]
+      },
+      "avoidCategories": ["generic luxury serif staging", "museum-label bureaucratic density"],
+      "descriptorTargets": {},
+      "pressures": {
+        "readingClarity": 92,
+        "objectPrimacy": 90,
+        "traceLegibility": 91,
+        "practicalTaskClarity": 94
+      },
+      "antiPatterns": ["monumental type that competes with objects", "motion-led reading hierarchy"]
+    },
+    "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+    "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+    "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+    "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+    "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+    "soundPolicy": "Silence by default. Any future sound must be tied to real object evidence, have rights clearance, and preserve a silent equivalent.",
+    "categoryTransferTest": {
+      "whyProjectSpecific": "The world depends on the exhibition's one hundred real objects, where scratches, repair, fading, and deformation are evidence of use rather than flaws to hide.",
+      "transferRisk": "medium if real object history is replaced by generic distressed styling or if traces cease to be factual object-specific evidence."
+    },
+    "antiPatterns": [
+      "generic scroll-triggered fade-and-rise sections",
+      "decorative particles, glow, or AI gradients unrelated to material evidence",
+      "continuous camera drift for premium atmosphere",
+      "scroll-jacking that delays reading or ticketing"
+    ],
+    "thesisRef": {
+      "schema": "ai-studio-os/creative-thesis@1",
+      "projectId": "benchmark-011-after-matter",
+      "governingIdea": "Let accumulated material change become the interface's evidence system, so time is perceived through what objects have endured rather than through decorative spectacle."
+    },
+    "unresolvedRisks": [
+      "Phase 0 material imagery is non-documentary and must be replaced by licensed object photography or new capture before production.",
+      "Trace navigation could become decorative if every trace is not grounded in a real object history.",
+      "Motion must retain narrative equivalence under reduced motion without flattening meaningful object-state relationships."
+    ],
+    "reviewReady": true,
+    "selected": true,
+    "truth": {
+      "humanCreativeSelectionConfirmed": true,
+      "visualWorldProofReviewed": true,
+      "styleFrameReviewComplete": true,
+      "typographyApproved": false,
+      "productionTechnologyApproved": false
+    }
+  },
+  "selection": {
+    "worldId": "friction-index",
+    "humanConfirmed": true,
+    "visualReviewConfirmed": true,
+    "selectedAt": "2026-08-29T19:01:32.1195217+02:00",
+    "selectionStatement": "Select Friction Index and freeze it as the shared Creative World for Benchmark 011.",
+    "selectionSource": "human",
+    "selectedAutomatically": false,
+    "visualEvidenceRefs": [
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-desktop.png",
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-mobile.png",
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/index.html"
+    ],
+    "rationale": "Friction Index most directly turns real material change into useful navigation while preserving object primacy, long-form reading, mobile clarity, reduced-motion compatibility, and immediate visit planning."
+  },
+  "freezeBoundary": {
+    "frozen": [
+      "Friction Index world idea and signature behavior",
+      "material evidence as the navigation principle",
+      "single-trace reveal followed by stillness",
+      "object primacy and factual trace requirement",
+      "immediate access to reading, context, and ticketing",
+      "mobile and reduced-motion equivalence requirement"
+    ],
+    "explicitlyNotFrozen": [
+      "final typography family and weights",
+      "licensed object photography and object capture",
+      "exact color tokens and spacing scale",
+      "motion timing and production implementation",
+      "sound design",
+      "production approval"
+    ]
+  },
+  "truth": {
+    "creativeWorldExplorationClosed": true,
+    "humanWorldSelectionConfirmed": true,
+    "humanVisualApproval": false,
+    "finalVisualSystemApproved": false,
+    "selectedAutomatically": false,
+    "productionApproved": false
+  }
+}
