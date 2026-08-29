@@ -118,3 +118,33 @@ test('Gemini dogfood runner reports provider rejection without returning secret 
   assert.ok(result.findings.some((item) => item.code === 'gemini-dogfood-provider-rejected-request'));
   assert.equal(JSON.stringify(result).includes(apiKey), false);
 });
+
+test('formal model enrollment records provider identity and rejects a mutable latest alias before the provider is contacted', async () => {
+  let observed;
+  const runner = createGeminiMotionDogfoodRunner({
+    apiKey,
+    model,
+    now: () => new Date('2026-08-29T11:00:00.000Z'),
+    fetchImpl: successfulFetch({
+      name: `models/${model}`,
+      baseModelId: model,
+      version: 'test-001',
+      supportedGenerationMethods: ['generateContent'],
+      inputTokenLimit: 100_000,
+      outputTokenLimit: 4_000
+    }, (url, options) => { observed = { url, options }; })
+  });
+  const enrolled = await runner.inspectModelIdentity();
+  assert.equal(enrolled.status, 'enrolled');
+  assert.equal(enrolled.providerVersion, 'test-001');
+  assert.match(observed.url, /models\/gemini-test-model$/);
+  assert.equal(observed.options.headers['x-goog-api-key'], apiKey);
+  assert.equal(JSON.stringify(enrolled).includes(apiKey), false);
+
+  let contacted = false;
+  const latestRunner = createGeminiMotionDogfoodRunner({ apiKey, model: 'gemini-flash-latest', fetchImpl: async () => { contacted = true; return {}; } });
+  const rejected = await latestRunner.inspectModelIdentity();
+  assert.equal(rejected.status, 'blocked');
+  assert.equal(contacted, false);
+  assert.ok(rejected.findings.some((item) => item.code === 'gemini-dogfood-mutable-model-alias'));
+});

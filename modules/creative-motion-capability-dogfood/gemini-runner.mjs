@@ -60,6 +60,25 @@ function parseStructuredDraft(response = {}) {
   }
 }
 
+function normalizeModelIdentity(value = {}) {
+  return {
+    schema: 'ai-studio-os/gemini-model-identity@1',
+    requestedModel: text(value?.requestedModel),
+    providerModelName: text(value?.providerModelName),
+    providerBaseModelId: text(value?.providerBaseModelId),
+    providerVersion: text(value?.providerVersion),
+    supportedGenerationMethods: Array.isArray(value?.supportedGenerationMethods) ? value.supportedGenerationMethods.map(text).filter(Boolean).sort() : [],
+    inputTokenLimit: integer(value?.inputTokenLimit),
+    outputTokenLimit: integer(value?.outputTokenLimit),
+    providerMetadataFingerprint: text(value?.providerMetadataFingerprint),
+    capturedAt: text(value?.capturedAt)
+  };
+}
+
+function isMutableLatestAlias(model) {
+  return /(?:^|-)latest$/i.test(text(model));
+}
+
 export function buildGeminiMotionDogfoodBudget(model, overrides = {}) {
   const normalizedModel = text(model);
   return {
@@ -81,6 +100,51 @@ export function createGeminiMotionDogfoodRunner({
   const configuredApiKey = text(apiKey);
   const configuredModel = text(model);
   const configuredApiRoot = text(apiRoot).replace(/\/+$/, '');
+
+  async function inspectModelIdentity() {
+    const findings = [];
+    if (!configuredApiKey) findings.push(finding('blocker', 'gemini-dogfood-api-key-missing', 'GEMINI_API_KEY is required to inspect a Gemini model identity.'));
+    if (!configuredModel) findings.push(finding('blocker', 'gemini-dogfood-model-missing', 'GEMINI_FREE_MODEL is required to inspect a Gemini model identity.'));
+    if (typeof fetchImpl !== 'function') findings.push(finding('blocker', 'gemini-dogfood-fetch-missing', 'A fetch implementation is required for Gemini execution.'));
+    if (isMutableLatestAlias(configuredModel)) findings.push(finding('blocker', 'gemini-dogfood-mutable-model-alias', 'Formal dogfood execution rejects a mutable Gemini latest alias. Configure a provider-stable model name, then enroll its provider metadata.'));
+    if (findings.length) return { schema: 'ai-studio-os/gemini-model-identity@1', status: 'blocked', findings };
+
+    const endpoint = `${configuredApiRoot}/models/${encodeURIComponent(configuredModel)}`;
+    let response;
+    let body;
+    try {
+      response = await fetchImpl(endpoint, { method: 'GET', headers: { 'x-goog-api-key': configuredApiKey } });
+      body = await response.json();
+    } catch (error) {
+      return {
+        schema: 'ai-studio-os/gemini-model-identity@1',
+        status: 'blocked',
+        findings: [finding('blocker', 'gemini-dogfood-model-inspection-failed', safeErrorMessage(error, configuredApiKey))]
+      };
+    }
+    if (!response.ok) {
+      return {
+        schema: 'ai-studio-os/gemini-model-identity@1',
+        status: 'blocked',
+        findings: [finding('blocker', 'gemini-dogfood-model-inspection-rejected', 'Gemini rejected the model identity inspection request.', { status: response.status, responseFingerprint: fingerprintCreativeValue(body ?? null) })]
+      };
+    }
+
+    const identity = normalizeModelIdentity({
+      requestedModel: configuredModel,
+      providerModelName: body?.name,
+      providerBaseModelId: body?.baseModelId,
+      providerVersion: body?.version,
+      supportedGenerationMethods: body?.supportedGenerationMethods,
+      inputTokenLimit: body?.inputTokenLimit,
+      outputTokenLimit: body?.outputTokenLimit,
+      providerMetadataFingerprint: fingerprintCreativeValue(body),
+      capturedAt: now().toISOString()
+    });
+    if (!identity.providerModelName || !identity.providerVersion) findings.push(finding('blocker', 'gemini-dogfood-provider-version-missing', 'Gemini model inspection did not expose a provider model name and version, so formal execution cannot bind provider identity.'));
+    if (!identity.supportedGenerationMethods.includes('generateContent')) findings.push(finding('blocker', 'gemini-dogfood-generate-content-unsupported', 'The enrolled Gemini model does not advertise generateContent support.'));
+    return { ...identity, status: findings.length ? 'blocked' : 'enrolled', findings };
+  }
 
   async function runPrototype({ trial, generationInstruction, architectureDeclaration, runtimeEvidenceRef }) {
     const normalizedTrial = normalizeTrial(trial);
@@ -212,5 +276,5 @@ export function createGeminiMotionDogfoodRunner({
     };
   }
 
-  return Object.freeze({ runPrototype });
+  return Object.freeze({ inspectModelIdentity, runPrototype });
 }

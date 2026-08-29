@@ -182,6 +182,21 @@ trial nor a substitute for V1-shaped exploration validation, browser-temporal
 proof, mobile/reduced-motion evidence, blind review, or capability
 interpretation.
 
+## Formal execution runner
+
+The formal 15-trial executor is a separate pre-proof layer. It first enrolls a
+Gemini model by snapshotting the provider Model resource, including the
+requested model, provider resource name/version, advertised generation methods,
+token limits and metadata fingerprint. Mutable `*-latest` aliases are rejected
+for formal execution.
+
+The execution plan binds exactly A1–E3, one explicit source-material bundle per
+condition, a fixed one-request model/temperature/token/time policy, and unique
+runtime trace/evidence references. It runs trials serially with no automatic
+retry, fallback model or manual result substitution. A produced run remains
+pre-proof evidence only: condition-specific source validation, rendered temporal
+proof, blind packet construction and human review still occur afterwards.
+
 ## Protocol review versus capability review
 
 Dogfood V1 deliberately separates two things:
