@@ -7,15 +7,27 @@ import { buildGeminiMotionDogfoodBudget } from './gemini-runner.mjs';
 import { MOTION_INTELLIGENCE_V2_KNOWLEDGE } from '../motion-intelligence-v2/knowledge.mjs';
 
 const CONDITION_IDS = ['A', 'B', 'C', 'D', 'E'];
+const COMPLETED_MOTION_SCHEMAS = new Set([
+  'ai-studio-os/motion-creative-exploration@1',
+  'ai-studio-os/motion-intelligence-reasoning-set@2',
+  'ai-studio-os/motion-intelligence-v2-exploration-handoff@1'
+]);
+const COMPLETED_MOTION_STAGES = new Set([
+  'motion-creative-exploration',
+  'motion-intelligence-v2-reasoning',
+  'motion-intelligence-v2-to-v1-handoff'
+]);
+const COMPLETED_MOTION_CONTAINER_KEYS = new Set(['exploration', 'reasoningSet', 'handoff']);
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function finding(severity, code, message, evidence = {}) { return { severity, code, message, evidence }; }
 function sameValue(left, right) { return fingerprintCreativeValue(left) === fingerprintCreativeValue(right); }
 function canonicalize(value) { if (Array.isArray(value)) return value.map(canonicalize); if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])); return value; }
 function contextFor(entries = [], conditionId) { return entries.filter((item) => text(item?.conditionId).toUpperCase() === conditionId); }
-function containsCompletedArtifact(value) {
+function containsCompletedMotionArtifact(value) {
   if (!value || typeof value !== 'object') return false;
-  if (Array.isArray(value)) return value.some(containsCompletedArtifact);
-  return Object.entries(value).some(([key, child]) => ['exploration', 'reasoningSet', 'handoff', 'hypotheses'].includes(key) || containsCompletedArtifact(child));
+  if (Array.isArray(value)) return value.some(containsCompletedMotionArtifact);
+  if (COMPLETED_MOTION_SCHEMAS.has(text(value.schema)) || COMPLETED_MOTION_STAGES.has(text(value.stage))) return true;
+  return Object.entries(value).some(([key, child]) => COMPLETED_MOTION_CONTAINER_KEYS.has(key) || containsCompletedMotionArtifact(child));
 }
 function sorted(values = []) { return [...new Set((Array.isArray(values) ? values : []).map(text).filter(Boolean))].sort(); }
 const FULL_KNOWLEDGE_IDS = sorted(MOTION_INTELLIGENCE_V2_KNOWLEDGE.map((item) => item.id));
@@ -23,7 +35,7 @@ const FULL_KNOWLEDGE_IDS = sorted(MOTION_INTELLIGENCE_V2_KNOWLEDGE.map((item) =>
 function reviewStaticContext({ conditionId, context, projectId, briefFingerprint, selectedCreativeWorld }) {
   const findings = [];
   if (!context || typeof context !== 'object' || Array.isArray(context)) findings.push(finding('blocker', 'dogfood-authoring-context-missing', 'Every condition requires verified pre-authoring context.'));
-  if (containsCompletedArtifact(context)) findings.push(finding('blocker', 'dogfood-authoring-context-completed-artifact-forbidden', 'Provider authoring context must never contain completed Motion exploration, reasoning-set, handoff or hypotheses artifacts.'));
+  if (containsCompletedMotionArtifact(context)) findings.push(finding('blocker', 'dogfood-authoring-context-completed-artifact-forbidden', 'Provider authoring context must never contain a completed Motion exploration, reasoning set, or V2-to-V1 handoff. Verified non-Motion provenance artifacts remain allowed.'));
   if (conditionId === 'A') {
     const contract = context?.v1AuthoringContract ?? {};
     if (text(contract.schema) !== 'ai-studio-os/motion-v1-dogfood-isolation@1' || !text(contract.isolationAttestedBy) || !text(contract.isolationEvidenceRef) || contract.truth?.motionV1CreativeGeneration !== true || contract.truth?.aiStudioKnowledgeUsed || contract.truth?.aiStudioTransferUsed || contract.truth?.aiStudioSynthesisUsed || contract.truth?.aiStudioMotionV2Used) findings.push(finding('blocker', 'dogfood-authoring-v1-context-invalid', 'Condition A requires the existing V1-only isolation attestation as pre-authoring context.'));
@@ -60,12 +72,25 @@ export function buildCreativeMotionDogfoodAuthoringTask({ trial, frozenBrief, se
       requiredTopLevel: ['hypotheses'],
       requiredHypothesisFields: conditionId === 'A' || conditionId === 'E'
         ? ['id', 'title', 'interpretation', 'creativeWorldRefs', 'language', 'motionMoments', 'stillMoments', 'hierarchyConsequences', 'responsiveConsequences', 'antiPatterns', 'critique']
-        : ['id', 'title', 'temporalStrategy', 'projectTruthRefs', 'creativeWorldRefs', 'knowledgeRefs', 'knowledgeContributions', 'semanticIntent', 'signatureBehavior', 'motionNecessity', 'attentionSequence', 'temporalComposition', 'motionHierarchy', 'physicalCharacter', 'choreography', 'cinematicLanguage', 'mediaMotion', 'responsivePlan', 'reducedMotionEquivalent', 'accessibilityConstraints', 'performanceReasoning', 'antiPatterns', 'failureModes', 'uncertainty', 'falsifier', 'critique'],
+        : ['id', 'title', 'temporalStrategy', 'projectTruthRefs', 'creativeWorldRefs', 'knowledgeRefs', 'knowledgeContributions', 'synthesisCandidateRefs', 'synthesisContributions', 'semanticIntent', 'signatureBehavior', 'motionNecessity', 'attentionSequence', 'temporalComposition', 'motionHierarchy', 'physicalCharacter', 'choreography', 'cinematicLanguage', 'mediaMotion', 'responsivePlan', 'reducedMotionEquivalent', 'accessibilityConstraints', 'performanceReasoning', 'antiPatterns', 'failureModes', 'uncertainty', 'falsifier', 'critique'],
       noCompletedArtifacts: true
     }
   };
   if (conditionId === 'A') payload.motionV1AuthoringContract = context.v1AuthoringContract;
-  if (['B', 'C', 'D'].includes(conditionId)) payload.motionV2Brief = context.v2Brief;
+  if (['B', 'C', 'D'].includes(conditionId)) {
+    payload.motionV2Brief = context.v2Brief;
+    payload.output.synthesisPolicy = conditionId === 'D'
+      ? {
+          mode: 'verified-candidates-only',
+          allowedCandidateIds: (context.v2Brief?.synthesisCandidates ?? []).map((item) => item.id),
+          contributionsMustExactlyMatchReferences: true
+        }
+      : {
+          mode: 'forbidden',
+          allowedCandidateIds: [],
+          contributionsMustExactlyMatchReferences: true
+        };
+  }
   if (conditionId === 'E') payload.directControlRequest = context.directControlRequest;
   return JSON.stringify(canonicalize(payload));
 }
