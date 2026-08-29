@@ -40,16 +40,16 @@ function normalizeControl(value = {}) {
     requestFingerprint: text(value?.requestFingerprint),
     responseFingerprint: text(value?.responseFingerprint),
     runtimeTraceRef: text(value?.runtimeTraceRef),
-    renderEvidenceRef: text(value?.renderEvidenceRef),
-    renderEvidenceFingerprint: text(value?.renderEvidenceFingerprint),
+    explorationFingerprint: text(value?.explorationFingerprint),
     isolationAttestedBy: text(value?.isolationAttestedBy),
     isolationEvidenceRef: text(value?.isolationEvidenceRef),
     truth: {
-      directModelControl: value?.truth?.directModelControl === true,
-      aiStudioMotionV1Used: value?.truth?.aiStudioMotionV1Used === true,
-      aiStudioMotionV2Used: value?.truth?.aiStudioMotionV2Used === true,
+      directModelCreativeGeneration: value?.truth?.directModelCreativeGeneration === true,
+      aiStudioKnowledgeUsed: value?.truth?.aiStudioKnowledgeUsed === true,
+      aiStudioTransferUsed: value?.truth?.aiStudioTransferUsed === true,
       aiStudioSynthesisUsed: value?.truth?.aiStudioSynthesisUsed === true,
-      renderEvidenceIndependentlyVerified: value?.truth?.renderEvidenceIndependentlyVerified === true
+      aiStudioMotionV2Used: value?.truth?.aiStudioMotionV2Used === true,
+      v1ContractValidationAndProofOnly: value?.truth?.v1ContractValidationAndProofOnly === true
     }
   };
 }
@@ -78,7 +78,7 @@ function reviewTemporalProofBinding(trial, exploration, source = {}) {
   const proofExploration = proofEvidence?.plan?.authorityInputs?.exploration ?? null;
   const proofEvidenceFingerprint = proofEvidence ? fingerprintCreativeValue(proofEvidence) : '';
 
-  if (!proofReview.reviewReady || proofReview.truth?.exactBrowserTemporalEvidence !== true) findings.push(finding('blocker', 'dogfood-temporal-proof-invalid', 'Dogfood A/B/C/D evidence requires the existing Motion proof verifier to confirm real exact-browser temporal evidence; fixture-only proof cannot qualify.', { findingCodes: proofReview.findings?.map((item) => item.code) ?? [] }));
+  if (!proofReview.reviewReady || proofReview.truth?.exactBrowserTemporalEvidence !== true) findings.push(finding('blocker', 'dogfood-temporal-proof-invalid', 'Dogfood evidence requires the existing Motion proof verifier to confirm real exact-browser temporal evidence; fixture-only proof cannot qualify.', { findingCodes: proofReview.findings?.map((item) => item.code) ?? [] }));
   if (!sameValue(proofExploration ?? null, exploration ?? null)) findings.push(finding('blocker', 'dogfood-temporal-proof-source-drift', 'Rendered Motion proof must be built from the exact condition exploration being tested.'));
   if (!proofEvidenceRef || proofEvidenceRef !== text(trial?.evidenceBundleRef)) findings.push(finding('blocker', 'dogfood-temporal-proof-ref-drift', 'Trial evidence-bundle reference must identify the exact freshly reviewed Motion proof evidence.'));
   if (renderedStudies.length !== Number(trial?.temporalStudyCount ?? 0)) findings.push(finding('blocker', 'dogfood-temporal-study-count-drift', 'Trial temporal-study count must match the freshly reviewed Motion proof.', { expected: renderedStudies.length, actual: trial?.temporalStudyCount ?? null }));
@@ -163,25 +163,30 @@ function reviewV2Trial(trial, source = {}) {
 function reviewDirectControlTrial(trial, source = {}) {
   const findings = [];
   const control = normalizeControl(source?.directControl ?? {});
+  const exploration = source?.exploration ?? null;
+  const explorationReview = reviewMotionCreativeExploration(exploration ?? {});
+  const explorationFingerprint = exploration ? fingerprintCreativeValue(exploration) : '';
   const sourceFingerprint = directControlFingerprint(control);
   const budget = trial?.generationBudget ?? {};
+  const proof = reviewTemporalProofBinding(trial, exploration, source);
 
   if (control.schema !== 'ai-studio-os/direct-model-motion-control@1') findings.push(finding('blocker', 'dogfood-direct-control-schema-invalid', 'Condition E requires the direct-model control evidence contract.'));
   if (control.projectId !== text(trial?.projectId) || control.briefFingerprint !== text(trial?.briefFingerprint)) findings.push(finding('blocker', 'dogfood-direct-control-context-drift', 'Direct-model control must bind the same project and brief snapshot as the trial.'));
   if (control.modelPolicyId !== text(budget?.modelPolicyId) || control.temperaturePolicyId !== text(budget?.temperaturePolicyId) || control.maxGenerationAttempts !== budget?.maxGenerationAttempts || control.tokenBudget !== budget?.tokenBudget || control.wallClockSeconds !== budget?.wallClockSeconds) findings.push(finding('blocker', 'dogfood-direct-control-budget-drift', 'Direct-model control must use the same declared model/sampling/generation/time budget as the experiment.'));
-  if (!control.requestFingerprint || !control.responseFingerprint || !control.runtimeTraceRef || !control.renderEvidenceRef || !control.renderEvidenceFingerprint) findings.push(finding('blocker', 'dogfood-direct-control-evidence-missing', 'Direct-model control requires request, response, runtime trace and rendered-comparison evidence fingerprints.'));
+  if (!control.requestFingerprint || !control.responseFingerprint || !control.runtimeTraceRef || !control.explorationFingerprint) findings.push(finding('blocker', 'dogfood-direct-control-evidence-missing', 'Direct-model control requires request, response, runtime-trace and resulting exploration fingerprints.'));
   if (control.runtimeTraceRef !== text(trial?.runtimeTraceRef)) findings.push(finding('blocker', 'dogfood-direct-control-runtime-drift', 'Direct-model control runtime trace must match the trial trace binding.'));
-  if (control.renderEvidenceRef !== text(trial?.evidenceBundleRef)) findings.push(finding('blocker', 'dogfood-direct-control-render-ref-drift', 'Direct-model control rendered evidence reference must match the trial evidence-bundle reference.'));
-  if (!control.isolationAttestedBy || !control.isolationEvidenceRef) findings.push(finding('blocker', 'dogfood-direct-control-isolation-attestation-missing', 'Until a first-class direct-model runner exists, Condition E requires explicit operator isolation attestation and evidence.'));
-  if (control.truth.directModelControl !== true || control.truth.aiStudioMotionV1Used || control.truth.aiStudioMotionV2Used || control.truth.aiStudioSynthesisUsed) findings.push(finding('blocker', 'dogfood-direct-control-contaminated', 'Condition E must be recorded as an isolated direct-model attempt without AI Studio Motion/Synthesis reasoning.'));
-  if (control.truth.renderEvidenceIndependentlyVerified !== true) findings.push(finding('blocker', 'dogfood-direct-control-render-unverified', 'Condition E must carry independently verified rendered comparison evidence before it can enter blind review.'));
-  if (text(trial?.sourceSnapshotFingerprint) !== sourceFingerprint) findings.push(finding('blocker', 'dogfood-direct-control-source-binding-drift', 'Condition E trial source fingerprint must bind the exact direct-model control evidence object.'));
+  if (!explorationReview.reviewReady) findings.push(finding('blocker', 'dogfood-direct-control-exploration-invalid', 'Direct-model hypotheses must still satisfy the shared V1 Motion exploration contract before rendering.', { findingCodes: explorationReview.findings?.map((item) => item.code) ?? [] }));
+  if (text(exploration?.projectId) !== text(trial?.projectId) || control.explorationFingerprint !== explorationFingerprint) findings.push(finding('blocker', 'dogfood-direct-control-exploration-drift', 'Direct-model control must bind the exact V1-shaped exploration produced from the model response.'));
+  if (!control.isolationAttestedBy || !control.isolationEvidenceRef) findings.push(finding('blocker', 'dogfood-direct-control-isolation-attestation-missing', 'Until a first-class isolated direct-model runner exists, Condition E requires explicit operator isolation attestation and evidence.'));
+  if (control.truth.directModelCreativeGeneration !== true || control.truth.aiStudioKnowledgeUsed || control.truth.aiStudioTransferUsed || control.truth.aiStudioSynthesisUsed || control.truth.aiStudioMotionV2Used || control.truth.v1ContractValidationAndProofOnly !== true) findings.push(finding('blocker', 'dogfood-direct-control-contaminated', 'Condition E must bypass AI Studio creative reasoning layers while allowing only shared V1 contract validation and temporal proof after direct-model hypothesis generation.'));
+  if (text(trial?.sourceSnapshotFingerprint) !== sourceFingerprint) findings.push(finding('blocker', 'dogfood-direct-control-source-binding-drift', 'Condition E trial source fingerprint must bind the exact direct-model request/response/isolation evidence object.'));
+  findings.push(...proof.findings);
 
   return {
-    sourceKind: 'operator-attested-direct-model-control',
+    sourceKind: 'direct-model-generation-v1-validation-proof',
     sourceSnapshotFingerprint: sourceFingerprint,
-    proofEvidenceFingerprint: control.renderEvidenceFingerprint,
-    proofEvidenceRef: control.renderEvidenceRef,
+    proofEvidenceFingerprint: proof.proofEvidenceFingerprint,
+    proofEvidenceRef: proof.proofEvidenceRef,
     verifiedKnowledgeIds: [],
     synthesisCandidateCount: 0,
     isolationAttestationRequired: true,
@@ -194,10 +199,10 @@ function reviewDirectControlTrial(trial, source = {}) {
 function canonicalReceiptTruth() {
   return {
     conditionExecutionFreshlyReviewedWhereSupported: true,
-    temporalProofFreshlyVerifiedForStudioConditions: true,
+    sameTemporalProofAuthorityUsedAcrossConditions: true,
     directModelIsolationUsesOperatorAttestation: true,
     directModelIsolationCryptographicallyProven: false,
-    directModelRenderRequiresIndependentVerification: true,
+    directModelUsesV1ValidationAndProofOnlyAfterGeneration: true,
     identicalOutputsAcrossIndependentReplicatesAllowed: true,
     receiptIsNotCreativeQuality: true,
     receiptIsNotWinnerSelection: true,
@@ -265,7 +270,7 @@ export function buildCreativeMotionDogfoodExecutionReceipt(experiment = {}, { tr
     });
   }
 
-  if (trials.length !== 15 || trials.some((item) => !item.reviewReady)) findings.push(finding('blocker', 'dogfood-execution-coverage-incomplete', 'All 15 dogfood trials must have condition-appropriate source and rendered-evidence verification before capability interpretation.'));
+  if (trials.length !== 15 || trials.some((item) => !item.reviewReady)) findings.push(finding('blocker', 'dogfood-execution-coverage-incomplete', 'All 15 dogfood trials must have condition-appropriate source and real temporal-proof verification before capability interpretation.'));
 
   const receipt = {
     schema: 'ai-studio-os/creative-motion-dogfood-execution-receipt@1',
@@ -307,6 +312,7 @@ export function reviewCreativeMotionDogfoodExecutionReceipt(receipt = {}, experi
       freshSourceReviewRequired: true,
       freshTemporalProofReviewRequired: true,
       directModelIsolationUsesOperatorAttestation: true,
+      directModelSharesV1ValidationAndProofHarness: true,
       identicalOutputsAcrossIndependentReplicatesAllowed: true,
       productionApproved: false
     }
