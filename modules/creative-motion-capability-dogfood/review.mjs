@@ -75,7 +75,9 @@ export function reviewCreativeMotionDogfoodProtocolResultsFresh(experiment = {},
   };
 }
 
-export function reviewCreativeMotionDogfoodResultsFresh(experiment = {}, packet = {}, {
+export const reviewCreativeMotionDogfoodResultsFresh = reviewCreativeMotionDogfoodProtocolResultsFresh;
+
+export function reviewCreativeMotionDogfoodCapabilityResultsFresh(experiment = {}, packet = {}, {
   blindSeed = '',
   reviewers = [],
   humanDecision = null,
