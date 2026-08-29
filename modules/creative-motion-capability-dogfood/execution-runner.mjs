@@ -25,7 +25,7 @@ export function buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed = '') {
   return scheduleFor(scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
 }
 
-function sourceBundle(value = {}) { return { trialId: text(value?.trialId), conditionId: text(value?.conditionId).toUpperCase(), sourceKind: text(value?.sourceKind), executionMode: text(value?.executionMode), sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint), sourceArtifactFingerprint: text(value?.sourceArtifactFingerprint), sourceExecutionFingerprint: text(value?.sourceExecutionFingerprint), executionInstanceRef: text(value?.executionInstanceRef), runtimeTraceRef: text(value?.runtimeTraceRef), runtimeTraceFingerprint: text(value?.runtimeTraceFingerprint), sourceEvidenceRef: text(value?.sourceEvidenceRef), selectedCreativeWorldFingerprint: text(value?.selectedCreativeWorldFingerprint), conditionArtifact: value?.conditionArtifact ?? null, generationInstruction: text(value?.generationInstruction), generationInstructionFingerprint: text(value?.generationInstructionFingerprint) }; }
+function sourceBundle(value = {}) { return { trialId: text(value?.trialId), conditionId: text(value?.conditionId).toUpperCase(), sourceKind: text(value?.sourceKind), executionMode: text(value?.executionMode), sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint), sourceArtifactFingerprint: text(value?.sourceArtifactFingerprint), sourceExecutionFingerprint: text(value?.sourceExecutionFingerprint), executionInstanceRef: text(value?.executionInstanceRef), runtimeTraceRef: text(value?.runtimeTraceRef), runtimeTraceFingerprint: text(value?.runtimeTraceFingerprint), sourceEvidenceRef: text(value?.sourceEvidenceRef), selectedCreativeWorldFingerprint: text(value?.selectedCreativeWorldFingerprint), conditionArtifact: value?.conditionArtifact ?? null, directControl: value?.directControl ?? null, generationInstruction: text(value?.generationInstruction), generationInstructionFingerprint: text(value?.generationInstructionFingerprint) }; }
 function expectedTruth() { return { experimentOnly: true, protocolPlanOnly: true, noAutomaticRetry: true, noFallbackModel: true, noManualCherryPicking: true, partialRunsNonResumable: true, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false }; }
 
 function normalizePlanCore(value = {}) {
@@ -38,7 +38,7 @@ function normalizePlanCore(value = {}) {
   };
 }
 function planFingerprint(value = {}) { return fingerprintCreativeValue(normalizePlanCore(value)); }
-function sourceArtifactFingerprint(bundle = {}) { return bundle.executionMode === 'architecture-output' ? fingerprintCreativeValue(bundle.conditionArtifact ?? null) : fingerprintCreativeValue({ sourceSnapshotFingerprint: bundle.sourceSnapshotFingerprint, generationInstructionFingerprint: bundle.generationInstructionFingerprint }); }
+function sourceArtifactFingerprint(bundle = {}) { return bundle.executionMode === 'architecture-output' ? fingerprintCreativeValue(bundle.conditionArtifact ?? null) : bundle.executionMode === 'executed-direct-model-output' ? fingerprintCreativeValue({ directControl: bundle.directControl ?? null, exploration: bundle.conditionArtifact ?? null }) : fingerprintCreativeValue({ sourceSnapshotFingerprint: bundle.sourceSnapshotFingerprint, generationInstructionFingerprint: bundle.generationInstructionFingerprint }); }
 function reviewSourceExecution(entry = {}, trial = {}, bundle = {}) {
   const execution = normalizeSourceExecution(entry.sourceExecution);
   const artifactFingerprint = sourceArtifactFingerprint(bundle);
@@ -120,10 +120,10 @@ export async function executeCreativeMotionDogfoodPlan(plan = {}, { runner } = {
   const trialRuns = [];
   for (const trial of plan.trials) {
     const bundle = bundles.get(trial.trialId);
-    if (bundle?.executionMode === 'architecture-output') {
+    if (bundle?.executionMode === 'architecture-output' || bundle?.executionMode === 'executed-direct-model-output') {
       const authority = bundle.conditionArtifact?.authorityInputs?.canonicalCreativeAuthority;
       const exactArtifact = bundle.conditionArtifact && sameValue(authority?.selectedCreativeWorld ?? authority?.creativeWorldExploration?.selectedWorld ?? null, plan.selectedCreativeWorld);
-      trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: exactArtifact ? 'architecture-output-ready' : 'invalid', conditionArtifact: bundle.conditionArtifact, sourceExecutionFingerprint: bundle.sourceExecutionFingerprint, runtimeTraceRef: bundle.runtimeTraceRef, exactBinding: exactArtifact, providerGenerationUsed: false });
+      trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: exactArtifact ? bundle.executionMode === 'executed-direct-model-output' ? 'executed-direct-model-output-verified' : 'architecture-output-ready' : 'invalid', conditionArtifact: bundle.conditionArtifact, sourceExecutionFingerprint: bundle.sourceExecutionFingerprint, runtimeTraceRef: bundle.runtimeTraceRef, exactBinding: exactArtifact, providerGenerationUsed: false });
       if (!exactArtifact) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-executor-architecture-output-drift', 'A native architecture output no longer binds the exact frozen Creative World.')], 'partial-batch-invalid');
       continue;
     }

@@ -245,6 +245,10 @@ Each response is passed through its existing native builder immediately: V1 for
 A, V2 reasoning plus V2-to-V1 handoff for B/C/D, and shared V1 validation for
 E. The resulting native artifacts and actual provider trace are then supplied
 as the per-trial source executions required by the formal execution verifier.
+For E, that source is the actual direct-control record: request/response
+fingerprints, trace, exact generation controls, isolation attestation and the
+resulting exploration fingerprint. It is verification-only after authoring;
+the downstream verifier must not issue a second direct-model request.
 This remains pre-proof experimental evidence and creates no creative-direction,
 technical-planning, review, capability, or production authority.
 

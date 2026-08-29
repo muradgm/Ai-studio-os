@@ -1,7 +1,7 @@
 import { fingerprintCreativeValue } from '../creative-intelligence-foundation/fingerprint.mjs';
 import { buildMotionCreativeExploration } from '../motion-creative-intelligence/runtime.mjs';
 import { buildMotionIntelligenceV2ExplorationHandoff, buildMotionIntelligenceV2Set, reviewMotionIntelligenceV2Brief } from '../motion-intelligence-v2/runtime.mjs';
-import { buildCreativeMotionDogfoodDirectControlExploration, buildCreativeMotionDogfoodGenerationSource, DOGFOOD_CORE_MOTION_KNOWLEDGE_IDS } from './execution.mjs';
+import { buildCreativeMotionDogfoodDirectControlExploration, DOGFOOD_CORE_MOTION_KNOWLEDGE_IDS } from './execution.mjs';
 import { buildCreativeMotionDogfoodExecutionPlan, buildCreativeMotionDogfoodExecutionSchedule, sameCreativeMotionDogfoodProviderIdentity } from './execution-runner.mjs';
 import { buildGeminiMotionDogfoodBudget } from './gemini-runner.mjs';
 import { MOTION_INTELLIGENCE_V2_KNOWLEDGE } from '../motion-intelligence-v2/knowledge.mjs';
@@ -54,7 +54,15 @@ export function buildCreativeMotionDogfoodAuthoringTask({ trial, frozenBrief, se
     frozenBriefFingerprint: fingerprintCreativeValue(frozenBrief),
     selectedCreativeWorld,
     selectedCreativeWorldFingerprint: fingerprintCreativeValue(selectedCreativeWorld),
-    output: { schema: conditionId === 'A' || conditionId === 'E' ? 'ai-studio-os/motion-hypotheses@1' : 'ai-studio-os/motion-intelligence-v2-hypotheses@2', minimumHypotheses: 3 }
+    output: {
+      schema: conditionId === 'A' || conditionId === 'E' ? 'ai-studio-os/motion-hypotheses@1' : 'ai-studio-os/motion-intelligence-v2-hypotheses@2',
+      minimumHypotheses: 3,
+      requiredTopLevel: ['hypotheses'],
+      requiredHypothesisFields: conditionId === 'A' || conditionId === 'E'
+        ? ['id', 'title', 'interpretation', 'creativeWorldRefs', 'language', 'motionMoments', 'stillMoments', 'hierarchyConsequences', 'responsiveConsequences', 'antiPatterns', 'critique']
+        : ['id', 'title', 'temporalStrategy', 'projectTruthRefs', 'creativeWorldRefs', 'knowledgeRefs', 'knowledgeContributions', 'semanticIntent', 'signatureBehavior', 'motionNecessity', 'attentionSequence', 'temporalComposition', 'motionHierarchy', 'physicalCharacter', 'choreography', 'cinematicLanguage', 'mediaMotion', 'responsivePlan', 'reducedMotionEquivalent', 'accessibilityConstraints', 'performanceReasoning', 'antiPatterns', 'failureModes', 'uncertainty', 'falsifier', 'critique'],
+      noCompletedArtifacts: true
+    }
   };
   if (conditionId === 'A') payload.motionV1AuthoringContract = context.v1AuthoringContract;
   if (['B', 'C', 'D'].includes(conditionId)) payload.motionV2Brief = context.v2Brief;
@@ -117,8 +125,27 @@ export async function executeCreativeMotionDogfoodAuthoringPlan(plan = {}, { run
     trialRuns.push({ trialId: slot.trialId, conditionId: slot.conditionId, status: native.reviewReady ? 'produced' : 'invalid', providerResult: result, nativeArtifact: native.exploration ?? null, findings: native.findings, exactBinding });
     if (!native.reviewReady) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-authoring-native-build-invalid', 'Generated hypotheses did not satisfy the condition native builder/reviewer.', { trialId: slot.trialId, findingCodes: native.findings?.map((item) => item.code) ?? [] })], 'partial-batch-invalid');
     const source = native.source;
-    const verificationBundle = buildCreativeMotionDogfoodGenerationSource({ trial, brief: plan.frozenBrief, selectedCreativeWorld: plan.selectedCreativeWorld, canonicalCreativeAuthority: plan.canonicalCreativeAuthority, source });
-    const artifactFingerprint = slot.conditionId === 'E' ? fingerprintCreativeValue({ sourceSnapshotFingerprint: verificationBundle.sourceSnapshotFingerprint, generationInstructionFingerprint: verificationBundle.generationInstructionFingerprint }) : fingerprintCreativeValue(native.exploration ?? null);
+    if (slot.conditionId === 'E') {
+      source.exploration = native.exploration;
+      source.directControl = {
+        schema: 'ai-studio-os/direct-model-motion-control@1',
+        projectId: plan.projectId,
+        briefFingerprint: plan.briefFingerprint,
+        modelPolicyId: plan.generationBudget.modelPolicyId,
+        temperaturePolicyId: plan.generationBudget.temperaturePolicyId,
+        maxGenerationAttempts: plan.generationBudget.maxGenerationAttempts,
+        tokenBudget: plan.generationBudget.tokenBudget,
+        wallClockSeconds: plan.generationBudget.wallClockSeconds,
+        requestFingerprint: result.request.bodyFingerprint,
+        responseFingerprint: result.trace.responseFingerprint,
+        runtimeTraceRef,
+        explorationFingerprint: fingerprintCreativeValue(native.exploration),
+        isolationAttestedBy: context.directControlRequest.isolationAttestedBy,
+        isolationEvidenceRef: context.directControlRequest.isolationEvidenceRef,
+        truth: { directModelCreativeGeneration: true, aiStudioKnowledgeUsed: false, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: false, v1ContractValidationAndProofOnly: true }
+      };
+    }
+    const artifactFingerprint = slot.conditionId === 'E' ? fingerprintCreativeValue({ directControl: source.directControl, exploration: native.exploration }) : fingerprintCreativeValue(native.exploration ?? null);
     trialSources.push({ trialId: slot.trialId, conditionId: slot.conditionId, source, sourceExecution: { schema: 'ai-studio-os/creative-motion-dogfood-source-execution@1', trialId: slot.trialId, conditionId: slot.conditionId, executionInstanceRef: runtimeEvidenceRef, runtimeTraceRef, runtimeTraceFingerprint: result.runtimeControl.runtimeTraceFingerprint, sourceEvidenceRef: runtimeEvidenceRef, sourceArtifactFingerprint: artifactFingerprint } });
   }
   const postIdentity = await runner.inspectModelIdentity();

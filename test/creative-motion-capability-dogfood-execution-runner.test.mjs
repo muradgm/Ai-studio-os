@@ -55,6 +55,19 @@ test('E receives the exact canonical Creative World object, not caller prompt te
   assert.equal(result.generationInstruction.includes('artifact://forged'), false);
 });
 
+test('executed E evidence is verification-only and cannot derive a second Gemini instruction', () => {
+  const generated = buildCreativeMotionDogfoodDirectControlExploration({ projectId, canonicalCreativeAuthority: canonical, selectedCreativeWorld: canonical.selectedCreativeWorld, generatedDraft: { hypotheses: buildMotionHypotheses(canonical.selectedCreativeWorld.id) } });
+  const budget = buildGeminiMotionDogfoodBudget(model);
+  const trial = { conditionId: 'E', projectId, briefFingerprint, runtimeTraceRef: 'artifact://dogfood/e/trace', generationBudget: budget };
+  const directControl = { schema: 'ai-studio-os/direct-model-motion-control@1', projectId, briefFingerprint, ...budget, requestFingerprint: 'r'.repeat(64), responseFingerprint: 's'.repeat(64), runtimeTraceRef: trial.runtimeTraceRef, explorationFingerprint: fingerprintCreativeValue(generated.exploration), isolationAttestedBy: 'operator-01', isolationEvidenceRef: 'artifact://dogfood/e/isolation', truth: { directModelCreativeGeneration: true, aiStudioKnowledgeUsed: false, aiStudioTransferUsed: false, aiStudioSynthesisUsed: false, aiStudioMotionV2Used: false, v1ContractValidationAndProofOnly: true } };
+  const result = buildCreativeMotionDogfoodGenerationSource({ trial, brief, selectedCreativeWorld: canonical.selectedCreativeWorld, canonicalCreativeAuthority: canonical, source: { directControl, exploration: generated.exploration } });
+  assert.equal(result.reviewReady, true);
+  assert.equal(result.executionMode, 'executed-direct-model-output');
+  assert.equal(result.generationInstruction, '');
+  assert.equal(result.generationInstructionFingerprint, '');
+  assert.equal(result.conditionArtifact, generated.exploration);
+});
+
 test('a Creative World content mutation with the same ID invalidates the source bundle', () => {
   const mutated = structuredClone(aSource());
   mutated.exploration.authorityInputs.canonicalCreativeAuthority.selectedCreativeWorld.motionLanguage = 'same id, mutated world content';

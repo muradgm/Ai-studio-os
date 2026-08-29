@@ -253,6 +253,23 @@ function reviewDirectControlPreProofSource(trial, source = {}) {
   return { sourceKind: 'direct-model-pre-proof-request', sourceSnapshotFingerprint: sourceFingerprint, verifiedKnowledgeIds: [], synthesisCandidateCount: 0, isolationAttestationRequired: true, independentControlIsolationProven: false, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
 }
 
+function reviewExecutedDirectControlSource(trial, source = {}) {
+  const findings = [];
+  const control = normalizeControl(source?.directControl ?? {});
+  const exploration = source?.exploration ?? null;
+  const explorationFingerprint = fingerprintCreativeValue(exploration ?? null);
+  const explorationReview = reviewMotionCreativeExploration(exploration ?? {});
+  if (control.schema !== 'ai-studio-os/direct-model-motion-control@1') findings.push(finding('blocker', 'dogfood-executed-direct-control-schema-invalid', 'Executed Condition E evidence requires the canonical direct-model control record.'));
+  if (control.projectId !== text(trial?.projectId) || control.briefFingerprint !== text(trial?.briefFingerprint)) findings.push(finding('blocker', 'dogfood-executed-direct-control-context-drift', 'Executed Condition E evidence must bind the exact project and frozen brief.'));
+  const budget = trial?.generationBudget ?? {};
+  if (control.modelPolicyId !== text(budget?.modelPolicyId) || control.temperaturePolicyId !== text(budget?.temperaturePolicyId) || control.maxGenerationAttempts !== budget?.maxGenerationAttempts || control.tokenBudget !== budget?.tokenBudget || control.wallClockSeconds !== budget?.wallClockSeconds) findings.push(finding('blocker', 'dogfood-executed-direct-control-budget-drift', 'Executed Condition E evidence must retain the exact frozen generation controls.'));
+  if (!control.requestFingerprint || !control.responseFingerprint || !control.runtimeTraceRef || control.explorationFingerprint !== explorationFingerprint) findings.push(finding('blocker', 'dogfood-executed-direct-control-evidence-drift', 'Executed Condition E evidence requires exact request, response, trace and exploration bindings.'));
+  if (control.runtimeTraceRef !== text(trial?.runtimeTraceRef)) findings.push(finding('blocker', 'dogfood-executed-direct-control-runtime-drift', 'Executed Condition E evidence must bind the exact trial runtime trace.'));
+  if (!explorationReview.reviewReady || text(exploration?.projectId) !== text(trial?.projectId)) findings.push(finding('blocker', 'dogfood-executed-direct-control-exploration-invalid', 'Executed Condition E output must be a fresh V1-valid exploration.'));
+  if (!control.isolationAttestedBy || !control.isolationEvidenceRef || control.truth.directModelCreativeGeneration !== true || control.truth.aiStudioKnowledgeUsed || control.truth.aiStudioTransferUsed || control.truth.aiStudioSynthesisUsed || control.truth.aiStudioMotionV2Used || control.truth.v1ContractValidationAndProofOnly !== true) findings.push(finding('blocker', 'dogfood-executed-direct-control-isolation-invalid', 'Executed Condition E must preserve direct-model isolation and V1-validation-only truth.'));
+  return { sourceKind: 'executed-direct-model-v1-exploration', sourceSnapshotFingerprint: fingerprintCreativeValue({ directControl: control, exploration }), verifiedKnowledgeIds: [], synthesisCandidateCount: 0, isolationAttestationRequired: true, independentControlIsolationProven: false, findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
 function canonicalize(value) {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])]));
@@ -285,16 +302,18 @@ export function buildCreativeMotionDogfoodGenerationSource({ trial = {}, brief =
   let payload;
   if (conditionId === 'A') { review = reviewV1Source(trial, source); payload = { exploration: source?.exploration ?? null, v1Isolation: source?.v1Isolation ?? null }; }
   else if (['B', 'C', 'D'].includes(conditionId)) { review = reviewV2Source(trial, source); payload = { reasoningSet: source?.reasoningSet ?? null, handoff: source?.handoff ?? null, authorityInputs: source?.authorityInputs ?? null }; }
+  else if (conditionId === 'E' && source?.directControl) { review = reviewExecutedDirectControlSource(trial, source); payload = { directControl: source?.directControl ?? null, exploration: source?.exploration ?? null }; }
   else if (conditionId === 'E') { review = reviewDirectControlPreProofSource(trial, source); payload = { directControlRequest: source?.directControlRequest ?? null }; }
   else review = { sourceKind: '', sourceSnapshotFingerprint: '', findings: [finding('blocker', 'dogfood-execution-condition-invalid', 'Generation source encountered an unsupported dogfood condition.', { conditionId })], reviewReady: false }, payload = {};
   const briefFingerprint = fingerprintCreativeValue(brief ?? {});
   const world = sharedWorldReview({ trial, selectedCreativeWorld, canonicalCreativeAuthority, source });
   const findings = [...review.findings, ...world.findings];
   if (briefFingerprint !== text(trial?.briefFingerprint)) findings.push(finding('blocker', 'dogfood-generation-source-brief-drift', 'Generation source must receive the exact frozen brief bound to the trial.'));
-  const executionMode = conditionId === 'E' ? 'direct-model-generation' : 'architecture-output';
-  const conditionArtifact = conditionId === 'A' ? source?.exploration ?? null : ['B', 'C', 'D'].includes(conditionId) ? source?.handoff?.exploration ?? null : null;
-  const instruction = conditionId === 'E' ? JSON.stringify(canonicalize({ schema: 'ai-studio-os/creative-motion-dogfood-direct-model-task@2', projectId: text(trial?.projectId), brief, briefFingerprint, selectedCreativeWorld, selectedCreativeWorldRef: world.selectedCreativeWorldRef, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, output: { schema: 'ai-studio-os/motion-hypotheses@1', minimumHypotheses: 3, v1ValidationRequired: true }, directControlRequest: payload.directControlRequest })) : '';
-  return { schema: 'ai-studio-os/creative-motion-dogfood-generation-source@2', conditionId, sourceKind: review.sourceKind, executionMode, sourceSnapshotFingerprint: review.sourceSnapshotFingerprint, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, conditionArtifact, generationInstruction: instruction, generationInstructionFingerprint: instruction ? fingerprintCreativeValue(instruction) : '', findings, reviewReady: findings.every((item) => item.severity !== 'blocker'), truth: { sourceFreshlyReviewed: true, operatorIsolationAttestationUsedOnlyWhereExistingArchitectureRequiresIt: review.isolationAttestationRequired === true, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
+  const executedDirect = conditionId === 'E' && source?.directControl;
+  const executionMode = conditionId === 'E' ? executedDirect ? 'executed-direct-model-output' : 'direct-model-generation' : 'architecture-output';
+  const conditionArtifact = conditionId === 'A' ? source?.exploration ?? null : ['B', 'C', 'D'].includes(conditionId) ? source?.handoff?.exploration ?? null : executedDirect ? source?.exploration ?? null : null;
+  const instruction = conditionId === 'E' && !executedDirect ? JSON.stringify(canonicalize({ schema: 'ai-studio-os/creative-motion-dogfood-direct-model-task@2', projectId: text(trial?.projectId), brief, briefFingerprint, selectedCreativeWorld, selectedCreativeWorldRef: world.selectedCreativeWorldRef, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, output: { schema: 'ai-studio-os/motion-hypotheses@1', minimumHypotheses: 3, v1ValidationRequired: true }, directControlRequest: payload.directControlRequest })) : '';
+  return { schema: 'ai-studio-os/creative-motion-dogfood-generation-source@2', conditionId, sourceKind: review.sourceKind, executionMode, sourceSnapshotFingerprint: review.sourceSnapshotFingerprint, selectedCreativeWorldFingerprint: world.selectedCreativeWorldFingerprint, conditionArtifact, directControl: executedDirect ? source?.directControl ?? null : null, generationInstruction: instruction, generationInstructionFingerprint: instruction ? fingerprintCreativeValue(instruction) : '', findings, reviewReady: findings.every((item) => item.severity !== 'blocker'), truth: { sourceFreshlyReviewed: true, operatorIsolationAttestationUsedOnlyWhereExistingArchitectureRequiresIt: review.isolationAttestationRequired === true, reviewReady: false, capabilityEvidenceReady: false, productionApproved: false } };
 }
 
 export function buildCreativeMotionDogfoodDirectControlExploration({ projectId, canonicalCreativeAuthority, selectedCreativeWorld, generatedDraft } = {}) {

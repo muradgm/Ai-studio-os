@@ -29,6 +29,8 @@ test('A/B/C/D authoring tasks contain pre-authoring context rather than complete
   const task = JSON.parse(buildCreativeMotionDogfoodAuthoringTask({ trial: { trialId: 'trial-a-1', conditionId: 'A' }, frozenBrief, selectedCreativeWorld: canonical.selectedCreativeWorld, context: contexts().find((item) => item.conditionId === 'A').context }));
   assert.deepEqual(task.frozenBrief, frozenBrief);
   assert.deepEqual(task.selectedCreativeWorld, canonical.selectedCreativeWorld);
+  assert.deepEqual(task.output.requiredTopLevel, ['hypotheses']);
+  assert.ok(task.output.requiredHypothesisFields.includes('motionMoments'));
   for (const key of ['exploration', 'reasoningSet', 'handoff', 'hypotheses']) assert.equal(Object.hasOwn(task, key), false);
 });
 
