@@ -50,11 +50,12 @@ function reviewSourceExecution(entry = {}, trial = {}, bundle = {}) {
   return { ...execution, sourceArtifactFingerprint: artifactFingerprint, sourceExecutionFingerprint: fingerprintCreativeValue({ ...execution, sourceArtifactFingerprint: artifactFingerprint }), findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
 }
 
-function deriveBundles({ projectId, brief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources }) {
+function deriveBundles({ projectId, brief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources, generationBudget }) {
   return schedule.map((trial) => {
     const entries = sourceEntryFor(trialSources, trial.trialId);
     if (entries.length !== 1) return sourceBundle({ trialId: trial.trialId, conditionId: trial.conditionId });
-    const generated = buildCreativeMotionDogfoodGenerationSource({ trial: { ...trial, projectId, briefFingerprint }, brief, selectedCreativeWorld, canonicalCreativeAuthority, source: entries[0].source });
+    const sourceExecution = entries[0].sourceExecution ?? {};
+    const generated = buildCreativeMotionDogfoodGenerationSource({ trial: { ...trial, projectId, briefFingerprint, runtimeTraceRef: sourceExecution.runtimeTraceRef, generationBudget }, brief, selectedCreativeWorld, canonicalCreativeAuthority, source: entries[0].source });
     const execution = reviewSourceExecution(entries[0], trial, generated);
     return { ...generated, trialId: trial.trialId, sourceArtifactFingerprint: execution.sourceArtifactFingerprint, sourceExecutionFingerprint: execution.sourceExecutionFingerprint, executionInstanceRef: execution.executionInstanceRef, runtimeTraceRef: execution.runtimeTraceRef, runtimeTraceFingerprint: execution.runtimeTraceFingerprint, sourceEvidenceRef: execution.sourceEvidenceRef, findings: [...generated.findings, ...execution.findings], reviewReady: generated.reviewReady && execution.reviewReady };
   });
@@ -67,7 +68,7 @@ export function buildCreativeMotionDogfoodExecutionPlan({ experimentId, projectI
   const generationBudget = buildGeminiMotionDogfoodBudget(identity.requestedModel, budget);
   const schedule = buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed);
   const sources = (Array.isArray(trialSources) ? trialSources : []).map(normalizeSourceEntry);
-  const bundles = deriveBundles({ projectId, brief: frozenBrief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources: sources });
+  const bundles = deriveBundles({ projectId, brief: frozenBrief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources: sources, generationBudget });
   const plan = { schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@4', stage: 'creative-motion-dogfood-pre-proof-execution', experimentId: text(experimentId), projectId: text(projectId), frozenBrief: frozenBrief ?? null, briefFingerprint, selectedCreativeWorld: selectedCreativeWorld ?? null, canonicalCreativeAuthority: canonicalCreativeAuthority ?? null, modelIdentity: identity, generationBudget, scheduleSeed: text(scheduleSeed), schedule, trialSources: sources, conditionBundles: bundles, trials: plannedTrials({ projectId, briefFingerprint, schedule, bundles, generationBudget }), truth: expectedTruth() };
   plan.snapshotFingerprint = planFingerprint(plan);
   const review = reviewCreativeMotionDogfoodExecutionPlan(plan);
@@ -87,7 +88,7 @@ export function reviewCreativeMotionDogfoodExecutionPlan(plan = {}) {
   const expectedSchedule = buildCreativeMotionDogfoodExecutionSchedule(core.scheduleSeed);
   if (!sameValue(core.schedule, expectedSchedule)) findings.push(finding('blocker', 'dogfood-executor-schedule-drift', 'Execution must use the frozen deterministic balanced schedule.'));
   if (core.trialSources.length !== expectedSchedule.length) findings.push(finding('blocker', 'dogfood-executor-source-coverage-invalid', 'Execution plan requires one independently produced source/output bundle for every A1–E3 trial.'));
-  const derivedBundles = deriveBundles({ projectId: core.projectId, brief: core.frozenBrief, briefFingerprint: core.briefFingerprint, selectedCreativeWorld: core.selectedCreativeWorld, canonicalCreativeAuthority: core.canonicalCreativeAuthority, schedule: expectedSchedule, trialSources: core.trialSources });
+  const derivedBundles = deriveBundles({ projectId: core.projectId, brief: core.frozenBrief, briefFingerprint: core.briefFingerprint, selectedCreativeWorld: core.selectedCreativeWorld, canonicalCreativeAuthority: core.canonicalCreativeAuthority, schedule: expectedSchedule, trialSources: core.trialSources, generationBudget: core.generationBudget });
   for (const expected of expectedSchedule) {
     const entries = sourceEntryFor(core.trialSources, expected.trialId);
     if (entries.length !== 1) findings.push(finding('blocker', 'dogfood-executor-source-duplicate-or-missing', 'Each scheduled replicate must have exactly one upstream source bundle.', { trialId: expected.trialId }));
