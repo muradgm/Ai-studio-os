@@ -17,17 +17,16 @@ const COMPLETED_MOTION_STAGES = new Set([
   'motion-intelligence-v2-reasoning',
   'motion-intelligence-v2-to-v1-handoff'
 ]);
-const COMPLETED_MOTION_CONTAINER_KEYS = new Set(['exploration', 'reasoningSet', 'handoff']);
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function finding(severity, code, message, evidence = {}) { return { severity, code, message, evidence }; }
 function sameValue(left, right) { return fingerprintCreativeValue(left) === fingerprintCreativeValue(right); }
 function canonicalize(value) { if (Array.isArray(value)) return value.map(canonicalize); if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map((key) => [key, canonicalize(value[key])])); return value; }
 function contextFor(entries = [], conditionId) { return entries.filter((item) => text(item?.conditionId).toUpperCase() === conditionId); }
-function containsCompletedMotionArtifact(value) {
+function containsCompletedMotionArtifact(value, depth = 0) {
   if (!value || typeof value !== 'object') return false;
-  if (Array.isArray(value)) return value.some(containsCompletedMotionArtifact);
+  if (Array.isArray(value)) return value.some((item) => containsCompletedMotionArtifact(item, depth + 1));
   if (COMPLETED_MOTION_SCHEMAS.has(text(value.schema)) || COMPLETED_MOTION_STAGES.has(text(value.stage))) return true;
-  return Object.entries(value).some(([key, child]) => COMPLETED_MOTION_CONTAINER_KEYS.has(key) || containsCompletedMotionArtifact(child));
+  return Object.entries(value).some(([key, child]) => (depth === 0 && ['exploration', 'reasoningSet', 'handoff', 'hypotheses'].includes(key)) || containsCompletedMotionArtifact(child, depth + 1));
 }
 function sorted(values = []) { return [...new Set((Array.isArray(values) ? values : []).map(text).filter(Boolean))].sort(); }
 const FULL_KNOWLEDGE_IDS = sorted(MOTION_INTELLIGENCE_V2_KNOWLEDGE.map((item) => item.id));
