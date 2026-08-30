@@ -172,6 +172,7 @@ export function createGeminiMotionDogfoodRunner({
       productionApproved: false,
       reviewReady: false,
       capabilityEvidenceReady: false,
+      technicalPlanningApproved: false,
       providerFallbackUsed: false,
       architectureExecutionCryptographicallyProven: false
     };

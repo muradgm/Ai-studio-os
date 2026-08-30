@@ -82,10 +82,10 @@ function providerResult({ trial, generationInstruction, architectureDeclaration,
   return {
     schema: 'ai-studio-os/gemini-motion-dogfood-run@1',
     status: 'produced',
-    truth: { prototypeOnly: true, creativeDirectionApproved: false, productionApproved: false, reviewReady: false, capabilityEvidenceReady: false, providerFallbackUsed: false, architectureExecutionCryptographicallyProven: false },
-    trial,
+    truth: { prototypeOnly: true, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false, reviewReady: false, capabilityEvidenceReady: false, providerFallbackUsed: false, architectureExecutionCryptographicallyProven: false },
+    trial: structuredClone(trial),
     architectureDeclaration,
-    request: { bodyFingerprint: requestFingerprint },
+    request: { bodyFingerprint: requestFingerprint, model, architectureDeclarationFingerprint: fingerprintCreativeValue(architectureDeclaration) },
     trace,
     runtimeControl: {
       schema: 'ai-studio-os/dogfood-runtime-control@1',
@@ -159,8 +159,10 @@ test('verified Synthesis provenance may remain inside D authority inputs without
 });
 
 test('fully valid mocked A1-E3 authoring executes exactly once per trial and downstream verification makes zero extra generation calls', async () => {
-  const authoringPlan = validPlan();
+  const authoringPlan = validPlan({ budget: { tokenBudget: 777, wallClockSeconds: 19 } });
   assert.equal(authoringPlan.pass, true, authoringPlan.findings.map((item) => item.code).join(', '));
+  assert.equal(authoringPlan.generationBudget.tokenBudget, 777);
+  assert.equal(authoringPlan.generationBudget.wallClockSeconds, 19);
 
   const calls = [];
   const runner = {
@@ -222,9 +224,45 @@ test('fully valid mocked A1-E3 authoring executes exactly once per trial and dow
   assert.equal(downstreamGenerationCalls, 0);
   assert.equal(downstream.trialRuns.length, 15);
   assert.equal(downstream.trialRuns.every((item) => item.providerGenerationUsed === false), true);
+  assert.equal(downstream.trialRuns.filter((item) => item.conditionId === 'E').every((item) => item.providerGenerationOccurredBeforeVerification === true), true);
   assert.equal(downstream.truth.reviewReady, false);
   assert.equal(downstream.truth.capabilityEvidenceReady, false);
   assert.equal(downstream.truth.creativeDirectionApproved, false);
   assert.equal(downstream.truth.technicalPlanningApproved, false);
   assert.equal(downstream.truth.productionApproved, false);
+});
+
+test('tampered provider-result bindings fail fast before a second authoring call', async () => {
+  const mutations = [
+    ['condition', (result) => { result.trial.conditionId = 'tampered'; }, 'dogfood-authoring-provider-trial-binding-invalid'],
+    ['project', (result) => { result.trial.projectId = 'another-project'; }, 'dogfood-authoring-provider-trial-binding-invalid'],
+    ['brief', (result) => { result.trial.briefFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-trial-binding-invalid'],
+    ['architecture declaration', (result) => { result.request.architectureDeclarationFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-architecture-binding-invalid'],
+    ['request trace', (result) => { result.trace.requestFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-request-response-binding-invalid'],
+    ['trace fingerprint', (result) => { result.runtimeControl.runtimeTraceFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-trace-fingerprint-invalid']
+  ];
+  for (const [label, mutate, expectedFinding] of mutations) {
+    const authoringPlan = validPlan();
+    let calls = 0;
+    const run = await executeCreativeMotionDogfoodAuthoringPlan(authoringPlan, {
+      runner: {
+        inspectModelIdentity: async () => ({ ...modelIdentity, status: 'enrolled', findings: [] }),
+        runPrototype: async ({ trial, generationInstruction, architectureDeclaration, runtimeEvidenceRef }) => {
+          calls += 1;
+          const task = JSON.parse(generationInstruction);
+          const hypotheses = ['A', 'E'].includes(trial.conditionId)
+            ? buildMotionHypotheses(canonical.selectedCreativeWorld.id)
+            : buildMotionDogfoodV2Hypotheses({ brief: task.motionV2Brief, selectedCreativeWorld: task.selectedCreativeWorld });
+          const result = providerResult({ trial, generationInstruction, architectureDeclaration, runtimeEvidenceRef, hypotheses });
+          mutate(result);
+          return result;
+        }
+      }
+    });
+    assert.equal(run.invalidReason, 'partial-batch-invalid', label);
+    assert.equal(calls, 1, label);
+    assert.ok(run.trialRuns[0].findings.some((item) => item.code === expectedFinding), label);
+    assert.equal(run.truth.capabilityEvidenceReady, false, label);
+    assert.equal(run.truth.productionApproved, false, label);
+  }
 });

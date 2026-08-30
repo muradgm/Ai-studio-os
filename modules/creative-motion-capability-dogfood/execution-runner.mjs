@@ -124,7 +124,7 @@ export async function executeCreativeMotionDogfoodPlan(plan = {}, { runner } = {
     if (bundle?.executionMode === 'architecture-output' || bundle?.executionMode === 'executed-direct-model-output') {
       const authority = bundle.conditionArtifact?.authorityInputs?.canonicalCreativeAuthority;
       const exactArtifact = bundle.conditionArtifact && sameValue(authority?.selectedCreativeWorld ?? authority?.creativeWorldExploration?.selectedWorld ?? null, plan.selectedCreativeWorld);
-      trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: exactArtifact ? bundle.executionMode === 'executed-direct-model-output' ? 'executed-direct-model-output-verified' : 'architecture-output-ready' : 'invalid', conditionArtifact: bundle.conditionArtifact, sourceExecutionFingerprint: bundle.sourceExecutionFingerprint, runtimeTraceRef: bundle.runtimeTraceRef, exactBinding: exactArtifact, providerGenerationUsed: false });
+      trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: exactArtifact ? bundle.executionMode === 'executed-direct-model-output' ? 'executed-direct-model-output-verified' : 'architecture-output-ready' : 'invalid', conditionArtifact: bundle.conditionArtifact, sourceExecutionFingerprint: bundle.sourceExecutionFingerprint, runtimeTraceRef: bundle.runtimeTraceRef, exactBinding: exactArtifact, providerGenerationUsed: false, providerGenerationOccurredBeforeVerification: bundle.executionMode === 'executed-direct-model-output' });
       if (!exactArtifact) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-executor-architecture-output-drift', 'A native architecture output no longer binds the exact frozen Creative World.')], 'partial-batch-invalid');
       continue;
     }

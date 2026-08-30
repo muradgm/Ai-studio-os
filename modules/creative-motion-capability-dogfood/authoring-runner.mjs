@@ -108,14 +108,29 @@ function buildNativeArtifact({ conditionId, projectId, canonicalCreativeAuthorit
   return { exploration: direct.exploration, source: { directControlRequest: context.directControlRequest }, reviewReady: direct.produced, findings: direct.findings };
 }
 
+function reviewProviderResultBinding({ result, trial, runtimeEvidenceRef, architectureDeclaration, modelIdentity }) {
+  const findings = [];
+  const expectedDeclarationFingerprint = fingerprintCreativeValue(architectureDeclaration);
+  const truth = result?.truth ?? {};
+  if (result?.status !== 'produced') findings.push(finding('blocker', 'dogfood-authoring-provider-status-invalid', 'Provider result must be a produced response before native construction.'));
+  if (text(result?.trial?.trialId) !== trial.trialId || text(result?.trial?.conditionId).toUpperCase() !== trial.conditionId || text(result?.trial?.projectId) !== trial.projectId || text(result?.trial?.briefFingerprint) !== trial.briefFingerprint || text(result?.trial?.runtimeTraceRef) !== trial.runtimeTraceRef || !sameValue(result?.trial?.generationBudget, trial.generationBudget)) findings.push(finding('blocker', 'dogfood-authoring-provider-trial-binding-invalid', 'Provider result must bind the exact scheduled trial, condition, project, frozen brief, trace reference and budget.'));
+  if (text(result?.runtimeControl?.runtimeEvidenceRef) !== runtimeEvidenceRef || text(result?.runtimeControl?.runtimeTraceRef) !== trial.runtimeTraceRef) findings.push(finding('blocker', 'dogfood-authoring-provider-runtime-binding-invalid', 'Provider runtime control must bind the exact scheduled trace and evidence references.'));
+  if (text(result?.request?.architectureDeclarationFingerprint) !== expectedDeclarationFingerprint) findings.push(finding('blocker', 'dogfood-authoring-provider-architecture-binding-invalid', 'Provider request must bind the exact pre-authoring architecture declaration sent to the runner.'));
+  if (!text(result?.request?.bodyFingerprint) || text(result?.trace?.requestFingerprint) !== text(result?.request?.bodyFingerprint) || !text(result?.trace?.responseFingerprint)) findings.push(finding('blocker', 'dogfood-authoring-provider-request-response-binding-invalid', 'Provider trace must bind the exact request fingerprint and a non-empty response fingerprint.'));
+  if (text(result?.runtimeControl?.runtimeTraceFingerprint) !== fingerprintCreativeValue(result?.trace ?? null)) findings.push(finding('blocker', 'dogfood-authoring-provider-trace-fingerprint-invalid', 'Runtime control must bind a fresh fingerprint of the exact provider trace.'));
+  if (text(result?.trace?.provider) !== 'gemini' || text(result?.trace?.model) !== text(modelIdentity?.requestedModel) || text(result?.request?.model) !== text(modelIdentity?.requestedModel)) findings.push(finding('blocker', 'dogfood-authoring-provider-model-binding-invalid', 'Provider result must identify the exact enrolled Gemini model.'));
+  if (truth.reviewReady !== false || truth.capabilityEvidenceReady !== false || truth.creativeDirectionApproved !== false || truth.technicalPlanningApproved !== false || truth.productionApproved !== false) findings.push(finding('blocker', 'dogfood-authoring-provider-authority-truth-invalid', 'Provider generation output remains non-authoritative and cannot advance review, capability, direction, technical-planning or production truth.'));
+  return { findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
+}
+
 function invalidRun(plan, trialRuns, findings, reason) {
   return { schema: 'ai-studio-os/creative-motion-dogfood-authoring-run@1', stage: 'creative-motion-dogfood-provider-authoring', status: 'invalid', invalidReason: reason, planSnapshotFingerprint: text(plan?.snapshotFingerprint), trialRuns, findings, truth: { experimentOnly: true, partialRunsNonResumable: true, replacementExperimentRequired: true, retryCount: 0, fallbackModelUsed: false, manualCherryPickingAllowed: false, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false } };
 }
 
-export function buildCreativeMotionDogfoodAuthoringPlan({ experimentId, projectId, frozenBrief, selectedCreativeWorld, canonicalCreativeAuthority, modelIdentity, conditionContexts = [], budget = {}, scheduleSeed } = {}) {
+export function buildCreativeMotionDogfoodAuthoringPlan({ experimentId, projectId, frozenBrief, selectedCreativeWorld, canonicalCreativeAuthority, modelIdentity, conditionContexts = [], budget = {}, generationBudget: frozenGenerationBudget = null, scheduleSeed } = {}) {
   const briefFingerprint = fingerprintCreativeValue(frozenBrief ?? {});
   const schedule = buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed);
-  const generationBudget = buildGeminiMotionDogfoodBudget(text(modelIdentity?.requestedModel), budget);
+  const generationBudget = buildGeminiMotionDogfoodBudget(text(modelIdentity?.requestedModel), frozenGenerationBudget ?? budget);
   const contexts = (Array.isArray(conditionContexts) ? conditionContexts : []).map((item) => ({ conditionId: text(item?.conditionId).toUpperCase(), context: item?.context ?? null }));
   const findings = [];
   if (!projectId || !scheduleSeed || !sameValue(selectedCreativeWorld, canonicalCreativeAuthority?.selectedCreativeWorld ?? canonicalCreativeAuthority?.creativeWorldExploration?.selectedWorld ?? null)) findings.push(finding('blocker', 'dogfood-authoring-shared-control-invalid', 'Authoring requires the exact frozen brief, selected Creative World and canonical authority bundle.'));
@@ -142,11 +157,12 @@ export async function executeCreativeMotionDogfoodAuthoringPlan(plan = {}, { run
     const runtimeEvidenceRef = 'artifact://dogfood-authoring/' + plan.experimentId + '/' + slot.trialId + '/run';
     const trial = { ...slot, projectId: plan.projectId, briefFingerprint: plan.briefFingerprint, runtimeTraceRef, generationBudget: plan.generationBudget };
     const generationInstruction = buildCreativeMotionDogfoodAuthoringTask({ trial, frozenBrief: plan.frozenBrief, selectedCreativeWorld: plan.selectedCreativeWorld, context });
+    const architectureDeclaration = { schema: 'ai-studio-os/creative-motion-dogfood-pre-authoring-binding@1', conditionId: slot.conditionId, contextFingerprint: fingerprintCreativeValue(context), completedArtifactsExcluded: true };
     let result;
-    try { result = await runner.runPrototype({ trial, generationInstruction, architectureDeclaration: { schema: 'ai-studio-os/creative-motion-dogfood-pre-authoring-binding@1', conditionId: slot.conditionId, contextFingerprint: fingerprintCreativeValue(context), completedArtifactsExcluded: true }, runtimeEvidenceRef }); } catch (error) { return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-authoring-provider-failure', text(error?.message) || 'Provider authoring failed.')], 'provider-system-failure'); }
-    const exactBinding = result?.status === 'produced' && text(result?.trial?.trialId) === slot.trialId && text(result?.trial?.runtimeTraceRef) === runtimeTraceRef && sameValue(result?.trial?.generationBudget, plan.generationBudget) && text(result?.runtimeControl?.runtimeEvidenceRef) === runtimeEvidenceRef;
-    const native = exactBinding ? buildNativeArtifact({ conditionId: slot.conditionId, projectId: plan.projectId, canonicalCreativeAuthority: plan.canonicalCreativeAuthority, selectedCreativeWorld: plan.selectedCreativeWorld, context, generatedDraft: result.generatedDraft }) : { reviewReady: false, findings: [finding('blocker', 'dogfood-authoring-provider-binding-invalid', 'Provider result did not bind the exact scheduled trial and controls.')] };
-    trialRuns.push({ trialId: slot.trialId, conditionId: slot.conditionId, status: native.reviewReady ? 'produced' : 'invalid', providerResult: result, nativeArtifact: native.exploration ?? null, findings: native.findings, exactBinding });
+    try { result = await runner.runPrototype({ trial, generationInstruction, architectureDeclaration, runtimeEvidenceRef }); } catch (error) { return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-authoring-provider-failure', text(error?.message) || 'Provider authoring failed.')], 'provider-system-failure'); }
+    const binding = reviewProviderResultBinding({ result, trial, runtimeEvidenceRef, architectureDeclaration, modelIdentity: plan.modelIdentity });
+    const native = binding.reviewReady ? buildNativeArtifact({ conditionId: slot.conditionId, projectId: plan.projectId, canonicalCreativeAuthority: plan.canonicalCreativeAuthority, selectedCreativeWorld: plan.selectedCreativeWorld, context, generatedDraft: result.generatedDraft }) : { reviewReady: false, findings: binding.findings };
+    trialRuns.push({ trialId: slot.trialId, conditionId: slot.conditionId, status: native.reviewReady ? 'produced' : 'invalid', providerResult: result, nativeArtifact: native.exploration ?? null, findings: native.findings, exactBinding: binding.reviewReady });
     if (!native.reviewReady) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-authoring-native-build-invalid', 'Generated hypotheses did not satisfy the condition native builder/reviewer.', { trialId: slot.trialId, findingCodes: native.findings?.map((item) => item.code) ?? [] })], 'partial-batch-invalid');
     const source = native.source;
     if (slot.conditionId === 'E') {

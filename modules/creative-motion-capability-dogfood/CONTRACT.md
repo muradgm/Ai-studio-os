@@ -249,6 +249,9 @@ For E, that source is the actual direct-control record: request/response
 fingerprints, trace, exact generation controls, isolation attestation and the
 resulting exploration fingerprint. It is verification-only after authoring;
 the downstream verifier must not issue a second direct-model request.
+Its downstream `providerGenerationUsed: false` records only that this verification
+step made no provider request; `providerGenerationOccurredBeforeVerification: true`
+records that the bound E artifact was already authored by the provider.
 This remains pre-proof experimental evidence and creates no creative-direction,
 technical-planning, review, capability, or production authority.
 
