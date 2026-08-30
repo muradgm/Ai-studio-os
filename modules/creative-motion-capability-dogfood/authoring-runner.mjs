@@ -3,7 +3,7 @@ import { buildMotionCreativeExploration } from '../motion-creative-intelligence/
 import { buildMotionIntelligenceV2ExplorationHandoff, buildMotionIntelligenceV2Set, reviewMotionIntelligenceV2Brief } from '../motion-intelligence-v2/runtime.mjs';
 import { buildCreativeMotionDogfoodDirectControlExploration, DOGFOOD_CORE_MOTION_KNOWLEDGE_IDS } from './execution.mjs';
 import { buildCreativeMotionDogfoodExecutionPlan, buildCreativeMotionDogfoodExecutionSchedule, sameCreativeMotionDogfoodProviderIdentity } from './execution-runner.mjs';
-import { buildGeminiMotionDogfoodBudget } from './gemini-runner.mjs';
+import { buildGeminiMotionDogfoodBudget, buildGeminiMotionDogfoodRequestRecord } from './gemini-runner.mjs';
 import { MOTION_INTELLIGENCE_V2_KNOWLEDGE } from '../motion-intelligence-v2/knowledge.mjs';
 
 const CONDITION_IDS = ['A', 'B', 'C', 'D', 'E'];
@@ -108,18 +108,19 @@ function buildNativeArtifact({ conditionId, projectId, canonicalCreativeAuthorit
   return { exploration: direct.exploration, source: { directControlRequest: context.directControlRequest }, reviewReady: direct.produced, findings: direct.findings };
 }
 
-function reviewProviderResultBinding({ result, trial, runtimeEvidenceRef, architectureDeclaration, modelIdentity }) {
+function reviewProviderResultBinding({ result, trial, generationInstruction, runtimeEvidenceRef, architectureDeclaration, modelIdentity }) {
   const findings = [];
-  const expectedDeclarationFingerprint = fingerprintCreativeValue(architectureDeclaration);
+  const expectedRequest = buildGeminiMotionDogfoodRequestRecord({ model: modelIdentity?.requestedModel, generationInstruction, generationBudget: trial.generationBudget, architectureDeclaration });
   const truth = result?.truth ?? {};
   if (result?.status !== 'produced') findings.push(finding('blocker', 'dogfood-authoring-provider-status-invalid', 'Provider result must be a produced response before native construction.'));
   if (text(result?.trial?.trialId) !== trial.trialId || text(result?.trial?.conditionId).toUpperCase() !== trial.conditionId || text(result?.trial?.projectId) !== trial.projectId || text(result?.trial?.briefFingerprint) !== trial.briefFingerprint || text(result?.trial?.runtimeTraceRef) !== trial.runtimeTraceRef || !sameValue(result?.trial?.generationBudget, trial.generationBudget)) findings.push(finding('blocker', 'dogfood-authoring-provider-trial-binding-invalid', 'Provider result must bind the exact scheduled trial, condition, project, frozen brief, trace reference and budget.'));
   if (text(result?.runtimeControl?.runtimeEvidenceRef) !== runtimeEvidenceRef || text(result?.runtimeControl?.runtimeTraceRef) !== trial.runtimeTraceRef) findings.push(finding('blocker', 'dogfood-authoring-provider-runtime-binding-invalid', 'Provider runtime control must bind the exact scheduled trace and evidence references.'));
-  if (text(result?.request?.architectureDeclarationFingerprint) !== expectedDeclarationFingerprint) findings.push(finding('blocker', 'dogfood-authoring-provider-architecture-binding-invalid', 'Provider request must bind the exact pre-authoring architecture declaration sent to the runner.'));
+  if (text(result?.request?.bodyFingerprint) !== expectedRequest.bodyFingerprint || !sameValue(result?.request?.generationConfig, expectedRequest.generationConfig) || text(result?.request?.endpoint) !== expectedRequest.endpoint || text(result?.request?.method) !== expectedRequest.method || text(result?.request?.model) !== expectedRequest.model || text(result?.request?.architectureDeclarationFingerprint) !== expectedRequest.architectureDeclarationFingerprint) findings.push(finding('blocker', 'dogfood-authoring-provider-request-control-invalid', 'Provider request must exactly match the frozen Gemini instruction, model, generation configuration and architecture declaration.'));
   if (!text(result?.request?.bodyFingerprint) || text(result?.trace?.requestFingerprint) !== text(result?.request?.bodyFingerprint) || !text(result?.trace?.responseFingerprint)) findings.push(finding('blocker', 'dogfood-authoring-provider-request-response-binding-invalid', 'Provider trace must bind the exact request fingerprint and a non-empty response fingerprint.'));
   if (text(result?.runtimeControl?.runtimeTraceFingerprint) !== fingerprintCreativeValue(result?.trace ?? null)) findings.push(finding('blocker', 'dogfood-authoring-provider-trace-fingerprint-invalid', 'Runtime control must bind a fresh fingerprint of the exact provider trace.'));
+  if (!sameValue({ maxGenerationAttempts: result?.runtimeControl?.maxGenerationAttempts, tokenBudget: result?.runtimeControl?.tokenBudget, wallClockSeconds: result?.runtimeControl?.wallClockSeconds, modelPolicyId: result?.runtimeControl?.modelPolicyId, temperaturePolicyId: result?.runtimeControl?.temperaturePolicyId }, trial.generationBudget)) findings.push(finding('blocker', 'dogfood-authoring-provider-runtime-budget-invalid', 'Provider runtime control must retain the exact frozen generation budget.'));
   if (text(result?.trace?.provider) !== 'gemini' || text(result?.trace?.model) !== text(modelIdentity?.requestedModel) || text(result?.request?.model) !== text(modelIdentity?.requestedModel)) findings.push(finding('blocker', 'dogfood-authoring-provider-model-binding-invalid', 'Provider result must identify the exact enrolled Gemini model.'));
-  if (truth.reviewReady !== false || truth.capabilityEvidenceReady !== false || truth.creativeDirectionApproved !== false || truth.technicalPlanningApproved !== false || truth.productionApproved !== false) findings.push(finding('blocker', 'dogfood-authoring-provider-authority-truth-invalid', 'Provider generation output remains non-authoritative and cannot advance review, capability, direction, technical-planning or production truth.'));
+  if (truth.prototypeOnly !== true || truth.providerFallbackUsed !== false || truth.architectureExecutionCryptographicallyProven !== false || truth.reviewReady !== false || truth.capabilityEvidenceReady !== false || truth.creativeDirectionApproved !== false || truth.technicalPlanningApproved !== false || truth.productionApproved !== false) findings.push(finding('blocker', 'dogfood-authoring-provider-authority-truth-invalid', 'Provider generation output remains prototype-only, non-fallback, non-cryptographically-proven and non-authoritative.'));
   return { findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
 }
 
@@ -160,7 +161,7 @@ export async function executeCreativeMotionDogfoodAuthoringPlan(plan = {}, { run
     const architectureDeclaration = { schema: 'ai-studio-os/creative-motion-dogfood-pre-authoring-binding@1', conditionId: slot.conditionId, contextFingerprint: fingerprintCreativeValue(context), completedArtifactsExcluded: true };
     let result;
     try { result = await runner.runPrototype({ trial, generationInstruction, architectureDeclaration, runtimeEvidenceRef }); } catch (error) { return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-authoring-provider-failure', text(error?.message) || 'Provider authoring failed.')], 'provider-system-failure'); }
-    const binding = reviewProviderResultBinding({ result, trial, runtimeEvidenceRef, architectureDeclaration, modelIdentity: plan.modelIdentity });
+    const binding = reviewProviderResultBinding({ result, trial, generationInstruction, runtimeEvidenceRef, architectureDeclaration, modelIdentity: plan.modelIdentity });
     const native = binding.reviewReady ? buildNativeArtifact({ conditionId: slot.conditionId, projectId: plan.projectId, canonicalCreativeAuthority: plan.canonicalCreativeAuthority, selectedCreativeWorld: plan.selectedCreativeWorld, context, generatedDraft: result.generatedDraft }) : { reviewReady: false, findings: binding.findings };
     trialRuns.push({ trialId: slot.trialId, conditionId: slot.conditionId, status: native.reviewReady ? 'produced' : 'invalid', providerResult: result, nativeArtifact: native.exploration ?? null, findings: native.findings, exactBinding: binding.reviewReady });
     if (!native.reviewReady) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-authoring-native-build-invalid', 'Generated hypotheses did not satisfy the condition native builder/reviewer.', { trialId: slot.trialId, findingCodes: native.findings?.map((item) => item.code) ?? [] })], 'partial-batch-invalid');

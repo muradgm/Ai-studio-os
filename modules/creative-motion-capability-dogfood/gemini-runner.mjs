@@ -90,6 +90,28 @@ export function buildGeminiMotionDogfoodBudget(model, overrides = {}) {
   };
 }
 
+export function buildGeminiMotionDogfoodRequestRecord({ model, generationInstruction, generationBudget, architectureDeclaration, apiRoot = GEMINI_API_ROOT } = {}) {
+  const configuredModel = text(model);
+  const budget = normalizeBudget(generationBudget);
+  const requestBody = {
+    contents: [{ role: 'user', parts: [{ text: text(generationInstruction) }] }],
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: TEMPERATURE,
+      maxOutputTokens: budget.tokenBudget
+    }
+  };
+  return {
+    requestBody,
+    endpoint: `${text(apiRoot).replace(/\/+$/, '')}/models/${encodeURIComponent(configuredModel)}:generateContent`,
+    method: 'POST',
+    model: configuredModel,
+    generationConfig: requestBody.generationConfig,
+    bodyFingerprint: fingerprintCreativeValue(requestBody),
+    architectureDeclarationFingerprint: fingerprintCreativeValue(architectureDeclaration)
+  };
+}
+
 export function createGeminiMotionDogfoodRunner({
   apiKey = process.env.GEMINI_API_KEY,
   model = process.env.GEMINI_FREE_MODEL,
@@ -178,23 +200,7 @@ export function createGeminiMotionDogfoodRunner({
     };
     if (findings.length) return { schema: 'ai-studio-os/gemini-motion-dogfood-run@1', status: 'blocked', truth, trial: normalizedTrial, findings };
 
-    const endpoint = `${configuredApiRoot}/models/${encodeURIComponent(configuredModel)}:generateContent`;
-    const requestBody = {
-      contents: [{ role: 'user', parts: [{ text: normalizedInstruction }] }],
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: TEMPERATURE,
-        maxOutputTokens: budget.tokenBudget
-      }
-    };
-    const requestRecord = {
-      endpoint,
-      method: 'POST',
-      model: configuredModel,
-      generationConfig: requestBody.generationConfig,
-      bodyFingerprint: fingerprintCreativeValue(requestBody),
-      architectureDeclarationFingerprint: fingerprintCreativeValue(architectureDeclaration)
-    };
+    const { requestBody, ...requestRecord } = buildGeminiMotionDogfoodRequestRecord({ model: configuredModel, generationInstruction: normalizedInstruction, generationBudget: budget, architectureDeclaration, apiRoot: configuredApiRoot });
     const startedAt = now().toISOString();
     const startedMs = Date.now();
     const controller = new AbortController();
@@ -203,7 +209,7 @@ export function createGeminiMotionDogfoodRunner({
     let response;
     let responseBody;
     try {
-      response = await fetchImpl(endpoint, {
+      response = await fetchImpl(requestRecord.endpoint, {
         method: 'POST',
         headers: {
           'content-type': 'application/json',

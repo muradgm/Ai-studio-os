@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { fingerprintCreativeValue } from '../modules/creative-intelligence-foundation/fingerprint.mjs';
 import { buildCreativeMotionDogfoodAuthoringPlan, buildCreativeMotionDogfoodAuthoringTask, executeCreativeMotionDogfoodAuthoringPlan } from '../modules/creative-motion-capability-dogfood/authoring-runner.mjs';
 import { buildCreativeMotionDogfoodExecutionSchedule, executeCreativeMotionDogfoodPlan } from '../modules/creative-motion-capability-dogfood/execution-runner.mjs';
-import { buildGeminiMotionDogfoodBudget } from '../modules/creative-motion-capability-dogfood/gemini-runner.mjs';
+import { buildGeminiMotionDogfoodBudget, buildGeminiMotionDogfoodRequestRecord } from '../modules/creative-motion-capability-dogfood/gemini-runner.mjs';
 import { buildCanonicalMotionAuthorityFixture, buildMotionHypotheses } from '../fixtures/motion-creative-authority-fixture.mjs';
 import { buildMotionDogfoodV2AuthoringContexts, buildMotionDogfoodV2Hypotheses } from '../fixtures/motion-v2-dogfood-authoring-fixture.mjs';
 
@@ -65,7 +65,8 @@ function validPlan(overrides = {}) {
 }
 
 function providerResult({ trial, generationInstruction, architectureDeclaration, runtimeEvidenceRef, hypotheses }) {
-  const requestFingerprint = fingerprintCreativeValue({ trialId: trial.trialId, generationInstruction });
+  const { requestBody, ...request } = buildGeminiMotionDogfoodRequestRecord({ model, generationInstruction, generationBudget: trial.generationBudget, architectureDeclaration });
+  const requestFingerprint = request.bodyFingerprint;
   const responseFingerprint = fingerprintCreativeValue({ trialId: trial.trialId, hypotheses });
   const trace = {
     schema: 'ai-studio-os/gemini-motion-dogfood-trace@1',
@@ -85,7 +86,7 @@ function providerResult({ trial, generationInstruction, architectureDeclaration,
     truth: { prototypeOnly: true, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false, reviewReady: false, capabilityEvidenceReady: false, providerFallbackUsed: false, architectureExecutionCryptographicallyProven: false },
     trial: structuredClone(trial),
     architectureDeclaration,
-    request: { bodyFingerprint: requestFingerprint, model, architectureDeclarationFingerprint: fingerprintCreativeValue(architectureDeclaration) },
+    request,
     trace,
     runtimeControl: {
       schema: 'ai-studio-os/dogfood-runtime-control@1',
@@ -237,9 +238,14 @@ test('tampered provider-result bindings fail fast before a second authoring call
     ['condition', (result) => { result.trial.conditionId = 'tampered'; }, 'dogfood-authoring-provider-trial-binding-invalid'],
     ['project', (result) => { result.trial.projectId = 'another-project'; }, 'dogfood-authoring-provider-trial-binding-invalid'],
     ['brief', (result) => { result.trial.briefFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-trial-binding-invalid'],
-    ['architecture declaration', (result) => { result.request.architectureDeclarationFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-architecture-binding-invalid'],
+    ['request prompt/body fingerprint', (result) => { result.request.bodyFingerprint = '0'.repeat(64); result.trace.requestFingerprint = result.request.bodyFingerprint; }, 'dogfood-authoring-provider-request-control-invalid'],
+    ['temperature', (result) => { result.request.generationConfig.temperature = 0.2; }, 'dogfood-authoring-provider-request-control-invalid'],
+    ['max output tokens', (result) => { result.request.generationConfig.maxOutputTokens = 99; }, 'dogfood-authoring-provider-request-control-invalid'],
+    ['architecture declaration', (result) => { result.request.architectureDeclarationFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-request-control-invalid'],
     ['request trace', (result) => { result.trace.requestFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-request-response-binding-invalid'],
-    ['trace fingerprint', (result) => { result.runtimeControl.runtimeTraceFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-trace-fingerprint-invalid']
+    ['trace fingerprint', (result) => { result.runtimeControl.runtimeTraceFingerprint = '0'.repeat(64); }, 'dogfood-authoring-provider-trace-fingerprint-invalid'],
+    ['runtime control budget', (result) => { result.runtimeControl.tokenBudget = 99; }, 'dogfood-authoring-provider-runtime-budget-invalid'],
+    ['fallback truth', (result) => { result.truth.providerFallbackUsed = true; }, 'dogfood-authoring-provider-authority-truth-invalid']
   ];
   for (const [label, mutate, expectedFinding] of mutations) {
     const authoringPlan = validPlan();
