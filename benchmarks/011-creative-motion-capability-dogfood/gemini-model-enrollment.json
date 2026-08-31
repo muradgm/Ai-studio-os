@@ -1,0 +1,19 @@
+{
+  "schema": "ai-studio-os/gemini-model-identity@1",
+  "requestedModel": "gemini-3.5-flash-lite",
+  "providerModelName": "models/gemini-3.5-flash-lite",
+  "providerBaseModelId": "",
+  "providerVersion": "3.5-flash-lite-07-2026",
+  "supportedGenerationMethods": [
+    "batchGenerateContent",
+    "countTokens",
+    "createCachedContent",
+    "generateContent"
+  ],
+  "inputTokenLimit": 1048576,
+  "outputTokenLimit": 65536,
+  "providerMetadataFingerprint": "1c16fb8a8ac0f002aa3f4d9d567000ae490b3c791893cf65b1e974e00e81ebd5",
+  "capturedAt": "2026-08-31T08:12:49.726Z",
+  "status": "enrolled",
+  "findings": []
+}
