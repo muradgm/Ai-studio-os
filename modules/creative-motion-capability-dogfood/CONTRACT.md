@@ -227,6 +227,34 @@ identity drift, or result-binding drift invalidates the entire batch, stops
 further calls, and makes the partial record non-resumable for capability
 evidence.
 
+## Provider-backed condition authoring
+
+`authoring-runner.mjs` is the narrow provider boundary for the formal creative
+generation trials. Before any call, it verifies all five static pre-authoring
+contexts and the frozen schedule. It sends Gemini hypothesis-authoring context,
+never a completed Motion exploration, reasoning set, or V2-to-V1 handoff.
+
+- A receives the frozen brief, exact selected Creative World, and Motion V1-only
+  authoring/isolation contract.
+- B/C/D receive the same controls plus their freshly verified V2 Brief: core
+  knowledge, full knowledge, or full knowledge plus Synthesis respectively.
+- E receives the frozen brief and exact Creative World through the isolated
+  direct-model control.
+
+Each response is passed through its existing native builder immediately: V1 for
+A, V2 reasoning plus V2-to-V1 handoff for B/C/D, and shared V1 validation for
+E. The resulting native artifacts and actual provider trace are then supplied
+as the per-trial source executions required by the formal execution verifier.
+For E, that source is the actual direct-control record: request/response
+fingerprints, trace, exact generation controls, isolation attestation and the
+resulting exploration fingerprint. It is verification-only after authoring;
+the downstream verifier must not issue a second direct-model request.
+Its downstream `providerGenerationUsed: false` records only that this verification
+step made no provider request; `providerGenerationOccurredBeforeVerification: true`
+records that the bound E artifact was already authored by the provider.
+This remains pre-proof experimental evidence and creates no creative-direction,
+technical-planning, review, capability, or production authority.
+
 ## Protocol review versus capability review
 
 Dogfood V1 deliberately separates two things:

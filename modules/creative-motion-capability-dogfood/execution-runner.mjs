@@ -21,7 +21,11 @@ function scheduleFor(seed = '') {
   return [1, 2, 3].flatMap((replicate) => CONDITION_IDS.map((conditionId) => ({ conditionId, replicate, orderKey: fingerprintCreativeValue({ seed: normalizedSeed, replicate, conditionId, purpose: 'balanced-dogfood-schedule' }) })).sort((left, right) => left.orderKey === right.orderKey ? left.conditionId.localeCompare(right.conditionId) : left.orderKey.localeCompare(right.orderKey)).map(({ conditionId }) => ({ replicate, conditionId })));
 }
 
-function sourceBundle(value = {}) { return { trialId: text(value?.trialId), conditionId: text(value?.conditionId).toUpperCase(), sourceKind: text(value?.sourceKind), executionMode: text(value?.executionMode), sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint), sourceArtifactFingerprint: text(value?.sourceArtifactFingerprint), sourceExecutionFingerprint: text(value?.sourceExecutionFingerprint), executionInstanceRef: text(value?.executionInstanceRef), runtimeTraceRef: text(value?.runtimeTraceRef), runtimeTraceFingerprint: text(value?.runtimeTraceFingerprint), sourceEvidenceRef: text(value?.sourceEvidenceRef), selectedCreativeWorldFingerprint: text(value?.selectedCreativeWorldFingerprint), conditionArtifact: value?.conditionArtifact ?? null, generationInstruction: text(value?.generationInstruction), generationInstructionFingerprint: text(value?.generationInstructionFingerprint) }; }
+export function buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed = '') {
+  return scheduleFor(scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
+}
+
+function sourceBundle(value = {}) { return { trialId: text(value?.trialId), conditionId: text(value?.conditionId).toUpperCase(), sourceKind: text(value?.sourceKind), executionMode: text(value?.executionMode), sourceSnapshotFingerprint: text(value?.sourceSnapshotFingerprint), sourceArtifactFingerprint: text(value?.sourceArtifactFingerprint), sourceExecutionFingerprint: text(value?.sourceExecutionFingerprint), executionInstanceRef: text(value?.executionInstanceRef), runtimeTraceRef: text(value?.runtimeTraceRef), runtimeTraceFingerprint: text(value?.runtimeTraceFingerprint), sourceEvidenceRef: text(value?.sourceEvidenceRef), selectedCreativeWorldFingerprint: text(value?.selectedCreativeWorldFingerprint), conditionArtifact: value?.conditionArtifact ?? null, directControl: value?.directControl ?? null, generationInstruction: text(value?.generationInstruction), generationInstructionFingerprint: text(value?.generationInstructionFingerprint) }; }
 function expectedTruth() { return { experimentOnly: true, protocolPlanOnly: true, noAutomaticRetry: true, noFallbackModel: true, noManualCherryPicking: true, partialRunsNonResumable: true, reviewReady: false, capabilityEvidenceReady: false, creativeDirectionApproved: false, technicalPlanningApproved: false, productionApproved: false }; }
 
 function normalizePlanCore(value = {}) {
@@ -34,7 +38,7 @@ function normalizePlanCore(value = {}) {
   };
 }
 function planFingerprint(value = {}) { return fingerprintCreativeValue(normalizePlanCore(value)); }
-function sourceArtifactFingerprint(bundle = {}) { return bundle.executionMode === 'architecture-output' ? fingerprintCreativeValue(bundle.conditionArtifact ?? null) : fingerprintCreativeValue({ sourceSnapshotFingerprint: bundle.sourceSnapshotFingerprint, generationInstructionFingerprint: bundle.generationInstructionFingerprint }); }
+function sourceArtifactFingerprint(bundle = {}) { return bundle.executionMode === 'architecture-output' ? fingerprintCreativeValue(bundle.conditionArtifact ?? null) : bundle.executionMode === 'executed-direct-model-output' ? fingerprintCreativeValue({ directControl: bundle.directControl ?? null, exploration: bundle.conditionArtifact ?? null }) : fingerprintCreativeValue({ sourceSnapshotFingerprint: bundle.sourceSnapshotFingerprint, generationInstructionFingerprint: bundle.generationInstructionFingerprint }); }
 function reviewSourceExecution(entry = {}, trial = {}, bundle = {}) {
   const execution = normalizeSourceExecution(entry.sourceExecution);
   const artifactFingerprint = sourceArtifactFingerprint(bundle);
@@ -46,11 +50,12 @@ function reviewSourceExecution(entry = {}, trial = {}, bundle = {}) {
   return { ...execution, sourceArtifactFingerprint: artifactFingerprint, sourceExecutionFingerprint: fingerprintCreativeValue({ ...execution, sourceArtifactFingerprint: artifactFingerprint }), findings, reviewReady: findings.every((item) => item.severity !== 'blocker') };
 }
 
-function deriveBundles({ projectId, brief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources }) {
+function deriveBundles({ projectId, brief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources, generationBudget }) {
   return schedule.map((trial) => {
     const entries = sourceEntryFor(trialSources, trial.trialId);
     if (entries.length !== 1) return sourceBundle({ trialId: trial.trialId, conditionId: trial.conditionId });
-    const generated = buildCreativeMotionDogfoodGenerationSource({ trial: { ...trial, projectId, briefFingerprint }, brief, selectedCreativeWorld, canonicalCreativeAuthority, source: entries[0].source });
+    const sourceExecution = entries[0].sourceExecution ?? {};
+    const generated = buildCreativeMotionDogfoodGenerationSource({ trial: { ...trial, projectId, briefFingerprint, runtimeTraceRef: sourceExecution.runtimeTraceRef, generationBudget }, brief, selectedCreativeWorld, canonicalCreativeAuthority, source: entries[0].source });
     const execution = reviewSourceExecution(entries[0], trial, generated);
     return { ...generated, trialId: trial.trialId, sourceArtifactFingerprint: execution.sourceArtifactFingerprint, sourceExecutionFingerprint: execution.sourceExecutionFingerprint, executionInstanceRef: execution.executionInstanceRef, runtimeTraceRef: execution.runtimeTraceRef, runtimeTraceFingerprint: execution.runtimeTraceFingerprint, sourceEvidenceRef: execution.sourceEvidenceRef, findings: [...generated.findings, ...execution.findings], reviewReady: generated.reviewReady && execution.reviewReady };
   });
@@ -61,9 +66,9 @@ export function buildCreativeMotionDogfoodExecutionPlan({ experimentId, projectI
   const briefFingerprint = fingerprintCreativeValue(frozenBrief ?? {});
   const identity = normalizeIdentity(modelIdentity);
   const generationBudget = buildGeminiMotionDogfoodBudget(identity.requestedModel, budget);
-  const schedule = scheduleFor(scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
+  const schedule = buildCreativeMotionDogfoodExecutionSchedule(scheduleSeed);
   const sources = (Array.isArray(trialSources) ? trialSources : []).map(normalizeSourceEntry);
-  const bundles = deriveBundles({ projectId, brief: frozenBrief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources: sources });
+  const bundles = deriveBundles({ projectId, brief: frozenBrief, briefFingerprint, selectedCreativeWorld, canonicalCreativeAuthority, schedule, trialSources: sources, generationBudget });
   const plan = { schema: 'ai-studio-os/creative-motion-dogfood-execution-plan@4', stage: 'creative-motion-dogfood-pre-proof-execution', experimentId: text(experimentId), projectId: text(projectId), frozenBrief: frozenBrief ?? null, briefFingerprint, selectedCreativeWorld: selectedCreativeWorld ?? null, canonicalCreativeAuthority: canonicalCreativeAuthority ?? null, modelIdentity: identity, generationBudget, scheduleSeed: text(scheduleSeed), schedule, trialSources: sources, conditionBundles: bundles, trials: plannedTrials({ projectId, briefFingerprint, schedule, bundles, generationBudget }), truth: expectedTruth() };
   plan.snapshotFingerprint = planFingerprint(plan);
   const review = reviewCreativeMotionDogfoodExecutionPlan(plan);
@@ -80,10 +85,10 @@ export function reviewCreativeMotionDogfoodExecutionPlan(plan = {}) {
   if (identity.schema !== 'ai-studio-os/gemini-model-identity@1' || !identity.requestedModel || !identity.providerModelName || !identity.providerVersion || !identity.providerMetadataFingerprint || !identity.capturedAt || !identity.supportedGenerationMethods.includes('generateContent') || /(?:^|-)latest$/i.test(identity.requestedModel)) findings.push(finding('blocker', 'dogfood-executor-provider-identity-invalid', 'Formal execution requires an enrolled immutable provider model name, version, capability and metadata binding.'));
   const canonicalWorld = core.canonicalCreativeAuthority?.selectedCreativeWorld ?? core.canonicalCreativeAuthority?.creativeWorldExploration?.selectedWorld ?? null;
   if (!core.selectedCreativeWorld || !sameValue(core.selectedCreativeWorld, canonicalWorld)) findings.push(finding('blocker', 'dogfood-executor-shared-world-drift', 'The exact selected Creative World must be frozen and freshly match the canonical authority bundle.'));
-  const expectedSchedule = scheduleFor(core.scheduleSeed).map((slot) => ({ ...slot, trialId: 'trial-' + slot.conditionId.toLowerCase() + '-' + slot.replicate }));
+  const expectedSchedule = buildCreativeMotionDogfoodExecutionSchedule(core.scheduleSeed);
   if (!sameValue(core.schedule, expectedSchedule)) findings.push(finding('blocker', 'dogfood-executor-schedule-drift', 'Execution must use the frozen deterministic balanced schedule.'));
   if (core.trialSources.length !== expectedSchedule.length) findings.push(finding('blocker', 'dogfood-executor-source-coverage-invalid', 'Execution plan requires one independently produced source/output bundle for every A1–E3 trial.'));
-  const derivedBundles = deriveBundles({ projectId: core.projectId, brief: core.frozenBrief, briefFingerprint: core.briefFingerprint, selectedCreativeWorld: core.selectedCreativeWorld, canonicalCreativeAuthority: core.canonicalCreativeAuthority, schedule: expectedSchedule, trialSources: core.trialSources });
+  const derivedBundles = deriveBundles({ projectId: core.projectId, brief: core.frozenBrief, briefFingerprint: core.briefFingerprint, selectedCreativeWorld: core.selectedCreativeWorld, canonicalCreativeAuthority: core.canonicalCreativeAuthority, schedule: expectedSchedule, trialSources: core.trialSources, generationBudget: core.generationBudget });
   for (const expected of expectedSchedule) {
     const entries = sourceEntryFor(core.trialSources, expected.trialId);
     if (entries.length !== 1) findings.push(finding('blocker', 'dogfood-executor-source-duplicate-or-missing', 'Each scheduled replicate must have exactly one upstream source bundle.', { trialId: expected.trialId }));
@@ -116,10 +121,10 @@ export async function executeCreativeMotionDogfoodPlan(plan = {}, { runner } = {
   const trialRuns = [];
   for (const trial of plan.trials) {
     const bundle = bundles.get(trial.trialId);
-    if (bundle?.executionMode === 'architecture-output') {
+    if (bundle?.executionMode === 'architecture-output' || bundle?.executionMode === 'executed-direct-model-output') {
       const authority = bundle.conditionArtifact?.authorityInputs?.canonicalCreativeAuthority;
       const exactArtifact = bundle.conditionArtifact && sameValue(authority?.selectedCreativeWorld ?? authority?.creativeWorldExploration?.selectedWorld ?? null, plan.selectedCreativeWorld);
-      trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: exactArtifact ? 'architecture-output-ready' : 'invalid', conditionArtifact: bundle.conditionArtifact, sourceExecutionFingerprint: bundle.sourceExecutionFingerprint, runtimeTraceRef: bundle.runtimeTraceRef, exactBinding: exactArtifact, providerGenerationUsed: false });
+      trialRuns.push({ trialId: trial.trialId, conditionId: trial.conditionId, status: exactArtifact ? bundle.executionMode === 'executed-direct-model-output' ? 'executed-direct-model-output-verified' : 'architecture-output-ready' : 'invalid', conditionArtifact: bundle.conditionArtifact, sourceExecutionFingerprint: bundle.sourceExecutionFingerprint, runtimeTraceRef: bundle.runtimeTraceRef, exactBinding: exactArtifact, providerGenerationUsed: false, providerGenerationOccurredBeforeVerification: bundle.executionMode === 'executed-direct-model-output' });
       if (!exactArtifact) return invalidRun(plan, trialRuns, [finding('blocker', 'dogfood-executor-architecture-output-drift', 'A native architecture output no longer binds the exact frozen Creative World.')], 'partial-batch-invalid');
       continue;
     }
