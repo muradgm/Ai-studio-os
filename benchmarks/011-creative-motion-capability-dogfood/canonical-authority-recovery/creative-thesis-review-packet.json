@@ -197,11 +197,11 @@
       "humanCreativeApproval": false
     },
     "governingIdea": {
-      "statement": "Let accumulated material change become the exhibition's evidence system: each trace opens a factual route into an object's lived history, then returns attention to the object and the practical museum visit.",
+      "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
       "singular": true,
       "sourceOpportunityId": "opportunity-1"
     },
-    "statement": "Let accumulated material change become the exhibition's evidence system: each trace opens a factual route into an object's lived history, then returns attention to the object and the practical museum visit. Creative tension: archival authority x tactile sensuality. Truth anchor: The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+    "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle. Creative tension: archival authority x tactile sensuality. Truth anchor: The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
     "creativeTension": {
       "label": "archival authority x tactile sensuality",
       "traits": [
@@ -273,7 +273,7 @@
       "Reduced motion implemented by simply disabling everything and losing narrative relationships."
     ],
     "principles": [
-      "A specific material trace must lead to factual object history, not decorative atmosphere.",
+      "Accumulated material change must remain connected to real object histories rather than decorative atmosphere.",
       "Stillness is the default state for reading, comparison and practical museum tasks.",
       "Repair and accumulated change are evidence of use, not luxury surface treatment.",
       "Each medium interprets the evidence system differently without replacing real objects with synthetic spectacle."
@@ -289,15 +289,15 @@
     "expressionTests": {
       "typography": "Separate contemplative exhibition voice from factual trace labels and durable reading without making type compete with object evidence.",
       "image": "Use licensed object photography or new capture to show actual wear, repair and material change; Phase 0 placeholders remain explicitly non-documentary.",
-      "motion": "Reveal one consequential trace or state relationship, then hold long enough to inspect its history; no continuous drift.",
-      "interaction": "Let a visitor choose a trace, inspect its history and return to the object and practical routes without losing orientation.",
+      "motion": "Make changes in material condition or historical understanding perceptible when they matter, then preserve deliberate stillness; no continuous drift.",
+      "interaction": "Let visitors encounter objects and their material histories without losing orientation or access to practical museum routes.",
       "sound": "Silence remains the default; any later sound must be grounded in object evidence and retain a silent equivalent.",
-      "responsive": "On mobile and under reduced motion, preserve object -> trace -> history -> return as a stable semantic sequence."
+      "responsive": "On desktop, mobile and under reduced motion, preserve the same evidence relationships, reading clarity and access to practical museum tasks through authored reinterpretation."
     },
     "technologyPolicy": "Implementation tools serve the evidence system. Motion, browser APIs, generated media and spatial tools are considered only when they make object-specific material time more legible without displacing the objects or museum tasks.",
     "competitorTransferTest": {
-      "question": "Could a direct competitor reuse this governing idea unchanged without losing the project truth that makes it meaningful?",
-      "passCondition": "A generic museum or design site cannot reuse this unchanged: without a collection where scratches, repairs, fading and deformation are actual evidence of use, the trace-as-route rule loses its reason to exist.",
+      "question": "Could another museum or design site reuse this evidence-system Thesis unchanged without the specific collection truth that wear, repair, fading and deformation are meaningful records of use?",
+      "passCondition": "The Thesis should weaken without After Matter’s one hundred real objects and its requirement to make accumulated material time perceptible while preserving reading, wayfinding, ticketing, mobile access and reduced-motion equivalence.",
       "evidenceRefs": [
         "truth-1",
         "truth-2",
@@ -315,7 +315,7 @@
         "rejectedBecause": "Best collection-scale frame, but less immediately actionable for wayfinding and may dilute the specificity of repair as evidence."
       }
     ],
-    "selectionRationale": "It gives the exhibition a project-specific interaction rule: factual material change becomes the route into history, while the strongest constraints from the other candidates preserve repair as evidence and stillness as an active museum posture.",
+    "selectionRationale": "This recovery Thesis is the broadest project-specific governing idea supported by the frozen After Matter brief: material change is meaningful evidence, but the later Creative World determines whether that evidence becomes navigation, editorial record, collection rhythm, or another materially grounded behavior.",
     "unresolvedRisks": [
       "Final licensed object photography and object-specific historical records remain outside this recovery pass."
     ],
@@ -342,10 +342,10 @@
       }
     }
   },
-  "proposedCreativeThesisFingerprint": "35360fd5ddc03fea9219a77dcd9a24a40002f1716dcad48b9b0e2feae2a0b62d",
+  "proposedCreativeThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
   "deterministicRecommendation": {
     "hypothesisId": "trace-as-evidence-system",
-    "authoredCandidateFingerprint": "6afa1267e16f7392af5bfe6ff0171799a3b6e2fe9f0250e689b7a007bacaeb51",
+    "authoredCandidateFingerprint": "787da1ea4388d5093f863ec5518bdd5fe842c9e9225daa76f5fa05d556528766",
     "rationale": "It gives the exhibition a project-specific interaction rule: factual material change becomes the route into history, while the strongest constraints from the other candidates preserve repair as evidence and stillness as an active museum posture."
   },
   "truth": {
@@ -356,5 +356,5 @@
     "productionApproved": false,
     "geminiGenerationUsed": false
   },
-  "snapshotFingerprint": "47a2df405fcb520eebc43ff91d2420a89991ca28daae5f44faec71b65f2451bf"
+  "snapshotFingerprint": "d9bafb23a55c2248424fc640ef541c6a573009846923dbffa939dcecf1231f46"
 }

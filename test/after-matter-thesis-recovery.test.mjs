@@ -26,5 +26,14 @@ test('After Matter recovery authors a grounded, divergent Thesis packet without 
   assert.equal(packet.truth.creativeWorldSelectionAuthorityCreated, false);
   assert.equal(packet.truth.productionApproved, false);
   assert.equal(packet.truth.geminiGenerationUsed, false);
+  assert.equal(packet.proposedCreativeThesis.governingIdea.statement, 'Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.');
+  const thesisText = JSON.stringify({
+    governingIdea: packet.proposedCreativeThesis.governingIdea,
+    principles: packet.proposedCreativeThesis.principles,
+    expressionTests: packet.proposedCreativeThesis.expressionTests,
+    selectionRationale: packet.proposedCreativeThesis.selectionRationale,
+    competitorTransferTest: packet.proposedCreativeThesis.competitorTransferTest
+  });
+  assert.doesNotMatch(thesisText, /each trace opens a route|choose a trace|object -> trace -> history -> return|one consequential trace|trace-as-route/i);
   assert.doesNotMatch(packet.proposedCreativeThesis.governingIdea.statement, /three\.js|webgl|webgpu|gsap|rive|blender|houdini|shader|scrolltrigger/i);
 });

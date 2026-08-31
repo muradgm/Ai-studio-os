@@ -76,9 +76,10 @@ function authoredCandidate(deliberation) {
   const base = authoredCandidateFromDeliberation(deliberation);
   return {
     ...base,
+    governingIdea: 'Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.',
     whyThisProject: 'After Matter is about one hundred real objects whose wear, repair, fading and deformation are evidence of use. The thesis keeps those histories primary while preserving reading, wayfinding, ticketing, mobile access and reduced-motion meaning.',
     principles: [
-      'A specific material trace must lead to factual object history, not decorative atmosphere.',
+      'Accumulated material change must remain connected to real object histories rather than decorative atmosphere.',
       'Stillness is the default state for reading, comparison and practical museum tasks.',
       'Repair and accumulated change are evidence of use, not luxury surface treatment.',
       'Each medium interprets the evidence system differently without replacing real objects with synthetic spectacle.'
@@ -86,16 +87,21 @@ function authoredCandidate(deliberation) {
     expressionTests: {
       typography: 'Separate contemplative exhibition voice from factual trace labels and durable reading without making type compete with object evidence.',
       image: 'Use licensed object photography or new capture to show actual wear, repair and material change; Phase 0 placeholders remain explicitly non-documentary.',
-      motion: 'Reveal one consequential trace or state relationship, then hold long enough to inspect its history; no continuous drift.',
-      interaction: 'Let a visitor choose a trace, inspect its history and return to the object and practical routes without losing orientation.',
+      motion: 'Make changes in material condition or historical understanding perceptible when they matter, then preserve deliberate stillness; no continuous drift.',
+      interaction: 'Let visitors encounter objects and their material histories without losing orientation or access to practical museum routes.',
       sound: 'Silence remains the default; any later sound must be grounded in object evidence and retain a silent equivalent.',
-      responsive: 'On mobile and under reduced motion, preserve object -> trace -> history -> return as a stable semantic sequence.'
+      responsive: 'On desktop, mobile and under reduced motion, preserve the same evidence relationships, reading clarity and access to practical museum tasks through authored reinterpretation.'
     },
     antiPrinciples: [
       'Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.',
       'Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.',
       'Scroll-jacking that delays reading or practical tasks.'
     ],
+    selectionRationale: 'This recovery Thesis is the broadest project-specific governing idea supported by the frozen After Matter brief: material change is meaningful evidence, but the later Creative World determines whether that evidence becomes navigation, editorial record, collection rhythm, or another materially grounded behavior.',
+    competitorTransferTest: {
+      question: 'Could another museum or design site reuse this evidence-system Thesis unchanged without the specific collection truth that wear, repair, fading and deformation are meaningful records of use?',
+      passCondition: 'The Thesis should weaken without After Matter’s one hundred real objects and its requirement to make accumulated material time perceptible while preserving reading, wayfinding, ticketing, mobile access and reduced-motion equivalence.'
+    },
     technologyPolicy: 'Implementation tools serve the evidence system. Motion, browser APIs, generated media and spatial tools are considered only when they make object-specific material time more legible without displacing the objects or museum tasks.'
   };
 }
