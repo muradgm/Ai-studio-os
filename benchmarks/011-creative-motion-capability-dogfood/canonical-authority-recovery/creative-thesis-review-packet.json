@@ -1,7 +1,7 @@
 {
   "schema": "ai-studio-os/benchmark-011-after-matter-thesis-recovery@1",
   "stage": "creative-thesis-recovery-review",
-  "status": "awaiting-human-creative-thesis-approval",
+  "status": "human-approved-thesis-awaiting-world-exploration",
   "projectId": "benchmark-011-after-matter",
   "historicalGrounding": {
     "frozenBriefFingerprint": "2e1e9c2259ee9ac3794d0b4e15871295f9ca624f9ec71d79cf1231f833745939",
@@ -343,6 +343,50 @@
     }
   },
   "proposedCreativeThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+  "humanDecision": {
+    "schema": "ai-studio-os/creative-thesis-human-decision@1",
+    "projectId": "benchmark-011-after-matter",
+    "decision": "refine-candidate",
+    "sourceDeliberationFingerprint": "a862903b91c9d73929c16cfb779f121f1c656d2c50f960d6e208233f21e5aa46",
+    "sourceCandidateId": "trace-as-evidence-system",
+    "sourceCandidateFingerprint": "61d7104db374256f0d485ef446d98de8f0f3d4794a6fa84dcebf37b9a29eb6b8",
+    "approvedThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+    "rationale": "The trace-as-evidence recommendation contained a strong project-specific principle but prematurely promoted Friction Index’s trace-navigation mechanism into Thesis authority. The human refinement preserves accumulated material change as evidence of lived time while leaving the Creative World layer free to determine how that evidence organizes the experience.",
+    "refinementSummary": "Generalize the Thesis from trace-navigation into accumulated material change as evidence, preserving the later Creative World decision about how that evidence organizes the experience.",
+    "humanConfirmed": true,
+    "decidedAt": "2026-08-31T10:55:36.158Z",
+    "evidenceRef": "human-decision://benchmark-011-after-matter/thesis-recovery/2026-08-31",
+    "decisionFingerprint": "c21e3a1ff566b5cdcfda669301afbf676dd2238edc0fc115281c536cd293172d"
+  },
+  "thesisAuthorityReview": {
+    "schema": "ai-studio-os/creative-thesis-authority-review@1",
+    "pass": true,
+    "reviewReady": true,
+    "status": "authoritative",
+    "findings": [],
+    "authority": {
+      "kind": "canonical-creative-thesis",
+      "projectId": "benchmark-011-after-matter",
+      "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+      "creativeTension": "archival authority x tactile sensuality",
+      "deliberationSchema": "ai-studio-os/creative-thesis-deliberation@1",
+      "thesisSchema": "ai-studio-os/creative-thesis@1",
+      "humanApproved": true,
+      "humanDecisionMode": "refine-candidate",
+      "machineRecommendationWasNotFinalAuthority": true,
+      "humanRefined": true
+    },
+    "truth": {
+      "deliberationRecomputedAtAuthorityBoundary": true,
+      "thesisRecomputedAtAuthorityBoundary": true,
+      "deliberationProjectIdentityRequired": true,
+      "deliberationCanSelfApprove": false,
+      "humanCreativeApprovalRequired": true,
+      "humanDecisionRecordRequired": true,
+      "machineRecommendationWasNotFinalAuthority": true,
+      "arbitraryThesisObjectAccepted": false
+    }
+  },
   "deterministicRecommendation": {
     "hypothesisId": "trace-as-evidence-system",
     "authoredCandidateFingerprint": "787da1ea4388d5093f863ec5518bdd5fe842c9e9225daa76f5fa05d556528766",
@@ -351,10 +395,11 @@
   "truth": {
     "recoveryPassIsNewAuthorship": true,
     "historicalPhase0SelectionPreservedOnlyAsEvidence": true,
-    "humanCreativeApproval": false,
+    "humanCreativeApprovalRecordedByDecision": true,
+    "machineRecommendationWasNotFinalAuthority": true,
     "creativeWorldSelectionAuthorityCreated": false,
     "productionApproved": false,
     "geminiGenerationUsed": false
   },
-  "snapshotFingerprint": "d9bafb23a55c2248424fc640ef541c6a573009846923dbffa939dcecf1231f46"
+  "snapshotFingerprint": "0b4cf1bab8555e3e57c0e3c1d905b055fdfffc8ad07c3cd929799d2d30aa2e66"
 }

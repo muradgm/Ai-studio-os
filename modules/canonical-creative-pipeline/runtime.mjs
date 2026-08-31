@@ -189,6 +189,7 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const creative = input.creativeRuntime ?? input.creative ?? {};
   const deliberation = input.creativeThesisDeliberation ?? creative.creativeThesisDeliberation ?? {};
   const thesis = input.creativeThesis ?? creative.creativeThesis ?? {};
+  const humanDecision = input.creativeThesisHumanDecision ?? creative.creativeThesisHumanDecision ?? {};
   const exploration = input.creativeWorldExploration ?? creative.creativeWorldExploration ?? {};
   const world = input.selectedCreativeWorld ?? creative.selectedCreativeWorld ?? exploration.selectedWorld ?? null;
   const styleFrameProof = input.styleFrameProof ?? creative.styleFrameProof ?? null;
@@ -197,7 +198,7 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const typography = input.typography ?? null;
   const projectId = input.projectId ?? creative.id ?? thesis?.projectId ?? null;
 
-  const thesisAuthorityReview = reviewCreativeThesisAuthority({ deliberation, thesis });
+  const thesisAuthorityReview = reviewCreativeThesisAuthority({ deliberation, thesis, humanDecision });
   if (thesisAuthorityReview.pass !== true) {
     findings.push(finding('blocker', 'canonical-thesis-authority-invalid', 'Canonical production requires a Creative Thesis whose authority is traceable to re-reviewed deliberation, re-reviewed thesis structure, explicit project identity, and human creative approval.', {
       authorityFindingCodes: thesisAuthorityReview.findings.map((item) => item.code)

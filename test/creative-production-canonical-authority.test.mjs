@@ -8,6 +8,7 @@ import {
   buildCreativeThesisDeliberation
 } from '../modules/creative-thesis/intelligence.mjs';
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
+import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
@@ -158,11 +159,8 @@ function canonicalInput(overrides = {}) {
     commercialObjective: 'Increase product understanding and ordering confidence',
     authoredCandidate: authored
   });
-  const thesis = {
-    ...builtThesis,
-    id: 'du-bonheur-thesis',
-    truth: { ...(builtThesis.truth ?? {}), humanCreativeApproval: true }
-  };
+  const thesis = { ...builtThesis, id: 'du-bonheur-thesis' };
+  const humanDecision = buildCreativeThesisHumanDecision({ deliberation, thesis, decision: 'approve-recommendation', sourceCandidateId: deliberation.selection.hypothesisId, rationale: 'The human approves the reviewed Thesis recommendation.', humanConfirmed: true, decidedAt: '2026-08-31T10:55:36.158Z', evidenceRef: 'fixture://du-bonheur-thesis-decision' });
   const thesisStatement = thesis.governingIdea.statement;
 
   const preSelectionExploration = buildCreativeWorldExploration({
@@ -198,6 +196,7 @@ function canonicalInput(overrides = {}) {
     canonicalCreativeAuthority: true,
     creativeThesisDeliberation: deliberation,
     creativeThesis: thesis,
+    creativeThesisHumanDecision: humanDecision,
     selectedCreativeWorld: world,
     creativeWorldExploration: exploration,
     styleFrameProof,

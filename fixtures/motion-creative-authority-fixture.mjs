@@ -1,5 +1,6 @@
 import { authoredCandidateFromDeliberation, buildCreativeThesisDeliberation } from '../modules/creative-thesis/intelligence.mjs';
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
+import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 import { buildMotionCreativeExploration } from '../modules/motion-creative-intelligence/runtime.mjs';
@@ -142,11 +143,8 @@ export function buildCanonicalMotionAuthorityFixture(projectId = MOTION_FIXTURE_
     commercialObjective: 'Increase clarity and confidence without sacrificing character',
     authoredCandidate: authored
   });
-  const thesis = {
-    ...builtThesis,
-    id: 'motion-thesis-1',
-    truth: { ...(builtThesis.truth ?? {}), humanCreativeApproval: true }
-  };
+  const thesis = { ...builtThesis, id: 'motion-thesis-1' };
+  const humanDecision = buildCreativeThesisHumanDecision({ deliberation, thesis, decision: 'approve-recommendation', sourceCandidateId: deliberation.selection.hypothesisId, rationale: 'The human approves the reviewed Thesis recommendation.', humanConfirmed: true, decidedAt: '2026-08-31T10:55:36.158Z', evidenceRef: 'fixture://motion-thesis-decision' });
 
   const preSelectionExploration = buildCreativeWorldExploration({ creativeThesis: thesis, authoredWorlds: authoredWorlds() });
   if (!preSelectionExploration.reviewReady) throw new Error(`Canonical Motion fixture world exploration failed: ${preSelectionExploration.findings.map((item) => item.code).join(', ')}`);
@@ -185,6 +183,7 @@ export function buildCanonicalMotionAuthorityFixture(projectId = MOTION_FIXTURE_
     projectId,
     creativeThesisDeliberation: deliberation,
     creativeThesis: thesis,
+    creativeThesisHumanDecision: humanDecision,
     selectedCreativeWorld,
     creativeWorldExploration,
     styleFrameProof,
