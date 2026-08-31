@@ -104,11 +104,25 @@ export const CREATIVE_KNOWLEDGE_GENERALIST_V1_CHARTER = Object.freeze({
     projectSpecificEligibilityMappingForbidden: true,
     futureRetrievalMustUseExistingGraphAndRetrievalContracts: true
   },
+  experimentIntegrity: {
+    benchmark011KnownBeforeCorpusPopulation: true,
+    benchmark011BlindConfirmatoryUseAllowed: false,
+    benchmark011DevelopmentalUseAllowed: true,
+    benchmark011PermittedPostTargetUses: [
+      'pipeline-integration', 'real-condition-d-execution', 'qualitative-architecture-behavior',
+      'harness-integrity', 'downstream-proof-and-review-flow'
+    ],
+    benchmark011CapabilityInterpretationRequiresPostTargetDisclosure: true,
+    unseenBenchmarkRequiredForCleanConfirmatoryEvaluation: true,
+    corpusFreezeRequiredBeforeUnseenBenchmarkReveal: true,
+    architectureMustRemainFrozenThroughUnseenBenchmarkExperiment: true
+  },
   populationProtocol: [
     'research-sources-under-this-charter', 'create-source-manifest-records', 'author-exactly-24-principles',
     'build-creative-intelligence-foundation', 'build-creative-knowledge-graph', 'review-every-entry',
     'freeze-corpus-library-and-graph-fingerprints', 'test-provenance', 'run-retrieval-neutrality-smoke-tests',
-    'merge-before-benchmark-011-resumes'
+    'merge-before-benchmark-011-post-target-developmental-evaluation-resumes',
+    'freeze-before-any-future-unseen-confirmatory-benchmark-is-revealed'
   ],
   futureFreezeContract: [
     'corpusId', 'corpusVersion', 'entryCount', 'domainCounts', 'entryIds', 'sourceManifestFingerprint',

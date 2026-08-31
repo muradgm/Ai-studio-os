@@ -29,6 +29,11 @@ test('Generalist V1 charter freezes the neutral 24-entry corpus design', () => {
   assert.equal(charter.contaminationFirewall.activeProjectTargetingForbidden, true);
   assert.equal(charter.sourceQuality.forbiddenPrimaryEvidence.includes('ai-studio-os-fixture-or-test'), true);
   assert.equal(charter.retrievalNeutrality.projectSpecificEligibilityMappingForbidden, true);
+  assert.equal(charter.experimentIntegrity.benchmark011KnownBeforeCorpusPopulation, true);
+  assert.equal(charter.experimentIntegrity.benchmark011BlindConfirmatoryUseAllowed, false);
+  assert.equal(charter.experimentIntegrity.benchmark011DevelopmentalUseAllowed, true);
+  assert.equal(charter.experimentIntegrity.unseenBenchmarkRequiredForCleanConfirmatoryEvaluation, true);
+  assert.equal(charter.experimentIntegrity.corpusFreezeRequiredBeforeUnseenBenchmarkReveal, true);
   assert.equal(charter.truth.populated, false);
 });
 
@@ -40,4 +45,8 @@ test('Generalist V1 charter rejects corpus expansion and benchmark targeting dri
   const targeted = buildCreativeKnowledgeGeneralistV1Charter();
   targeted.contaminationFirewall.activeProjectTargetingForbidden = false;
   assert.equal(reviewCreativeKnowledgeGeneralistV1Charter(targeted).pass, false);
+
+  const falseBlindness = buildCreativeKnowledgeGeneralistV1Charter();
+  falseBlindness.experimentIntegrity.benchmark011BlindConfirmatoryUseAllowed = true;
+  assert.equal(reviewCreativeKnowledgeGeneralistV1Charter(falseBlindness).pass, false);
 });
