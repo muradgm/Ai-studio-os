@@ -1,0 +1,601 @@
+{
+  "schema": "ai-studio-os/creative-knowledge-generalist-source-manifest@1",
+  "corpusId": "creative-knowledge-generalist-v1",
+  "capturedAt": "2026-08-31T18:48:33Z",
+  "sources": [
+    {
+      "sourceId": "cambridge-multimedia-visual-displays-2021",
+      "sourceType": "academic-book-chapter",
+      "sourceRef": "https://doi.org/10.1017/9781108894333.052",
+      "title": "Multimedia Learning with Visual Displays",
+      "authorOrOrganization": "Matthew T. McCrudden and Peggy N. Van Meter",
+      "publishedAt": "2021-11-19",
+      "evidenceLocator": "Chapter 43, pp. 510-520",
+      "provenanceNote": "Research review of visual-display design, extraneous processing, signaling, and graphical organizers.",
+      "domainIdsSupported": [
+        "editorial-and-information-design"
+      ],
+      "entryIds": [
+        "editorial-grouping-reduces-search",
+        "editorial-signal-reading-order",
+        "editorial-structure-inference"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "princeton-data-visualization-2018",
+      "sourceType": "academic-book",
+      "sourceRef": "https://assets.press.princeton.edu/chapters/s13826.pdf",
+      "title": "Data Visualization: A Practical Introduction",
+      "authorOrOrganization": "Kieran Healy",
+      "publishedAt": "2018",
+      "evidenceLocator": "Chapter 1, visual grouping and Gestalt rules",
+      "provenanceNote": "Explains proximity, similarity, connection, continuity, closure, figure-ground, and common fate as inferred visual relations.",
+      "domainIdsSupported": [
+        "editorial-and-information-design"
+      ],
+      "entryIds": [
+        "editorial-grouping-reduces-search",
+        "editorial-signal-reading-order",
+        "editorial-structure-inference"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "lynch-image-city-1960",
+      "sourceType": "established-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262620017/the-image-of-the-city/",
+      "title": "The Image of the City",
+      "authorOrOrganization": "Kevin Lynch",
+      "publishedAt": "1960",
+      "evidenceLocator": "Imageability framework",
+      "provenanceNote": "Documents imageability as a criterion for vivid and memorable environmental form.",
+      "domainIdsSupported": [
+        "architecture-and-spatial-experience"
+      ],
+      "entryIds": [
+        "spatial-landmarks-anchor-transition",
+        "spatial-legibility-supports-orientation",
+        "spatial-thresholds-mark-change"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "jackson-sense-place-time-1994",
+      "sourceType": "established-book",
+      "sourceRef": "https://yalebooks.yale.edu/book/9780300063974/a-sense-of-place-a-sense-of-time/",
+      "title": "A Sense of Place, a Sense of Time",
+      "authorOrOrganization": "J. B. Jackson",
+      "publishedAt": "1994",
+      "evidenceLocator": "Essays on place, movement, communities, and roads",
+      "provenanceNote": "Examines how lived spatial systems connect place, movement, and time.",
+      "domainIdsSupported": [
+        "architecture-and-spatial-experience"
+      ],
+      "entryIds": [
+        "spatial-landmarks-anchor-transition",
+        "spatial-legibility-supports-orientation",
+        "spatial-thresholds-mark-change"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "norman-everyday-things-2014",
+      "sourceType": "established-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262525671/the-design-of-everyday-things/",
+      "title": "The Design of Everyday Things",
+      "authorOrOrganization": "Don Norman",
+      "publishedAt": "2014-01-10",
+      "evidenceLocator": "Revised and expanded edition",
+      "provenanceNote": "Applies cognitive science to signifiers, feedback, mappings, constraints, and human-centered design.",
+      "domainIdsSupported": [
+        "industrial-and-product-design"
+      ],
+      "entryIds": [
+        "product-feedback-closes-action-loop",
+        "product-mapping-preserves-control",
+        "product-signifiers-reveal-action"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "iso-9241-110-2020",
+      "sourceType": "international-standard",
+      "sourceRef": "https://www.iso.org/standard/75258.html",
+      "title": "ISO 9241-110:2020 Ergonomics of human-system interaction - Interaction principles",
+      "authorOrOrganization": "International Organization for Standardization",
+      "publishedAt": "2020-05",
+      "evidenceLocator": "Clause 5, interaction principles",
+      "provenanceNote": "Defines general interaction principles including task suitability, self-descriptiveness, expectation conformity, controllability, and error robustness.",
+      "domainIdsSupported": [
+        "industrial-and-product-design",
+        "interaction-and-hci"
+      ],
+      "entryIds": [
+        "interaction-feedback-reveals-system-state",
+        "interaction-predictability-supports-learning",
+        "interaction-task-fit-beats-technology",
+        "product-feedback-closes-action-loop",
+        "product-mapping-preserves-control",
+        "product-signifiers-reveal-action"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "bordwell-narration-fiction-film-1985",
+      "sourceType": "established-book",
+      "sourceRef": "https://www.routledge.com/Narration-in-the-Fiction-Film/Bordwell/p/book/9781138126848",
+      "title": "Narration in the Fiction Film",
+      "authorOrOrganization": "David Bordwell",
+      "publishedAt": "1985",
+      "evidenceLocator": "Narrative representation and filmic storytelling strategies",
+      "provenanceNote": "Analyzes how film narration constructs viewer understanding through medium-specific representation and story patterns.",
+      "domainIdsSupported": [
+        "film-and-cinematography"
+      ],
+      "entryIds": [
+        "film-continuity-preserves-orientation",
+        "film-framing-allocates-attention",
+        "film-withholding-creates-inference"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "bordwell-staiger-thompson-classical-hollywood-1985",
+      "sourceType": "established-book",
+      "sourceRef": "https://www.routledge.com/The-Classical-Hollywood-Cinema-Film-Style-and-Mode-of-Production-to-1960/Bordwell-Staiger-Thompson/p/book/9780415003834",
+      "title": "The Classical Hollywood Cinema",
+      "authorOrOrganization": "David Bordwell, Janet Staiger, and Kristin Thompson",
+      "publishedAt": "1985",
+      "evidenceLocator": "Film style and mode of production",
+      "provenanceNote": "Provides empirically grounded analysis of systematic film style and production practice.",
+      "domainIdsSupported": [
+        "film-and-cinematography"
+      ],
+      "entryIds": [
+        "film-continuity-preserves-orientation",
+        "film-framing-allocates-attention",
+        "film-withholding-creates-inference"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "szarkowski-photographers-eye-1966",
+      "sourceType": "institutional-publication",
+      "sourceRef": "https://www.moma.org/docs/press_archives/3800/releases/MOMA_1966_July-December_0106_150.pdf",
+      "title": "The Photographer's Eye",
+      "authorOrOrganization": "John Szarkowski and The Museum of Modern Art",
+      "publishedAt": "1966-12-05",
+      "evidenceLocator": "Museum publication announcement and book introduction",
+      "provenanceNote": "Institutional publication describing a critical investigation of photographic form, style, and photographic possibilities.",
+      "domainIdsSupported": [
+        "photography-and-visual-framing"
+      ],
+      "entryIds": [
+        "photo-context-reframes-interpretation",
+        "photo-frame-creates-meaningful-exclusion",
+        "photo-vantage-changes-relation"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "armstrong-scenes-library-1998",
+      "sourceType": "academic-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262011693/scenes-in-a-library/",
+      "title": "Scenes in a Library",
+      "authorOrOrganization": "Carol Armstrong",
+      "publishedAt": "1998",
+      "evidenceLocator": "Photography, text, and verbal framing",
+      "provenanceNote": "Studies how photographs interact with text, publication form, and contextual framing.",
+      "domainIdsSupported": [
+        "photography-and-visual-framing"
+      ],
+      "entryIds": [
+        "photo-context-reframes-interpretation",
+        "photo-frame-creates-meaningful-exclusion",
+        "photo-vantage-changes-relation"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "huron-sweet-anticipation-2006",
+      "sourceType": "academic-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262582780/sweet-anticipation/",
+      "title": "Sweet Anticipation: Music and the Psychology of Expectation",
+      "authorOrOrganization": "David Huron",
+      "publishedAt": "2006",
+      "evidenceLocator": "Psychological theory of musical expectation",
+      "provenanceNote": "Connects expectation, uncertainty, prediction, and emotional response in musical experience.",
+      "domainIdsSupported": [
+        "music-and-rhythm"
+      ],
+      "entryIds": [
+        "music-expectation-shapes-tension",
+        "music-meter-organizes-attention",
+        "music-surprise-needs-established-pattern"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "london-hearing-time-2012",
+      "sourceType": "academic-book",
+      "sourceRef": "https://doi.org/10.1093/acprof:oso/9780199744374.001.0001",
+      "title": "Hearing in Time: Psychological Aspects of Musical Meter",
+      "authorOrOrganization": "Justin London",
+      "publishedAt": "2012-05-03",
+      "evidenceLocator": "Chapters 1-3, meter as attentional behavior",
+      "provenanceNote": "Develops meter as synchronization of attention and action to rhythmic environments.",
+      "domainIdsSupported": [
+        "music-and-rhythm"
+      ],
+      "entryIds": [
+        "music-expectation-shapes-tension",
+        "music-meter-organizes-attention",
+        "music-surprise-needs-established-pattern"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "moggridge-designing-interactions-2007",
+      "sourceType": "established-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262134743/designing-interactions/",
+      "title": "Designing Interactions",
+      "authorOrOrganization": "Bill Moggridge",
+      "publishedAt": "2007",
+      "evidenceLocator": "Interaction-design case histories",
+      "provenanceNote": "Documents interaction-design practices and the relationship between people, tools, and digital behavior.",
+      "domainIdsSupported": [
+        "interaction-and-hci"
+      ],
+      "entryIds": [
+        "interaction-feedback-reveals-system-state",
+        "interaction-predictability-supports-learning",
+        "interaction-task-fit-beats-technology"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "mack-rock-inattentional-blindness-1998",
+      "sourceType": "academic-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262632034/inattentional-blindness/",
+      "title": "Inattentional Blindness",
+      "authorOrOrganization": "Arien Mack and Irvin Rock",
+      "publishedAt": "1998",
+      "evidenceLocator": "Experimental studies of attention and conscious perception",
+      "provenanceNote": "Reports research linking attention to conscious perception and missed unattended information.",
+      "domainIdsSupported": [
+        "visual-perception-and-cognition"
+      ],
+      "entryIds": [
+        "perception-attention-limits-conscious-access",
+        "perception-change-needs-salient-cue",
+        "perception-task-relevance-guides-selection"
+      ],
+      "evidenceRole": "primary",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    },
+    {
+      "sourceId": "tsotsos-visual-attention-2021",
+      "sourceType": "academic-book",
+      "sourceRef": "https://mitpress.mit.edu/9780262543804/a-computational-perspective-on-visual-attention/",
+      "title": "A Computational Perspective on Visual Attention",
+      "authorOrOrganization": "John K. Tsotsos",
+      "publishedAt": "2021-06-22",
+      "evidenceLocator": "Selective Tuning model",
+      "provenanceNote": "Explains attention as task- and scene-dependent selective processing under computational limits.",
+      "domainIdsSupported": [
+        "visual-perception-and-cognition"
+      ],
+      "entryIds": [
+        "perception-attention-limits-conscious-access",
+        "perception-change-needs-salient-cue",
+        "perception-task-relevance-guides-selection"
+      ],
+      "evidenceRole": "supporting",
+      "capturedAt": "2026-08-31T18:48:33Z"
+    }
+  ],
+  "entryEvidence": [
+    {
+      "entryId": "editorial-signal-reading-order",
+      "primarySourceId": "cambridge-multimedia-visual-displays-2021",
+      "supportingSourceIds": [
+        "princeton-data-visualization-2018"
+      ],
+      "evidenceSourceIds": [
+        "cambridge-multimedia-visual-displays-2021",
+        "princeton-data-visualization-2018"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Signals reduce extraneous search before interpretation."
+    },
+    {
+      "entryId": "editorial-grouping-reduces-search",
+      "primarySourceId": "princeton-data-visualization-2018",
+      "supportingSourceIds": [
+        "cambridge-multimedia-visual-displays-2021"
+      ],
+      "evidenceSourceIds": [
+        "princeton-data-visualization-2018",
+        "cambridge-multimedia-visual-displays-2021"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Perceptual grouping proposes relations before reading."
+    },
+    {
+      "entryId": "editorial-structure-inference",
+      "primarySourceId": "cambridge-multimedia-visual-displays-2021",
+      "supportingSourceIds": [
+        "princeton-data-visualization-2018"
+      ],
+      "evidenceSourceIds": [
+        "cambridge-multimedia-visual-displays-2021",
+        "princeton-data-visualization-2018"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Representation should match the inference it asks for."
+    },
+    {
+      "entryId": "spatial-legibility-supports-orientation",
+      "primarySourceId": "lynch-image-city-1960",
+      "supportingSourceIds": [
+        "jackson-sense-place-time-1994"
+      ],
+      "evidenceSourceIds": [
+        "lynch-image-city-1960",
+        "jackson-sense-place-time-1994"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Legible form supports orientation through a coherent environmental image."
+    },
+    {
+      "entryId": "spatial-landmarks-anchor-transition",
+      "primarySourceId": "lynch-image-city-1960",
+      "supportingSourceIds": [
+        "jackson-sense-place-time-1994"
+      ],
+      "evidenceSourceIds": [
+        "lynch-image-city-1960",
+        "jackson-sense-place-time-1994"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Distinct anchors stabilize transitions between regions."
+    },
+    {
+      "entryId": "spatial-thresholds-mark-change",
+      "primarySourceId": "jackson-sense-place-time-1994",
+      "supportingSourceIds": [
+        "lynch-image-city-1960"
+      ],
+      "evidenceSourceIds": [
+        "jackson-sense-place-time-1994",
+        "lynch-image-city-1960"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Transitions become intelligible when a threshold marks a change in relation."
+    },
+    {
+      "entryId": "product-signifiers-reveal-action",
+      "primarySourceId": "norman-everyday-things-2014",
+      "supportingSourceIds": [
+        "iso-9241-110-2020"
+      ],
+      "evidenceSourceIds": [
+        "norman-everyday-things-2014",
+        "iso-9241-110-2020"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Action becomes discoverable when perceived cues match available operations."
+    },
+    {
+      "entryId": "product-feedback-closes-action-loop",
+      "primarySourceId": "norman-everyday-things-2014",
+      "supportingSourceIds": [
+        "iso-9241-110-2020"
+      ],
+      "evidenceSourceIds": [
+        "norman-everyday-things-2014",
+        "iso-9241-110-2020"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Feedback closes the gap between action and interpreted result."
+    },
+    {
+      "entryId": "product-mapping-preserves-control",
+      "primarySourceId": "iso-9241-110-2020",
+      "supportingSourceIds": [
+        "norman-everyday-things-2014"
+      ],
+      "evidenceSourceIds": [
+        "iso-9241-110-2020",
+        "norman-everyday-things-2014"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Natural mapping reduces translation between intention and control."
+    },
+    {
+      "entryId": "film-framing-allocates-attention",
+      "primarySourceId": "bordwell-narration-fiction-film-1985",
+      "supportingSourceIds": [
+        "bordwell-staiger-thompson-classical-hollywood-1985"
+      ],
+      "evidenceSourceIds": [
+        "bordwell-narration-fiction-film-1985",
+        "bordwell-staiger-thompson-classical-hollywood-1985"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Framing allocates attention by selecting a relation, not merely an object."
+    },
+    {
+      "entryId": "film-continuity-preserves-orientation",
+      "primarySourceId": "bordwell-staiger-thompson-classical-hollywood-1985",
+      "supportingSourceIds": [
+        "bordwell-narration-fiction-film-1985"
+      ],
+      "evidenceSourceIds": [
+        "bordwell-staiger-thompson-classical-hollywood-1985",
+        "bordwell-narration-fiction-film-1985"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Continuity cues preserve orientation across changes in view."
+    },
+    {
+      "entryId": "film-withholding-creates-inference",
+      "primarySourceId": "bordwell-narration-fiction-film-1985",
+      "supportingSourceIds": [
+        "bordwell-staiger-thompson-classical-hollywood-1985"
+      ],
+      "evidenceSourceIds": [
+        "bordwell-narration-fiction-film-1985",
+        "bordwell-staiger-thompson-classical-hollywood-1985"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Withholding can invite inference when enough evidence remains."
+    },
+    {
+      "entryId": "photo-frame-creates-meaningful-exclusion",
+      "primarySourceId": "szarkowski-photographers-eye-1966",
+      "supportingSourceIds": [
+        "armstrong-scenes-library-1998"
+      ],
+      "evidenceSourceIds": [
+        "szarkowski-photographers-eye-1966",
+        "armstrong-scenes-library-1998"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: The frame creates meaning through deliberate exclusion."
+    },
+    {
+      "entryId": "photo-vantage-changes-relation",
+      "primarySourceId": "szarkowski-photographers-eye-1966",
+      "supportingSourceIds": [
+        "armstrong-scenes-library-1998"
+      ],
+      "evidenceSourceIds": [
+        "szarkowski-photographers-eye-1966",
+        "armstrong-scenes-library-1998"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Vantage changes the relation between viewer and subject."
+    },
+    {
+      "entryId": "photo-context-reframes-interpretation",
+      "primarySourceId": "armstrong-scenes-library-1998",
+      "supportingSourceIds": [
+        "szarkowski-photographers-eye-1966"
+      ],
+      "evidenceSourceIds": [
+        "armstrong-scenes-library-1998",
+        "szarkowski-photographers-eye-1966"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Context changes how an image is read without changing its pixels."
+    },
+    {
+      "entryId": "music-expectation-shapes-tension",
+      "primarySourceId": "huron-sweet-anticipation-2006",
+      "supportingSourceIds": [
+        "london-hearing-time-2012"
+      ],
+      "evidenceSourceIds": [
+        "huron-sweet-anticipation-2006",
+        "london-hearing-time-2012"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Expectation makes timing emotionally consequential."
+    },
+    {
+      "entryId": "music-meter-organizes-attention",
+      "primarySourceId": "london-hearing-time-2012",
+      "supportingSourceIds": [
+        "huron-sweet-anticipation-2006"
+      ],
+      "evidenceSourceIds": [
+        "london-hearing-time-2012",
+        "huron-sweet-anticipation-2006"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Meter organizes attention into a temporal grid."
+    },
+    {
+      "entryId": "music-surprise-needs-established-pattern",
+      "primarySourceId": "huron-sweet-anticipation-2006",
+      "supportingSourceIds": [
+        "london-hearing-time-2012"
+      ],
+      "evidenceSourceIds": [
+        "huron-sweet-anticipation-2006",
+        "london-hearing-time-2012"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Surprise is legible only against a learned baseline."
+    },
+    {
+      "entryId": "interaction-task-fit-beats-technology",
+      "primarySourceId": "iso-9241-110-2020",
+      "supportingSourceIds": [
+        "moggridge-designing-interactions-2007"
+      ],
+      "evidenceSourceIds": [
+        "iso-9241-110-2020",
+        "moggridge-designing-interactions-2007"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Interaction should be shaped by the task rather than the available technology."
+    },
+    {
+      "entryId": "interaction-predictability-supports-learning",
+      "primarySourceId": "iso-9241-110-2020",
+      "supportingSourceIds": [
+        "moggridge-designing-interactions-2007"
+      ],
+      "evidenceSourceIds": [
+        "iso-9241-110-2020",
+        "moggridge-designing-interactions-2007"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Predictable behavior lets people build reusable expectations."
+    },
+    {
+      "entryId": "interaction-feedback-reveals-system-state",
+      "primarySourceId": "moggridge-designing-interactions-2007",
+      "supportingSourceIds": [
+        "iso-9241-110-2020"
+      ],
+      "evidenceSourceIds": [
+        "moggridge-designing-interactions-2007",
+        "iso-9241-110-2020"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Feedback should expose the state needed for the next decision."
+    },
+    {
+      "entryId": "perception-attention-limits-conscious-access",
+      "primarySourceId": "mack-rock-inattentional-blindness-1998",
+      "supportingSourceIds": [
+        "tsotsos-visual-attention-2021"
+      ],
+      "evidenceSourceIds": [
+        "mack-rock-inattentional-blindness-1998",
+        "tsotsos-visual-attention-2021"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Unattended information may fail to become consciously available."
+    },
+    {
+      "entryId": "perception-change-needs-salient-cue",
+      "primarySourceId": "mack-rock-inattentional-blindness-1998",
+      "supportingSourceIds": [
+        "tsotsos-visual-attention-2021"
+      ],
+      "evidenceSourceIds": [
+        "mack-rock-inattentional-blindness-1998",
+        "tsotsos-visual-attention-2021"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Meaningful change needs a cue that competes successfully for attention."
+    },
+    {
+      "entryId": "perception-task-relevance-guides-selection",
+      "primarySourceId": "tsotsos-visual-attention-2021",
+      "supportingSourceIds": [
+        "mack-rock-inattentional-blindness-1998"
+      ],
+      "evidenceSourceIds": [
+        "tsotsos-visual-attention-2021",
+        "mack-rock-inattentional-blindness-1998"
+      ],
+      "claimSupportNote": "Primary locator and independent supporting locator were inspected for the bounded causal claim: Selection improves when relevance is specified by task and scene."
+    }
+  ]
+}
