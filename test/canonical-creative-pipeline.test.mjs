@@ -232,6 +232,19 @@ test('canonical handoff passes only valid, traceable, production-complete creati
   assert.equal(output.truth.productionApprovalFabricated, false);
 });
 
+test('a valid decision for world A cannot authorize an exploration selected by a separate valid decision for world B', () => {
+  const parts = fixture();
+  const pre = parts.exploration.preSelectionExploration;
+  const refs = parts.visualProofEvidence.worlds.find((world) => world.worldId === 'world-b').evidenceRefs;
+  const decisionB = buildCreativeWorldHumanDecision({ exploration: pre, visualProofEvidence: parts.visualProofEvidence, selectedWorldId: 'world-b', reviewedWorldEvidenceRefs: refs, reviewedComparisonRefs: parts.visualProofEvidence.comparisonRefs, rationale: 'The human selects World B for this separate decision.', humanConfirmed: true, decidedAt: '2026-08-31T16:00:00Z', evidenceRef: 'fixture://world-b-decision' });
+  const selectedB = selectCreativeWorld(pre, { humanDecision: decisionB, visualProofEvidence: parts.visualProofEvidence });
+  const output = buildCanonicalCreativeProductionHandoff({ ...handoffInput(parts), selectedCreativeWorld: selectedB.selectedWorld, creativeWorldExploration: selectedB, creativeWorldHumanDecision: parts.creativeWorldHumanDecision, creativeDirection: { ...parts.direction, worldContext: { id: 'world-b' } } });
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeSelectionHumanGoverned, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-human-decision-selected-world-mismatch'));
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-human-decision-selection-record-mismatch'));
+});
+
 test('arbitrary review-ready thesis without deliberation authority cannot cross production boundary', () => {
   const parts = fixture();
   parts.deliberation = null;

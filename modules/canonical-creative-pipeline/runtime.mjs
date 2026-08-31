@@ -1,6 +1,7 @@
 import { reviewCreativeThesisAuthority } from '../creative-thesis/authority.mjs';
 import { reviewCreativeWorldExploration } from '../creative-world/runtime.mjs';
 import { reviewCreativeWorldHumanDecision } from '../creative-world/authority.mjs';
+import { fingerprintCreativeValue } from '../creative-intelligence-foundation/fingerprint.mjs';
 
 function finding(severity, code, message, evidence = {}) {
   return { severity, code, message, evidence };
@@ -216,6 +217,18 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const provenance = selectionProvenance(exploration, world ?? {}, thesis, visualProofEvidence, projectId);
   const worldDecisionReview = reviewCreativeWorldHumanDecision({ decision: creativeWorldHumanDecision, exploration: input.preSelectionCreativeWorldExploration ?? exploration.preSelectionExploration ?? exploration, visualProofEvidence });
   if (!worldDecisionReview.pass) findings.push(...worldDecisionReview.findings);
+  const preSelectionExploration = input.preSelectionCreativeWorldExploration ?? exploration.preSelectionExploration ?? exploration;
+  const canonicalSelectedCandidate = (preSelectionExploration?.worlds ?? []).find((item) => item?.id === selectedWorldId) ?? null;
+  const decisionMatchesSelectedWorld = worldDecisionReview.pass === true
+    && worldDecisionReview.decision.selectedWorldId === selectedWorldId
+    && worldDecisionReview.decision.selectedWorldFingerprint === fingerprintCreativeValue(canonicalSelectedCandidate ?? {});
+  const embeddedSelectionDecision = exploration?.selection?.humanDecision ?? null;
+  const embeddedDecisionReview = reviewCreativeWorldHumanDecision({ decision: embeddedSelectionDecision, exploration: preSelectionExploration, visualProofEvidence });
+  const selectionDecisionMatchesExternalDecision = embeddedDecisionReview.pass === true
+    && embeddedDecisionReview.decision.selectedWorldId === selectedWorldId
+    && fingerprintCreativeValue(worldDecisionReview.decision ?? {}) === fingerprintCreativeValue(embeddedDecisionReview.decision ?? {});
+  if (!decisionMatchesSelectedWorld) findings.push(finding('blocker', 'canonical-world-human-decision-selected-world-mismatch', 'The external Human World decision does not authorize the exact selected Creative World crossing the canonical boundary.'));
+  if (!selectionDecisionMatchesExternalDecision) findings.push(finding('blocker', 'canonical-world-human-decision-selection-record-mismatch', 'The selected exploration must persist the same freshly verified Human World decision supplied to canonical handoff.'));
   if (!provenance.explorationReview.valid) {
     findings.push(finding('blocker', 'canonical-world-exploration-invalid', 'Canonical production requires the complete Creative World Exploration to remain review-ready, thesis-bound, and to contain the selected world among 3–5 reviewed alternatives.', {
       worldId: selectedWorldId,
@@ -294,9 +307,11 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
       creativeThesisAuthorityValid: thesisAuthorityReview.pass === true,
       creativeThesisHumanApproved: thesisAuthorityReview.authority?.humanApproved === true,
       creativeWorldExplorationRevalidated: provenance.explorationReview.valid,
-      creativeSelectionHumanGoverned: authorityValid,
+      creativeSelectionHumanGoverned: authorityValid && decisionMatchesSelectedWorld && selectionDecisionMatchesExternalDecision,
       creativeWorldHumanDecisionRequired: true,
       creativeWorldHumanDecisionValid: worldDecisionReview.pass === true,
+      creativeWorldHumanDecisionMatchesSelectedWorld: decisionMatchesSelectedWorld,
+      creativeWorldSelectionDecisionBindingValid: selectionDecisionMatchesExternalDecision,
       creativeSelectionProvenanceValid: provenance.valid,
       renderedVisualProofEvidenceValid: provenance.visualEvidence.valid,
       creativeWorldProductionContractComplete: completeness.complete,
