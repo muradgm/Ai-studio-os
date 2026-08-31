@@ -1,0 +1,138 @@
+{
+  "schema": "ai-studio-os/creative-knowledge-generalist-freeze@1",
+  "corpusId": "creative-knowledge-generalist-v1",
+  "corpusVersion": "creative-knowledge-generalist-v1",
+  "entryCount": 24,
+  "domainCounts": {
+    "editorial-and-information-design": 3,
+    "architecture-and-spatial-experience": 3,
+    "industrial-and-product-design": 3,
+    "film-and-cinematography": 3,
+    "photography-and-visual-framing": 3,
+    "music-and-rhythm": 3,
+    "interaction-and-hci": 3,
+    "visual-perception-and-cognition": 3
+  },
+  "entryIds": [
+    "editorial-grouping-reduces-search",
+    "editorial-signal-reading-order",
+    "editorial-structure-inference",
+    "film-continuity-preserves-orientation",
+    "film-framing-allocates-attention",
+    "film-withholding-creates-inference",
+    "interaction-feedback-reveals-system-state",
+    "interaction-predictability-supports-learning",
+    "interaction-task-fit-beats-technology",
+    "music-expectation-shapes-tension",
+    "music-meter-organizes-attention",
+    "music-surprise-needs-established-pattern",
+    "perception-attention-limits-conscious-access",
+    "perception-change-needs-salient-cue",
+    "perception-task-relevance-guides-selection",
+    "photo-context-reframes-interpretation",
+    "photo-frame-creates-meaningful-exclusion",
+    "photo-vantage-changes-relation",
+    "product-feedback-closes-action-loop",
+    "product-mapping-preserves-control",
+    "product-signifiers-reveal-action",
+    "spatial-landmarks-anchor-transition",
+    "spatial-legibility-supports-orientation",
+    "spatial-thresholds-mark-change"
+  ],
+  "sourceIds": [
+    "armstrong-scenes-library-1998",
+    "bordwell-narration-fiction-film-1985",
+    "bordwell-staiger-thompson-classical-hollywood-1985",
+    "cambridge-multimedia-visual-displays-2021",
+    "huron-sweet-anticipation-2006",
+    "iso-9241-110-2020",
+    "jackson-sense-place-time-1994",
+    "london-hearing-time-2012",
+    "lynch-image-city-1960",
+    "mack-rock-inattentional-blindness-1998",
+    "moggridge-designing-interactions-2007",
+    "norman-everyday-things-2014",
+    "princeton-data-visualization-2018",
+    "szarkowski-photographers-eye-1966",
+    "tsotsos-visual-attention-2021"
+  ],
+  "sourceManifestFingerprint": "8c70ec413d8312e28b2f79c05e14c12b60858544ae5f77f4253590ee91166e92",
+  "knowledgeLibraryFingerprint": "eeefecb6a83a34daa7859d2538a436eccbc2e68a5eb9bd04c55859a9f0abbec7",
+  "foundationSnapshotFingerprint": "60a0907d95743db80f7fad1885f7c509aaad4511245e6cfcb70a69242a72bad5",
+  "knowledgeGraphFingerprint": "d39b3abe8df6e1a1a79907cfb5cc518133a3d3c004f1549a5013b01dfebb85da",
+  "corpusContentFingerprint": "d4a99a6cb45f598c17b106d91199abaccfb46b6aa72a63a81068c4c872052628",
+  "createdAt": "2026-08-31T00:00:00Z",
+  "frozenAt": "2026-08-31T00:00:00Z",
+  "experimentIntegrity": {
+    "benchmark011KnownBeforeCorpusPopulation": true,
+    "benchmark011BlindConfirmatoryUseAllowed": false,
+    "benchmark011DevelopmentalUseAllowed": true,
+    "benchmark011CapabilityInterpretationRequiresPostTargetDisclosure": true,
+    "unseenBenchmarkRequiredForCleanConfirmatoryEvaluation": true,
+    "corpusFreezeRequiredBeforeUnseenBenchmarkReveal": true,
+    "architectureMustRemainFrozenThroughUnseenBenchmarkExperiment": true
+  },
+  "retrievalNeutralitySmoke": [
+    {
+      "domain": "editorial-and-information-design",
+      "retrievalSnapshotFingerprint": "eaa882f7d1fe71fe9d05582f739a15b364cc8bb1014c0fec70d0c4bf183fe291",
+      "resultIds": [
+        "editorial-grouping-reduces-search",
+        "editorial-signal-reading-order",
+        "editorial-structure-inference"
+      ]
+    },
+    {
+      "domain": "architecture-and-spatial-experience",
+      "retrievalSnapshotFingerprint": "88d1cea0751a3c0d4c60ed29414adda17a208b05c1087c79270cad33721f01ec",
+      "resultIds": [
+        "spatial-legibility-supports-orientation",
+        "spatial-landmarks-anchor-transition",
+        "spatial-thresholds-mark-change"
+      ]
+    },
+    {
+      "domain": "industrial-and-product-design",
+      "retrievalSnapshotFingerprint": "57c050f35e91be5eb671760cae27f7da6f0886791a006eab4e995b602f9e6cd6",
+      "resultIds": [
+        "product-feedback-closes-action-loop"
+      ]
+    },
+    {
+      "domain": "film-and-cinematography",
+      "retrievalSnapshotFingerprint": "20c054ebe227e2e47ad14fe52719348e62257b9d907b4d28440281b709de698d",
+      "resultIds": [
+        "film-framing-allocates-attention"
+      ]
+    },
+    {
+      "domain": "music-and-rhythm",
+      "retrievalSnapshotFingerprint": "1ae4734639cc8cb161522bcacd98e13c1c55f0018b01f7ace72ffeca373829cb",
+      "resultIds": [
+        "music-expectation-shapes-tension",
+        "music-meter-organizes-attention"
+      ]
+    },
+    {
+      "domain": "interaction-and-hci",
+      "retrievalSnapshotFingerprint": "339c2def8003fece7f1931f729e6f740f56536a691c050f6a924295e8a7be26f",
+      "resultIds": [
+        "interaction-feedback-reveals-system-state",
+        "interaction-predictability-supports-learning",
+        "interaction-task-fit-beats-technology"
+      ]
+    }
+  ],
+  "truth": {
+    "generalPurpose": true,
+    "benchmarkTailored": false,
+    "benchmark011KnownBeforePopulation": true,
+    "benchmark011BlindConfirmatoryUseAllowed": false,
+    "benchmark011DevelopmentalUseAllowed": true,
+    "unseenBenchmarkRequiredForCleanConfirmation": true,
+    "projectAuthority": false,
+    "creativeAuthority": false,
+    "productionAuthority": false,
+    "providerGenerationUsed": false
+  }
+}
