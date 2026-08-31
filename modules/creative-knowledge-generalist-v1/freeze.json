@@ -56,13 +56,13 @@
     "szarkowski-photographers-eye-1966",
     "tsotsos-visual-attention-2021"
   ],
-  "sourceManifestFingerprint": "8c70ec413d8312e28b2f79c05e14c12b60858544ae5f77f4253590ee91166e92",
-  "knowledgeLibraryFingerprint": "eeefecb6a83a34daa7859d2538a436eccbc2e68a5eb9bd04c55859a9f0abbec7",
-  "foundationSnapshotFingerprint": "60a0907d95743db80f7fad1885f7c509aaad4511245e6cfcb70a69242a72bad5",
-  "knowledgeGraphFingerprint": "d39b3abe8df6e1a1a79907cfb5cc518133a3d3c004f1549a5013b01dfebb85da",
-  "corpusContentFingerprint": "d4a99a6cb45f598c17b106d91199abaccfb46b6aa72a63a81068c4c872052628",
-  "createdAt": "2026-08-31T00:00:00Z",
-  "frozenAt": "2026-08-31T00:00:00Z",
+  "sourceManifestFingerprint": "a27d07b4dda350c384745fa38ab99f64d5b5af49ddf5803326bf5266cdf581f8",
+  "knowledgeLibraryFingerprint": "6ebfae1cce2fed2c2b7b321487259cfcf0df918a1e2a820cd20e3b4780b4d143",
+  "foundationSnapshotFingerprint": "18d472d6b8cc5c045796fb58cff0c61f102c2463c294e7aa17625184c0a3409e",
+  "knowledgeGraphFingerprint": "f577b66c371d3275641b207378ff4efd973c103dc87d0ec6ab610d3196d6a093",
+  "corpusContentFingerprint": "0a5541692f83e2f5fea5b89d0c26bc426e2d771aebe7bc1c69e3ad6872dda013",
+  "createdAt": "2026-08-31T18:49:00Z",
+  "frozenAt": "2026-08-31T18:50:00Z",
   "experimentIntegrity": {
     "benchmark011KnownBeforeCorpusPopulation": true,
     "benchmark011BlindConfirmatoryUseAllowed": false,
@@ -75,7 +75,7 @@
   "retrievalNeutralitySmoke": [
     {
       "domain": "editorial-and-information-design",
-      "retrievalSnapshotFingerprint": "eaa882f7d1fe71fe9d05582f739a15b364cc8bb1014c0fec70d0c4bf183fe291",
+      "retrievalSnapshotFingerprint": "64a039c3006da0fd8a1065819047b8f74e08841e59a5b5e6ff230eb146bb6129",
       "resultIds": [
         "editorial-grouping-reduces-search",
         "editorial-signal-reading-order",
@@ -84,7 +84,7 @@
     },
     {
       "domain": "architecture-and-spatial-experience",
-      "retrievalSnapshotFingerprint": "88d1cea0751a3c0d4c60ed29414adda17a208b05c1087c79270cad33721f01ec",
+      "retrievalSnapshotFingerprint": "2a6aea951578be6c3eafda53aa64b6bda4c96507d90be886b7ee2ea80aa617ea",
       "resultIds": [
         "spatial-legibility-supports-orientation",
         "spatial-landmarks-anchor-transition",
@@ -93,21 +93,21 @@
     },
     {
       "domain": "industrial-and-product-design",
-      "retrievalSnapshotFingerprint": "57c050f35e91be5eb671760cae27f7da6f0886791a006eab4e995b602f9e6cd6",
+      "retrievalSnapshotFingerprint": "4627e73edb61b54a68898ebec1167c18f005b5f41b3cef568df692a441d8890e",
       "resultIds": [
         "product-feedback-closes-action-loop"
       ]
     },
     {
       "domain": "film-and-cinematography",
-      "retrievalSnapshotFingerprint": "20c054ebe227e2e47ad14fe52719348e62257b9d907b4d28440281b709de698d",
+      "retrievalSnapshotFingerprint": "28d677109f67e00a2a6e76d70df049cd2f7893605e5dca0b7c0efe71f7a0003d",
       "resultIds": [
         "film-framing-allocates-attention"
       ]
     },
     {
       "domain": "music-and-rhythm",
-      "retrievalSnapshotFingerprint": "1ae4734639cc8cb161522bcacd98e13c1c55f0018b01f7ace72ffeca373829cb",
+      "retrievalSnapshotFingerprint": "222182b9c480ce44d450b0bbab27e3f606f81e7aab6c2983b114e18d94dd9fbc",
       "resultIds": [
         "music-expectation-shapes-tension",
         "music-meter-organizes-attention"
@@ -115,7 +115,7 @@
     },
     {
       "domain": "interaction-and-hci",
-      "retrievalSnapshotFingerprint": "339c2def8003fece7f1931f729e6f740f56536a691c050f6a924295e8a7be26f",
+      "retrievalSnapshotFingerprint": "e6ec06fa7382682fc2d6f8fa53728ce7f70d84b3b4a1b5b786c67d6c8c393ca6",
       "resultIds": [
         "interaction-feedback-reveals-system-state",
         "interaction-predictability-supports-learning",
