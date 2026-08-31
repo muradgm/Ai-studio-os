@@ -9,6 +9,7 @@ import {
   buildCreativeThesisDeliberation
 } from '../modules/creative-thesis/intelligence.mjs';
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
+import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
@@ -156,11 +157,8 @@ function fixture() {
     commercialObjective: 'Increase understanding and conversion confidence',
     authoredCandidate: authored
   });
-  const thesis = {
-    ...builtThesis,
-    id: 'thesis-1',
-    truth: { ...(builtThesis.truth ?? {}), humanCreativeApproval: true }
-  };
+  const thesis = { ...builtThesis, id: 'thesis-1' };
+  const humanDecision = buildCreativeThesisHumanDecision({ deliberation, thesis, decision: 'approve-recommendation', sourceCandidateId: deliberation.selection.hypothesisId, rationale: 'The human approves the reviewed Thesis recommendation.', humanConfirmed: true, decidedAt: '2026-08-31T10:55:36.158Z', evidenceRef: 'fixture://creative-thesis-decision' });
 
   const preSelectionExploration = buildCreativeWorldExploration({
     creativeThesis: thesis,
@@ -201,7 +199,7 @@ function fixture() {
     worldContext: { id: 'world-a' },
     findings: []
   };
-  return { deliberation, thesis, world, exploration, styleFrameProof, visualProofEvidence, direction };
+  return { deliberation, thesis, humanDecision, world, exploration, styleFrameProof, visualProofEvidence, direction };
 }
 
 function handoffInput(parts) {
@@ -209,6 +207,7 @@ function handoffInput(parts) {
     projectId: 'project-1',
     creativeThesisDeliberation: parts.deliberation,
     creativeThesis: parts.thesis,
+    creativeThesisHumanDecision: parts.humanDecision,
     selectedCreativeWorld: parts.world,
     creativeWorldExploration: parts.exploration,
     styleFrameProof: parts.styleFrameProof,
@@ -245,9 +244,9 @@ test('arbitrary review-ready thesis without deliberation authority cannot cross 
   assert.ok(output.findings.some((item) => item.code === 'canonical-thesis-authority-invalid'));
 });
 
-test('thesis without explicit human creative approval cannot cross production boundary', () => {
+test('thesis without an explicit human decision cannot cross production boundary', () => {
   const parts = fixture();
-  parts.thesis.truth.humanCreativeApproval = false;
+  parts.humanDecision = null;
   const output = buildCanonicalCreativeProductionHandoff(handoffInput(parts));
   assert.equal(output.pass, false);
   assert.equal(output.truth.creativeThesisHumanApproved, false);

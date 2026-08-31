@@ -1,0 +1,410 @@
+{
+  "schema": "ai-studio-os/benchmark-011-after-matter-thesis-recovery@1",
+  "stage": "creative-thesis-recovery-review",
+  "status": "human-approved-thesis-awaiting-world-exploration",
+  "projectId": "benchmark-011-after-matter",
+  "historicalGrounding": {
+    "frozenBriefFingerprint": "2e1e9c2259ee9ac3794d0b4e15871295f9ca624f9ec71d79cf1231f833745939",
+    "historicalPhase0Refs": [
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/dogfood-brief.json",
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/selection.json",
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-desktop.png",
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-mobile.png",
+      "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/index.html"
+    ],
+    "historicalSelectedWorld": {
+      "id": "friction-index",
+      "fingerprint": "3e1d94e065ff5a0aca8cc04f65d7788e7bdd29b09901031edced3994e4b51324"
+    },
+    "historicalFactsOnly": true,
+    "recoveryAuthorshipIsNew": true
+  },
+  "deliberation": {
+    "schema": "ai-studio-os/creative-thesis-deliberation@1",
+    "stage": "creative-thesis-deliberation",
+    "projectId": "benchmark-011-after-matter",
+    "sourceTruths": [
+      "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+      "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation.",
+      "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves.",
+      "Mobile is a primary visit-planning surface, not a reduced desktop afterthought.",
+      "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback.",
+      "Motion must derive from accumulated time, material memory, repair or change; technology cannot become the concept.",
+      "Long-form reading requires deliberate stillness and stable hierarchy.",
+      "Primary navigation, exhibition information and ticket reservation remain immediately usable throughout the experience.",
+      "Desktop and mobile require authored reinterpretation rather than scaled copies.",
+      "Reduced-motion behavior preserves semantic sequence and state meaning.",
+      "The experience remains plausible for production performance and accessibility budgets.",
+      "Real objects remain primary visual evidence; generic synthetic hero imagery cannot replace them."
+    ],
+    "sourceOpportunities": [
+      "material-evidence-without-spectacle"
+    ],
+    "contradictions": [
+      "Archival authority versus tactile sensuality.",
+      "Slow contemplative reading versus moments of memorable temporal revelation.",
+      "Material permanence versus digital ephemerality.",
+      "One hundred distinct objects versus one coherent exhibition identity."
+    ],
+    "hypotheses": [
+      {
+        "id": "trace-as-evidence-system",
+        "statement": "Let each object's accumulated change become evidence that guides movement: a visitor enters history through one visible trace, then returns to the object with its use made legible.",
+        "tension": "archival authority x tactile sensuality",
+        "truthRefs": [
+          "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+          "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation.",
+          "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves."
+        ],
+        "opportunityRefs": [
+          "material-evidence-without-spectacle"
+        ],
+        "crossDomainConnections": [
+          "object conservation x navigable evidence index"
+        ],
+        "experientialConsequences": [
+          "Object encounters begin with one factual trace rather than an atmospheric transition.",
+          "Reading holds after a trace has established its historical consequence."
+        ],
+        "commercialConsequences": [
+          "Ticketing and visit details remain visibly available because evidence-led exploration cannot become a navigation maze."
+        ],
+        "antiGenericClaims": [
+          "Reject generic distressed styling that is not tied to an actual object history.",
+          "Reject cinematic movement that carries visitors past the objects."
+        ],
+        "risks": [
+          "The trace could become a decorative filter if object-specific evidence is unavailable."
+        ],
+        "critique": [
+          "Strongest continuity with the historical Friction Index selection, but it can over-privilege one interaction pattern across all exhibition moments."
+        ]
+      },
+      {
+        "id": "repair-as-public-record",
+        "statement": "Treat repair, care, uncertainty and alteration as the exhibition's public record, making preservation itself a readable editorial structure rather than a hidden conservation backstory.",
+        "tension": "material permanence x digital ephemerality",
+        "truthRefs": [
+          "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+          "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation.",
+          "Mobile is a primary visit-planning surface, not a reduced desktop afterthought."
+        ],
+        "opportunityRefs": [
+          "material-evidence-without-spectacle"
+        ],
+        "crossDomainConnections": [
+          "conservation ledger x editorial reading system"
+        ],
+        "experientialConsequences": [
+          "Visitors can move from an object to a legible chain of repair and care without losing the object context.",
+          "Long-form curatorial writing accommodates uncertainty and provenance as meaningful evidence."
+        ],
+        "commercialConsequences": [
+          "Visit planning stays concise and factual, counterbalancing the denser archival material."
+        ],
+        "antiGenericClaims": [
+          "Reject restoration as a luxury patina.",
+          "Reject an interface that turns documentation into decorative metadata."
+        ],
+        "risks": [
+          "The record can become bureaucratic and obscure the sensuous encounter with the object."
+        ],
+        "critique": [
+          "Most intellectually distinct, but risks making one hundred object encounters feel like an archive interface rather than an exhibition experience."
+        ]
+      },
+      {
+        "id": "hundred-temporal-portraits",
+        "statement": "Make one hundred distinct object lives perceptible as a shared tempo: each encounter isolates a particular change, while deliberate stillness lets the collection cohere without flattening its differences.",
+        "tension": "one hundred distinct objects x one coherent exhibition identity",
+        "truthRefs": [
+          "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+          "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves.",
+          "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback."
+        ],
+        "opportunityRefs": [
+          "material-evidence-without-spectacle"
+        ],
+        "crossDomainConnections": [
+          "museum sequence x portrait cycle"
+        ],
+        "experientialConsequences": [
+          "Each object receives a distinct temporal encounter rather than a universal animated template.",
+          "Reduced motion preserves the same sequence of object, change and context through stable hierarchy."
+        ],
+        "commercialConsequences": [
+          "The collection identity can carry across desktop and mobile without reducing practical visit-planning tasks to a secondary route."
+        ],
+        "antiGenericClaims": [
+          "Reject one branded motion gesture applied uniformly to every object.",
+          "Reject ambient movement used to signal cultural prestige."
+        ],
+        "risks": [
+          "The collection-level idea may be too diffuse to guide a visitor through an individual object journey."
+        ],
+        "critique": [
+          "Best collection-scale frame, but less immediately actionable for wayfinding and may dilute the specificity of repair as evidence."
+        ]
+      }
+    ],
+    "synthesis": {
+      "statement": "Let accumulated material change become the exhibition's evidence system: each trace opens a factual route into an object's lived history, then returns attention to the object and the practical museum visit.",
+      "sourceHypothesisIds": [
+        "trace-as-evidence-system",
+        "repair-as-public-record"
+      ],
+      "rationale": "Trace as Evidence System supplies the navigable object-to-history behavior; Repair as Public Record ensures that the trace remains factual care and provenance rather than a generic distressed aesthetic."
+    },
+    "selection": {
+      "hypothesisId": "trace-as-evidence-system",
+      "rationale": "It gives the exhibition a project-specific interaction rule: factual material change becomes the route into history, while the strongest constraints from the other candidates preserve repair as evidence and stillness as an active museum posture.",
+      "competitorTransferJudgment": "A generic museum or design site cannot reuse this unchanged: without a collection where scratches, repairs, fading and deformation are actual evidence of use, the trace-as-route rule loses its reason to exist.",
+      "strategicRelevanceJudgment": "It differentiates the launch experience without sacrificing the practical routes that make dates, access, events and ticket reservation usable.",
+      "experientialPotentialJudgment": "It can govern imagery, hierarchy, object navigation, motion restraint, reading posture, responsive recomposition and reduced-motion equivalence without making any technology the concept."
+    },
+    "truth": {
+      "generatedHypothesesAreCandidatesOnly": true,
+      "humanCreativeApproval": false,
+      "thesisFrozen": false
+    },
+    "review": {
+      "schema": "ai-studio-os/creative-thesis-deliberation-review@1",
+      "pass": true,
+      "reviewReady": true,
+      "status": "ready-for-thesis-authorship",
+      "findings": [],
+      "truth": {
+        "structuralDeliberationReviewOnly": true,
+        "humanCreativeApproval": false,
+        "selectedHypothesisAuthoredAsThesis": false
+      }
+    },
+    "pass": true,
+    "reviewReady": true,
+    "status": "ready-for-thesis-authorship",
+    "findings": []
+  },
+  "proposedCreativeThesis": {
+    "schema": "ai-studio-os/creative-thesis@1",
+    "stage": "creative-thesis",
+    "projectId": "benchmark-011-after-matter",
+    "intent": "Create the digital launch experience for a contemporary design museum exhibition about patina, repair, wear and material memory. The experience must make physical time perceptible without turning the site into a cinematic demo or sacrificing reading, wayfinding, ticketing and accessibility.",
+    "audience": "Design-literate museum visitors, architects, product designers, students and culturally curious general visitors using desktop and mobile devices.",
+    "commercialObjective": "Make the exhibition memorable while preserving clear access to dates, location, events and ticket reservation.",
+    "authorship": {
+      "mode": "authored-candidate",
+      "supplied": true,
+      "humanCreativeApproval": false
+    },
+    "governingIdea": {
+      "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+      "singular": true,
+      "sourceOpportunityId": "opportunity-1"
+    },
+    "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle. Creative tension: archival authority x tactile sensuality. Truth anchor: The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+    "creativeTension": {
+      "label": "archival authority x tactile sensuality",
+      "traits": [
+        "archival authority",
+        "tactile sensuality"
+      ]
+    },
+    "whyThisProject": "After Matter is about one hundred real objects whose wear, repair, fading and deformation are evidence of use. The thesis keeps those histories primary while preserving reading, wayfinding, ticketing, mobile access and reduced-motion meaning.",
+    "sourceTruths": [
+      {
+        "id": "truth-1",
+        "value": "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide."
+      },
+      {
+        "id": "truth-2",
+        "value": "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation."
+      },
+      {
+        "id": "truth-3",
+        "value": "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves."
+      },
+      {
+        "id": "truth-4",
+        "value": "Mobile is a primary visit-planning surface, not a reduced desktop afterthought."
+      },
+      {
+        "id": "truth-5",
+        "value": "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback."
+      },
+      {
+        "id": "truth-6",
+        "value": "Motion must derive from accumulated time, material memory, repair or change; technology cannot become the concept."
+      },
+      {
+        "id": "truth-7",
+        "value": "Long-form reading requires deliberate stillness and stable hierarchy."
+      },
+      {
+        "id": "truth-8",
+        "value": "Primary navigation, exhibition information and ticket reservation remain immediately usable throughout the experience."
+      },
+      {
+        "id": "truth-9",
+        "value": "Desktop and mobile require authored reinterpretation rather than scaled copies."
+      },
+      {
+        "id": "truth-10",
+        "value": "Reduced-motion behavior preserves semantic sequence and state meaning."
+      },
+      {
+        "id": "truth-11",
+        "value": "The experience remains plausible for production performance and accessibility budgets."
+      },
+      {
+        "id": "truth-12",
+        "value": "Real objects remain primary visual evidence; generic synthetic hero imagery cannot replace them."
+      }
+    ],
+    "sourceOpportunity": {
+      "id": "opportunity-1",
+      "value": "material-evidence-without-spectacle"
+    },
+    "categoryRejections": [
+      "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+      "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+      "Continuous camera drift or parallax used only to signal premium aesthetics.",
+      "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+      "Scroll-jacking that delays reading or practical tasks.",
+      "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+    ],
+    "principles": [
+      "Accumulated material change must remain connected to real object histories rather than decorative atmosphere.",
+      "Stillness is the default state for reading, comparison and practical museum tasks.",
+      "Repair and accumulated change are evidence of use, not luxury surface treatment.",
+      "Each medium interprets the evidence system differently without replacing real objects with synthetic spectacle."
+    ],
+    "antiPrinciples": [
+      "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+      "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+      "Continuous camera drift or parallax used only to signal premium aesthetics.",
+      "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+      "Scroll-jacking that delays reading or practical tasks.",
+      "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+    ],
+    "expressionTests": {
+      "typography": "Separate contemplative exhibition voice from factual trace labels and durable reading without making type compete with object evidence.",
+      "image": "Use licensed object photography or new capture to show actual wear, repair and material change; Phase 0 placeholders remain explicitly non-documentary.",
+      "motion": "Make changes in material condition or historical understanding perceptible when they matter, then preserve deliberate stillness; no continuous drift.",
+      "interaction": "Let visitors encounter objects and their material histories without losing orientation or access to practical museum routes.",
+      "sound": "Silence remains the default; any later sound must be grounded in object evidence and retain a silent equivalent.",
+      "responsive": "On desktop, mobile and under reduced motion, preserve the same evidence relationships, reading clarity and access to practical museum tasks through authored reinterpretation."
+    },
+    "technologyPolicy": "Implementation tools serve the evidence system. Motion, browser APIs, generated media and spatial tools are considered only when they make object-specific material time more legible without displacing the objects or museum tasks.",
+    "competitorTransferTest": {
+      "question": "Could another museum or design site reuse this evidence-system Thesis unchanged without the specific collection truth that wear, repair, fading and deformation are meaningful records of use?",
+      "passCondition": "The Thesis should weaken without After Matter’s one hundred real objects and its requirement to make accumulated material time perceptible while preserving reading, wayfinding, ticketing, mobile access and reduced-motion equivalence.",
+      "evidenceRefs": [
+        "truth-1",
+        "truth-2",
+        "truth-3",
+        "opportunity-1"
+      ]
+    },
+    "alternativesConsidered": [
+      {
+        "idea": "Treat repair, care, uncertainty and alteration as the exhibition's public record, making preservation itself a readable editorial structure rather than a hidden conservation backstory.",
+        "rejectedBecause": "Most intellectually distinct, but risks making one hundred object encounters feel like an archive interface rather than an exhibition experience."
+      },
+      {
+        "idea": "Make one hundred distinct object lives perceptible as a shared tempo: each encounter isolates a particular change, while deliberate stillness lets the collection cohere without flattening its differences.",
+        "rejectedBecause": "Best collection-scale frame, but less immediately actionable for wayfinding and may dilute the specificity of repair as evidence."
+      }
+    ],
+    "selectionRationale": "This recovery Thesis is the broadest project-specific governing idea supported by the frozen After Matter brief: material change is meaningful evidence, but the later Creative World determines whether that evidence becomes navigation, editorial record, collection rhythm, or another materially grounded behavior.",
+    "unresolvedRisks": [
+      "Final licensed object photography and object-specific historical records remain outside this recovery pass."
+    ],
+    "truth": {
+      "humanCreativeApproval": false,
+      "creativeThesisFrozen": false,
+      "generatedFromSuppliedTruthAndInspiration": true,
+      "authoredCandidateSupplied": true
+    },
+    "status": "ready-for-creative-direction-review",
+    "pass": true,
+    "reviewReady": true,
+    "findings": [],
+    "review": {
+      "stage": "creative-thesis-review",
+      "status": "ready-for-creative-direction-review",
+      "pass": true,
+      "reviewReady": true,
+      "findings": [],
+      "truth": {
+        "humanCreativeApproval": false,
+        "creativeThesisFrozen": false,
+        "structuralReviewOnly": true
+      }
+    }
+  },
+  "proposedCreativeThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+  "humanDecision": {
+    "schema": "ai-studio-os/creative-thesis-human-decision@1",
+    "projectId": "benchmark-011-after-matter",
+    "decision": "refine-candidate",
+    "sourceDeliberationFingerprint": "a862903b91c9d73929c16cfb779f121f1c656d2c50f960d6e208233f21e5aa46",
+    "sourceCandidateId": "trace-as-evidence-system",
+    "sourceCandidateFingerprint": "61d7104db374256f0d485ef446d98de8f0f3d4794a6fa84dcebf37b9a29eb6b8",
+    "approvedThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+    "rationale": "The trace-as-evidence recommendation contained a strong project-specific principle but prematurely promoted Friction Index’s trace-navigation mechanism into Thesis authority. The human refinement preserves accumulated material change as evidence of lived time while leaving the Creative World layer free to determine how that evidence organizes the experience.",
+    "refinementSummary": "Generalize the Thesis from trace-navigation into accumulated material change as evidence, preserving the later Creative World decision about how that evidence organizes the experience.",
+    "humanConfirmed": true,
+    "decidedAt": "2026-08-31T13:35:27Z",
+    "evidenceRef": "artifact://benchmarks/011-creative-motion-capability-dogfood/canonical-authority-recovery/human-thesis-decision.json",
+    "decisionFingerprint": "83f95a72e2e4a9dae031f190896492064280a846f34e7971ee06af61ca78afa8",
+    "provenance": {
+      "kind": "explicit-operator-supplied-human-creative-decision",
+      "cryptographicallyAuthenticatedHumanIdentity": false,
+      "sourceStatement": "I approve the After Matter Creative Thesis at fingerprint 03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1"
+    }
+  },
+  "thesisAuthorityReview": {
+    "schema": "ai-studio-os/creative-thesis-authority-review@1",
+    "pass": true,
+    "reviewReady": true,
+    "status": "authoritative",
+    "findings": [],
+    "authority": {
+      "kind": "canonical-creative-thesis",
+      "projectId": "benchmark-011-after-matter",
+      "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+      "creativeTension": "archival authority x tactile sensuality",
+      "deliberationSchema": "ai-studio-os/creative-thesis-deliberation@1",
+      "thesisSchema": "ai-studio-os/creative-thesis@1",
+      "humanApproved": true,
+      "humanDecisionMode": "refine-candidate",
+      "machineRecommendationWasNotFinalAuthority": true,
+      "humanRefined": true
+    },
+    "truth": {
+      "deliberationRecomputedAtAuthorityBoundary": true,
+      "thesisRecomputedAtAuthorityBoundary": true,
+      "deliberationProjectIdentityRequired": true,
+      "deliberationCanSelfApprove": false,
+      "humanCreativeApprovalRequired": true,
+      "humanDecisionRecordRequired": true,
+      "machineRecommendationWasNotFinalAuthority": true,
+      "arbitraryThesisObjectAccepted": false
+    }
+  },
+  "deterministicRecommendation": {
+    "hypothesisId": "trace-as-evidence-system",
+    "authoredCandidateFingerprint": "787da1ea4388d5093f863ec5518bdd5fe842c9e9225daa76f5fa05d556528766",
+    "rationale": "It gives the exhibition a project-specific interaction rule: factual material change becomes the route into history, while the strongest constraints from the other candidates preserve repair as evidence and stillness as an active museum posture."
+  },
+  "truth": {
+    "recoveryPassIsNewAuthorship": true,
+    "historicalPhase0SelectionPreservedOnlyAsEvidence": true,
+    "humanCreativeApprovalRecordedByDecision": true,
+    "machineRecommendationWasNotFinalAuthority": true,
+    "creativeWorldSelectionAuthorityCreated": false,
+    "productionApproved": false,
+    "geminiGenerationUsed": false
+  },
+  "snapshotFingerprint": "2a88681869a629e112a9fc8b716136922b3dbaa817316f6089c2bb8a7cbf97c1"
+}
