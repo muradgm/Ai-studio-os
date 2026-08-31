@@ -1,5 +1,5 @@
 import { fingerprintCreativeValue } from '../../../modules/creative-intelligence-foundation/fingerprint.mjs';
-import { buildCreativeThesisHumanDecision, reviewCreativeThesisAuthority } from '../../../modules/creative-thesis/authority.mjs';
+import { reviewCreativeThesisAuthority } from '../../../modules/creative-thesis/authority.mjs';
 import { authoredCandidateFromDeliberation, buildCreativeThesisDeliberation } from '../../../modules/creative-thesis/intelligence.mjs';
 import { buildCreativeThesis } from '../../../modules/creative-thesis/runtime.mjs';
 
@@ -107,7 +107,7 @@ function authoredCandidate(deliberation) {
   };
 }
 
-export function buildAfterMatterThesisRecovery(brief = {}) {
+export function buildAfterMatterThesisRecovery(brief = {}, { humanDecision = null } = {}) {
   const exactBrief = brief && typeof brief === 'object' ? brief : {};
   const projectId = text(exactBrief.projectId);
   const deliberation = buildCreativeThesisDeliberation({
@@ -146,28 +146,17 @@ export function buildAfterMatterThesisRecovery(brief = {}) {
     commercialObjective: 'Make the exhibition memorable while preserving clear access to dates, location, events and ticket reservation.',
     authoredCandidate: candidate
   });
-  const humanDecision = buildCreativeThesisHumanDecision({
-    deliberation,
-    thesis,
-    decision: 'refine-candidate',
-    sourceCandidateId: 'trace-as-evidence-system',
-    rationale: 'The trace-as-evidence recommendation contained a strong project-specific principle but prematurely promoted Friction Index’s trace-navigation mechanism into Thesis authority. The human refinement preserves accumulated material change as evidence of lived time while leaving the Creative World layer free to determine how that evidence organizes the experience.',
-    refinementSummary: 'Generalize the Thesis from trace-navigation into accumulated material change as evidence, preserving the later Creative World decision about how that evidence organizes the experience.',
-    humanConfirmed: true,
-    decidedAt: '2026-08-31T10:55:36.158Z',
-    evidenceRef: 'human-decision://benchmark-011-after-matter/thesis-recovery/2026-08-31'
-  });
   const authorityReview = reviewCreativeThesisAuthority({ deliberation, thesis, humanDecision });
   const packet = {
     schema: RECOVERY_SCHEMA,
     stage: 'creative-thesis-recovery-review',
-    status: authorityReview.reviewReady ? 'human-approved-thesis-awaiting-world-exploration' : 'blocked',
+    status: authorityReview.reviewReady ? 'human-approved-thesis-awaiting-world-exploration' : 'awaiting-human-creative-thesis-approval',
     projectId,
     historicalGrounding: historicalGrounding(exactBrief),
     deliberation,
     proposedCreativeThesis: thesis,
     proposedCreativeThesisFingerprint: fingerprintCreativeValue(thesis),
-    humanDecision,
+    humanDecision: humanDecision ?? null,
     thesisAuthorityReview: authorityReview,
     deterministicRecommendation: {
       hypothesisId: deliberation.selection?.hypothesisId ?? null,

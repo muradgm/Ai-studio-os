@@ -66,6 +66,14 @@ export function buildCreativeThesisHumanDecision({ deliberation, thesis, decisio
 }
 
 export function reviewCreativeThesisHumanDecision({ decision, deliberation, thesis } = {}) {
+  if (!decision || typeof decision !== 'object' || Array.isArray(decision)) {
+    return {
+      schema: 'ai-studio-os/creative-thesis-human-decision-review@1',
+      findings: [finding('blocker', 'creative-thesis-human-decision-missing', 'Creative Thesis authority requires an externally supplied explicit human decision record.')],
+      pass: false,
+      decision: null
+    };
+  }
   const findings = [];
   const core = decisionCore(decision);
   const projectId = clean(thesis?.projectId);

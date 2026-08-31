@@ -190,7 +190,7 @@ test('canonical thesis authority rejects unbound flags and human-decision proven
   thesis.truth.humanCreativeApproval = true;
   const result = reviewCreativeThesisAuthority({ deliberation: delib, thesis });
   assert.equal(result.pass, false);
-  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-human-decision-schema-invalid'));
+  assert.ok(result.findings.some((item) => item.code === 'creative-thesis-human-decision-missing'));
 
   const decision = decisionFor(delib, thesis, { decision: 'refine-candidate', sourceCandidateId: 'missing', refinementSummary: 'Attempted unsupported refinement.' });
   const drift = reviewCreativeThesisAuthority({ deliberation: delib, thesis, humanDecision: decision });
