@@ -1,5 +1,6 @@
 import { reviewCreativeThesisAuthority } from '../creative-thesis/authority.mjs';
 import { reviewCreativeWorldExploration } from '../creative-world/runtime.mjs';
+import { reviewCreativeWorldHumanDecision } from '../creative-world/authority.mjs';
 
 function finding(severity, code, message, evidence = {}) {
   return { severity, code, message, evidence };
@@ -191,6 +192,7 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
   const thesis = input.creativeThesis ?? creative.creativeThesis ?? {};
   const humanDecision = input.creativeThesisHumanDecision ?? creative.creativeThesisHumanDecision ?? {};
   const exploration = input.creativeWorldExploration ?? creative.creativeWorldExploration ?? {};
+  const creativeWorldHumanDecision = input.creativeWorldHumanDecision ?? creative.creativeWorldHumanDecision ?? null;
   const world = input.selectedCreativeWorld ?? creative.selectedCreativeWorld ?? exploration.selectedWorld ?? null;
   const styleFrameProof = input.styleFrameProof ?? creative.styleFrameProof ?? null;
   const visualProofEvidence = input.visualProofEvidence ?? input.styleFrameProofEvidence ?? creative.visualProofEvidence ?? creative.styleFrameProofEvidence ?? {};
@@ -212,6 +214,8 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
 
   const selectedWorldId = world?.id ?? null;
   const provenance = selectionProvenance(exploration, world ?? {}, thesis, visualProofEvidence, projectId);
+  const worldDecisionReview = reviewCreativeWorldHumanDecision({ decision: creativeWorldHumanDecision, exploration: input.preSelectionCreativeWorldExploration ?? exploration.preSelectionExploration ?? exploration, visualProofEvidence });
+  if (!worldDecisionReview.pass) findings.push(...worldDecisionReview.findings);
   if (!provenance.explorationReview.valid) {
     findings.push(finding('blocker', 'canonical-world-exploration-invalid', 'Canonical production requires the complete Creative World Exploration to remain review-ready, thesis-bound, and to contain the selected world among 3–5 reviewed alternatives.', {
       worldId: selectedWorldId,
@@ -291,6 +295,8 @@ export function buildCanonicalCreativeProductionHandoff(input = {}) {
       creativeThesisHumanApproved: thesisAuthorityReview.authority?.humanApproved === true,
       creativeWorldExplorationRevalidated: provenance.explorationReview.valid,
       creativeSelectionHumanGoverned: authorityValid,
+      creativeWorldHumanDecisionRequired: true,
+      creativeWorldHumanDecisionValid: worldDecisionReview.pass === true,
       creativeSelectionProvenanceValid: provenance.valid,
       renderedVisualProofEvidenceValid: provenance.visualEvidence.valid,
       creativeWorldProductionContractComplete: completeness.complete,

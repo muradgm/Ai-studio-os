@@ -2,6 +2,7 @@ import { authoredCandidateFromDeliberation, buildCreativeThesisDeliberation } fr
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
+import { buildCreativeWorldHumanDecision } from '../modules/creative-world/authority.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 import { buildMotionCreativeExploration } from '../modules/motion-creative-intelligence/runtime.mjs';
 import { buildMotionProofPlan, buildMotionProofEvidence } from '../modules/motion-creative-intelligence/proof.mjs';
@@ -161,13 +162,8 @@ export function buildCanonicalMotionAuthorityFixture(projectId = MOTION_FIXTURE_
   if (!visualProofEvidence.reviewReady) throw new Error(`Canonical Motion fixture visual evidence failed: ${visualProofEvidence.findings.map((item) => item.code).join(', ')}`);
 
   const selectedEvidenceRefs = visualProofEvidence.worlds.find((item) => item.worldId === 'consequential-continuity').evidenceRefs;
-  const creativeWorldExploration = selectCreativeWorld(preSelectionExploration, {
-    worldId: 'consequential-continuity',
-    humanConfirmed: true,
-    visualReviewConfirmed: true,
-    visualEvidenceRefs: selectedEvidenceRefs,
-    rationale: 'The continuity world best expresses calm authority while making consequential state changes legible.'
-  });
+  const creativeWorldHumanDecision = buildCreativeWorldHumanDecision({ exploration: preSelectionExploration, visualProofEvidence, selectedWorldId: 'consequential-continuity', reviewedWorldEvidenceRefs: selectedEvidenceRefs, reviewedComparisonRefs: visualProofEvidence.comparisonRefs, rationale: 'The continuity world best expresses calm authority while making consequential state changes legible.', humanConfirmed: true, decidedAt: '2026-08-31T10:56:00Z', evidenceRef: 'fixture://motion-world-decision' });
+  const creativeWorldExploration = selectCreativeWorld(preSelectionExploration, { humanDecision: creativeWorldHumanDecision, visualProofEvidence });
   const selectedCreativeWorld = creativeWorldExploration.selectedWorld;
   if (!selectedCreativeWorld) throw new Error(`Canonical Motion fixture world selection failed: ${creativeWorldExploration.findings.map((item) => item.code).join(', ')}`);
 
@@ -184,6 +180,7 @@ export function buildCanonicalMotionAuthorityFixture(projectId = MOTION_FIXTURE_
     creativeThesisDeliberation: deliberation,
     creativeThesis: thesis,
     creativeThesisHumanDecision: humanDecision,
+    creativeWorldHumanDecision,
     selectedCreativeWorld,
     creativeWorldExploration,
     styleFrameProof,

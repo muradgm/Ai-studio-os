@@ -11,6 +11,7 @@ import {
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
+import { buildCreativeWorldHumanDecision } from '../modules/creative-world/authority.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
 function buildDeliberation() {
@@ -182,13 +183,8 @@ function fixture() {
   assert.equal(visualProofEvidence.reviewReady, true);
 
   const selectedEvidenceRefs = visualProofEvidence.worlds.find((item) => item.worldId === 'world-a').evidenceRefs;
-  const exploration = selectCreativeWorld(preSelectionExploration, {
-    worldId: 'world-a',
-    humanConfirmed: true,
-    visualReviewConfirmed: true,
-    visualEvidenceRefs: selectedEvidenceRefs,
-    rationale: 'World A best preserves product truth while producing a distinct service rhythm.'
-  });
+  const creativeWorldHumanDecision = buildCreativeWorldHumanDecision({ exploration: preSelectionExploration, visualProofEvidence, selectedWorldId: 'world-a', reviewedWorldEvidenceRefs: selectedEvidenceRefs, reviewedComparisonRefs: visualProofEvidence.comparisonRefs, rationale: 'World A best preserves product truth while producing a distinct service rhythm.', humanConfirmed: true, decidedAt: '2026-08-31T10:56:00Z', evidenceRef: 'fixture://world-decision' });
+  const exploration = selectCreativeWorld(preSelectionExploration, { humanDecision: creativeWorldHumanDecision, visualProofEvidence });
   const world = exploration.selectedWorld;
   assert.ok(world);
 
@@ -199,7 +195,7 @@ function fixture() {
     worldContext: { id: 'world-a' },
     findings: []
   };
-  return { deliberation, thesis, humanDecision, world, exploration, styleFrameProof, visualProofEvidence, direction };
+  return { deliberation, thesis, humanDecision, creativeWorldHumanDecision, world, exploration, styleFrameProof, visualProofEvidence, direction };
 }
 
 function handoffInput(parts) {
@@ -208,6 +204,7 @@ function handoffInput(parts) {
     creativeThesisDeliberation: parts.deliberation,
     creativeThesis: parts.thesis,
     creativeThesisHumanDecision: parts.humanDecision,
+    creativeWorldHumanDecision: parts.creativeWorldHumanDecision,
     selectedCreativeWorld: parts.world,
     creativeWorldExploration: parts.exploration,
     styleFrameProof: parts.styleFrameProof,

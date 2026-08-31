@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
+import { buildCreativeWorldHumanDecision } from '../modules/creative-world/authority.mjs';
+import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
 const thesis = {
   schema:'ai-studio-os/creative-thesis@1', stage:'creative-thesis', projectId:'test-project',
@@ -69,14 +71,18 @@ test('project specificity and signature behavior are required', () => {
 
 test('selection cannot occur without explicit human and visual-proof confirmation', () => {
   const exploration = buildCreativeWorldExploration({creativeThesis:thesis,authoredWorlds:[world('world-1'),world('world-2'),world('world-3')]});
-  const pending = selectCreativeWorld(exploration,{worldId:'world-2',humanConfirmed:true});
+  const pending = selectCreativeWorld(exploration,{humanDecision:{humanConfirmed:true}});
   assert.equal(pending.selectedWorld,null);
-  assert.ok(pending.findings.some((item)=>item.code==='creative-world-visual-proof-review-required'));
+  assert.ok(pending.findings.some((item)=>item.code==='creative-world-human-decision-schema-invalid'));
 });
 
 test('visual-proof-backed human selection creates an authoritative world while later approvals stay false', () => {
   const exploration = buildCreativeWorldExploration({creativeThesis:thesis,authoredWorlds:[world('world-1'),world('world-2'),world('world-3')]});
-  const selected = selectCreativeWorld(exploration,{worldId:'world-2',humanConfirmed:true,visualReviewConfirmed:true,visualEvidenceRefs:['artifact://style-frame/world-2'],rationale:'World 2 survives the comparative visual proof.'});
+  const plan = buildStyleFrameProof({ exploration });
+  const proof = buildVisualProofEvidence({ plan, renderedFrames: plan.frames.map((frame)=>({frameId:frame.id,worldId:frame.worldId,imageRef:`artifact://style-frame/${frame.id}`,sourceRef:`artifact://style-frame/${frame.id}.html`})), comparisonRefs:['artifact://style-frame/comparison'] });
+  const refs = proof.worlds.find((world)=>world.worldId==='world-2').evidenceRefs;
+  const decision = buildCreativeWorldHumanDecision({ exploration, visualProofEvidence:proof, selectedWorldId:'world-2', reviewedWorldEvidenceRefs:refs, reviewedComparisonRefs:proof.comparisonRefs, rationale:'World 2 survives the comparative visual proof.',humanConfirmed:true,decidedAt:'2026-08-31T15:41:00Z',evidenceRef:'test://world-decision' });
+  const selected = selectCreativeWorld(exploration,{humanDecision:decision,visualProofEvidence:proof});
   assert.equal(selected.selectedWorld.id,'world-2');
   assert.equal(selected.selectedWorld.schema,'ai-studio-os/creative-world@1');
   assert.equal(selected.selectedWorld.selected,true);
