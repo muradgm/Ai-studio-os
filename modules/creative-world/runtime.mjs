@@ -1,3 +1,5 @@
+import { reviewCreativeWorldHumanDecision } from './authority.mjs';
+
 function clean(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -233,17 +235,17 @@ export function buildCreativeWorldExploration({ creativeThesis = null, authoredW
   return { ...exploration, status: review.status, pass: review.pass, reviewReady: review.reviewReady, findings: review.findings, divergence: review.divergence, review };
 }
 
-export function selectCreativeWorld(exploration = {}, { worldId, humanConfirmed = false, visualReviewConfirmed = false, visualEvidenceRefs = [], rationale = '' } = {}) {
-  const id = clean(worldId);
+export function selectCreativeWorld(exploration = {}, { humanDecision = null, visualProofEvidence = null } = {}) {
+  const decisionReview = reviewCreativeWorldHumanDecision({ decision: humanDecision, exploration, visualProofEvidence });
+  const id = clean(decisionReview.decision?.selectedWorldId);
   const worlds = Array.isArray(exploration.worlds) ? exploration.worlds : [];
   const selected = worlds.find((world) => world.id === id) ?? null;
-  const evidenceRefs = cleanList(visualEvidenceRefs);
+  const evidenceRefs = decisionReview.decision?.reviewedWorldEvidenceRefs ?? [];
   const findings = [];
 
   if (exploration.reviewReady !== true) findings.push(finding('blocker', 'creative-world-exploration-not-review-ready', 'A Creative World cannot be selected until the exploration set is structurally review-ready.'));
   if (!id || !selected) findings.push(finding('blocker', 'creative-world-selection-invalid', 'Creative World selection must reference one candidate in the current exploration.', { worldId: id || null }));
-  if (humanConfirmed !== true) findings.push(finding('major', 'creative-world-human-selection-required', 'No automated score may select the Creative World. Explicit human/creative-director confirmation is required.'));
-  if (visualReviewConfirmed !== true || !evidenceRefs.length) findings.push(finding('major', 'creative-world-visual-proof-review-required', 'A Creative World may not become authoritative from prose alone. Comparable visual proof must be reviewed and referenced before selection.'));
+  if (!decisionReview.pass) findings.push(...decisionReview.findings);
 
   const blockers = findings.filter((item) => item.severity === 'blocker');
   const majors = findings.filter((item) => item.severity === 'major');
@@ -264,13 +266,15 @@ export function selectCreativeWorld(exploration = {}, { worldId, humanConfirmed 
 
   return {
     ...structuredClone(exploration),
+    preSelectionExploration: structuredClone(exploration),
     worlds: updatedWorlds,
     selection: {
       worldId: id || null,
       humanConfirmed: confirmed,
       visualReviewConfirmed: confirmed,
       visualEvidenceRefs: evidenceRefs,
-      rationale: clean(rationale) || null,
+      rationale: decisionReview.decision?.rationale ?? null,
+      humanDecision: confirmed ? structuredClone(humanDecision) : null,
       selectedAutomatically: false
     },
     selectedWorld,

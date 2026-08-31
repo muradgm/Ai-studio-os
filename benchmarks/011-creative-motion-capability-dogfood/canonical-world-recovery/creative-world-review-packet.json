@@ -1,0 +1,3276 @@
+{
+  "schema": "ai-studio-os/benchmark-011-after-matter-world-recovery@1",
+  "stage": "creative-world-recovery",
+  "status": "ready-for-human-creative-world-review",
+  "projectId": "benchmark-011-after-matter",
+  "approvedThesis": {
+    "schema": "ai-studio-os/creative-thesis@1",
+    "stage": "creative-thesis",
+    "projectId": "benchmark-011-after-matter",
+    "intent": "Create the digital launch experience for a contemporary design museum exhibition about patina, repair, wear and material memory. The experience must make physical time perceptible without turning the site into a cinematic demo or sacrificing reading, wayfinding, ticketing and accessibility.",
+    "audience": "Design-literate museum visitors, architects, product designers, students and culturally curious general visitors using desktop and mobile devices.",
+    "commercialObjective": "Make the exhibition memorable while preserving clear access to dates, location, events and ticket reservation.",
+    "authorship": {
+      "mode": "authored-candidate",
+      "supplied": true,
+      "humanCreativeApproval": false
+    },
+    "governingIdea": {
+      "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+      "singular": true,
+      "sourceOpportunityId": "opportunity-1"
+    },
+    "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle. Creative tension: archival authority x tactile sensuality. Truth anchor: The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+    "creativeTension": {
+      "label": "archival authority x tactile sensuality",
+      "traits": [
+        "archival authority",
+        "tactile sensuality"
+      ]
+    },
+    "whyThisProject": "After Matter is about one hundred real objects whose wear, repair, fading and deformation are evidence of use. The thesis keeps those histories primary while preserving reading, wayfinding, ticketing, mobile access and reduced-motion meaning.",
+    "sourceTruths": [
+      {
+        "id": "truth-1",
+        "value": "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide."
+      },
+      {
+        "id": "truth-2",
+        "value": "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation."
+      },
+      {
+        "id": "truth-3",
+        "value": "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves."
+      },
+      {
+        "id": "truth-4",
+        "value": "Mobile is a primary visit-planning surface, not a reduced desktop afterthought."
+      },
+      {
+        "id": "truth-5",
+        "value": "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback."
+      },
+      {
+        "id": "truth-6",
+        "value": "Motion must derive from accumulated time, material memory, repair or change; technology cannot become the concept."
+      },
+      {
+        "id": "truth-7",
+        "value": "Long-form reading requires deliberate stillness and stable hierarchy."
+      },
+      {
+        "id": "truth-8",
+        "value": "Primary navigation, exhibition information and ticket reservation remain immediately usable throughout the experience."
+      },
+      {
+        "id": "truth-9",
+        "value": "Desktop and mobile require authored reinterpretation rather than scaled copies."
+      },
+      {
+        "id": "truth-10",
+        "value": "Reduced-motion behavior preserves semantic sequence and state meaning."
+      },
+      {
+        "id": "truth-11",
+        "value": "The experience remains plausible for production performance and accessibility budgets."
+      },
+      {
+        "id": "truth-12",
+        "value": "Real objects remain primary visual evidence; generic synthetic hero imagery cannot replace them."
+      }
+    ],
+    "sourceOpportunity": {
+      "id": "opportunity-1",
+      "value": "material-evidence-without-spectacle"
+    },
+    "categoryRejections": [
+      "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+      "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+      "Continuous camera drift or parallax used only to signal premium aesthetics.",
+      "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+      "Scroll-jacking that delays reading or practical tasks.",
+      "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+    ],
+    "principles": [
+      "Accumulated material change must remain connected to real object histories rather than decorative atmosphere.",
+      "Stillness is the default state for reading, comparison and practical museum tasks.",
+      "Repair and accumulated change are evidence of use, not luxury surface treatment.",
+      "Each medium interprets the evidence system differently without replacing real objects with synthetic spectacle."
+    ],
+    "antiPrinciples": [
+      "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+      "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+      "Continuous camera drift or parallax used only to signal premium aesthetics.",
+      "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+      "Scroll-jacking that delays reading or practical tasks.",
+      "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+    ],
+    "expressionTests": {
+      "typography": "Separate contemplative exhibition voice from factual trace labels and durable reading without making type compete with object evidence.",
+      "image": "Use licensed object photography or new capture to show actual wear, repair and material change; Phase 0 placeholders remain explicitly non-documentary.",
+      "motion": "Make changes in material condition or historical understanding perceptible when they matter, then preserve deliberate stillness; no continuous drift.",
+      "interaction": "Let visitors encounter objects and their material histories without losing orientation or access to practical museum routes.",
+      "sound": "Silence remains the default; any later sound must be grounded in object evidence and retain a silent equivalent.",
+      "responsive": "On desktop, mobile and under reduced motion, preserve the same evidence relationships, reading clarity and access to practical museum tasks through authored reinterpretation."
+    },
+    "technologyPolicy": "Implementation tools serve the evidence system. Motion, browser APIs, generated media and spatial tools are considered only when they make object-specific material time more legible without displacing the objects or museum tasks.",
+    "competitorTransferTest": {
+      "question": "Could another museum or design site reuse this evidence-system Thesis unchanged without the specific collection truth that wear, repair, fading and deformation are meaningful records of use?",
+      "passCondition": "The Thesis should weaken without After Matter’s one hundred real objects and its requirement to make accumulated material time perceptible while preserving reading, wayfinding, ticketing, mobile access and reduced-motion equivalence.",
+      "evidenceRefs": [
+        "truth-1",
+        "truth-2",
+        "truth-3",
+        "opportunity-1"
+      ]
+    },
+    "alternativesConsidered": [
+      {
+        "idea": "Treat repair, care, uncertainty and alteration as the exhibition's public record, making preservation itself a readable editorial structure rather than a hidden conservation backstory.",
+        "rejectedBecause": "Most intellectually distinct, but risks making one hundred object encounters feel like an archive interface rather than an exhibition experience."
+      },
+      {
+        "idea": "Make one hundred distinct object lives perceptible as a shared tempo: each encounter isolates a particular change, while deliberate stillness lets the collection cohere without flattening its differences.",
+        "rejectedBecause": "Best collection-scale frame, but less immediately actionable for wayfinding and may dilute the specificity of repair as evidence."
+      }
+    ],
+    "selectionRationale": "This recovery Thesis is the broadest project-specific governing idea supported by the frozen After Matter brief: material change is meaningful evidence, but the later Creative World determines whether that evidence becomes navigation, editorial record, collection rhythm, or another materially grounded behavior.",
+    "unresolvedRisks": [
+      "Final licensed object photography and object-specific historical records remain outside this recovery pass."
+    ],
+    "truth": {
+      "humanCreativeApproval": false,
+      "creativeThesisFrozen": false,
+      "generatedFromSuppliedTruthAndInspiration": true,
+      "authoredCandidateSupplied": true
+    },
+    "status": "ready-for-creative-direction-review",
+    "pass": true,
+    "reviewReady": true,
+    "findings": [],
+    "review": {
+      "stage": "creative-thesis-review",
+      "status": "ready-for-creative-direction-review",
+      "pass": true,
+      "reviewReady": true,
+      "findings": [],
+      "truth": {
+        "humanCreativeApproval": false,
+        "creativeThesisFrozen": false,
+        "structuralReviewOnly": true
+      }
+    }
+  },
+  "approvedThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+  "thesisAuthorityReview": {
+    "schema": "ai-studio-os/creative-thesis-authority-review@1",
+    "pass": true,
+    "reviewReady": true,
+    "status": "authoritative",
+    "findings": [],
+    "authority": {
+      "kind": "canonical-creative-thesis",
+      "projectId": "benchmark-011-after-matter",
+      "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+      "creativeTension": "archival authority x tactile sensuality",
+      "deliberationSchema": "ai-studio-os/creative-thesis-deliberation@1",
+      "thesisSchema": "ai-studio-os/creative-thesis@1",
+      "humanApproved": true,
+      "humanDecisionMode": "refine-candidate",
+      "machineRecommendationWasNotFinalAuthority": true,
+      "humanRefined": true
+    },
+    "truth": {
+      "deliberationRecomputedAtAuthorityBoundary": true,
+      "thesisRecomputedAtAuthorityBoundary": true,
+      "deliberationProjectIdentityRequired": true,
+      "deliberationCanSelfApprove": false,
+      "humanCreativeApprovalRequired": true,
+      "humanDecisionRecordRequired": true,
+      "machineRecommendationWasNotFinalAuthority": true,
+      "arbitraryThesisObjectAccepted": false
+    }
+  },
+  "exploration": {
+    "schema": "ai-studio-os/creative-world-exploration@1",
+    "stage": "creative-world",
+    "creativeThesis": {
+      "schema": "ai-studio-os/creative-thesis@1",
+      "stage": "creative-thesis",
+      "projectId": "benchmark-011-after-matter",
+      "intent": "Create the digital launch experience for a contemporary design museum exhibition about patina, repair, wear and material memory. The experience must make physical time perceptible without turning the site into a cinematic demo or sacrificing reading, wayfinding, ticketing and accessibility.",
+      "audience": "Design-literate museum visitors, architects, product designers, students and culturally curious general visitors using desktop and mobile devices.",
+      "commercialObjective": "Make the exhibition memorable while preserving clear access to dates, location, events and ticket reservation.",
+      "authorship": {
+        "mode": "authored-candidate",
+        "supplied": true,
+        "humanCreativeApproval": false
+      },
+      "governingIdea": {
+        "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+        "singular": true,
+        "sourceOpportunityId": "opportunity-1"
+      },
+      "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle. Creative tension: archival authority x tactile sensuality. Truth anchor: The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+      "creativeTension": {
+        "label": "archival authority x tactile sensuality",
+        "traits": [
+          "archival authority",
+          "tactile sensuality"
+        ]
+      },
+      "whyThisProject": "After Matter is about one hundred real objects whose wear, repair, fading and deformation are evidence of use. The thesis keeps those histories primary while preserving reading, wayfinding, ticketing, mobile access and reduced-motion meaning.",
+      "sourceTruths": [
+        {
+          "id": "truth-1",
+          "value": "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide."
+        },
+        {
+          "id": "truth-2",
+          "value": "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation."
+        },
+        {
+          "id": "truth-3",
+          "value": "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves."
+        },
+        {
+          "id": "truth-4",
+          "value": "Mobile is a primary visit-planning surface, not a reduced desktop afterthought."
+        },
+        {
+          "id": "truth-5",
+          "value": "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback."
+        },
+        {
+          "id": "truth-6",
+          "value": "Motion must derive from accumulated time, material memory, repair or change; technology cannot become the concept."
+        },
+        {
+          "id": "truth-7",
+          "value": "Long-form reading requires deliberate stillness and stable hierarchy."
+        },
+        {
+          "id": "truth-8",
+          "value": "Primary navigation, exhibition information and ticket reservation remain immediately usable throughout the experience."
+        },
+        {
+          "id": "truth-9",
+          "value": "Desktop and mobile require authored reinterpretation rather than scaled copies."
+        },
+        {
+          "id": "truth-10",
+          "value": "Reduced-motion behavior preserves semantic sequence and state meaning."
+        },
+        {
+          "id": "truth-11",
+          "value": "The experience remains plausible for production performance and accessibility budgets."
+        },
+        {
+          "id": "truth-12",
+          "value": "Real objects remain primary visual evidence; generic synthetic hero imagery cannot replace them."
+        }
+      ],
+      "sourceOpportunity": {
+        "id": "opportunity-1",
+        "value": "material-evidence-without-spectacle"
+      },
+      "categoryRejections": [
+        "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+        "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+        "Continuous camera drift or parallax used only to signal premium aesthetics.",
+        "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+        "Scroll-jacking that delays reading or practical tasks.",
+        "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+      ],
+      "principles": [
+        "Accumulated material change must remain connected to real object histories rather than decorative atmosphere.",
+        "Stillness is the default state for reading, comparison and practical museum tasks.",
+        "Repair and accumulated change are evidence of use, not luxury surface treatment.",
+        "Each medium interprets the evidence system differently without replacing real objects with synthetic spectacle."
+      ],
+      "antiPrinciples": [
+        "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+        "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+        "Continuous camera drift or parallax used only to signal premium aesthetics.",
+        "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+        "Scroll-jacking that delays reading or practical tasks.",
+        "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+      ],
+      "expressionTests": {
+        "typography": "Separate contemplative exhibition voice from factual trace labels and durable reading without making type compete with object evidence.",
+        "image": "Use licensed object photography or new capture to show actual wear, repair and material change; Phase 0 placeholders remain explicitly non-documentary.",
+        "motion": "Make changes in material condition or historical understanding perceptible when they matter, then preserve deliberate stillness; no continuous drift.",
+        "interaction": "Let visitors encounter objects and their material histories without losing orientation or access to practical museum routes.",
+        "sound": "Silence remains the default; any later sound must be grounded in object evidence and retain a silent equivalent.",
+        "responsive": "On desktop, mobile and under reduced motion, preserve the same evidence relationships, reading clarity and access to practical museum tasks through authored reinterpretation."
+      },
+      "technologyPolicy": "Implementation tools serve the evidence system. Motion, browser APIs, generated media and spatial tools are considered only when they make object-specific material time more legible without displacing the objects or museum tasks.",
+      "competitorTransferTest": {
+        "question": "Could another museum or design site reuse this evidence-system Thesis unchanged without the specific collection truth that wear, repair, fading and deformation are meaningful records of use?",
+        "passCondition": "The Thesis should weaken without After Matter’s one hundred real objects and its requirement to make accumulated material time perceptible while preserving reading, wayfinding, ticketing, mobile access and reduced-motion equivalence.",
+        "evidenceRefs": [
+          "truth-1",
+          "truth-2",
+          "truth-3",
+          "opportunity-1"
+        ]
+      },
+      "alternativesConsidered": [
+        {
+          "idea": "Treat repair, care, uncertainty and alteration as the exhibition's public record, making preservation itself a readable editorial structure rather than a hidden conservation backstory.",
+          "rejectedBecause": "Most intellectually distinct, but risks making one hundred object encounters feel like an archive interface rather than an exhibition experience."
+        },
+        {
+          "idea": "Make one hundred distinct object lives perceptible as a shared tempo: each encounter isolates a particular change, while deliberate stillness lets the collection cohere without flattening its differences.",
+          "rejectedBecause": "Best collection-scale frame, but less immediately actionable for wayfinding and may dilute the specificity of repair as evidence."
+        }
+      ],
+      "selectionRationale": "This recovery Thesis is the broadest project-specific governing idea supported by the frozen After Matter brief: material change is meaningful evidence, but the later Creative World determines whether that evidence becomes navigation, editorial record, collection rhythm, or another materially grounded behavior.",
+      "unresolvedRisks": [
+        "Final licensed object photography and object-specific historical records remain outside this recovery pass."
+      ],
+      "truth": {
+        "humanCreativeApproval": false,
+        "creativeThesisFrozen": false,
+        "generatedFromSuppliedTruthAndInspiration": true,
+        "authoredCandidateSupplied": true
+      },
+      "status": "ready-for-creative-direction-review",
+      "pass": true,
+      "reviewReady": true,
+      "findings": [],
+      "review": {
+        "stage": "creative-thesis-review",
+        "status": "ready-for-creative-direction-review",
+        "pass": true,
+        "reviewReady": true,
+        "findings": [],
+        "truth": {
+          "humanCreativeApproval": false,
+          "creativeThesisFrozen": false,
+          "structuralReviewOnly": true
+        }
+      }
+    },
+    "thesisRef": {
+      "schema": "ai-studio-os/creative-thesis@1",
+      "projectId": "benchmark-011-after-matter",
+      "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+      "status": "ready-for-creative-direction-review",
+      "reviewReady": true
+    },
+    "authoringBrief": {
+      "stage": "creative-world-authoring-brief",
+      "thesisRef": {
+        "schema": "ai-studio-os/creative-thesis@1",
+        "projectId": "benchmark-011-after-matter",
+        "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+        "creativeTension": "archival authority x tactile sensuality",
+        "categoryRejections": [
+          "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+          "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+          "Continuous camera drift or parallax used only to signal premium aesthetics.",
+          "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+          "Scroll-jacking that delays reading or practical tasks.",
+          "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+        ]
+      },
+      "requiredCandidateCount": {
+        "min": 3,
+        "max": 5
+      },
+      "requiredStructuralDimensions": [
+        "worldClass",
+        "narrativeModel",
+        "compositionModel",
+        "imageLanguage",
+        "motionLanguage",
+        "interactionModel",
+        "responsiveStrategy"
+      ],
+      "instruction": "Author 3–5 genuinely different experience worlds that all preserve the same thesis but differ in narrative, composition, image/material behavior, motion, interaction, and responsive logic. Do not submit palette/type/layout reskins.",
+      "technologyRule": "Technology is downstream and may not be used as the primary world differentiator.",
+      "typographyRule": "Define typography intent and measurable pressures; do not freeze final font families at Creative World stage.",
+      "proofRule": "Structural readiness advances all viable worlds to comparable visual/style-frame proof. Do not select a winner from prose alone."
+    },
+    "worlds": [
+      {
+        "schema": "ai-studio-os/creative-world@1",
+        "id": "friction-index",
+        "label": "Friction Index",
+        "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+        "interpretationOfThesis": "Material time becomes a readable sequence of specific changes: wear, repair, fading, and care guide attention while objects, reading, and practical museum tasks remain primary.",
+        "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "worldClass": "material-history navigation system",
+        "narrativeModel": "move from a visible object to one selected trace, then from that trace into history, context, and a return to the object.",
+        "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+        "typographyIntent": {
+          "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+          "roles": {
+            "exhibition": "measured, tactile, and memorable",
+            "trace": "precise and chronologically clear",
+            "reading": "quiet, durable, and comfortably long-form",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "generic luxury serif staging",
+            "museum-label bureaucratic density"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 92,
+            "objectPrimacy": 90,
+            "traceLegibility": 91,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "monumental type that competes with objects",
+            "motion-led reading hierarchy"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+        "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+        "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+        "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "soundPolicy": "Silence by default. Any future sound must be tied to real object evidence, have rights clearance, and preserve a silent equivalent.",
+        "categoryTransferTest": {
+          "whyProjectSpecific": "The world depends on the exhibition's one hundred real objects, where scratches, repair, fading, and deformation are evidence of use rather than flaws to hide.",
+          "transferRisk": "medium if real object history is replaced by generic distressed styling or if traces cease to be factual object-specific evidence."
+        },
+        "antiPatterns": [
+          "generic scroll-triggered fade-and-rise sections",
+          "decorative particles, glow, or AI gradients unrelated to material evidence",
+          "continuous camera drift for premium atmosphere",
+          "scroll-jacking that delays reading or ticketing"
+        ],
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "unresolvedRisks": [
+          "Phase 0 material imagery is non-documentary and must be replaced by licensed object photography or new capture before production.",
+          "Trace navigation could become decorative if every trace is not grounded in a real object history.",
+          "Motion must retain narrative equivalence under reduced motion without flattening meaningful object-state relationships."
+        ],
+        "reviewReady": true,
+        "selected": false,
+        "truth": {
+          "humanCreativeSelectionConfirmed": false,
+          "visualWorldProofReviewed": false,
+          "styleFrameReviewComplete": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false
+        },
+        "findings": []
+      },
+      {
+        "schema": "ai-studio-os/creative-world@1",
+        "id": "repair-ledger",
+        "label": "Repair Ledger",
+        "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+        "interpretationOfThesis": "Accumulated material change becomes evidence through an inspectable chronology of care, so repair and uncertainty are understood as real histories rather than decorative surface.",
+        "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "worldClass": "conservation-led editorial record",
+        "narrativeModel": "move from object encounter into a chronological ledger of care, uncertainty and context, then return to the object with the record retained.",
+        "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+        "typographyIntent": {
+          "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+          "roles": {
+            "object": "quietly prominent",
+            "ledger": "precise chronology",
+            "reading": "durable and generous",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "bureaucratic database density",
+            "luxury restoration language"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 95,
+            "objectPrimacy": 91,
+            "chronologyLegibility": 94,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "metadata used as texture",
+            "type that makes care feel bureaucratic"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+        "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+        "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "soundPolicy": "Silence by default. Any future sound must be factual, rights-cleared and have a silent equivalent.",
+        "categoryTransferTest": {
+          "whyProjectSpecific": "After Matter treats wear, repair, fading and deformation across one hundred real objects as evidence of use; the ledger is meaningful because care is part of each object history.",
+          "transferRisk": "high if generic museum metadata or decorative annotations replace factual conservation evidence."
+        },
+        "antiPatterns": [
+          "decorative metadata",
+          "generic archive-dashboard UI",
+          "documentation that obscures the object"
+        ],
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "unresolvedRisks": [
+          "Requires object-specific conservation records and licensed photography before production.",
+          "Chronology can become dense if uncertainty is not editorially prioritized."
+        ],
+        "reviewReady": true,
+        "selected": false,
+        "truth": {
+          "humanCreativeSelectionConfirmed": false,
+          "visualWorldProofReviewed": false,
+          "styleFrameReviewComplete": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false
+        },
+        "findings": []
+      },
+      {
+        "schema": "ai-studio-os/creative-world@1",
+        "id": "pressure-room",
+        "label": "Pressure Room",
+        "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+        "interpretationOfThesis": "Accumulated change is understood through a focused encounter with the resistance an object has endured, then released into factual history and practical museum access.",
+        "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "worldClass": "concentrated encounter rhythm",
+        "narrativeModel": "arrive at one object, experience a composed threshold of resistance, open its factual history, then release back to a still exhibition field.",
+        "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+        "typographyIntent": {
+          "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+          "roles": {
+            "encounter": "measured and spacious",
+            "history": "factual and close",
+            "reading": "calm and durable",
+            "visit": "persistent and direct"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif"
+            ]
+          },
+          "avoidCategories": [
+            "cinematic title-card drama",
+            "oversized type that blocks the object"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "encounterFocus": 94,
+            "readingClarity": 90,
+            "practicalTaskClarity": 95,
+            "objectPrimacy": 96
+          },
+          "antiPatterns": [
+            "forced waiting",
+            "fake loading state"
+          ]
+        },
+        "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+        "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+        "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "soundPolicy": "Silence by default. Any future sound must support an object-specific causal relationship and retain a silent equivalent.",
+        "categoryTransferTest": {
+          "whyProjectSpecific": "The encounter is specific to After Matter because one hundred real objects carry distinct resistance through wear, repair, fading and deformation, not because a generic cultural site needs theatrical tension.",
+          "transferRisk": "high if the threshold turns into a cinematic intro, scroll-jacking or a technology demonstration."
+        },
+        "antiPatterns": [
+          "cinematic intro",
+          "forced waiting",
+          "scroll-jacking",
+          "fake loading state",
+          "inaccessible timed gate",
+          "technology demo"
+        ],
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "unresolvedRisks": [
+          "The threshold requires clear bypass and reduced-motion equivalence.",
+          "Concentration must not suppress reading, dates, location or ticket access."
+        ],
+        "reviewReady": true,
+        "selected": false,
+        "truth": {
+          "humanCreativeSelectionConfirmed": false,
+          "visualWorldProofReviewed": false,
+          "styleFrameReviewComplete": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false
+        },
+        "findings": []
+      }
+    ],
+    "selection": null,
+    "selectedWorld": null,
+    "truth": {
+      "authoredWorldsSupplied": true,
+      "humanWorldSelectionConfirmed": false,
+      "selectedAutomatically": false
+    },
+    "status": "ready-for-style-frame-proof",
+    "pass": true,
+    "reviewReady": true,
+    "findings": [],
+    "divergence": [
+      {
+        "a": "friction-index",
+        "b": "repair-ledger",
+        "differenceCount": 7,
+        "differences": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "matches": [],
+        "heuristicPass": true,
+        "pass": true,
+        "proofLevel": "structural-heuristic",
+        "humanSemanticDivergenceReviewed": false,
+        "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+      },
+      {
+        "a": "friction-index",
+        "b": "pressure-room",
+        "differenceCount": 7,
+        "differences": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "matches": [],
+        "heuristicPass": true,
+        "pass": true,
+        "proofLevel": "structural-heuristic",
+        "humanSemanticDivergenceReviewed": false,
+        "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+      },
+      {
+        "a": "repair-ledger",
+        "b": "pressure-room",
+        "differenceCount": 7,
+        "differences": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "matches": [],
+        "heuristicPass": true,
+        "pass": true,
+        "proofLevel": "structural-heuristic",
+        "humanSemanticDivergenceReviewed": false,
+        "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+      }
+    ],
+    "review": {
+      "stage": "creative-world-review",
+      "status": "ready-for-style-frame-proof",
+      "pass": true,
+      "reviewReady": true,
+      "findings": [],
+      "divergence": [
+        {
+          "a": "friction-index",
+          "b": "repair-ledger",
+          "differenceCount": 7,
+          "differences": [
+            "worldClass",
+            "narrativeModel",
+            "compositionModel",
+            "imageLanguage",
+            "motionLanguage",
+            "interactionModel",
+            "responsiveStrategy"
+          ],
+          "matches": [],
+          "heuristicPass": true,
+          "pass": true,
+          "proofLevel": "structural-heuristic",
+          "humanSemanticDivergenceReviewed": false,
+          "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+        },
+        {
+          "a": "friction-index",
+          "b": "pressure-room",
+          "differenceCount": 7,
+          "differences": [
+            "worldClass",
+            "narrativeModel",
+            "compositionModel",
+            "imageLanguage",
+            "motionLanguage",
+            "interactionModel",
+            "responsiveStrategy"
+          ],
+          "matches": [],
+          "heuristicPass": true,
+          "pass": true,
+          "proofLevel": "structural-heuristic",
+          "humanSemanticDivergenceReviewed": false,
+          "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+        },
+        {
+          "a": "repair-ledger",
+          "b": "pressure-room",
+          "differenceCount": 7,
+          "differences": [
+            "worldClass",
+            "narrativeModel",
+            "compositionModel",
+            "imageLanguage",
+            "motionLanguage",
+            "interactionModel",
+            "responsiveStrategy"
+          ],
+          "matches": [],
+          "heuristicPass": true,
+          "pass": true,
+          "proofLevel": "structural-heuristic",
+          "humanSemanticDivergenceReviewed": false,
+          "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+        }
+      ],
+      "truth": {
+        "humanWorldSelectionConfirmed": false,
+        "humanSemanticDivergenceReviewed": false,
+        "visualApprovalComplete": false,
+        "styleFrameReviewComplete": false,
+        "structuralReviewOnly": true
+      }
+    }
+  },
+  "structuralReview": {
+    "stage": "creative-world-review",
+    "status": "ready-for-style-frame-proof",
+    "pass": true,
+    "reviewReady": true,
+    "findings": [],
+    "divergence": [
+      {
+        "a": "friction-index",
+        "b": "repair-ledger",
+        "differenceCount": 7,
+        "differences": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "matches": [],
+        "heuristicPass": true,
+        "pass": true,
+        "proofLevel": "structural-heuristic",
+        "humanSemanticDivergenceReviewed": false,
+        "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+      },
+      {
+        "a": "friction-index",
+        "b": "pressure-room",
+        "differenceCount": 7,
+        "differences": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "matches": [],
+        "heuristicPass": true,
+        "pass": true,
+        "proofLevel": "structural-heuristic",
+        "humanSemanticDivergenceReviewed": false,
+        "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+      },
+      {
+        "a": "repair-ledger",
+        "b": "pressure-room",
+        "differenceCount": 7,
+        "differences": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "matches": [],
+        "heuristicPass": true,
+        "pass": true,
+        "proofLevel": "structural-heuristic",
+        "humanSemanticDivergenceReviewed": false,
+        "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+      }
+    ],
+    "truth": {
+      "humanWorldSelectionConfirmed": false,
+      "humanSemanticDivergenceReviewed": false,
+      "visualApprovalComplete": false,
+      "styleFrameReviewComplete": false,
+      "structuralReviewOnly": true
+    }
+  },
+  "recoveryProvenance": [
+    {
+      "worldId": "friction-index",
+      "historicalEvidenceRefs": [
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/README.md",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/selection.json",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/dogfood-brief.json",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/index.html",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-desktop.png",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-mobile.png",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/assets/material-study.png"
+      ],
+      "canonicalThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+      "canonicalRecoveredWorldFingerprint": "d09a802ef466b98eefe081372f787ced0d558c33932219b40066512c259f63b3",
+      "structuralReviewReady": true,
+      "recoveryAuthorship": "canonical-rebinding-from-historical-structured-world",
+      "historicalPhase0WorldFingerprint": "3e1d94e065ff5a0aca8cc04f65d7788e7bdd29b09901031edced3994e4b51324"
+    },
+    {
+      "worldId": "repair-ledger",
+      "historicalEvidenceRefs": [
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/README.md",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/selection.json",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/dogfood-brief.json",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/index.html",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-desktop.png",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-mobile.png",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/assets/material-study.png"
+      ],
+      "canonicalThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+      "canonicalRecoveredWorldFingerprint": "67dbdb66f90e5f385e0ffeb1dc59845c472cd663ff9a46145ccd711ebbff6953",
+      "structuralReviewReady": true,
+      "recoveryAuthorship": "new-canonical-recovery-authorship"
+    },
+    {
+      "worldId": "pressure-room",
+      "historicalEvidenceRefs": [
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/README.md",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/selection.json",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/dogfood-brief.json",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/index.html",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-desktop.png",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/after-matter-mobile.png",
+        "benchmarks/011-creative-motion-capability-dogfood/runs/after-matter-phase0/assets/material-study.png"
+      ],
+      "canonicalThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+      "canonicalRecoveredWorldFingerprint": "dd9c3f852d3d1eb3c60488a9ca3df915ce8116fadceb531db909ce480b69f96a",
+      "structuralReviewReady": true,
+      "recoveryAuthorship": "new-canonical-recovery-authorship"
+    }
+  ],
+  "styleFramePlan": {
+    "schema": "ai-studio-os/style-frame-proof-plan@2",
+    "stage": "style-frame-proof",
+    "projectId": "benchmark-011-after-matter",
+    "exploration": {
+      "schema": "ai-studio-os/creative-world-exploration@1",
+      "stage": "creative-world",
+      "creativeThesis": {
+        "schema": "ai-studio-os/creative-thesis@1",
+        "stage": "creative-thesis",
+        "projectId": "benchmark-011-after-matter",
+        "intent": "Create the digital launch experience for a contemporary design museum exhibition about patina, repair, wear and material memory. The experience must make physical time perceptible without turning the site into a cinematic demo or sacrificing reading, wayfinding, ticketing and accessibility.",
+        "audience": "Design-literate museum visitors, architects, product designers, students and culturally curious general visitors using desktop and mobile devices.",
+        "commercialObjective": "Make the exhibition memorable while preserving clear access to dates, location, events and ticket reservation.",
+        "authorship": {
+          "mode": "authored-candidate",
+          "supplied": true,
+          "humanCreativeApproval": false
+        },
+        "governingIdea": {
+          "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+          "singular": true,
+          "sourceOpportunityId": "opportunity-1"
+        },
+        "statement": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle. Creative tension: archival authority x tactile sensuality. Truth anchor: The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide.",
+        "creativeTension": {
+          "label": "archival authority x tactile sensuality",
+          "traits": [
+            "archival authority",
+            "tactile sensuality"
+          ]
+        },
+        "whyThisProject": "After Matter is about one hundred real objects whose wear, repair, fading and deformation are evidence of use. The thesis keeps those histories primary while preserving reading, wayfinding, ticketing, mobile access and reduced-motion meaning.",
+        "sourceTruths": [
+          {
+            "id": "truth-1",
+            "value": "The exhibition contains one hundred real objects whose scratches, repairs, fading and deformation are evidence of use rather than defects to hide."
+          },
+          {
+            "id": "truth-2",
+            "value": "Visitors need both contemplative editorial reading and practical access to dates, location, events and ticket reservation."
+          },
+          {
+            "id": "truth-3",
+            "value": "The museum wants a memorable digital identity for the exhibition but rejects spectacle that overwhelms the objects themselves."
+          },
+          {
+            "id": "truth-4",
+            "value": "Mobile is a primary visit-planning surface, not a reduced desktop afterthought."
+          },
+          {
+            "id": "truth-5",
+            "value": "Reduced-motion users must receive equivalent hierarchy, causality and narrative meaning rather than a stripped fallback."
+          },
+          {
+            "id": "truth-6",
+            "value": "Motion must derive from accumulated time, material memory, repair or change; technology cannot become the concept."
+          },
+          {
+            "id": "truth-7",
+            "value": "Long-form reading requires deliberate stillness and stable hierarchy."
+          },
+          {
+            "id": "truth-8",
+            "value": "Primary navigation, exhibition information and ticket reservation remain immediately usable throughout the experience."
+          },
+          {
+            "id": "truth-9",
+            "value": "Desktop and mobile require authored reinterpretation rather than scaled copies."
+          },
+          {
+            "id": "truth-10",
+            "value": "Reduced-motion behavior preserves semantic sequence and state meaning."
+          },
+          {
+            "id": "truth-11",
+            "value": "The experience remains plausible for production performance and accessibility budgets."
+          },
+          {
+            "id": "truth-12",
+            "value": "Real objects remain primary visual evidence; generic synthetic hero imagery cannot replace them."
+          }
+        ],
+        "sourceOpportunity": {
+          "id": "opportunity-1",
+          "value": "material-evidence-without-spectacle"
+        },
+        "categoryRejections": [
+          "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+          "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+          "Continuous camera drift or parallax used only to signal premium aesthetics.",
+          "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+          "Scroll-jacking that delays reading or practical tasks.",
+          "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+        ],
+        "principles": [
+          "Accumulated material change must remain connected to real object histories rather than decorative atmosphere.",
+          "Stillness is the default state for reading, comparison and practical museum tasks.",
+          "Repair and accumulated change are evidence of use, not luxury surface treatment.",
+          "Each medium interprets the evidence system differently without replacing real objects with synthetic spectacle."
+        ],
+        "antiPrinciples": [
+          "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+          "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+          "Continuous camera drift or parallax used only to signal premium aesthetics.",
+          "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+          "Scroll-jacking that delays reading or practical tasks.",
+          "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+        ],
+        "expressionTests": {
+          "typography": "Separate contemplative exhibition voice from factual trace labels and durable reading without making type compete with object evidence.",
+          "image": "Use licensed object photography or new capture to show actual wear, repair and material change; Phase 0 placeholders remain explicitly non-documentary.",
+          "motion": "Make changes in material condition or historical understanding perceptible when they matter, then preserve deliberate stillness; no continuous drift.",
+          "interaction": "Let visitors encounter objects and their material histories without losing orientation or access to practical museum routes.",
+          "sound": "Silence remains the default; any later sound must be grounded in object evidence and retain a silent equivalent.",
+          "responsive": "On desktop, mobile and under reduced motion, preserve the same evidence relationships, reading clarity and access to practical museum tasks through authored reinterpretation."
+        },
+        "technologyPolicy": "Implementation tools serve the evidence system. Motion, browser APIs, generated media and spatial tools are considered only when they make object-specific material time more legible without displacing the objects or museum tasks.",
+        "competitorTransferTest": {
+          "question": "Could another museum or design site reuse this evidence-system Thesis unchanged without the specific collection truth that wear, repair, fading and deformation are meaningful records of use?",
+          "passCondition": "The Thesis should weaken without After Matter’s one hundred real objects and its requirement to make accumulated material time perceptible while preserving reading, wayfinding, ticketing, mobile access and reduced-motion equivalence.",
+          "evidenceRefs": [
+            "truth-1",
+            "truth-2",
+            "truth-3",
+            "opportunity-1"
+          ]
+        },
+        "alternativesConsidered": [
+          {
+            "idea": "Treat repair, care, uncertainty and alteration as the exhibition's public record, making preservation itself a readable editorial structure rather than a hidden conservation backstory.",
+            "rejectedBecause": "Most intellectually distinct, but risks making one hundred object encounters feel like an archive interface rather than an exhibition experience."
+          },
+          {
+            "idea": "Make one hundred distinct object lives perceptible as a shared tempo: each encounter isolates a particular change, while deliberate stillness lets the collection cohere without flattening its differences.",
+            "rejectedBecause": "Best collection-scale frame, but less immediately actionable for wayfinding and may dilute the specificity of repair as evidence."
+          }
+        ],
+        "selectionRationale": "This recovery Thesis is the broadest project-specific governing idea supported by the frozen After Matter brief: material change is meaningful evidence, but the later Creative World determines whether that evidence becomes navigation, editorial record, collection rhythm, or another materially grounded behavior.",
+        "unresolvedRisks": [
+          "Final licensed object photography and object-specific historical records remain outside this recovery pass."
+        ],
+        "truth": {
+          "humanCreativeApproval": false,
+          "creativeThesisFrozen": false,
+          "generatedFromSuppliedTruthAndInspiration": true,
+          "authoredCandidateSupplied": true
+        },
+        "status": "ready-for-creative-direction-review",
+        "pass": true,
+        "reviewReady": true,
+        "findings": [],
+        "review": {
+          "stage": "creative-thesis-review",
+          "status": "ready-for-creative-direction-review",
+          "pass": true,
+          "reviewReady": true,
+          "findings": [],
+          "truth": {
+            "humanCreativeApproval": false,
+            "creativeThesisFrozen": false,
+            "structuralReviewOnly": true
+          }
+        }
+      },
+      "thesisRef": {
+        "schema": "ai-studio-os/creative-thesis@1",
+        "projectId": "benchmark-011-after-matter",
+        "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+        "status": "ready-for-creative-direction-review",
+        "reviewReady": true
+      },
+      "authoringBrief": {
+        "stage": "creative-world-authoring-brief",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle.",
+          "creativeTension": "archival authority x tactile sensuality",
+          "categoryRejections": [
+            "Generic scroll-triggered fade-and-rise sequences applied uniformly to every section.",
+            "Floating glass cards, glowing AI gradients or decorative particles unrelated to material memory.",
+            "Continuous camera drift or parallax used only to signal premium aesthetics.",
+            "Over-elastic spring motion that makes museum content feel playful or weightless without conceptual reason.",
+            "Scroll-jacking that delays reading or practical tasks.",
+            "Reduced motion implemented by simply disabling everything and losing narrative relationships."
+          ]
+        },
+        "requiredCandidateCount": {
+          "min": 3,
+          "max": 5
+        },
+        "requiredStructuralDimensions": [
+          "worldClass",
+          "narrativeModel",
+          "compositionModel",
+          "imageLanguage",
+          "motionLanguage",
+          "interactionModel",
+          "responsiveStrategy"
+        ],
+        "instruction": "Author 3–5 genuinely different experience worlds that all preserve the same thesis but differ in narrative, composition, image/material behavior, motion, interaction, and responsive logic. Do not submit palette/type/layout reskins.",
+        "technologyRule": "Technology is downstream and may not be used as the primary world differentiator.",
+        "typographyRule": "Define typography intent and measurable pressures; do not freeze final font families at Creative World stage.",
+        "proofRule": "Structural readiness advances all viable worlds to comparable visual/style-frame proof. Do not select a winner from prose alone."
+      },
+      "worlds": [
+        {
+          "schema": "ai-studio-os/creative-world@1",
+          "id": "friction-index",
+          "label": "Friction Index",
+          "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+          "interpretationOfThesis": "Material time becomes a readable sequence of specific changes: wear, repair, fading, and care guide attention while objects, reading, and practical museum tasks remain primary.",
+          "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+          "worldClass": "material-history navigation system",
+          "narrativeModel": "move from a visible object to one selected trace, then from that trace into history, context, and a return to the object.",
+          "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+          "typographyIntent": {
+            "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+            "roles": {
+              "exhibition": "measured, tactile, and memorable",
+              "trace": "precise and chronologically clear",
+              "reading": "quiet, durable, and comfortably long-form",
+              "visit": "immediate and functional"
+            },
+            "preferredCategories": {
+              "display": [
+                "serif",
+                "humanist sans-serif"
+              ],
+              "body": [
+                "sans-serif",
+                "serif"
+              ]
+            },
+            "avoidCategories": [
+              "generic luxury serif staging",
+              "museum-label bureaucratic density"
+            ],
+            "descriptorTargets": {},
+            "pressures": {
+              "readingClarity": 92,
+              "objectPrimacy": 90,
+              "traceLegibility": 91,
+              "practicalTaskClarity": 94
+            },
+            "antiPatterns": [
+              "monumental type that competes with objects",
+              "motion-led reading hierarchy"
+            ]
+          },
+          "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+          "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+          "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+          "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+          "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+          "soundPolicy": "Silence by default. Any future sound must be tied to real object evidence, have rights clearance, and preserve a silent equivalent.",
+          "categoryTransferTest": {
+            "whyProjectSpecific": "The world depends on the exhibition's one hundred real objects, where scratches, repair, fading, and deformation are evidence of use rather than flaws to hide.",
+            "transferRisk": "medium if real object history is replaced by generic distressed styling or if traces cease to be factual object-specific evidence."
+          },
+          "antiPatterns": [
+            "generic scroll-triggered fade-and-rise sections",
+            "decorative particles, glow, or AI gradients unrelated to material evidence",
+            "continuous camera drift for premium atmosphere",
+            "scroll-jacking that delays reading or ticketing"
+          ],
+          "thesisRef": {
+            "schema": "ai-studio-os/creative-thesis@1",
+            "projectId": "benchmark-011-after-matter",
+            "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+          },
+          "unresolvedRisks": [
+            "Phase 0 material imagery is non-documentary and must be replaced by licensed object photography or new capture before production.",
+            "Trace navigation could become decorative if every trace is not grounded in a real object history.",
+            "Motion must retain narrative equivalence under reduced motion without flattening meaningful object-state relationships."
+          ],
+          "reviewReady": true,
+          "selected": false,
+          "truth": {
+            "humanCreativeSelectionConfirmed": false,
+            "visualWorldProofReviewed": false,
+            "styleFrameReviewComplete": false,
+            "typographyApproved": false,
+            "productionTechnologyApproved": false
+          },
+          "findings": []
+        },
+        {
+          "schema": "ai-studio-os/creative-world@1",
+          "id": "repair-ledger",
+          "label": "Repair Ledger",
+          "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+          "interpretationOfThesis": "Accumulated material change becomes evidence through an inspectable chronology of care, so repair and uncertainty are understood as real histories rather than decorative surface.",
+          "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+          "worldClass": "conservation-led editorial record",
+          "narrativeModel": "move from object encounter into a chronological ledger of care, uncertainty and context, then return to the object with the record retained.",
+          "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+          "typographyIntent": {
+            "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+            "roles": {
+              "object": "quietly prominent",
+              "ledger": "precise chronology",
+              "reading": "durable and generous",
+              "visit": "immediate and functional"
+            },
+            "preferredCategories": {
+              "display": [
+                "serif"
+              ],
+              "body": [
+                "sans-serif",
+                "serif"
+              ]
+            },
+            "avoidCategories": [
+              "bureaucratic database density",
+              "luxury restoration language"
+            ],
+            "descriptorTargets": {},
+            "pressures": {
+              "readingClarity": 95,
+              "objectPrimacy": 91,
+              "chronologyLegibility": 94,
+              "practicalTaskClarity": 94
+            },
+            "antiPatterns": [
+              "metadata used as texture",
+              "type that makes care feel bureaucratic"
+            ]
+          },
+          "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+          "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+          "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+          "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+          "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+          "soundPolicy": "Silence by default. Any future sound must be factual, rights-cleared and have a silent equivalent.",
+          "categoryTransferTest": {
+            "whyProjectSpecific": "After Matter treats wear, repair, fading and deformation across one hundred real objects as evidence of use; the ledger is meaningful because care is part of each object history.",
+            "transferRisk": "high if generic museum metadata or decorative annotations replace factual conservation evidence."
+          },
+          "antiPatterns": [
+            "decorative metadata",
+            "generic archive-dashboard UI",
+            "documentation that obscures the object"
+          ],
+          "thesisRef": {
+            "schema": "ai-studio-os/creative-thesis@1",
+            "projectId": "benchmark-011-after-matter",
+            "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+          },
+          "unresolvedRisks": [
+            "Requires object-specific conservation records and licensed photography before production.",
+            "Chronology can become dense if uncertainty is not editorially prioritized."
+          ],
+          "reviewReady": true,
+          "selected": false,
+          "truth": {
+            "humanCreativeSelectionConfirmed": false,
+            "visualWorldProofReviewed": false,
+            "styleFrameReviewComplete": false,
+            "typographyApproved": false,
+            "productionTechnologyApproved": false
+          },
+          "findings": []
+        },
+        {
+          "schema": "ai-studio-os/creative-world@1",
+          "id": "pressure-room",
+          "label": "Pressure Room",
+          "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+          "interpretationOfThesis": "Accumulated change is understood through a focused encounter with the resistance an object has endured, then released into factual history and practical museum access.",
+          "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+          "worldClass": "concentrated encounter rhythm",
+          "narrativeModel": "arrive at one object, experience a composed threshold of resistance, open its factual history, then release back to a still exhibition field.",
+          "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+          "typographyIntent": {
+            "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+            "roles": {
+              "encounter": "measured and spacious",
+              "history": "factual and close",
+              "reading": "calm and durable",
+              "visit": "persistent and direct"
+            },
+            "preferredCategories": {
+              "display": [
+                "serif",
+                "humanist sans-serif"
+              ],
+              "body": [
+                "sans-serif"
+              ]
+            },
+            "avoidCategories": [
+              "cinematic title-card drama",
+              "oversized type that blocks the object"
+            ],
+            "descriptorTargets": {},
+            "pressures": {
+              "encounterFocus": 94,
+              "readingClarity": 90,
+              "practicalTaskClarity": 95,
+              "objectPrimacy": 96
+            },
+            "antiPatterns": [
+              "forced waiting",
+              "fake loading state"
+            ]
+          },
+          "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+          "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+          "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+          "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+          "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+          "soundPolicy": "Silence by default. Any future sound must support an object-specific causal relationship and retain a silent equivalent.",
+          "categoryTransferTest": {
+            "whyProjectSpecific": "The encounter is specific to After Matter because one hundred real objects carry distinct resistance through wear, repair, fading and deformation, not because a generic cultural site needs theatrical tension.",
+            "transferRisk": "high if the threshold turns into a cinematic intro, scroll-jacking or a technology demonstration."
+          },
+          "antiPatterns": [
+            "cinematic intro",
+            "forced waiting",
+            "scroll-jacking",
+            "fake loading state",
+            "inaccessible timed gate",
+            "technology demo"
+          ],
+          "thesisRef": {
+            "schema": "ai-studio-os/creative-thesis@1",
+            "projectId": "benchmark-011-after-matter",
+            "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+          },
+          "unresolvedRisks": [
+            "The threshold requires clear bypass and reduced-motion equivalence.",
+            "Concentration must not suppress reading, dates, location or ticket access."
+          ],
+          "reviewReady": true,
+          "selected": false,
+          "truth": {
+            "humanCreativeSelectionConfirmed": false,
+            "visualWorldProofReviewed": false,
+            "styleFrameReviewComplete": false,
+            "typographyApproved": false,
+            "productionTechnologyApproved": false
+          },
+          "findings": []
+        }
+      ],
+      "selection": null,
+      "selectedWorld": null,
+      "truth": {
+        "authoredWorldsSupplied": true,
+        "humanWorldSelectionConfirmed": false,
+        "selectedAutomatically": false
+      },
+      "status": "ready-for-style-frame-proof",
+      "pass": true,
+      "reviewReady": true,
+      "findings": [],
+      "divergence": [
+        {
+          "a": "friction-index",
+          "b": "repair-ledger",
+          "differenceCount": 7,
+          "differences": [
+            "worldClass",
+            "narrativeModel",
+            "compositionModel",
+            "imageLanguage",
+            "motionLanguage",
+            "interactionModel",
+            "responsiveStrategy"
+          ],
+          "matches": [],
+          "heuristicPass": true,
+          "pass": true,
+          "proofLevel": "structural-heuristic",
+          "humanSemanticDivergenceReviewed": false,
+          "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+        },
+        {
+          "a": "friction-index",
+          "b": "pressure-room",
+          "differenceCount": 7,
+          "differences": [
+            "worldClass",
+            "narrativeModel",
+            "compositionModel",
+            "imageLanguage",
+            "motionLanguage",
+            "interactionModel",
+            "responsiveStrategy"
+          ],
+          "matches": [],
+          "heuristicPass": true,
+          "pass": true,
+          "proofLevel": "structural-heuristic",
+          "humanSemanticDivergenceReviewed": false,
+          "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+        },
+        {
+          "a": "repair-ledger",
+          "b": "pressure-room",
+          "differenceCount": 7,
+          "differences": [
+            "worldClass",
+            "narrativeModel",
+            "compositionModel",
+            "imageLanguage",
+            "motionLanguage",
+            "interactionModel",
+            "responsiveStrategy"
+          ],
+          "matches": [],
+          "heuristicPass": true,
+          "pass": true,
+          "proofLevel": "structural-heuristic",
+          "humanSemanticDivergenceReviewed": false,
+          "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+        }
+      ],
+      "review": {
+        "stage": "creative-world-review",
+        "status": "ready-for-style-frame-proof",
+        "pass": true,
+        "reviewReady": true,
+        "findings": [],
+        "divergence": [
+          {
+            "a": "friction-index",
+            "b": "repair-ledger",
+            "differenceCount": 7,
+            "differences": [
+              "worldClass",
+              "narrativeModel",
+              "compositionModel",
+              "imageLanguage",
+              "motionLanguage",
+              "interactionModel",
+              "responsiveStrategy"
+            ],
+            "matches": [],
+            "heuristicPass": true,
+            "pass": true,
+            "proofLevel": "structural-heuristic",
+            "humanSemanticDivergenceReviewed": false,
+            "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+          },
+          {
+            "a": "friction-index",
+            "b": "pressure-room",
+            "differenceCount": 7,
+            "differences": [
+              "worldClass",
+              "narrativeModel",
+              "compositionModel",
+              "imageLanguage",
+              "motionLanguage",
+              "interactionModel",
+              "responsiveStrategy"
+            ],
+            "matches": [],
+            "heuristicPass": true,
+            "pass": true,
+            "proofLevel": "structural-heuristic",
+            "humanSemanticDivergenceReviewed": false,
+            "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+          },
+          {
+            "a": "repair-ledger",
+            "b": "pressure-room",
+            "differenceCount": 7,
+            "differences": [
+              "worldClass",
+              "narrativeModel",
+              "compositionModel",
+              "imageLanguage",
+              "motionLanguage",
+              "interactionModel",
+              "responsiveStrategy"
+            ],
+            "matches": [],
+            "heuristicPass": true,
+            "pass": true,
+            "proofLevel": "structural-heuristic",
+            "humanSemanticDivergenceReviewed": false,
+            "limitation": "String-distinct authored structural fields can detect obvious reskins, but they do not prove that two worlds are creatively or semantically different."
+          }
+        ],
+        "truth": {
+          "humanWorldSelectionConfirmed": false,
+          "humanSemanticDivergenceReviewed": false,
+          "visualApprovalComplete": false,
+          "styleFrameReviewComplete": false,
+          "structuralReviewOnly": true
+        }
+      }
+    },
+    "explorationRef": {
+      "schema": "ai-studio-os/creative-world-exploration@1",
+      "status": "ready-for-style-frame-proof",
+      "reviewReady": true,
+      "worldIds": [
+        "friction-index",
+        "repair-ledger",
+        "pressure-room"
+      ]
+    },
+    "moments": [
+      {
+        "id": "exhibition-entry",
+        "label": "Exhibition entry",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove first-contact world identity while exhibition facts and practical navigation remain usable.",
+        "productState": "Visitor enters After Matter with dates, location and tickets immediately available."
+      },
+      {
+        "id": "object-detail-history",
+        "label": "Object detail and history",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove how one material change leads into factual history while the object remains primary.",
+        "productState": "Visitor examines an explicitly non-documentary material-study placeholder and its factual-history structure."
+      },
+      {
+        "id": "curatorial-reading",
+        "label": "Curatorial reading",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove long-form reading posture, stillness and contextual continuity.",
+        "productState": "Visitor reads care, provenance and uncertainty in a stable editorial context."
+      },
+      {
+        "id": "visit-ticketing",
+        "label": "Visit and ticketing",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove date, location and ticket actions remain immediate inside the Creative World.",
+        "productState": "Visitor checks exhibition dates and reserves a ticket without leaving the material-history context."
+      },
+      {
+        "id": "mobile-interpretation",
+        "label": "Mobile interpretation",
+        "viewport": "mobile",
+        "width": 390,
+        "height": 844,
+        "purpose": "Prove authored narrow-screen object/history interpretation with a clear route to practical museum tasks.",
+        "productState": "Mobile visitor reads one object-history relationship and can reach dates, location and tickets immediately."
+      }
+    ],
+    "frames": [
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "friction-index-exhibition-entry",
+        "worldId": "friction-index",
+        "worldLabel": "Friction Index",
+        "momentId": "exhibition-entry",
+        "momentLabel": "Exhibition entry",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove first-contact world identity while exhibition facts and practical navigation remain usable.",
+        "productState": "Visitor enters After Matter with dates, location and tickets immediately available.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+        "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+        "typographyIntent": {
+          "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+          "roles": {
+            "exhibition": "measured, tactile, and memorable",
+            "trace": "precise and chronologically clear",
+            "reading": "quiet, durable, and comfortably long-form",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "generic luxury serif staging",
+            "museum-label bureaucratic density"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 92,
+            "objectPrimacy": 90,
+            "traceLegibility": 91,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "monumental type that competes with objects",
+            "motion-led reading hierarchy"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+        "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+        "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+        "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "friction-index-object-detail-history",
+        "worldId": "friction-index",
+        "worldLabel": "Friction Index",
+        "momentId": "object-detail-history",
+        "momentLabel": "Object detail and history",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove how one material change leads into factual history while the object remains primary.",
+        "productState": "Visitor examines an explicitly non-documentary material-study placeholder and its factual-history structure.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+        "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+        "typographyIntent": {
+          "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+          "roles": {
+            "exhibition": "measured, tactile, and memorable",
+            "trace": "precise and chronologically clear",
+            "reading": "quiet, durable, and comfortably long-form",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "generic luxury serif staging",
+            "museum-label bureaucratic density"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 92,
+            "objectPrimacy": 90,
+            "traceLegibility": 91,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "monumental type that competes with objects",
+            "motion-led reading hierarchy"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+        "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+        "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+        "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "friction-index-curatorial-reading",
+        "worldId": "friction-index",
+        "worldLabel": "Friction Index",
+        "momentId": "curatorial-reading",
+        "momentLabel": "Curatorial reading",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove long-form reading posture, stillness and contextual continuity.",
+        "productState": "Visitor reads care, provenance and uncertainty in a stable editorial context.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+        "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+        "typographyIntent": {
+          "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+          "roles": {
+            "exhibition": "measured, tactile, and memorable",
+            "trace": "precise and chronologically clear",
+            "reading": "quiet, durable, and comfortably long-form",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "generic luxury serif staging",
+            "museum-label bureaucratic density"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 92,
+            "objectPrimacy": 90,
+            "traceLegibility": 91,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "monumental type that competes with objects",
+            "motion-led reading hierarchy"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+        "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+        "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+        "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "friction-index-visit-ticketing",
+        "worldId": "friction-index",
+        "worldLabel": "Friction Index",
+        "momentId": "visit-ticketing",
+        "momentLabel": "Visit and ticketing",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove date, location and ticket actions remain immediate inside the Creative World.",
+        "productState": "Visitor checks exhibition dates and reserves a ticket without leaving the material-history context.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+        "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+        "typographyIntent": {
+          "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+          "roles": {
+            "exhibition": "measured, tactile, and memorable",
+            "trace": "precise and chronologically clear",
+            "reading": "quiet, durable, and comfortably long-form",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "generic luxury serif staging",
+            "museum-label bureaucratic density"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 92,
+            "objectPrimacy": 90,
+            "traceLegibility": 91,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "monumental type that competes with objects",
+            "motion-led reading hierarchy"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+        "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+        "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+        "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "friction-index-mobile-interpretation",
+        "worldId": "friction-index",
+        "worldLabel": "Friction Index",
+        "momentId": "mobile-interpretation",
+        "momentLabel": "Mobile interpretation",
+        "viewport": "mobile",
+        "width": 390,
+        "height": 844,
+        "purpose": "Prove authored narrow-screen object/history interpretation with a clear route to practical museum tasks.",
+        "productState": "Mobile visitor reads one object-history relationship and can reach dates, location and tickets immediately.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Accumulated marks of use become the visitor's wayfinding system, so the exhibition is entered through a trace rather than a spectacle.",
+        "signatureBehavior": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "compositionModel": "a high-contrast object field paired with an ordered trace index and calm reading column; practical routes remain visible at every state.",
+        "typographyIntent": {
+          "statement": "Typography separates an expansive contemplative exhibition voice from compact, factual trace labels and stable long-form reading; no final family or weight is approved.",
+          "roles": {
+            "exhibition": "measured, tactile, and memorable",
+            "trace": "precise and chronologically clear",
+            "reading": "quiet, durable, and comfortably long-form",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "generic luxury serif staging",
+            "museum-label bureaucratic density"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 92,
+            "objectPrimacy": 90,
+            "traceLegibility": 91,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "monumental type that competes with objects",
+            "motion-led reading hierarchy"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new museum capture presented with close material crops, visible wear, and enough negative space for one factual trace at a time; Phase 0 uses an explicitly non-documentary material placeholder only.",
+        "materialLanguage": "oxidized metal, repaired ceramic, worn lacquer, paper fiber, dark archival cloth, fine rules, and restrained oxide-red trace markers.",
+        "motionLanguage": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "interactionModel": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately.",
+        "responsiveStrategy": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "repair-ledger-exhibition-entry",
+        "worldId": "repair-ledger",
+        "worldLabel": "Repair Ledger",
+        "momentId": "exhibition-entry",
+        "momentLabel": "Exhibition entry",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove first-contact world identity while exhibition facts and practical navigation remain usable.",
+        "productState": "Visitor enters After Matter with dates, location and tickets immediately available.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+        "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+        "typographyIntent": {
+          "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+          "roles": {
+            "object": "quietly prominent",
+            "ledger": "precise chronology",
+            "reading": "durable and generous",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "bureaucratic database density",
+            "luxury restoration language"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 95,
+            "objectPrimacy": 91,
+            "chronologyLegibility": 94,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "metadata used as texture",
+            "type that makes care feel bureaucratic"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+        "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+        "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "repair-ledger-object-detail-history",
+        "worldId": "repair-ledger",
+        "worldLabel": "Repair Ledger",
+        "momentId": "object-detail-history",
+        "momentLabel": "Object detail and history",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove how one material change leads into factual history while the object remains primary.",
+        "productState": "Visitor examines an explicitly non-documentary material-study placeholder and its factual-history structure.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+        "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+        "typographyIntent": {
+          "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+          "roles": {
+            "object": "quietly prominent",
+            "ledger": "precise chronology",
+            "reading": "durable and generous",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "bureaucratic database density",
+            "luxury restoration language"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 95,
+            "objectPrimacy": 91,
+            "chronologyLegibility": 94,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "metadata used as texture",
+            "type that makes care feel bureaucratic"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+        "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+        "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "repair-ledger-curatorial-reading",
+        "worldId": "repair-ledger",
+        "worldLabel": "Repair Ledger",
+        "momentId": "curatorial-reading",
+        "momentLabel": "Curatorial reading",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove long-form reading posture, stillness and contextual continuity.",
+        "productState": "Visitor reads care, provenance and uncertainty in a stable editorial context.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+        "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+        "typographyIntent": {
+          "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+          "roles": {
+            "object": "quietly prominent",
+            "ledger": "precise chronology",
+            "reading": "durable and generous",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "bureaucratic database density",
+            "luxury restoration language"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 95,
+            "objectPrimacy": 91,
+            "chronologyLegibility": 94,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "metadata used as texture",
+            "type that makes care feel bureaucratic"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+        "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+        "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "repair-ledger-visit-ticketing",
+        "worldId": "repair-ledger",
+        "worldLabel": "Repair Ledger",
+        "momentId": "visit-ticketing",
+        "momentLabel": "Visit and ticketing",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove date, location and ticket actions remain immediate inside the Creative World.",
+        "productState": "Visitor checks exhibition dates and reserves a ticket without leaving the material-history context.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+        "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+        "typographyIntent": {
+          "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+          "roles": {
+            "object": "quietly prominent",
+            "ledger": "precise chronology",
+            "reading": "durable and generous",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "bureaucratic database density",
+            "luxury restoration language"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 95,
+            "objectPrimacy": 91,
+            "chronologyLegibility": 94,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "metadata used as texture",
+            "type that makes care feel bureaucratic"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+        "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+        "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "repair-ledger-mobile-interpretation",
+        "worldId": "repair-ledger",
+        "worldLabel": "Repair Ledger",
+        "momentId": "mobile-interpretation",
+        "momentLabel": "Mobile interpretation",
+        "viewport": "mobile",
+        "width": 390,
+        "height": 844,
+        "purpose": "Prove authored narrow-screen object/history interpretation with a clear route to practical museum tasks.",
+        "productState": "Mobile visitor reads one object-history relationship and can reach dates, location and tickets immediately.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Care is the editorial voice: repair, uncertainty and conservation records gather beside each object as a public, readable ledger.",
+        "signatureBehavior": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "compositionModel": "object field with a calm adjacent ledger, durable reading column and compact visit rail; documentation is ordered as evidence rather than ornament.",
+        "typographyIntent": {
+          "statement": "A measured editorial hierarchy distinguishes object title, conservation annotation, uncertainty and long-form curatorial reading without approving a final family.",
+          "roles": {
+            "object": "quietly prominent",
+            "ledger": "precise chronology",
+            "reading": "durable and generous",
+            "visit": "immediate and functional"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif"
+            ],
+            "body": [
+              "sans-serif",
+              "serif"
+            ]
+          },
+          "avoidCategories": [
+            "bureaucratic database density",
+            "luxury restoration language"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "readingClarity": 95,
+            "objectPrimacy": 91,
+            "chronologyLegibility": 94,
+            "practicalTaskClarity": 94
+          },
+          "antiPatterns": [
+            "metadata used as texture",
+            "type that makes care feel bureaucratic"
+          ]
+        },
+        "imageLanguage": "licensed exhibition object photography or new capture paired with close documentation crops; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "paper fiber, conservation tissue, graphite notation, repaired joins, archival tabs and restrained ink rules.",
+        "motionLanguage": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "interactionModel": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately.",
+        "responsiveStrategy": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "pressure-room-exhibition-entry",
+        "worldId": "pressure-room",
+        "worldLabel": "Pressure Room",
+        "momentId": "exhibition-entry",
+        "momentLabel": "Exhibition entry",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove first-contact world identity while exhibition facts and practical navigation remain usable.",
+        "productState": "Visitor enters After Matter with dates, location and tickets immediately available.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+        "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+        "typographyIntent": {
+          "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+          "roles": {
+            "encounter": "measured and spacious",
+            "history": "factual and close",
+            "reading": "calm and durable",
+            "visit": "persistent and direct"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif"
+            ]
+          },
+          "avoidCategories": [
+            "cinematic title-card drama",
+            "oversized type that blocks the object"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "encounterFocus": 94,
+            "readingClarity": 90,
+            "practicalTaskClarity": 95,
+            "objectPrimacy": 96
+          },
+          "antiPatterns": [
+            "forced waiting",
+            "fake loading state"
+          ]
+        },
+        "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+        "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+        "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "pressure-room-object-detail-history",
+        "worldId": "pressure-room",
+        "worldLabel": "Pressure Room",
+        "momentId": "object-detail-history",
+        "momentLabel": "Object detail and history",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove how one material change leads into factual history while the object remains primary.",
+        "productState": "Visitor examines an explicitly non-documentary material-study placeholder and its factual-history structure.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+        "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+        "typographyIntent": {
+          "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+          "roles": {
+            "encounter": "measured and spacious",
+            "history": "factual and close",
+            "reading": "calm and durable",
+            "visit": "persistent and direct"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif"
+            ]
+          },
+          "avoidCategories": [
+            "cinematic title-card drama",
+            "oversized type that blocks the object"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "encounterFocus": 94,
+            "readingClarity": 90,
+            "practicalTaskClarity": 95,
+            "objectPrimacy": 96
+          },
+          "antiPatterns": [
+            "forced waiting",
+            "fake loading state"
+          ]
+        },
+        "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+        "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+        "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "pressure-room-curatorial-reading",
+        "worldId": "pressure-room",
+        "worldLabel": "Pressure Room",
+        "momentId": "curatorial-reading",
+        "momentLabel": "Curatorial reading",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove long-form reading posture, stillness and contextual continuity.",
+        "productState": "Visitor reads care, provenance and uncertainty in a stable editorial context.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+        "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+        "typographyIntent": {
+          "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+          "roles": {
+            "encounter": "measured and spacious",
+            "history": "factual and close",
+            "reading": "calm and durable",
+            "visit": "persistent and direct"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif"
+            ]
+          },
+          "avoidCategories": [
+            "cinematic title-card drama",
+            "oversized type that blocks the object"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "encounterFocus": 94,
+            "readingClarity": 90,
+            "practicalTaskClarity": 95,
+            "objectPrimacy": 96
+          },
+          "antiPatterns": [
+            "forced waiting",
+            "fake loading state"
+          ]
+        },
+        "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+        "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+        "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "pressure-room-visit-ticketing",
+        "worldId": "pressure-room",
+        "worldLabel": "Pressure Room",
+        "momentId": "visit-ticketing",
+        "momentLabel": "Visit and ticketing",
+        "viewport": "desktop",
+        "width": 1440,
+        "height": 900,
+        "purpose": "Prove date, location and ticket actions remain immediate inside the Creative World.",
+        "productState": "Visitor checks exhibition dates and reserves a ticket without leaving the material-history context.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+        "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+        "typographyIntent": {
+          "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+          "roles": {
+            "encounter": "measured and spacious",
+            "history": "factual and close",
+            "reading": "calm and durable",
+            "visit": "persistent and direct"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif"
+            ]
+          },
+          "avoidCategories": [
+            "cinematic title-card drama",
+            "oversized type that blocks the object"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "encounterFocus": 94,
+            "readingClarity": 90,
+            "practicalTaskClarity": 95,
+            "objectPrimacy": 96
+          },
+          "antiPatterns": [
+            "forced waiting",
+            "fake loading state"
+          ]
+        },
+        "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+        "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+        "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      },
+      {
+        "schema": "ai-studio-os/style-frame-proof@2",
+        "id": "pressure-room-mobile-interpretation",
+        "worldId": "pressure-room",
+        "worldLabel": "Pressure Room",
+        "momentId": "mobile-interpretation",
+        "momentLabel": "Mobile interpretation",
+        "viewport": "mobile",
+        "width": 390,
+        "height": 844,
+        "purpose": "Prove authored narrow-screen object/history interpretation with a clear route to practical museum tasks.",
+        "productState": "Mobile visitor reads one object-history relationship and can reach dates, location and tickets immediately.",
+        "thesisRef": {
+          "schema": "ai-studio-os/creative-thesis@1",
+          "projectId": "benchmark-011-after-matter",
+          "governingIdea": "Let accumulated material change become the exhibition’s evidence system, so time is perceived through what the objects have endured rather than through decorative spectacle."
+        },
+        "worldIdea": "Time is felt as resistance: one object receives a concentrated encounter where pressure and release make quiet attention the dramatic event.",
+        "signatureBehavior": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "compositionModel": "one dominant object plane, a compressed threshold edge and a surrounding still field with persistent practical navigation.",
+        "typographyIntent": {
+          "statement": "Sparse spatial typography holds attention around one object while factual history and practical routes stay immediately legible; no final family is approved.",
+          "roles": {
+            "encounter": "measured and spacious",
+            "history": "factual and close",
+            "reading": "calm and durable",
+            "visit": "persistent and direct"
+          },
+          "preferredCategories": {
+            "display": [
+              "serif",
+              "humanist sans-serif"
+            ],
+            "body": [
+              "sans-serif"
+            ]
+          },
+          "avoidCategories": [
+            "cinematic title-card drama",
+            "oversized type that blocks the object"
+          ],
+          "descriptorTargets": {},
+          "pressures": {
+            "encounterFocus": 94,
+            "readingClarity": 90,
+            "practicalTaskClarity": 95,
+            "objectPrimacy": 96
+          },
+          "antiPatterns": [
+            "forced waiting",
+            "fake loading state"
+          ]
+        },
+        "imageLanguage": "licensed object photography or new capture shown at concentrated scale with materially specific close detail; this proof uses an explicitly labelled non-documentary material-study placeholder.",
+        "materialLanguage": "dark mineral ground, compressed shadow, worn surfaces, fine pressure lines and restrained light at repaired edges.",
+        "motionLanguage": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "interactionModel": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point.",
+        "responsiveStrategy": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "proofPolicy": {
+          "typography": "proxy-only-not-approved-family",
+          "documentaryImagery": "real-source-or-explicit-placeholder-only",
+          "productionTechnology": "not-selected",
+          "exactBrowserRasterRequired": true,
+          "purpose": "compare-creative-worlds-before-human-selection"
+        },
+        "truth": {
+          "humanVisualApproval": false,
+          "worldSelected": false,
+          "typographyApproved": false,
+          "productionTechnologyApproved": false,
+          "productionReady": false
+        }
+      }
+    ],
+    "comparisons": [
+      {
+        "id": "exhibition-entry-comparison",
+        "momentId": "exhibition-entry",
+        "momentLabel": "Exhibition entry",
+        "worldIds": [
+          "friction-index",
+          "repair-ledger",
+          "pressure-room"
+        ],
+        "purpose": "compare-the-same-product-state-across-all-creative-worlds"
+      },
+      {
+        "id": "object-detail-history-comparison",
+        "momentId": "object-detail-history",
+        "momentLabel": "Object detail and history",
+        "worldIds": [
+          "friction-index",
+          "repair-ledger",
+          "pressure-room"
+        ],
+        "purpose": "compare-the-same-product-state-across-all-creative-worlds"
+      },
+      {
+        "id": "curatorial-reading-comparison",
+        "momentId": "curatorial-reading",
+        "momentLabel": "Curatorial reading",
+        "worldIds": [
+          "friction-index",
+          "repair-ledger",
+          "pressure-room"
+        ],
+        "purpose": "compare-the-same-product-state-across-all-creative-worlds"
+      },
+      {
+        "id": "visit-ticketing-comparison",
+        "momentId": "visit-ticketing",
+        "momentLabel": "Visit and ticketing",
+        "worldIds": [
+          "friction-index",
+          "repair-ledger",
+          "pressure-room"
+        ],
+        "purpose": "compare-the-same-product-state-across-all-creative-worlds"
+      },
+      {
+        "id": "mobile-interpretation-comparison",
+        "momentId": "mobile-interpretation",
+        "momentLabel": "Mobile interpretation",
+        "worldIds": [
+          "friction-index",
+          "repair-ledger",
+          "pressure-room"
+        ],
+        "purpose": "compare-the-same-product-state-across-all-creative-worlds"
+      }
+    ],
+    "evidenceRequirements": {
+      "perWorldFrameCount": 5,
+      "crossWorldComparisonCount": 5,
+      "exactBrowserRaster": true,
+      "desktopProofRequired": true,
+      "mobileProofRequired": true,
+      "htmlSourceRequired": true,
+      "manifestRequired": true,
+      "humanSelectionRequiredAfterProof": true
+    },
+    "selection": null,
+    "truth": {
+      "worldSelectedAutomatically": false,
+      "humanVisualApproval": false,
+      "typographyApproved": false,
+      "productionTechnologyApproved": false
+    },
+    "status": "ready-for-browser-proof",
+    "pass": true,
+    "reviewReady": true,
+    "findings": [],
+    "review": {
+      "stage": "style-frame-proof-review",
+      "status": "ready-for-browser-proof",
+      "pass": true,
+      "reviewReady": true,
+      "findings": [],
+      "truth": {
+        "structuralReviewOnly": true,
+        "humanVisualApproval": false,
+        "worldSelectedAutomatically": false,
+        "styleFrameProductionComplete": false
+      }
+    }
+  },
+  "historicalPhase0": {
+    "selectedWorldId": "friction-index",
+    "selectedWorldFingerprint": "3e1d94e065ff5a0aca8cc04f65d7788e7bdd29b09901031edced3994e4b51324",
+    "selectionIsEvidenceOnly": true
+  },
+  "selection": null,
+  "selectedWorld": null,
+  "truth": {
+    "humanWorldSelectionConfirmed": false,
+    "selectedAutomatically": false,
+    "creativeDirectionAuthorityCreated": false,
+    "motionAuthorityCreated": false,
+    "productionApproved": false,
+    "geminiGenerationUsed": false,
+    "exactBrowserRaster": true,
+    "renderedCompositionBindingsValidated": true,
+    "humanVisualApproval": false
+  },
+  "snapshotFingerprint": "7cd406278083e7920c7baf8ab43aeeec950ef34998f53b26a4ee4f23742d3a5c",
+  "renderedFrames": [
+    {
+      "frameId": "friction-index-exhibition-entry",
+      "worldId": "friction-index",
+      "momentId": "exhibition-entry",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-exhibition-entry.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-exhibition-entry.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "friction-index-object-detail-history",
+      "worldId": "friction-index",
+      "momentId": "object-detail-history",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-object-detail-history.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-object-detail-history.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "friction-index-curatorial-reading",
+      "worldId": "friction-index",
+      "momentId": "curatorial-reading",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-curatorial-reading.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-curatorial-reading.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "friction-index-visit-ticketing",
+      "worldId": "friction-index",
+      "momentId": "visit-ticketing",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-visit-ticketing.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-visit-ticketing.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "friction-index-mobile-interpretation",
+      "worldId": "friction-index",
+      "momentId": "mobile-interpretation",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-mobile-interpretation.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-mobile-interpretation.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "mobile"
+      }
+    },
+    {
+      "frameId": "repair-ledger-exhibition-entry",
+      "worldId": "repair-ledger",
+      "momentId": "exhibition-entry",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-exhibition-entry.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-exhibition-entry.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "repair-ledger-object-detail-history",
+      "worldId": "repair-ledger",
+      "momentId": "object-detail-history",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-object-detail-history.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-object-detail-history.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "repair-ledger-curatorial-reading",
+      "worldId": "repair-ledger",
+      "momentId": "curatorial-reading",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-curatorial-reading.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-curatorial-reading.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "repair-ledger-visit-ticketing",
+      "worldId": "repair-ledger",
+      "momentId": "visit-ticketing",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-visit-ticketing.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-visit-ticketing.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "repair-ledger-mobile-interpretation",
+      "worldId": "repair-ledger",
+      "momentId": "mobile-interpretation",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-mobile-interpretation.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-mobile-interpretation.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "mobile"
+      }
+    },
+    {
+      "frameId": "pressure-room-exhibition-entry",
+      "worldId": "pressure-room",
+      "momentId": "exhibition-entry",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-exhibition-entry.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-exhibition-entry.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "pressure-room-object-detail-history",
+      "worldId": "pressure-room",
+      "momentId": "object-detail-history",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-object-detail-history.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-object-detail-history.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "pressure-room-curatorial-reading",
+      "worldId": "pressure-room",
+      "momentId": "curatorial-reading",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-curatorial-reading.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-curatorial-reading.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "pressure-room-visit-ticketing",
+      "worldId": "pressure-room",
+      "momentId": "visit-ticketing",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-visit-ticketing.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-visit-ticketing.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
+    },
+    {
+      "frameId": "pressure-room-mobile-interpretation",
+      "worldId": "pressure-room",
+      "momentId": "mobile-interpretation",
+      "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-mobile-interpretation.html",
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-mobile-interpretation.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "mobile"
+      }
+    }
+  ],
+  "comparisonRefs": [
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/exhibition-entry-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/object-detail-history-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/curatorial-reading-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/visit-ticketing-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/mobile-interpretation-comparison.png"
+  ],
+  "comparisonBindings": [
+    {
+      "momentId": "exhibition-entry",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "object-detail-history",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "curatorial-reading",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "visit-ticketing",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "mobile-interpretation",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    }
+  ],
+  "visualProofEvidence": {
+    "schema": "ai-studio-os/style-frame-proof-evidence@2",
+    "projectId": "benchmark-011-after-matter",
+    "status": "ready-for-human-visual-review",
+    "pass": true,
+    "reviewReady": true,
+    "comparisonRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/exhibition-entry-comparison.png",
+    "comparisonRefs": [
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/exhibition-entry-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/object-detail-history-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/curatorial-reading-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/visit-ticketing-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/mobile-interpretation-comparison.png"
+    ],
+    "worlds": [
+      {
+        "worldId": "friction-index",
+        "reviewReady": true,
+        "evidenceRefs": [
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-exhibition-entry.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-object-detail-history.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-curatorial-reading.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-visit-ticketing.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-mobile-interpretation.png"
+        ],
+        "sourceRefs": [
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-exhibition-entry.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-object-detail-history.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-curatorial-reading.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-visit-ticketing.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-mobile-interpretation.html"
+        ]
+      },
+      {
+        "worldId": "repair-ledger",
+        "reviewReady": true,
+        "evidenceRefs": [
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-exhibition-entry.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-object-detail-history.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-curatorial-reading.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-visit-ticketing.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-mobile-interpretation.png"
+        ],
+        "sourceRefs": [
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-exhibition-entry.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-object-detail-history.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-curatorial-reading.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-visit-ticketing.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-mobile-interpretation.html"
+        ]
+      },
+      {
+        "worldId": "pressure-room",
+        "reviewReady": true,
+        "evidenceRefs": [
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-exhibition-entry.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-object-detail-history.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-curatorial-reading.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-visit-ticketing.png",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-mobile-interpretation.png"
+        ],
+        "sourceRefs": [
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-exhibition-entry.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-object-detail-history.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-curatorial-reading.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-visit-ticketing.html",
+          "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-mobile-interpretation.html"
+        ]
+      }
+    ],
+    "findings": [],
+    "truth": {
+      "exactBrowserRaster": true,
+      "humanVisualApproval": false,
+      "humanWorldSelectionConfirmed": false,
+      "selectedAutomatically": false,
+      "typographyApproved": false,
+      "productionTechnologyApproved": false
+    }
+  },
+  "humanReviewPacket": {
+    "status": "ready-for-human-creative-world-review",
+    "approvedThesisFingerprint": "03f2924c14696c25fd1724522a434b79a19b8f46a13f0d8447b17732d48d8ca1",
+    "historicalPhase0Selection": "Friction Index is historical evidence only; it does not select this canonical recovery.",
+    "worlds": [
+      {
+        "worldId": "friction-index",
+        "renderingGrammar": "trace-index-composition",
+        "strongestConsequence": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
+        "principalRisk": "Phase 0 material imagery is non-documentary and must be replaced by licensed object photography or new capture before production.",
+        "reducedMotionImplication": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
+        "mobileImplication": "mobile retains one trace at a time with the current object and return route visible; reading and ticket routes recompose vertically rather than inheriting desktop columns.",
+        "practicalMuseumUsability": "choose a material trace, inspect its history, move between object detail and exhibition context without losing orientation, and access visit information immediately."
+      },
+      {
+        "worldId": "repair-ledger",
+        "renderingGrammar": "conservation-ledger-composition",
+        "strongestConsequence": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
+        "principalRisk": "Requires object-specific conservation records and licensed photography before production.",
+        "reducedMotionImplication": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
+        "mobileImplication": "mobile becomes a single chronological reading stack with the object and visit route held in context; it is not a compressed desktop ledger.",
+        "practicalMuseumUsability": "inspect a care record, compare sequential interventions, retain object context and reach visit tasks immediately."
+      },
+      {
+        "worldId": "pressure-room",
+        "renderingGrammar": "pressure-release-composition",
+        "strongestConsequence": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
+        "principalRisk": "The threshold requires clear bypass and reduced-motion equivalence.",
+        "reducedMotionImplication": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",
+        "mobileImplication": "mobile uses a vertical encounter sequence with a visible bypass and immediate visit route; pressure is expressed through hierarchy, never elapsed time.",
+        "practicalMuseumUsability": "enter or bypass a composed object threshold, inspect its factual history, return to the exhibition field and access visit tasks at every point."
+      }
+    ],
+    "comparisonRefs": [
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/exhibition-entry-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/object-detail-history-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/curatorial-reading-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/visit-ticketing-comparison.png",
+      "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/mobile-interpretation-comparison.png"
+    ],
+    "selection": null
+  }
+}

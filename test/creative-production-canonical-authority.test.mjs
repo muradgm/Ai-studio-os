@@ -10,6 +10,7 @@ import {
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
+import { buildCreativeWorldHumanDecision } from '../modules/creative-world/authority.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
 const baseInput = JSON.parse(fs.readFileSync(new URL('../benchmarks/005-du-bonheur-creative-production/input.json', import.meta.url)));
@@ -182,13 +183,8 @@ function canonicalInput(overrides = {}) {
   });
   assert.equal(visualProofEvidence.reviewReady, true);
   const selectedEvidenceRefs = visualProofEvidence.worlds.find((item) => item.worldId === 'counter-ritual').evidenceRefs;
-  const exploration = selectCreativeWorld(preSelectionExploration, {
-    worldId: 'counter-ritual',
-    humanConfirmed: true,
-    visualReviewConfirmed: true,
-    visualEvidenceRefs: selectedEvidenceRefs,
-    rationale: 'Counter Ritual turns the strongest project-specific service truth into the clearest durable experience structure.'
-  });
+  const creativeWorldHumanDecision = buildCreativeWorldHumanDecision({ exploration: preSelectionExploration, visualProofEvidence, selectedWorldId: 'counter-ritual', reviewedWorldEvidenceRefs: selectedEvidenceRefs, reviewedComparisonRefs: visualProofEvidence.comparisonRefs, rationale: 'Counter Ritual turns the strongest project-specific service truth into the clearest durable experience structure.', humanConfirmed: true, decidedAt: '2026-08-31T10:56:00Z', evidenceRef: 'fixture://du-bonheur-world-decision' });
+  const exploration = selectCreativeWorld(preSelectionExploration, { humanDecision: creativeWorldHumanDecision, visualProofEvidence });
   const world = exploration.selectedWorld;
 
   return {
@@ -197,6 +193,7 @@ function canonicalInput(overrides = {}) {
     creativeThesisDeliberation: deliberation,
     creativeThesis: thesis,
     creativeThesisHumanDecision: humanDecision,
+    creativeWorldHumanDecision,
     selectedCreativeWorld: world,
     creativeWorldExploration: exploration,
     styleFrameProof,

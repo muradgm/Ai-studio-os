@@ -11,6 +11,7 @@ import {
 import { buildCreativeThesis } from '../modules/creative-thesis/runtime.mjs';
 import { buildCreativeThesisHumanDecision } from '../modules/creative-thesis/authority.mjs';
 import { buildCreativeWorldExploration, selectCreativeWorld } from '../modules/creative-world/runtime.mjs';
+import { buildCreativeWorldHumanDecision } from '../modules/creative-world/authority.mjs';
 import { buildStyleFrameProof, buildVisualProofEvidence } from '../modules/style-frame/runtime.mjs';
 
 function buildDeliberation() {
@@ -182,13 +183,8 @@ function fixture() {
   assert.equal(visualProofEvidence.reviewReady, true);
 
   const selectedEvidenceRefs = visualProofEvidence.worlds.find((item) => item.worldId === 'world-a').evidenceRefs;
-  const exploration = selectCreativeWorld(preSelectionExploration, {
-    worldId: 'world-a',
-    humanConfirmed: true,
-    visualReviewConfirmed: true,
-    visualEvidenceRefs: selectedEvidenceRefs,
-    rationale: 'World A best preserves product truth while producing a distinct service rhythm.'
-  });
+  const creativeWorldHumanDecision = buildCreativeWorldHumanDecision({ exploration: preSelectionExploration, visualProofEvidence, selectedWorldId: 'world-a', reviewedWorldEvidenceRefs: selectedEvidenceRefs, reviewedComparisonRefs: visualProofEvidence.comparisonRefs, rationale: 'World A best preserves product truth while producing a distinct service rhythm.', humanConfirmed: true, decidedAt: '2026-08-31T10:56:00Z', evidenceRef: 'fixture://world-decision' });
+  const exploration = selectCreativeWorld(preSelectionExploration, { humanDecision: creativeWorldHumanDecision, visualProofEvidence });
   const world = exploration.selectedWorld;
   assert.ok(world);
 
@@ -199,7 +195,7 @@ function fixture() {
     worldContext: { id: 'world-a' },
     findings: []
   };
-  return { deliberation, thesis, humanDecision, world, exploration, styleFrameProof, visualProofEvidence, direction };
+  return { deliberation, thesis, humanDecision, creativeWorldHumanDecision, world, exploration, styleFrameProof, visualProofEvidence, direction };
 }
 
 function handoffInput(parts) {
@@ -208,6 +204,7 @@ function handoffInput(parts) {
     creativeThesisDeliberation: parts.deliberation,
     creativeThesis: parts.thesis,
     creativeThesisHumanDecision: parts.humanDecision,
+    creativeWorldHumanDecision: parts.creativeWorldHumanDecision,
     selectedCreativeWorld: parts.world,
     creativeWorldExploration: parts.exploration,
     styleFrameProof: parts.styleFrameProof,
@@ -233,6 +230,19 @@ test('canonical handoff passes only valid, traceable, production-complete creati
   assert.equal(output.truth.creativeWorldStructuralReviewReady, true);
   assert.equal(output.truth.creativeWorldThesisProjectBindingValid, true);
   assert.equal(output.truth.productionApprovalFabricated, false);
+});
+
+test('a valid decision for world A cannot authorize an exploration selected by a separate valid decision for world B', () => {
+  const parts = fixture();
+  const pre = parts.exploration.preSelectionExploration;
+  const refs = parts.visualProofEvidence.worlds.find((world) => world.worldId === 'world-b').evidenceRefs;
+  const decisionB = buildCreativeWorldHumanDecision({ exploration: pre, visualProofEvidence: parts.visualProofEvidence, selectedWorldId: 'world-b', reviewedWorldEvidenceRefs: refs, reviewedComparisonRefs: parts.visualProofEvidence.comparisonRefs, rationale: 'The human selects World B for this separate decision.', humanConfirmed: true, decidedAt: '2026-08-31T16:00:00Z', evidenceRef: 'fixture://world-b-decision' });
+  const selectedB = selectCreativeWorld(pre, { humanDecision: decisionB, visualProofEvidence: parts.visualProofEvidence });
+  const output = buildCanonicalCreativeProductionHandoff({ ...handoffInput(parts), selectedCreativeWorld: selectedB.selectedWorld, creativeWorldExploration: selectedB, creativeWorldHumanDecision: parts.creativeWorldHumanDecision, creativeDirection: { ...parts.direction, worldContext: { id: 'world-b' } } });
+  assert.equal(output.pass, false);
+  assert.equal(output.truth.creativeSelectionHumanGoverned, false);
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-human-decision-selected-world-mismatch'));
+  assert.ok(output.findings.some((item) => item.code === 'canonical-world-human-decision-selection-record-mismatch'));
 });
 
 test('arbitrary review-ready thesis without deliberation authority cannot cross production boundary', () => {

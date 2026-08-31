@@ -1,0 +1,42 @@
+{
+  "schema": "ai-studio-os/creative-world-human-decision@1",
+  "projectId": "benchmark-011-after-matter",
+  "decision": "select-world",
+  "sourceExplorationFingerprint": "819da551755b47a3372e9972a1d909922ddc74a9700f1abee66821d0d7115b70",
+  "selectedWorldId": "friction-index",
+  "selectedWorldFingerprint": "d09a802ef466b98eefe081372f787ced0d558c33932219b40066512c259f63b3",
+  "visualProofEvidenceFingerprint": "83d6d6810171eabab06156a4badbe9c57b45f4b3c681e2ffd781bdc7152a5360",
+  "reviewedWorldEvidenceRefs": [
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-exhibition-entry.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-object-detail-history.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-curatorial-reading.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-visit-ticketing.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-mobile-interpretation.png"
+  ],
+  "reviewedComparisonRefs": [
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/exhibition-entry-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/object-detail-history-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/curatorial-reading-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/visit-ticketing-comparison.png",
+    "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/mobile-interpretation-comparison.png"
+  ],
+  "rationale": "The human approved the reviewed ranking: Friction Index is selected as the canonical Creative World; Repair Ledger is retained as a valuable secondary influence; Pressure Room is retained as a targeted temporal technique rather than the governing world.",
+  "humanConfirmed": true,
+  "decidedAt": "2026-08-31T15:41:00Z",
+  "evidenceRef": "ranking approved",
+  "ranking": [
+    {
+      "worldId": "friction-index",
+      "disposition": "selected-canonical-world"
+    },
+    {
+      "worldId": "repair-ledger",
+      "disposition": "retained-secondary-non-authoritative"
+    },
+    {
+      "worldId": "pressure-room",
+      "disposition": "retained-targeted-technique-non-authoritative"
+    }
+  ],
+  "decisionFingerprint": "753231da7320aac2df7e27578856573cac0563b18175373f833e92928cacc157"
+}
