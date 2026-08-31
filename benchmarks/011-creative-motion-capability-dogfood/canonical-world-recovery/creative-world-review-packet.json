@@ -2776,6 +2776,7 @@
     "productionApproved": false,
     "geminiGenerationUsed": false,
     "exactBrowserRaster": true,
+    "renderedCompositionBindingsValidated": true,
     "humanVisualApproval": false
   },
   "snapshotFingerprint": "7cd406278083e7920c7baf8ab43aeeec950ef34998f53b26a4ee4f23742d3a5c",
@@ -2785,105 +2786,315 @@
       "worldId": "friction-index",
       "momentId": "exhibition-entry",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-exhibition-entry.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-exhibition-entry.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-exhibition-entry.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "friction-index-object-detail-history",
       "worldId": "friction-index",
       "momentId": "object-detail-history",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-object-detail-history.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-object-detail-history.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-object-detail-history.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "friction-index-curatorial-reading",
       "worldId": "friction-index",
       "momentId": "curatorial-reading",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-curatorial-reading.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-curatorial-reading.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-curatorial-reading.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "friction-index-visit-ticketing",
       "worldId": "friction-index",
       "momentId": "visit-ticketing",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-visit-ticketing.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-visit-ticketing.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-visit-ticketing.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "friction-index-mobile-interpretation",
       "worldId": "friction-index",
       "momentId": "mobile-interpretation",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/friction-index-mobile-interpretation.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-mobile-interpretation.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/friction-index-mobile-interpretation.png",
+      "worldRenderBinding": {
+        "worldId": "friction-index",
+        "compositionGrammar": "trace-index-composition",
+        "compositionModelRef": "d6ea1d096bdbd493227dfaed3f5ce5449234e61514dd429d3ce86e88d35fb309",
+        "interactionModelRef": "17502a1c56e1f2c004eb415ef20d9e941656a8f04a7673ce6b52d082764c1807",
+        "responsiveStrategyRef": "fad9bf7f94a9dd18b0c04ba056dae2890dfaa910650462d3bbb0cb7ea0822ffa",
+        "renderedConsequences": [
+          "ordered trace index has permanent spatial authority",
+          "active factual trace branches into history beside the object",
+          "reading holds after the trace relationship is established",
+          "mobile keeps one active trace and an explicit return route"
+        ],
+        "viewport": "mobile"
+      }
     },
     {
       "frameId": "repair-ledger-exhibition-entry",
       "worldId": "repair-ledger",
       "momentId": "exhibition-entry",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-exhibition-entry.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-exhibition-entry.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-exhibition-entry.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "repair-ledger-object-detail-history",
       "worldId": "repair-ledger",
       "momentId": "object-detail-history",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-object-detail-history.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-object-detail-history.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-object-detail-history.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "repair-ledger-curatorial-reading",
       "worldId": "repair-ledger",
       "momentId": "curatorial-reading",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-curatorial-reading.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-curatorial-reading.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-curatorial-reading.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "repair-ledger-visit-ticketing",
       "worldId": "repair-ledger",
       "momentId": "visit-ticketing",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-visit-ticketing.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-visit-ticketing.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-visit-ticketing.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "repair-ledger-mobile-interpretation",
       "worldId": "repair-ledger",
       "momentId": "mobile-interpretation",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/repair-ledger-mobile-interpretation.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-mobile-interpretation.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/repair-ledger-mobile-interpretation.png",
+      "worldRenderBinding": {
+        "worldId": "repair-ledger",
+        "compositionGrammar": "conservation-ledger-composition",
+        "compositionModelRef": "43216597d01776c2e8726923a074d9c0841744b764bcdb038cf724b0f6be856c",
+        "interactionModelRef": "0e7196db87868c8204f56429c40d05e8d8778fae6b8ce1f667112162bc686473",
+        "responsiveStrategyRef": "6271d3e0a684a5b263878e1f2da957d1ae3d387ab4862405471b017db8c8e8a4",
+        "renderedConsequences": [
+          "object and conservation ledger coexist as equal evidence",
+          "dated annotations accumulate in chronological order",
+          "long-form reading is native to the ledger column",
+          "mobile recomposes into an object-context plus chronology stack"
+        ],
+        "viewport": "mobile"
+      }
     },
     {
       "frameId": "pressure-room-exhibition-entry",
       "worldId": "pressure-room",
       "momentId": "exhibition-entry",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-exhibition-entry.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-exhibition-entry.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-exhibition-entry.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "pressure-room-object-detail-history",
       "worldId": "pressure-room",
       "momentId": "object-detail-history",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-object-detail-history.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-object-detail-history.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-object-detail-history.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "pressure-room-curatorial-reading",
       "worldId": "pressure-room",
       "momentId": "curatorial-reading",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-curatorial-reading.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-curatorial-reading.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-curatorial-reading.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "pressure-room-visit-ticketing",
       "worldId": "pressure-room",
       "momentId": "visit-ticketing",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-visit-ticketing.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-visit-ticketing.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-visit-ticketing.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "desktop"
+      }
     },
     {
       "frameId": "pressure-room-mobile-interpretation",
       "worldId": "pressure-room",
       "momentId": "mobile-interpretation",
       "sourceRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/source-html/pressure-room-mobile-interpretation.html",
-      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-mobile-interpretation.png"
+      "imageRef": "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/frames/pressure-room-mobile-interpretation.png",
+      "worldRenderBinding": {
+        "worldId": "pressure-room",
+        "compositionGrammar": "pressure-release-composition",
+        "compositionModelRef": "a98825d6ed2ddcf6fc27c1610293b5351a5ceb842a679c7f8c32d349b071f58b",
+        "interactionModelRef": "f229a1dbaad5aaa9c430be10b683be3061f6593021afc1cad19fefb38068874a",
+        "responsiveStrategyRef": "5c7c9883015b8819032661344d26c3f1fe6e4b1e768e5984fd190940e09a8967",
+        "renderedConsequences": [
+          "one object occupies a compressed encounter field",
+          "a visible threshold separates encounter from released history",
+          "bypass and visit routes stay available before the threshold",
+          "mobile communicates pressure through sequence without elapsed time"
+        ],
+        "viewport": "mobile"
+      }
     }
   ],
   "comparisonRefs": [
@@ -2892,6 +3103,53 @@
     "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/curatorial-reading-comparison.png",
     "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/visit-ticketing-comparison.png",
     "benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/style-frame-proof/comparisons/mobile-interpretation-comparison.png"
+  ],
+  "comparisonBindings": [
+    {
+      "momentId": "exhibition-entry",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "object-detail-history",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "curatorial-reading",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "visit-ticketing",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    },
+    {
+      "momentId": "mobile-interpretation",
+      "compositionGrammars": [
+        "trace-index-composition",
+        "conservation-ledger-composition",
+        "pressure-release-composition"
+      ],
+      "distinct": true
+    }
   ],
   "visualProofEvidence": {
     "schema": "ai-studio-os/style-frame-proof-evidence@2",
@@ -2980,6 +3238,7 @@
     "worlds": [
       {
         "worldId": "friction-index",
+        "renderingGrammar": "trace-index-composition",
         "strongestConsequence": "A visitor chooses one material trace at a time; the chosen trace reveals its history, then the interface holds still long enough for inspection and reading.",
         "principalRisk": "Phase 0 material imagery is non-documentary and must be replaced by licensed object photography or new capture before production.",
         "reducedMotionImplication": "single-trace reveals, deliberate pauses, and quiet contextual returns; no continuous camera drift, uniform fades, or decorative particles.",
@@ -2988,6 +3247,7 @@
       },
       {
         "worldId": "repair-ledger",
+        "renderingGrammar": "conservation-ledger-composition",
         "strongestConsequence": "Annotations gather beside the object, then settle into a stable chronological ledger that remains readable without pulling attention away from the object.",
         "principalRisk": "Requires object-specific conservation records and licensed photography before production.",
         "reducedMotionImplication": "annotations gather and settle into chronology, followed by still reading; no theatrical reveal or ambient drift.",
@@ -2996,6 +3256,7 @@
       },
       {
         "worldId": "pressure-room",
+        "renderingGrammar": "pressure-release-composition",
         "strongestConsequence": "A deliberate threshold concentrates attention on one object-history relationship, then releases into stable context without forcing waiting or blocking access.",
         "principalRisk": "The threshold requires clear bypass and reduced-motion equivalence.",
         "reducedMotionImplication": "brief resistance, release and long stillness; reduced motion preserves the same threshold relationship as a stable state change.",

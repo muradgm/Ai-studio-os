@@ -79,3 +79,32 @@ test('persisted After Matter browser proof binds every planned frame and keeps p
   assert.equal(packet.truth.humanWorldSelectionConfirmed, false);
   assert.equal(packet.selectedWorld, null);
 });
+
+test('rendered After Matter proof uses distinct world grammars without changing canonical worlds', () => {
+  const packet = JSON.parse(fs.readFileSync('benchmarks/011-creative-motion-capability-dogfood/canonical-world-recovery/creative-world-review-packet.json', 'utf8'));
+  const fingerprints = Object.fromEntries(packet.exploration.worlds.map((world) => [world.id, fingerprintCreativeValue(world)]));
+  assert.deepEqual(fingerprints, {
+    'friction-index': 'd09a802ef466b98eefe081372f787ced0d558c33932219b40066512c259f63b3',
+    'repair-ledger': '67dbdb66f90e5f385e0ffeb1dc59845c472cd663ff9a46145ccd711ebbff6953',
+    'pressure-room': 'dd9c3f852d3d1eb3c60488a9ca3df915ce8116fadceb531db909ce480b69f96a'
+  });
+  assert.equal(packet.comparisonBindings.length, 5);
+  for (const binding of packet.comparisonBindings) {
+    assert.equal(binding.distinct, true);
+    assert.equal(new Set(binding.compositionGrammars).size, 3);
+  }
+  assert.equal(packet.renderedFrames.every((frame) => frame.worldRenderBinding?.renderedConsequences?.length >= 3), true);
+  assert.equal(packet.renderedFrames.filter((frame) => frame.viewport === 'mobile').every((frame) => frame.worldRenderBinding.compositionGrammar), true);
+  const sourceFor = (id) => fs.readFileSync(packet.renderedFrames.find((frame) => frame.frameId === id).sourceRef, 'utf8');
+  assert.match(sourceFor('friction-index-object-detail-history'), /trace-index|SELECTED FACTUAL TRACE/);
+  assert.match(sourceFor('repair-ledger-object-detail-history'), /ledger-panel|CONSERVATION LEDGER|entries/);
+  assert.match(sourceFor('pressure-room-object-detail-history'), /threshold|Bypass to visit/);
+  const sourcesWithPlaceholder = packet.renderedFrames
+    .map((frame) => fs.readFileSync(frame.sourceRef, 'utf8'))
+    .filter((source) => source.includes('<figure class="study">'));
+  assert.ok(sourcesWithPlaceholder.length >= 9);
+  for (const source of sourcesWithPlaceholder) assert.match(source, /NON-DOCUMENTARY PLACEHOLDER \/ MATERIAL STUDY/);
+  assert.equal(packet.truth.renderedCompositionBindingsValidated, true);
+  assert.equal(packet.truth.productionApproved, false);
+  assert.equal(packet.truth.geminiGenerationUsed, false);
+});
