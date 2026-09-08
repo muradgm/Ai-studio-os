@@ -117,7 +117,7 @@ export function routeModelTask({ task, registry, providers } = {}) {
     if (!supportsOperation(provider, normalizedTask.operation)) reasons.push('operation-mismatch');
     if (!supportsAll(provider, normalizedTask.requiredCapabilities)) reasons.push('capability-mismatch');
     if ((COST_ORDER[provider.costTier ?? 'medium'] ?? COST_ORDER.medium) > budget) reasons.push('over-budget');
-    if (normalizedTask.preferredModel && provider.models?.length && !provider.models.includes(normalizedTask.preferredModel)) reasons.push('preferred-model-unavailable');
+    if (normalizedTask.preferredModel && !provider.models?.includes(normalizedTask.preferredModel)) reasons.push('preferred-model-unavailable');
     return {
       providerId: provider.id,
       provider: provider.provider,
@@ -156,8 +156,15 @@ export function routeModelTask({ task, registry, providers } = {}) {
   };
 }
 
+function sanitizeMetadata(metadata = {}) {
+  const sanitized = { ...metadata };
+  for (const key of ['humanApproved', 'productionReady', 'releaseReady', 'reviewReady', 'approved', 'selected', 'canonical']) delete sanitized[key];
+  return sanitized;
+}
+
 function normalizeProviderResult(result = {}, routed, task) {
-  const providerFindings = Array.isArray(result.findings) ? result.findings.map((item) => ({ ...item })) : [];
+  const safeResult = result && typeof result === 'object' ? result : {};
+  const providerFindings = Array.isArray(safeResult.findings) ? safeResult.findings.map((item) => ({ ...item })) : [];
   const blocked = providerFindings.some((item) => item.severity === 'blocker');
   return {
     schema: 'ai-studio-os/model-result@1',
@@ -166,15 +173,15 @@ function normalizeProviderResult(result = {}, routed, task) {
     operation: task.operation,
     provider: routed.assignment.provider,
     providerId: routed.assignment.providerId,
-    model: result.model ?? routed.assignment.model ?? null,
-    output: result.output ?? null,
-    usage: result.usage ?? null,
-    cost: result.cost ?? null,
+    model: safeResult.model ?? routed.assignment.model ?? null,
+    output: safeResult.output ?? null,
+    usage: safeResult.usage ?? null,
+    cost: safeResult.cost ?? null,
     provenance: {
-      ...(result.provenance ?? {}),
+      ...(safeResult.provenance ?? {}),
       provider: routed.assignment.provider,
       providerId: routed.assignment.providerId,
-      model: result.model ?? routed.assignment.model ?? null
+      model: safeResult.model ?? routed.assignment.model ?? null
     },
     findings: providerFindings,
     pass: !blocked,
@@ -184,7 +191,7 @@ function normalizeProviderResult(result = {}, routed, task) {
       productionReady: false,
       releaseReady: false
     },
-    metadata: { ...(result.metadata ?? {}) }
+    metadata: sanitizeMetadata(safeResult.metadata ?? {})
   };
 }
 
