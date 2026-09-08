@@ -60,6 +60,16 @@ test('preferred model is a task constraint and does not silently substitute an i
   assert.equal(routed.assignment.model, 'beta');
 });
 
+test('unknown preferred model fails closed when no provider explicitly declares it', () => {
+  const registry = createModelRegistry([
+    provider({ id: 'declared', models: ['alpha'] }),
+    provider({ id: 'undeclared', models: [] })
+  ]);
+  const routed = routeModelTask({ registry, task: { id: 't3b', operation: 'reason', requiredCapabilities: ['reasoning'], preferredModel: 'gamma' } });
+  assert.equal(routed.pass, false);
+  assert.equal(routed.trace.every((item) => item.reasons.includes('preferred-model-unavailable')), true);
+});
+
 test('mock provider executes without network credentials and returns non-authoritative output', async () => {
   const registry = createModelRegistry([createMockModelProvider()]);
   const result = await executeModelTask({
@@ -88,7 +98,7 @@ test('provider self-asserted approval cannot cross the model runtime authority b
   assert.equal(result.pass, true);
   assert.equal(result.execution.authority.humanApproved, false);
   assert.equal(result.execution.authority.productionReady, false);
-  assert.equal(result.execution.metadata.humanApproved, true);
+  assert.equal('humanApproved' in result.execution.metadata, false);
 });
 
 test('provider exceptions become blocker findings rather than escaping the runtime', async () => {
