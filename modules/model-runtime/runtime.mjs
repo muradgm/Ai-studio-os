@@ -29,7 +29,7 @@ function validateProvider(provider = {}) {
   if (typeof provider.execute !== 'function') findings.push(finding('blocker', 'model-provider-execute-missing', 'Model provider execute() is required.'));
   if (!Array.isArray(provider.operations) || provider.operations.length === 0) findings.push(finding('blocker', 'model-provider-operations-missing', 'Model provider must declare at least one operation.'));
   if (!Array.isArray(provider.capabilities)) findings.push(finding('blocker', 'model-provider-capabilities-invalid', 'Model provider capabilities must be an array.'));
-  if (provider.costTier && !(provider.costTier in COST_ORDER)) findings.push(finding('blocker', 'model-provider-cost-tier-invalid', 'Unknown model provider cost tier.', { costTier: provider.costTier }));
+  if (provider.costTier !== undefined && !Object.hasOwn(COST_ORDER, provider.costTier)) findings.push(finding('blocker', 'model-provider-cost-tier-invalid', 'Unknown model provider cost tier.', { costTier: provider.costTier }));
   return findings;
 }
 
@@ -108,7 +108,7 @@ export function routeModelTask({ task, registry, providers } = {}) {
 
   if (!normalizedTask.id) findings.push(finding('blocker', 'model-task-id-missing', 'Model task id is required.'));
   if (!normalizedTask.operation) findings.push(finding('blocker', 'model-task-operation-missing', 'Model task operation is required.'));
-  if (!(normalizedTask.budgetTier in COST_ORDER)) findings.push(finding('blocker', 'model-task-budget-tier-invalid', 'Unknown model task budget tier.', { budgetTier: normalizedTask.budgetTier }));
+  if (!Object.hasOwn(COST_ORDER, normalizedTask.budgetTier)) findings.push(finding('blocker', 'model-task-budget-tier-invalid', 'Unknown model task budget tier.', { budgetTier: normalizedTask.budgetTier }));
   if (findings.length) return { stage: 'model-gateway', providerAgnostic: true, task: normalizedTask, assignment: null, trace: [], findings, pass: false };
 
   const budget = COST_ORDER[normalizedTask.budgetTier];

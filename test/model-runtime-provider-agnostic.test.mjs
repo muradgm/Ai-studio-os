@@ -114,3 +114,17 @@ test('provider exceptions become blocker findings rather than escaping the runti
 test('duplicate provider ids are rejected', () => {
   assert.throws(() => createModelRegistry([provider({ id: 'same' }), provider({ id: 'same', provider: 'vendor-b' })]), /model-provider-duplicate/);
 });
+
+test('inherited object keys cannot bypass provider or task budget validation', () => {
+  for (const costTier of ['constructor', 'toString', '__proto__', '', false, 0]) {
+    assert.throws(() => createModelRegistry([{ ...provider(), costTier }]), /model-provider-invalid/);
+    assert.throws(() => createModelProvider({ ...provider(), costTier }), /model-provider-invalid/);
+    const routed = routeModelTask({
+      registry: createModelRegistry([provider()]),
+      task: { id: 'invalid-budget', operation: 'reason', budgetTier: costTier }
+    });
+    assert.equal(routed.pass, false);
+    assert.equal(routed.assignment, null);
+    assert.ok(routed.findings.some((item) => item.code === 'model-task-budget-tier-invalid'));
+  }
+});
