@@ -34,7 +34,7 @@ export function createMockModelProvider({
         output,
         usage: { measured: false, inputTokens: null, outputTokens: null },
         cost: { measured: false, amount: null, currency: null },
-        provenance: { liveProviderCall: false, deterministic: true },
+        provenance: { liveProviderCall: false, deterministic: true, developmentOnly: true },
         metadata: { testOrDevelopmentExecution: true }
       };
     }

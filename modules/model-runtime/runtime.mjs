@@ -91,6 +91,7 @@ export function createModelRegistry(providers = []) {
 function normalizeTask(task = {}) {
   return {
     id: clean(task.id),
+    ...Object.fromEntries(['projectId', 'sourceRef', 'candidateRef'].filter((key) => Object.hasOwn(task, key)).map((key) => [key, clean(task[key])])),
     operation: clean(task.operation),
     requiredCapabilities: normalizeCapabilities(task.requiredCapabilities ?? []),
     budgetTier: task.budgetTier ?? 'high',
@@ -165,11 +166,19 @@ function sanitizeMetadata(metadata = {}) {
 function normalizeProviderResult(result = {}, routed, task) {
   const safeResult = result && typeof result === 'object' ? result : {};
   const providerFindings = Array.isArray(safeResult.findings) ? safeResult.findings.map((item) => ({ ...item })) : [];
+  const identity = { taskId: task.id, ...Object.fromEntries(['projectId', 'sourceRef', 'candidateRef'].filter((key) => Object.hasOwn(task, key)).map((key) => [key, task[key]])) };
+  for (const container of [safeResult, safeResult.output, safeResult.metadata, safeResult.provenance]) {
+    for (const [key, value] of Object.entries(identity)) {
+      if (container && Object.hasOwn(container, key) && container[key] !== value) {
+        providerFindings.push(finding('blocker', 'model-result-identity-mismatch', 'Provider response does not match the requested identity.', { key }));
+      }
+    }
+  }
   const blocked = providerFindings.some((item) => item.severity === 'blocker');
   return {
     schema: 'ai-studio-os/model-result@1',
     stage: 'model-execution',
-    taskId: task.id,
+    ...identity,
     operation: task.operation,
     provider: routed.assignment.provider,
     providerId: routed.assignment.providerId,
@@ -210,7 +219,7 @@ export async function executeModelTask({ task, registry, providers, context = {}
   }
 
   try {
-    const result = await provider.execute({ ...routed.task, model: routed.assignment.model }, context);
+    const result = await provider.execute(structuredClone({ ...routed.task, model: routed.assignment.model }), context);
     const execution = normalizeProviderResult(result, routed, routed.task);
     return {
       ...routed,
